@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from "node:child_process";
 import * as vscode from "vscode";
 
 /**
- * Mirrors the RPC command/response protocol from the GSD agent.
+ * Mirrors the RPC command/response protocol from the SDD agent.
  * These types are intentionally kept minimal and self-contained so the
  * extension has no dependency on the agent packages at runtime.
  */
@@ -77,10 +77,10 @@ type PendingRequest = {
 };
 
 /**
- * Client that spawns `gsd --mode rpc` and communicates via JSON lines
+ * Client that spawns `sdd --mode rpc` and communicates via JSON lines
  * over stdin/stdout. Emits VS Code events for streaming responses.
  */
-export class GsdClient implements vscode.Disposable {
+export class SddClient implements vscode.Disposable {
 	private process: ChildProcess | null = null;
 	private pendingRequests = new Map<string, PendingRequest>();
 	private requestId = 0;
@@ -111,7 +111,7 @@ export class GsdClient implements vscode.Disposable {
 	}
 
 	/**
-	 * Spawn the GSD agent in RPC mode.
+	 * Spawn the SDD agent in RPC mode.
 	 */
 	async start(): Promise<void> {
 		if (this.process) {
@@ -140,7 +140,7 @@ export class GsdClient implements vscode.Disposable {
 
 		this.process.on("exit", (code, signal) => {
 			this.process = null;
-			this.rejectAllPending(`GSD process exited (code=${code}, signal=${signal})`);
+			this.rejectAllPending(`SDD process exited (code=${code}, signal=${signal})`);
 			this._onConnectionChange.fire(false);
 
 			if (code !== 0 && signal !== "SIGTERM") {
@@ -152,7 +152,7 @@ export class GsdClient implements vscode.Disposable {
 				if (this.restartTimestamps.length > 3) {
 					// Too many crashes within 60s — stop retrying
 					this._onError.fire(
-						`GSD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "GSD: Start Agent" to retry manually.`,
+						`SDD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "SDD: Start Agent" to retry manually.`,
 					);
 				} else if (this.restartCount < 3) {
 					this.restartCount++;
@@ -166,7 +166,7 @@ export class GsdClient implements vscode.Disposable {
 	}
 
 	/**
-	 * Stop the GSD agent process.
+	 * Stop the SDD agent process.
 	 */
 	async stop(): Promise<void> {
 		if (!this.process) {
@@ -487,7 +487,7 @@ export class GsdClient implements vscode.Disposable {
 
 	private send(command: Record<string, unknown>): Promise<RpcResponse> {
 		if (!this.process?.stdin) {
-			return Promise.reject(new Error("GSD client not started"));
+			return Promise.reject(new Error("SDD client not started"));
 		}
 
 		const id = `req_${++this.requestId}`;
