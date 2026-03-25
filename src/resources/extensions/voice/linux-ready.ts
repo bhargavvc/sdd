@@ -81,7 +81,7 @@ export function ensureVoiceVenv(cb: ReadinessCallbacks): boolean {
 		);
 		return true;
 	} catch {
-		cb.notify("Voice: failed to create Python venv — run: python3 -m venv ~/.gsd/voice-venv", "error");
+		cb.notify("Voice: failed to create Python venv — run: python3 -m venv ~/.sdd/voice-venv", "error");
 		return false;
 	}
 }

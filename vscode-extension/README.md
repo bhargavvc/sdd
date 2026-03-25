@@ -4,7 +4,7 @@ Control the [GSD-2 coding agent](https://github.com/gsd-build/gsd-2) directly fr
 
 ## Requirements
 
-GSD must be installed before activating this extension:
+SDD must be installed before activating this extension:
 
 ```bash
 npm install -g gsd-pi

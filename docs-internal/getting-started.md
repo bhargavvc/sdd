@@ -10,11 +10,11 @@ Requires Node.js ≥ 22.0.0 (24 LTS recommended) and Git.
 
 > **`command not found: gsd`?** Your shell may not have npm's global bin directory in `$PATH`. Run `npm prefix -g` to find it, then add `$(npm prefix -g)/bin` to your PATH. See [Troubleshooting](./troubleshooting.md#command-not-found-gsd-after-install) for details.
 
-GSD checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/gsd update`.
+SDD checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/gsd update`.
 
 ### Set up API keys
 
-If you use a non-Anthropic model, you'll need a search API key for web search. Run `/gsd config` to set keys globally — they're saved to `~/.gsd/agent/auth.json` and apply to all projects:
+If you use a non-Anthropic model, you'll need a search API key for web search. Run `/gsd config` to set keys globally — they're saved to `~/.sdd/agent/auth.json` and apply to all projects:
 
 ```bash
 # Inside any GSD session:
@@ -25,13 +25,13 @@ See [Global API Keys](./configuration.md#global-api-keys-gsd-config) for details
 
 ### Set up custom MCP servers
 
-If you want GSD to call local or external MCP servers, add project-local config in `.mcp.json` or `.gsd/mcp.json`.
+If you want GSD to call local or external MCP servers, add project-local config in `.mcp.json` or `.sdd/mcp.json`.
 
 See [Configuration → MCP Servers](./configuration.md#mcp-servers) for examples and verification steps.
 
 ### VS Code Extension
 
-GSD is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "GSD" in VS Code extensions. The extension provides:
+SDD is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "GSD" in VS Code extensions. The extension provides:
 
 - **`@gsd` chat participant** — talk to the agent in VS Code Chat
 - **Sidebar dashboard** — connection status, model info, token usage, quick actions
@@ -41,7 +41,7 @@ The CLI (`gsd-pi`) must be installed first — the extension connects to it via 
 
 ### Web Interface
 
-GSD also has a browser-based interface. Run `gsd --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
+SDD also has a browser-based interface. Run `gsd --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
 
 ## First Launch
 
@@ -51,7 +51,7 @@ Run `gsd` in any directory:
 gsd
 ```
 
-GSD displays a welcome screen showing your version, active model, and available tool keys. Then on first launch, it runs a setup wizard:
+SDD displays a welcome screen showing your version, active model, and available tool keys. Then on first launch, it runs a setup wizard:
 
 1. **LLM Provider** — select from 20+ providers (Anthropic, OpenAI, Google, OpenRouter, GitHub Copilot, Amazon Bedrock, Azure, and more). OAuth flows handle Claude Max and Copilot subscriptions automatically; otherwise paste an API key.
 2. **Tool API Keys** (optional) — Brave Search, Context7, Jina, Slack, Discord. Press Enter to skip any.
@@ -66,7 +66,7 @@ gsd config
 
 ## Choose a Model
 
-GSD auto-selects a default model after login. Switch later with:
+SDD auto-selects a default model after login. Switch later with:
 
 ```
 /model
@@ -80,7 +80,7 @@ Or configure per-phase models in preferences — see [Configuration](./configura
 
 Type `/gsd` inside a session. GSD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next.
 
-- **No `.gsd/` directory** → starts a discussion flow to capture your project vision
+- **No `.sdd/` directory** → starts a discussion flow to capture your project vision
 - **Milestone exists, no roadmap** → discuss or research the milestone
 - **Roadmap exists, slices pending** → plan the next slice or execute a task
 - **Mid-task** → resume where you left off
@@ -117,11 +117,11 @@ gsd
 /gsd queue      # queue the next milestone
 ```
 
-Both terminals read and write the same `.gsd/` files. Decisions in terminal 2 are picked up at the next phase boundary automatically.
+Both terminals read and write the same `.sdd/` files. Decisions in terminal 2 are picked up at the next phase boundary automatically.
 
 ## Project Structure
 
-GSD organizes work into a hierarchy:
+SDD organizes work into a hierarchy:
 
 ```
 Milestone  →  a shippable version (4-10 slices)
@@ -131,10 +131,10 @@ Milestone  →  a shippable version (4-10 slices)
 
 The iron rule: **a task must fit in one context window.** If it can't, it's two tasks.
 
-All state lives on disk in `.gsd/`:
+All state lives on disk in `.sdd/`:
 
 ```
-.gsd/
+.sdd/
   PROJECT.md          — what the project is right now
   REQUIREMENTS.md     — requirement contract (active/validated/deferred)
   DECISIONS.md        — append-only architectural decisions
@@ -179,7 +179,7 @@ Shows each session's date, message count, and first-message preview so you can c
 
 ## Troubleshooting
 
-### `gsd` command runs `git svn dcommit` instead of GSD
+### `gsd` command runs `git svn dcommit` instead of SDD
 
 The [oh-my-zsh git plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git) defines `alias gsd='git svn dcommit'`, which shadows the GSD binary.
 

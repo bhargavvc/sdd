@@ -32,10 +32,10 @@ test("toPosixPath: handles Windows UNC paths", () => {
 	assert.equal(toPosixPath("\\\\server\\share\\dir"), "//server/share/dir");
 });
 
-test("toPosixPath: handles .gsd/worktrees path on Windows", () => {
+test("toPosixPath: handles .sdd/worktrees path on Windows", () => {
 	assert.equal(
 		toPosixPath("C:\\Users\\name\\project\\.gsd\\worktrees\\M001"),
-		"C:/Users/name/project/.gsd/worktrees/M001",
+		"C:/Users/name/project/.sdd/worktrees/M001",
 	);
 });
 

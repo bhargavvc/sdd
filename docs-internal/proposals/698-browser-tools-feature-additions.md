@@ -55,7 +55,7 @@ Save cookies, localStorage, sessionStorage, and auth tokens to disk. Restore the
 |---|---|
 | **New tools in** | `tools/session.ts` (extend existing file) |
 | **Playwright API** | `context.storageState()` for cookies + localStorage; `page.evaluate()` for sessionStorage (not included in Playwright's storageState) |
-| **Storage location** | Session artifacts directory: `.gsd/browser-state/<name>.json` |
+| **Storage location** | Session artifacts directory: `.sdd/browser-state/<name>.json` |
 | **Tool signatures** | `browser_save_state({ name?: string })` → `{ path, cookieCount, localStorageOrigins }` / `browser_restore_state({ name?: string })` → `{ restored, cookieCount }` |
 | **Restore mechanism** | `browser.newContext({ storageState: path })` for new sessions; `context.addCookies()` + `page.evaluate()` for mid-session restore |
 | **Security** | State files may contain auth tokens — add to `.gitignore` pattern, warn in tool output |
@@ -68,7 +68,7 @@ Save cookies, localStorage, sessionStorage, and auth tokens to disk. Restore the
 - [ ] Saves sessionStorage via `page.evaluate()` (per-origin)
 - [ ] Restores state on new browser context launch
 - [ ] Restores state mid-session (cookies + evaluate injection)
-- [ ] State files written to `.gsd/browser-state/` and gitignored
+- [ ] State files written to `.sdd/browser-state/` and gitignored
 - [ ] Tool output shows count of restored items, never displays secret values
 
 ---
@@ -174,7 +174,7 @@ Compare two screenshots pixel-by-pixel, return a diff image and similarity score
 | **New file** | `tools/visual-diff.ts` |
 | **Comparison library** | `pixelmatch` (lightweight, ~200 lines, MIT) or Playwright's built-in `expect(page).toHaveScreenshot()` comparison |
 | **Tool signature** | `browser_visual_diff({ baseline?: string, current?: string, threshold?: number })` → `{ match: boolean, similarity: number, diffPixels: number, diffImagePath?: string }` |
-| **Baseline management** | Save baselines to `.gsd/browser-baselines/`; auto-name by URL + viewport |
+| **Baseline management** | Save baselines to `.sdd/browser-baselines/`; auto-name by URL + viewport |
 | **Dependencies** | `pixelmatch` + `pngjs` (new deps, ~50KB total) or use Playwright's built-in comparator |
 | **Estimated effort** | **10–14 hours** |
 | **Risk** | Medium — anti-aliasing and dynamic content (timestamps, ads) cause false positives; threshold tuning needed |

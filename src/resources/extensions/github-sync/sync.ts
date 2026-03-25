@@ -2,7 +2,7 @@
  * Core GitHub sync engine.
  *
  * Entry point: `runGitHubSync()` — called from the GSD post-unit pipeline.
- * Routes to per-event sync functions based on the unit type, reads GSD
+ * Routes to per-event sync functions based on the unit type, reads SDD
  * files to build GitHub entities, and persists the sync mapping.
  *
  * All errors are caught internally — sync failures never block execution.
@@ -10,15 +10,15 @@
 
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { loadFile, parseSummary } from "../gsd/files.js";
-import { parseRoadmap, parsePlan } from "../gsd/parsers-legacy.js";
+import { loadFile, parseSummary } from "../sdd/files.js";
+import { parseRoadmap, parsePlan } from "../sdd/parsers-legacy.js";
 import {
   resolveMilestoneFile,
   resolveSliceFile,
   resolveTaskFile,
-} from "../gsd/paths.js";
-import { debugLog } from "../gsd/debug-logger.js";
-import { loadEffectiveGSDPreferences } from "../gsd/preferences.js";
+} from "../sdd/paths.js";
+import { debugLog } from "../sdd/debug-logger.js";
+import { loadEffectiveSDDPreferences } from "../sdd/preferences.js";
 
 import type { GitHubSyncConfig, SyncMapping } from "./types.js";
 import {
@@ -442,7 +442,7 @@ async function syncMilestoneComplete(
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
 
 /**
- * Walk the `.gsd/milestones/` tree and create GitHub entities for any
+ * Walk the `.sdd/milestones/` tree and create GitHub entities for any
  * that are missing from the sync mapping. Safe to run multiple times.
  */
 export async function bootstrapSync(basePath: string): Promise<{
@@ -505,7 +505,7 @@ let _cachedConfig: GitHubSyncConfig | null | undefined;
 function loadGitHubSyncConfig(_basePath: string): GitHubSyncConfig | null {
   if (_cachedConfig !== undefined) return _cachedConfig;
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveSDDPreferences();
     const github = (prefs?.preferences as Record<string, unknown>)?.github;
     if (!github || typeof github !== "object") {
       _cachedConfig = null;

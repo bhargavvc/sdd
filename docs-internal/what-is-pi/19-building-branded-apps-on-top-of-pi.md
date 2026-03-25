@@ -88,7 +88,7 @@ And inside `gsd`, you import pi packages and create your own session, UI, storag
 
 ## 19.3 The Second Biggest Misconception: `~/.gsd` Is a Default, Not a Requirement
 
-Pi CLI defaults to `~/.gsd/agent`, but embedded applications are not forced to use it.
+Pi CLI defaults to `~/.sdd/agent`, but embedded applications are not forced to use it.
 
 When you use `createAgentSession()`, you can control:
 
@@ -102,7 +102,7 @@ When you use `createAgentSession()`, you can control:
 
 That means your app can store state under:
 
-- `~/.gsd/agent`
+- `~/.sdd/agent`
 - `~/Library/Application Support/GSD`
 - `%APPDATA%/GSD`
 - an app-local portable directory
@@ -269,7 +269,7 @@ A branded app should usually own its own storage hierarchy.
 Example:
 
 ```text
-~/.gsd/
+~/.sdd/
   agent/
     auth.json
     models.json
@@ -337,7 +337,7 @@ This is the core pattern for “my app uses pi, but not as global pi.”
 
 ## 19.8 Bundling Resources Inside Your App
 
-This is another place where people often assume they must rely on discovery from `~/.gsd` or `.gsd/`.
+This is another place where people often assume they must rely on discovery from `~/.gsd` or `.sdd/`.
 
 You do not.
 
@@ -414,8 +414,8 @@ These are different product strategies.
 
 ### Discovery-driven product
 You intentionally load from:
-- `~/.gsd/agent/...`
-- `.gsd/...`
+- `~/.sdd/agent/...`
+- `.sdd/...`
 - installed pi packages
 
 #### Good when
@@ -671,14 +671,14 @@ A branded app should decide whether users:
 Use custom `AuthStorage` paths.
 
 ```typescript
-const authStorage = AuthStorage.create("/path/to/gsd/auth.json");
+const authStorage = AuthStorage.create("/path/to/sdd/auth.json");
 ```
 
 ### App-owned model config
 Use your own `models.json` location or register providers dynamically.
 
 ```typescript
-const modelRegistry = new ModelRegistry(authStorage, "/path/to/gsd/models.json");
+const modelRegistry = new ModelRegistry(authStorage, "/path/to/sdd/models.json");
 ```
 
 ### Custom provider strategy

@@ -52,7 +52,7 @@ Every launch compiles 17+ TypeScript extensions to JavaScript using jiti. No cac
 All provider SDKs are imported at module evaluation time in `pi-ai/index.js`, even though only one provider is typically configured.
 
 ### 4. initResources copies files every launch (~128ms)
-`cpSync` with `force: true` copies all bundled resources to `~/.gsd/agent/` on every startup, even when nothing changed.
+`cpSync` with `force: true` copies all bundled resources to `~/.sdd/agent/` on every startup, even when nothing changed.
 
 ### 5. undici import (~200ms)
 Imported in loader.js for proxy support. Not needed for most users.

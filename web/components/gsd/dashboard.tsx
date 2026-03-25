@@ -35,9 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   CurrentSliceCardSkeleton,
   ActivityCardSkeleton,
-} from "@/components/gsd/loading-skeletons"
-import { ScopeBadge } from "@/components/gsd/scope-badge"
-import { ProjectWelcome } from "@/components/gsd/project-welcome"
+} from "@/components/sdd/loading-skeletons"
+import { ScopeBadge } from "@/components/sdd/scope-badge"
+import { ProjectWelcome } from "@/components/sdd/project-welcome"
 
 /** Interpolate progress bar color from red (0%) through yellow (50%) to green (100%) using oklch. */
 function getProgressColor(percent: number): string {

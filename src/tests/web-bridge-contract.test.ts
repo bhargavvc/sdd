@@ -141,20 +141,20 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo Milestone",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S01",
             title: "Demo Slice",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S01/S01-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S01/tasks",
+            planPath: ".sdd/milestones/M001/slices/S01/S01-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S01/tasks",
             tasks: [
               {
                 id: "T01",
                 title: "Wire boot",
                 done: false,
-                planPath: ".gsd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
+                planPath: ".sdd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
               },
             ],
           },

@@ -1,5 +1,5 @@
 // Browser-safe TypeScript interfaces for the settings surface.
-// Mirrors upstream types from src/resources/extensions/gsd/ modules:
+// Mirrors upstream types from src/resources/extensions/sdd/ modules:
 //   preferences.ts, model-router.ts, context-budget.ts,
 //   routing-history.ts, metrics.ts
 // Do NOT import from those modules directly — they use Node.js APIs

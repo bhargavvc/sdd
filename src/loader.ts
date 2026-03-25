@@ -89,7 +89,7 @@ process.env.PI_PACKAGE_DIR = pkgDir
 process.env.PI_SKIP_VERSION_CHECK = '1'  // GSD runs its own update check in cli.ts — suppress pi's
 process.title = 'gsd'
 
-// Print branded banner on first launch (before ~/.gsd/ exists).
+// Print branded banner on first launch (before ~/.sdd/ exists).
 // Set GSD_FIRST_RUN_BANNER so cli.ts skips the duplicate welcome screen.
 if (!existsSync(appRoot)) {
   const cyan  = '\x1b[36m'
@@ -106,7 +106,7 @@ if (!existsSync(appRoot)) {
   process.env.GSD_FIRST_RUN_BANNER = '1'
 }
 
-// GSD_CODING_AGENT_DIR — tells pi's getAgentDir() to return ~/.gsd/agent/ instead of ~/.gsd/agent/
+// GSD_CODING_AGENT_DIR — tells pi's getAgentDir() to return ~/.sdd/agent/ instead of ~/.sdd/agent/
 process.env.GSD_CODING_AGENT_DIR = agentDir
 
 // NODE_PATH — make gsd's own node_modules available to extensions loaded via jiti.
@@ -140,7 +140,7 @@ process.env.GSD_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md')
 
 // GSD_BUNDLED_EXTENSION_PATHS — dynamically discovered bundled extension entry points.
 // Uses the shared discoverExtensionEntryPaths() to scan the bundled resources
-// directory, then remaps discovered paths to agentDir (~/.gsd/agent/extensions/)
+// directory, then remaps discovered paths to agentDir (~/.sdd/agent/extensions/)
 // where initResources() will sync them.
 const bundledExtDir = join(resourcesDir, 'extensions')
 const agentExtDir = join(agentDir, 'extensions')

@@ -106,8 +106,8 @@ test('launchWebMode prefers the packaged standalone host and opens the resolved 
   const status = await webMode.launchWebMode(
     {
       cwd: '/tmp/current-project',
-      projectSessionsDir: '/tmp/.gsd/sessions/--tmp-current-project--',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions/--tmp-current-project--',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
     },
     {
@@ -172,7 +172,7 @@ test('launchWebMode prefers the packaged standalone host and opens the resolved 
         GSD_WEB_PORT: '45123',
         GSD_WEB_AUTH_TOKEN: authToken,
         GSD_WEB_PROJECT_CWD: '/tmp/current-project',
-        GSD_WEB_PROJECT_SESSIONS_DIR: '/tmp/.gsd/sessions/--tmp-current-project--',
+        GSD_WEB_PROJECT_SESSIONS_DIR: '/tmp/.sdd/sessions/--tmp-current-project--',
         GSD_WEB_PACKAGE_ROOT: tmp,
         GSD_WEB_HOST_KIND: 'packaged-standalone',
       },
@@ -408,8 +408,8 @@ test('launch failure surfaces status and reason before browser open', async (t) 
   const status = await webMode.launchWebMode(
     {
       cwd: '/tmp/current-project',
-      projectSessionsDir: '/tmp/.gsd/sessions/--tmp-current-project--',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions/--tmp-current-project--',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
     },
     {
@@ -655,8 +655,8 @@ test('launchWebMode kills stale instance for same cwd before spawning', async (t
   const status = await webMode.launchWebMode(
     {
       cwd,
-      projectSessionsDir: '/tmp/.gsd/sessions/stale',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions/stale',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
     },
     {
@@ -712,8 +712,8 @@ test('launchWebMode does not log cleanup when no stale instance exists', async (
   const status = await webMode.launchWebMode(
     {
       cwd: '/tmp/clean-project',
-      projectSessionsDir: '/tmp/.gsd/sessions/clean',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions/clean',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
     },
     {

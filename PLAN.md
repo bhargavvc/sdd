@@ -2,7 +2,7 @@
 
 ## Problem
 
-GSD has 7+ commands that check, diagnose, or clean up project state. Several overlap or duplicate each other, and worktree lifecycle management is missing entirely. Users can't answer "what's safe to delete?" without manual git investigation.
+SDD has 7+ commands that check, diagnose, or clean up project state. Several overlap or duplicate each other, and worktree lifecycle management is missing entirely. Users can't answer "what's safe to delete?" without manual git investigation.
 
 ### Current surface area
 
@@ -15,7 +15,7 @@ GSD has 7+ commands that check, diagnose, or clean up project state. Several ove
 | `/gsd cleanup` | Runs branches + snapshots cleanup | **Redundant** — doctor already handles branches |
 | `/gsd cleanup branches` | Delete merged `gsd/*` branches | **Redundant** — doctor detects but won't fix legacy branches |
 | `/gsd cleanup snapshots` | Prune old snapshot refs | **Gap** — doctor has no snapshot check |
-| `/gsd cleanup projects` | Audit orphaned `~/.gsd/projects/` dirs | **Fully redundant** — doctor's `orphaned_project_state` does the same |
+| `/gsd cleanup projects` | Audit orphaned `~/.sdd/projects/` dirs | **Fully redundant** — doctor's `orphaned_project_state` does the same |
 | `/gsd keys doctor` | Per-key health check | **Complementary** — deeper than doctor's surface provider check |
 | `/gsd skill-health` | Skill usage stats | No overlap — analytics, not health |
 | `/gsd inspect` | SQLite DB diagnostics | No overlap — introspection tool |
@@ -44,7 +44,7 @@ Add to `doctor-checks.ts` → `checkGitHealth()`:
 | `worktree_dirty` | warning | no | Stale worktree has uncommitted changes | Report only — data loss risk |
 | `worktree_unpushed` | warning | no | Worktree branch has commits not on any remote | Report only — push first |
 
-**Scope:** Only GSD-managed worktrees under `.gsd/worktrees/`. Not `.claude/worktrees/`, not sibling repos, not `/tmp/` worktrees. GSD owns what GSD creates.
+**Scope:** Only GSD-managed worktrees under `.sdd/worktrees/`. Not `.claude/worktrees/`, not sibling repos, not `/tmp/` worktrees. GSD owns what GSD creates.
 
 **Safety rules:**
 - Never auto-remove a worktree matching `process.cwd()` (existing pattern)
@@ -66,7 +66,7 @@ This makes `cleanup branches` redundant — doctor handles both `milestone/*` an
 **2b. Add `snapshot_ref_bloat` doctor check.**
 
 New check in `checkRuntimeHealth()`:
-- Count `refs/gsd/snapshots/` refs
+- Count `refs/sdd/snapshots/` refs
 - If > 50 refs per label, report `snapshot_ref_bloat` (warning, fixable)
 - `--fix` action: prune to newest 5 per label (same logic as existing `handleCleanupSnapshots`)
 
@@ -91,21 +91,21 @@ No deprecation warnings. Same commands, doctor under the hood. Existing muscle m
 Enhance `handleList()` in `worktree-command.ts` to show safety information inline:
 
 ```
-GSD Worktrees
+SDD Worktrees
 
   feature-x  ● active
     branch  worktree/feature-x
-    path    .gsd/worktrees/feature-x
+    path    .sdd/worktrees/feature-x
     status  3 uncommitted files · 2 unpushed commits · last commit 4h ago
 
   old-bugfix  
     branch  worktree/old-bugfix
-    path    .gsd/worktrees/old-bugfix
+    path    .sdd/worktrees/old-bugfix
     status  ✓ merged into main · safe to remove
 
   stale-experiment  
     branch  worktree/stale-experiment
-    path    .gsd/worktrees/stale-experiment
+    path    .sdd/worktrees/stale-experiment
     status  ⚠ no commits in 18 days · no open PR
 ```
 

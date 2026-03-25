@@ -1,5 +1,5 @@
 {
-  "name": "@gsd-build/engine-linux-x64-gnu",
+  "name": "@bhargavvc/engine-linux-x64-gnu",
   "version": "2.46.1",
   "description": "GSD native engine binary for Linux x64 (glibc)",
   "os": [

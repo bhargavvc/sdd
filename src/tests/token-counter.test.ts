@@ -5,7 +5,7 @@ import {
 	countTokensSync,
 	initTokenCounter,
 	isAccurateCountingAvailable,
-} from "../resources/extensions/gsd/token-counter.ts";
+} from "../resources/extensions/sdd/token-counter.ts";
 
 describe("token-counter", () => {
 	it("countTokensSync returns heuristic estimate before init", () => {

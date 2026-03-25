@@ -1,6 +1,6 @@
 # Architecture Overview
 
-GSD is a TypeScript application built on the [Pi SDK](https://github.com/badlogic/pi-mono). It embeds the Pi coding agent and extends it with the GSD workflow engine, auto mode state machine, and project management primitives.
+SDD is a TypeScript application built on the [Pi SDK](https://github.com/badlogic/pi-mono). It embeds the Pi coding agent and extends it with the GSD workflow engine, auto mode state machine, and project management primitives.
 
 ## System Structure
 
@@ -10,10 +10,10 @@ gsd (CLI binary)
       └─ cli.ts         Wires SDK managers, loads extensions, starts InteractiveMode
           ├─ onboarding.ts   First-run setup wizard (LLM provider + tool keys)
           ├─ wizard.ts       Env hydration from stored auth.json credentials
-          ├─ app-paths.ts    ~/.gsd/agent/, ~/.gsd/sessions/, auth.json
-          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.gsd/agent/
+          ├─ app-paths.ts    ~/.sdd/agent/, ~/.sdd/sessions/, auth.json
+          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.sdd/agent/
           └─ src/resources/
-              ├─ extensions/gsd/    Core GSD extension
+              ├─ extensions/sdd/    Core GSD extension
               ├─ extensions/...     12 supporting extensions
               ├─ agents/            scout, researcher, worker
               ├─ AGENTS.md          Agent routing instructions
@@ -29,7 +29,7 @@ vscode-extension/         VS Code extension — chat participant (@gsd), sidebar
 
 ### State Lives on Disk
 
-`.gsd/` is the sole source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions. This enables crash recovery, multi-terminal steering, and session resumption.
+`.sdd/` is the sole source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions. This enables crash recovery, multi-terminal steering, and session resumption.
 
 ### Two-File Loader Pattern
 
@@ -41,7 +41,7 @@ vscode-extension/         VS Code extension — chat participant (@gsd), sidebar
 
 ### Always-Overwrite Sync
 
-Bundled extensions and agents are synced to `~/.gsd/agent/` on every launch, not just first run. This means `npm update -g` takes effect immediately.
+Bundled extensions and agents are synced to `~/.sdd/agent/` on every launch, not just first run. This means `npm update -g` takes effect immediately.
 
 ### Lazy Provider Loading
 

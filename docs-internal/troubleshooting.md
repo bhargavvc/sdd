@@ -2,7 +2,7 @@
 
 ## `/gsd doctor`
 
-The built-in diagnostic tool validates `.gsd/` integrity:
+The built-in diagnostic tool validates `.sdd/` integrity:
 
 ```
 /gsd doctor
@@ -107,24 +107,24 @@ models:
 
 **Symptoms:** Auto mode won't start, says another session is running.
 
-**Fix:** GSD automatically detects stale locks — if the owning PID is dead, the lock is cleaned up and re-acquired on the next `/gsd auto`. This includes stranded `.gsd.lock/` directories left by `proper-lockfile` after crashes. If automatic recovery fails, delete `.gsd/auto.lock` and the `.gsd.lock/` directory manually:
+**Fix:** GSD automatically detects stale locks — if the owning PID is dead, the lock is cleaned up and re-acquired on the next `/gsd auto`. This includes stranded `.gsd.lock/` directories left by `proper-lockfile` after crashes. If automatic recovery fails, delete `.sdd/auto.lock` and the `.gsd.lock/` directory manually:
 
 ```bash
-rm -f .gsd/auto.lock
+rm -f .sdd/auto.lock
 rm -rf "$(dirname .gsd)/.gsd.lock"
 ```
 
 ### Git merge conflicts
 
-**Symptoms:** Worktree merge fails on `.gsd/` files.
+**Symptoms:** Worktree merge fails on `.sdd/` files.
 
-**Fix:** GSD auto-resolves conflicts on `.gsd/` runtime files. For content conflicts in code files, the LLM is given an opportunity to resolve them via a fix-merge session. If that fails, manual resolution is needed.
+**Fix:** GSD auto-resolves conflicts on `.sdd/` runtime files. For content conflicts in code files, the LLM is given an opportunity to resolve them via a fix-merge session. If that fails, manual resolution is needed.
 
 ### Pre-dispatch says the milestone integration branch no longer exists
 
 **Symptoms:** Auto mode or `/gsd doctor` reports that a milestone recorded an integration branch that no longer exists in git.
 
-**What it means:** The milestone's `.gsd/milestones/<MID>/<MID>-META.json` still points at the branch that was active when the milestone started, but that branch has since been renamed or deleted.
+**What it means:** The milestone's `.sdd/milestones/<MID>/<MID>-META.json` still points at the branch that was active when the milestone started, but that branch has since been renamed or deleted.
 
 **Current behavior:**
 - If GSD can deterministically recover to a safe branch, it no longer hard-stops auto mode.
@@ -138,9 +138,9 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 - Run `/gsd doctor fix` to rewrite the stale milestone metadata automatically when the fallback is obvious.
 - If GSD still blocks, recreate the missing branch or update your git preferences so `git.main_branch` points at a real branch.
 
-### Transient `EBUSY` / `EPERM` / `EACCES` while writing `.gsd/` files
+### Transient `EBUSY` / `EPERM` / `EACCES` while writing `.sdd/` files
 
-**Symptoms:** On Windows, auto mode or doctor occasionally fails while updating `.gsd/` files with errors like `EBUSY`, `EPERM`, or `EACCES`.
+**Symptoms:** On Windows, auto mode or doctor occasionally fails while updating `.sdd/` files with errors like `EBUSY`, `EPERM`, or `EACCES`.
 
 **Cause:** Antivirus, indexers, editors, or filesystem watchers can briefly lock the destination or temp file just as GSD performs the atomic rename.
 
@@ -190,12 +190,12 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 **Symptoms:** `mcp_servers` reports no servers configured.
 
 **Common causes:**
-- No `.mcp.json` or `.gsd/mcp.json` file exists in the current project
+- No `.mcp.json` or `.sdd/mcp.json` file exists in the current project
 - The config file is malformed JSON
-- The server is configured in a different project directory than the one where you launched GSD
+- The server is configured in a different project directory than the one where you launched SDD
 
 **Fix:**
-- Add the server to `.mcp.json` or `.gsd/mcp.json`
+- Add the server to `.mcp.json` or `.sdd/mcp.json`
 - Verify the file parses as JSON
 - Re-run `mcp_servers(refresh=true)`
 
@@ -242,7 +242,7 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 - Call the tool with `mcp_call(server="name", tool="tool_name", args={...})`
 - If you're developing GSD itself, rebuild after schema changes with `npm run build`
 
-### Local stdio server works manually but not in GSD
+### Local stdio server works manually but not in SDD
 
 **Symptoms:** Running the server command manually seems fine, but GSD can't connect.
 
@@ -281,8 +281,8 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 ### Reset auto mode state
 
 ```bash
-rm .gsd/auto.lock
-rm .gsd/completed-units.json
+rm .sdd/auto.lock
+rm .sdd/completed-units.json
 ```
 
 Then `/gsd auto` to restart from current disk state.
@@ -292,7 +292,7 @@ Then `/gsd auto` to restart from current disk state.
 If adaptive model routing is producing bad results, clear the routing history:
 
 ```bash
-rm .gsd/routing-history.json
+rm .sdd/routing-history.json
 ```
 
 ### Full state rebuild
@@ -308,7 +308,7 @@ Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detecte
 - **GitHub Issues:** [github.com/gsd-build/GSD-2/issues](https://github.com/gsd-build/GSD-2/issues)
 - **Dashboard:** `Ctrl+Alt+G` or `/gsd status` for real-time diagnostics
 - **Forensics:** `/gsd forensics` for structured post-mortem analysis of auto-mode failures
-- **Session logs:** `.gsd/activity/` contains JSONL session dumps for crash forensics
+- **Session logs:** `.sdd/activity/` contains JSONL session dumps for crash forensics
 
 ## iTerm2-Specific Issues
 
@@ -362,7 +362,7 @@ Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detecte
 
 ### "LSP isn't available in this workspace"
 
-GSD auto-detects language servers based on project files (e.g. `package.json` → TypeScript, `Cargo.toml` → Rust, `go.mod` → Go). If no servers are detected, the agent skips LSP features.
+SDD auto-detects language servers based on project files (e.g. `package.json` → TypeScript, `Cargo.toml` → Rust, `go.mod` → Go). If no servers are detected, the agent skips LSP features.
 
 **Check status:**
 ```

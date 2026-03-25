@@ -53,7 +53,7 @@ export interface SubprocessModuleResolution {
  *
  * @param packageRoot  Absolute path to the GSD package root.
  * @param relPath      Path relative to `src/`, e.g.
- *                     `"resources/extensions/gsd/workspace-index.ts"`.
+ *                     `"resources/extensions/sdd/workspace-index.ts"`.
  * @param checkExists  Optional `existsSync` override (for testing).
  */
 export function resolveSubprocessModule(

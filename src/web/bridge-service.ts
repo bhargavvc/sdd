@@ -909,7 +909,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
   const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
   const moduleResolution = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/workspace-index.ts",
+    "resources/extensions/sdd/workspace-index.ts",
     checkExists,
   );
   const workspaceModulePath = moduleResolution.modulePath;

@@ -7,7 +7,7 @@ import { AuthStorage } from "@gsd/pi-coding-agent";
 import { Editor, type EditorTheme, Key, matchesKey, truncateToWidth } from "@gsd/pi-tui";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { getGlobalGSDPreferencesPath, loadEffectiveGSDPreferences } from "../gsd/preferences.js";
+import { getGlobalSDDPreferencesPath, loadEffectiveSDDPreferences } from "../sdd/preferences.js";
 import { getRemoteConfigStatus, isValidChannelId, resolveRemoteConfig } from "./config.js";
 import { maskEditorLine, sanitizeError } from "../shared/mod.js";
 import { getLatestPromptSummary } from "./status.js";
@@ -202,7 +202,7 @@ async function handleRemoteStatus(ctx: ExtensionCommandContext): Promise<void> {
 }
 
 async function handleDisconnect(ctx: ExtensionCommandContext): Promise<void> {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveSDDPreferences();
   const channel = prefs?.preferences.remote_questions?.channel;
   if (!channel) return void ctx.ui.notify("No remote channel configured — nothing to disconnect.", "info");
 
@@ -316,7 +316,7 @@ function removeProviderToken(provider: string): void {
 }
 
 export function saveRemoteQuestionsConfig(channel: "slack" | "discord" | "telegram", channelId: string): void {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalSDDPreferencesPath();
   const block = [
     "remote_questions:",
     `  channel: ${channel}`,
@@ -343,7 +343,7 @@ export function saveRemoteQuestionsConfig(channel: "slack" | "discord" | "telegr
 }
 
 function removeRemoteQuestionsConfig(): void {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalSDDPreferencesPath();
   if (!existsSync(prefsPath)) return;
   const content = readFileSync(prefsPath, "utf-8");
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);

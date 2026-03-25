@@ -13,13 +13,13 @@ The actual architecture is a TypeScript extension system:
 
 | Plan Reference | Actual Location |
 |---|---|
-| `gsd-tools.cjs` command routing | `src/resources/extensions/gsd/commands.ts` |
-| `lib/workflow-template.cjs` | `src/resources/extensions/gsd/workflow-templates.ts` (new) |
+| `gsd-tools.cjs` command routing | `src/resources/extensions/sdd/commands.ts` |
+| `lib/workflow-template.cjs` | `src/resources/extensions/sdd/workflow-templates.ts` (new) |
 | `lib/init.cjs` | No separate init; logic lives in handler module |
 | `lib/core.cjs` | Utilities spread across `paths.ts`, `state.ts`, etc. |
-| `~/.claude/get-shit-done/workflow-templates/` | `src/resources/extensions/gsd/workflow-templates/` (new dir) |
+| `~/.claude/get-shit-done/workflow-templates/` | `src/resources/extensions/sdd/workflow-templates/` (new dir) |
 | `/gsd:start`, `/gsd:templates` | `/gsd start`, `/gsd templates` subcommands |
-| Prompt templates | `src/resources/extensions/gsd/prompts/` |
+| Prompt templates | `src/resources/extensions/sdd/prompts/` |
 
 ---
 
@@ -27,17 +27,17 @@ The actual architecture is a TypeScript extension system:
 
 ### Files to Create
 
-1. **`src/resources/extensions/gsd/workflow-templates/registry.json`**
+1. **`src/resources/extensions/sdd/workflow-templates/registry.json`**
    - Template metadata: name, description, phases, triggers, artifact_dir, complexity, agents
 
-2. **`src/resources/extensions/gsd/workflow-templates.ts`**
+2. **`src/resources/extensions/sdd/workflow-templates.ts`**
    - `loadRegistry()` — parse registry.json from extension dir
    - `resolveTemplate(nameOrTrigger)` — match by name, alias, or trigger keywords
    - `autoDetect(context)` — analyze user input + project state for best template match
    - `listTemplates()` — formatted template list for display
    - `getTemplateInfo(name)` — detailed template metadata
 
-3. **`src/resources/extensions/gsd/commands-workflow-templates.ts`**
+3. **`src/resources/extensions/sdd/commands-workflow-templates.ts`**
    - `handleStart(args, ctx, pi)` — `/gsd start [template] [args]`
    - `handleTemplates(args, ctx)` — `/gsd templates [info <name>]`
 
@@ -47,22 +47,22 @@ The actual architecture is a TypeScript extension system:
 
 ### Files to Create (Phase 2 — Templates)
 
-5. **`src/resources/extensions/gsd/workflow-templates/bugfix.md`**
-6. **`src/resources/extensions/gsd/workflow-templates/small-feature.md`**
-7. **`src/resources/extensions/gsd/workflow-templates/spike.md`**
-8. **`src/resources/extensions/gsd/workflow-templates/hotfix.md`**
-9. **`src/resources/extensions/gsd/workflow-templates/refactor.md`**
-10. **`src/resources/extensions/gsd/workflow-templates/security-audit.md`**
-11. **`src/resources/extensions/gsd/workflow-templates/dep-upgrade.md`**
-12. **`src/resources/extensions/gsd/workflow-templates/full-project.md`**
+5. **`src/resources/extensions/sdd/workflow-templates/bugfix.md`**
+6. **`src/resources/extensions/sdd/workflow-templates/small-feature.md`**
+7. **`src/resources/extensions/sdd/workflow-templates/spike.md`**
+8. **`src/resources/extensions/sdd/workflow-templates/hotfix.md`**
+9. **`src/resources/extensions/sdd/workflow-templates/refactor.md`**
+10. **`src/resources/extensions/sdd/workflow-templates/security-audit.md`**
+11. **`src/resources/extensions/sdd/workflow-templates/dep-upgrade.md`**
+12. **`src/resources/extensions/sdd/workflow-templates/full-project.md`**
 
 ### Prompt Templates
 
-13. **`src/resources/extensions/gsd/prompts/workflow-start.md`** — dispatched when `/gsd start` resolves a template
-14. **`src/resources/extensions/gsd/prompts/workflow-bugfix.md`** — bugfix-specific dispatch prompt
-15. **`src/resources/extensions/gsd/prompts/workflow-small-feature.md`**
-16. **`src/resources/extensions/gsd/prompts/workflow-spike.md`**
-17. **`src/resources/extensions/gsd/prompts/workflow-hotfix.md`**
+13. **`src/resources/extensions/sdd/prompts/workflow-start.md`** — dispatched when `/gsd start` resolves a template
+14. **`src/resources/extensions/sdd/prompts/workflow-bugfix.md`** — bugfix-specific dispatch prompt
+15. **`src/resources/extensions/sdd/prompts/workflow-small-feature.md`**
+16. **`src/resources/extensions/sdd/prompts/workflow-spike.md`**
+17. **`src/resources/extensions/sdd/prompts/workflow-hotfix.md`**
 
 ---
 

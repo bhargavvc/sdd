@@ -1,7 +1,7 @@
 /**
  * GSD file parser — native Rust implementation.
  *
- * Parses `.gsd/` directory markdown files containing YAML-like frontmatter
+ * Parses `.sdd/` directory markdown files containing YAML-like frontmatter
  * and structured sections. Replaces the JS regex-based parser for
  * performance-critical batch operations.
  */
@@ -72,7 +72,7 @@ export function extractAllSections(
 }
 
 /**
- * Batch-parse all `.md` files in a `.gsd/` directory tree.
+ * Batch-parse all `.md` files in a `.sdd/` directory tree.
  *
  * Reads and parses all markdown files under the given directory.
  * Each file gets frontmatter parsing and section extraction.

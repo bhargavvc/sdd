@@ -15,7 +15,7 @@
  *
  * Note: Extension modules are .ts files loaded via jiti (not compiled to .js).
  * We use createJiti() here because this module is compiled by tsc but imports
- * from resources/extensions/gsd/ which are shipped as raw .ts (#1283).
+ * from resources/extensions/sdd/ which are shipped as raw .ts (#1283).
  */
 
 import chalk from 'chalk'

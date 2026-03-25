@@ -232,7 +232,7 @@ function newId(): string {
 // ─── Select Block Accumulator ─────────────────────────────────────────────────
 
 interface SelectOption {
-  index: number    // 1-based as rendered by GSD
+  index: number    // 1-based as rendered by SDD
   label: string
   selected: boolean
 }

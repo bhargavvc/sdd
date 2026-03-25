@@ -20,7 +20,7 @@ docker sandbox create --template ./docker --name gsd-sandbox
 # Shell into the sandbox
 docker sandbox exec -it gsd-sandbox bash
 
-# Inside the sandbox, run GSD
+# Inside the sandbox, run SDD
 gsd auto "implement the feature described in issue #42"
 ```
 

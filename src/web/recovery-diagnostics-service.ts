@@ -371,8 +371,8 @@ async function collectRecoveryDiagnosticsChildPayload(
   const env = options.env ?? process.env
   const checkExists = options.existsSync ?? existsSync
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const doctorResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/doctor.ts", checkExists)
-  const forensicsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/session-forensics.ts", checkExists)
+  const doctorResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/doctor.ts", checkExists)
+  const forensicsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/session-forensics.ts", checkExists)
   const doctorModulePath = doctorResolution.modulePath
   const sessionForensicsModulePath = forensicsResolution.modulePath
 

@@ -2,7 +2,7 @@
 
 *Introduced in v2.17.0*
 
-GSD 2.17 introduces a coordinated token optimization system that can reduce token usage by 40-60% without sacrificing output quality for most workloads. The system has three pillars: **token profiles**, **context compression**, and **complexity-based task routing**.
+SDD 2.17 introduces a coordinated token optimization system that can reduce token usage by 40-60% without sacrificing output quality for most workloads. The system has three pillars: **token profiles**, **context compression**, and **complexity-based task routing**.
 
 ## Token Profiles
 
@@ -105,7 +105,7 @@ Explicit `phases` settings always override the profile defaults.
 
 ## Complexity-Based Task Routing
 
-GSD classifies each task by complexity and routes it to an appropriate model tier when dynamic routing is enabled. Simple documentation fixes use cheaper models while complex architectural work gets the reasoning power it needs.
+SDD classifies each task by complexity and routes it to an appropriate model tier when dynamic routing is enabled. Simple documentation fixes use cheaper models while complex architectural work gets the reasoning power it needs.
 
 > **Prerequisite:** Dynamic routing requires explicit `models` in your preferences. Without a `models` section, routing is skipped and the session's launch model is used for all phases. Token profiles set `models` automatically.
 
@@ -165,7 +165,7 @@ This graduated approach preserves model quality for the most complex work while 
 
 ## Adaptive Learning (Routing History)
 
-GSD tracks the success and failure of each tier assignment over time and adjusts future classifications accordingly. This is opt-in — it happens automatically and persists in `.gsd/routing-history.json`.
+SDD tracks the success and failure of each tier assignment over time and adjusts future classifications accordingly. This is opt-in — it happens automatically and persists in `.sdd/routing-history.json`.
 
 ### How It Works
 
@@ -190,7 +190,7 @@ Feedback signals are weighted 2× compared to automatic outcomes. Requires dynam
 
 ```bash
 # Routing history is stored per-project
-.gsd/routing-history.json
+.sdd/routing-history.json
 
 # Clear history to reset adaptive learning
 # (happens via the routing-history module API)
@@ -275,7 +275,7 @@ The profile is resolved once and flows through the entire dispatch pipeline. Exp
 
 *Introduced in v2.29.0*
 
-GSD can apply deterministic prompt compression before falling back to section-boundary truncation. This preserves more information when context exceeds the budget.
+SDD can apply deterministic prompt compression before falling back to section-boundary truncation. This preserves more information when context exceeds the budget.
 
 ### Compression Strategy
 

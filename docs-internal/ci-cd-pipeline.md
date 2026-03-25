@@ -2,7 +2,7 @@
 
 ## Overview
 
-GSD 2 uses a three-stage promotion pipeline that automatically moves merged PRs through **Dev → Test → Prod** environments using npm dist-tags.
+SDD 2 uses a three-stage promotion pipeline that automatically moves merged PRs through **Dev → Test → Prod** environments using npm dist-tags.
 
 ```
 PR merged to main
@@ -80,7 +80,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/gsd-build/gsd-pi:latest --version
 CI automatically detects when a PR contains only documentation changes (`.md` files and `docs/` content). When docs-only:
 
 - **Skipped:** `build`, `windows-portability` (no code to compile or test)
-- **Still runs:** `lint` (secret scanning, `.gsd/` check), `docs-check` (prompt injection scan)
+- **Still runs:** `lint` (secret scanning, `.sdd/` check), `docs-check` (prompt injection scan)
 
 This saves CI minutes on documentation PRs while still enforcing security checks.
 

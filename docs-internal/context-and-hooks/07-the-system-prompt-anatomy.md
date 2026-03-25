@@ -20,7 +20,7 @@ When `buildSystemPrompt()` runs, it assembles sections in this exact order:
 │ 2. Append system prompt (APPEND_SYSTEM.md)       │
 │                                                  │
 │ 3. Project context files                         │
-│    ├── ~/.gsd/agent/AGENTS.md (global)            │
+│    ├── ~/.sdd/agent/AGENTS.md (global)            │
 │    ├── Ancestor AGENTS.md / CLAUDE.md files      │
 │    └── cwd AGENTS.md / CLAUDE.md                 │
 │                                                  │
@@ -72,7 +72,7 @@ Pi documentation (read only when the user asks about pi itself...):
 
 ### SYSTEM.md Override (full replacement)
 
-If `.gsd/SYSTEM.md` (project) or `~/.gsd/agent/SYSTEM.md` (global) exists, its contents **completely replace** the default base prompt above. The tools list, guidelines, pi docs pointers — all gone. You own the entire base.
+If `.sdd/SYSTEM.md` (project) or `~/.sdd/agent/SYSTEM.md` (global) exists, its contents **completely replace** the default base prompt above. The tools list, guidelines, pi docs pointers — all gone. You own the entire base.
 
 Project takes precedence over global. Only one SYSTEM.md is used (first found wins).
 
@@ -124,7 +124,7 @@ Guidelines are assembled dynamically based on which tools are active:
 
 ## Section 2: Append System Prompt
 
-If `.gsd/APPEND_SYSTEM.md` (project) or `~/.gsd/agent/APPEND_SYSTEM.md` (global) exists, its contents are appended after the base prompt.
+If `.sdd/APPEND_SYSTEM.md` (project) or `~/.sdd/agent/APPEND_SYSTEM.md` (global) exists, its contents are appended after the base prompt.
 
 This is the safe way to add project-wide instructions without replacing the default prompt. It works with both the default base and a custom SYSTEM.md.
 
@@ -135,7 +135,7 @@ This is the safe way to add project-wide instructions without replacing the defa
 Pi walks the filesystem collecting context files:
 
 ```
-1. ~/.gsd/agent/AGENTS.md (global)
+1. ~/.sdd/agent/AGENTS.md (global)
 2. Walk from cwd upward to root:
    - Each directory: check for AGENTS.md, then CLAUDE.md (first found wins per directory)
    - Files are collected root-down (ancestors first, cwd last)
@@ -148,7 +148,7 @@ All found files are concatenated under a "# Project Context" header:
 
 Project-specific instructions and guidelines:
 
-## /Users/you/.gsd/agent/AGENTS.md
+## /Users/you/.sdd/agent/AGENTS.md
 
 [global AGENTS.md content]
 
@@ -174,7 +174,7 @@ When a skill file references a relative path, resolve it against the skill direc
   <skill>
     <name>commit-outstanding</name>
     <description>Commit all uncommitted files in logical groups</description>
-    <location>/Users/you/.gsd/agent/skills/commit-outstanding/SKILL.md</location>
+    <location>/Users/you/.sdd/agent/skills/commit-outstanding/SKILL.md</location>
   </skill>
 </available_skills>
 ```

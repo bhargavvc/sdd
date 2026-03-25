@@ -24,7 +24,7 @@ export async function collectCapturesData(projectCwdOverride?: string): Promise<
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/captures.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/captures.ts")
   const capturesModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(capturesModulePath))) {
@@ -94,7 +94,7 @@ export async function resolveCaptureAction(request: CaptureResolveRequest, proje
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/captures.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/captures.ts")
   const capturesModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(capturesModulePath))) {

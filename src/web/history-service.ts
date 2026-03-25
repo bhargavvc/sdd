@@ -24,7 +24,7 @@ export async function collectHistoryData(projectCwdOverride?: string): Promise<H
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/metrics.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/metrics.ts")
   const historyModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(historyModulePath))) {

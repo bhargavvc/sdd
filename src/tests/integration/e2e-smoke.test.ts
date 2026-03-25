@@ -9,7 +9,7 @@
  * Prerequisite: npm run build must be run first.
  *
  * Run with:
- *   node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs \
+ *   node --import ./src/resources/extensions/sdd/tests/resolve-ts.mjs \
  *        --experimental-strip-types --test \
  *        src/tests/integration/e2e-smoke.test.ts
  */
@@ -403,10 +403,10 @@ test("gsd -h is equivalent to --help", async () => {
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// 13. gsd headless without .gsd/ directory exits 1 with clean error
+// 13. gsd headless without .sdd/ directory exits 1 with clean error
 // ---------------------------------------------------------------------------
 
-test("gsd headless without .gsd/ directory exits 1 with clean error", async (t) => {
+test("gsd headless without .sdd/ directory exits 1 with clean error", async (t) => {
   const tmpDir = mkdtempSync(join(tmpdir(), "gsd-e2e-no-gsd-"));
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
@@ -418,8 +418,8 @@ test("gsd headless without .gsd/ directory exits 1 with clean error", async (t) 
 
   const combined = stripAnsi(result.stdout + result.stderr);
   assert.ok(
-    combined.includes(".gsd/") || combined.includes("No .gsd"),
-    `expected .gsd/ missing error, got:\n${combined.slice(0, 500)}`,
+    combined.includes(".sdd/") || combined.includes("No .gsd"),
+    `expected .sdd/ missing error, got:\n${combined.slice(0, 500)}`,
   );
 
   assertNoCrashMarkers(combined);
@@ -628,7 +628,7 @@ test("gsd --version ignores trailing arguments", async () => {
 
 test("gsd headless help (positional) exits cleanly", async () => {
   // "help" as a positional is treated as a quick command by headless mode.
-  // Without .gsd/ it should fail, but with --help flag it should succeed.
+  // Without .sdd/ it should fail, but with --help flag it should succeed.
   const result = await runGsd(["headless", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);

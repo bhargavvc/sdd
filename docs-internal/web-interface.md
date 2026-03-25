@@ -2,7 +2,7 @@
 
 > Added in v2.41.0
 
-GSD includes a browser-based web interface for project management, real-time progress monitoring, and multi-project support.
+SDD includes a browser-based web interface for project management, real-time progress monitoring, and multi-project support.
 
 ## Quick Start
 

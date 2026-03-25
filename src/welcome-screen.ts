@@ -8,7 +8,7 @@
 
 import os from 'node:os'
 import chalk from 'chalk'
-import { GSD_LOGO } from './logo.js'
+import { SDD_LOGO } from './logo.js'
 
 export interface WelcomeScreenOptions {
   version: string
@@ -55,7 +55,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
   const H = '─', DV = '│', DS = '├'
 
   // ── Left rows: blank + 6 logo lines + blank (8 total) ───────────────────────
-  const leftRows = ['', ...GSD_LOGO, '']
+  const leftRows = ['', ...SDD_LOGO, '']
 
   // ── Right rows (8 total, null = divider) ────────────────────────────────────
   const titleLeft  = `  ${chalk.bold('Get Shit Done')}`

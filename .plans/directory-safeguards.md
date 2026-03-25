@@ -1,7 +1,7 @@
 # Directory Safeguards Plan
 
 ## Problem
-GSD had zero protection against being launched from dangerous directories like `$HOME`, `/`, `/usr`, `/etc`, etc. Running `gsd init` from these locations would create `.gsd/` and write planning files into system directories.
+SDD had zero protection against being launched from dangerous directories like `$HOME`, `/`, `/usr`, `/etc`, etc. Running `gsd init` from these locations would create `.sdd/` and write planning files into system directories.
 
 ## Solution
 Added a `validate-directory.ts` module with layered safeguards:

@@ -21,12 +21,12 @@ Users on capped plans (e.g., Claude Pro) exhaust weekly token limits in 15-20 ho
 ### Key Files
 | File | Role |
 |------|------|
-| `src/resources/extensions/gsd/auto.ts` | Dispatch logic, model switching (lines 1791-1879) |
-| `src/resources/extensions/gsd/preferences.ts` | Model resolution, `resolveModelWithFallbacksForUnit()` |
-| `src/resources/extensions/gsd/post-unit-hooks.ts` | Pre-dispatch hooks (model field defined but unused) |
-| `src/resources/extensions/gsd/types.ts` | Type definitions for hooks and model config |
-| `src/resources/extensions/gsd/metrics.ts` | Token tracking, aggregation, cost projection |
-| `src/resources/extensions/gsd/auto-prompts.ts` | Prompt builders per unit type |
+| `src/resources/extensions/sdd/auto.ts` | Dispatch logic, model switching (lines 1791-1879) |
+| `src/resources/extensions/sdd/preferences.ts` | Model resolution, `resolveModelWithFallbacksForUnit()` |
+| `src/resources/extensions/sdd/post-unit-hooks.ts` | Pre-dispatch hooks (model field defined but unused) |
+| `src/resources/extensions/sdd/types.ts` | Type definitions for hooks and model config |
+| `src/resources/extensions/sdd/metrics.ts` | Token tracking, aggregation, cost projection |
+| `src/resources/extensions/sdd/auto-prompts.ts` | Prompt builders per unit type |
 | `packages/pi-coding-agent/src/core/model-registry.ts` | Model availability and metadata |
 
 ## Proposed Design
@@ -108,7 +108,7 @@ Model dispatch (existing auto.ts logic)
 
 #### 1a. Define types and configuration
 
-**File:** `src/resources/extensions/gsd/types.ts`
+**File:** `src/resources/extensions/sdd/types.ts`
 - Add `ComplexityTier` type: `'light' | 'standard' | 'heavy'`
 - Add `DynamicRoutingConfig` interface:
   ```typescript
@@ -123,14 +123,14 @@ Model dispatch (existing auto.ts logic)
   }
   ```
 
-**File:** `src/resources/extensions/gsd/preferences.ts`
+**File:** `src/resources/extensions/sdd/preferences.ts`
 - Add `dynamic_routing` to preference schema
 - Add validation for the new config
 - Add `loadDynamicRoutingConfig()` function
 
 #### 1b. Build complexity classifier
 
-**New file:** `src/resources/extensions/gsd/complexity-classifier.ts`
+**New file:** `src/resources/extensions/sdd/complexity-classifier.ts`
 - `classifyUnitComplexity(unitType, unitId, metadata?)` → `ComplexityTier`
 - Heuristic rules:
   - Unit type mapping (see Tiers table above)
@@ -140,7 +140,7 @@ Model dispatch (existing auto.ts logic)
 
 #### 1c. Build model router
 
-**New file:** `src/resources/extensions/gsd/model-router.ts`
+**New file:** `src/resources/extensions/sdd/model-router.ts`
 - `resolveModelForComplexity(tier, phaseConfig, availableModels)` → `ResolvedModelConfig`
 - Logic:
   1. Get user's configured model for phase (ceiling)
@@ -151,7 +151,7 @@ Model dispatch (existing auto.ts logic)
 
 #### 1d. Wire into dispatch
 
-**File:** `src/resources/extensions/gsd/auto.ts`
+**File:** `src/resources/extensions/sdd/auto.ts`
 - In the model resolution block (lines 1791-1879):
   1. After `resolveModelWithFallbacksForUnit()`, call classifier
   2. If dynamic routing enabled, call router to potentially downgrade
@@ -160,24 +160,24 @@ Model dispatch (existing auto.ts logic)
 
 #### 1e. Wire the unused pre-dispatch hook model field
 
-**File:** `src/resources/extensions/gsd/auto.ts`
+**File:** `src/resources/extensions/sdd/auto.ts`
 - Apply `preDispatchResult.model` when returned — this is already defined but unused
 - Allows hooks to override dynamic routing decisions
 
 #### Tests
 
-**New file:** `src/resources/extensions/gsd/tests/complexity-classifier.test.ts`
+**New file:** `src/resources/extensions/sdd/tests/complexity-classifier.test.ts`
 - Test tier assignment for each unit type
 - Test metadata-based adjustments (file count, dependency count)
 - Test edge cases (missing metadata, unknown unit types)
 
-**New file:** `src/resources/extensions/gsd/tests/model-router.test.ts`
+**New file:** `src/resources/extensions/sdd/tests/model-router.test.ts`
 - Test downgrade-only behavior (never exceeds configured model)
 - Test tier-to-model mapping with various available model sets
 - Test fallback chain construction
 - Test when dynamic routing is disabled (passthrough)
 
-**New file:** `src/resources/extensions/gsd/tests/dynamic-routing-integration.test.ts`
+**New file:** `src/resources/extensions/sdd/tests/dynamic-routing-integration.test.ts`
 - Test full flow: unit → classify → route → dispatch
 - Test escalation on failure
 - Test preference loading and validation
@@ -190,7 +190,7 @@ Model dispatch (existing auto.ts logic)
 
 #### 2a. Metrics tracking
 
-**File:** `src/resources/extensions/gsd/metrics.ts`
+**File:** `src/resources/extensions/sdd/metrics.ts`
 - Add `tier` field to `UnitMetrics`
 - Add `model_downgraded: boolean` field
 - Add `escalation_count` field
@@ -199,7 +199,7 @@ Model dispatch (existing auto.ts logic)
 
 #### 2b. Dashboard integration
 
-**File:** `src/resources/extensions/gsd/auto-dashboard.ts`
+**File:** `src/resources/extensions/sdd/auto-dashboard.ts`
 - Add tier badge to unit progress display (e.g., `[L]`, `[S]`, `[H]`)
 - Add savings summary to completion stats: "Dynamic routing saved ~$X.XX (N units downgraded)"
 - Color-code tier in token widget
@@ -217,9 +217,9 @@ Model dispatch (existing auto.ts logic)
 
 #### 3a. Outcome tracking
 
-**File:** `src/resources/extensions/gsd/complexity-classifier.ts`
+**File:** `src/resources/extensions/sdd/complexity-classifier.ts`
 - Track success/failure per tier per unit-type pattern
-- Store in `.gsd/routing-history.json` (project-level)
+- Store in `.sdd/routing-history.json` (project-level)
 - Simple structure: `{ "execute-task:docs": { light: { success: 12, fail: 1 }, ... } }`
 
 #### 3b. Adaptive thresholds
@@ -313,7 +313,7 @@ When multiple providers are configured, the router should consider cost differen
 
 **Implementation:**
 - Add `cost_per_1k_tokens` metadata to model registry (or maintain a lookup table for known models)
-- New file: `src/resources/extensions/gsd/model-cost-table.ts` — static cost table for known models, updatable via preferences
+- New file: `src/resources/extensions/sdd/model-cost-table.ts` — static cost table for known models, updatable via preferences
 - `resolveModelForComplexity()` ranks available models by cost within a tier's capability range
 - Preference key: `dynamic_routing.cross_provider: true|false` (default: true when enabled)
 
@@ -327,7 +327,7 @@ After each unit completes, users can flag the output quality to improve future c
   - `over` = "this could have used a simpler model" → records downgrade signal
   - `under` = "this needed a better model" → records upgrade signal
   - `ok` = confirms current tier was appropriate
-- Feedback stored alongside outcome data in `.gsd/routing-history.json`
+- Feedback stored alongside outcome data in `.sdd/routing-history.json`
 - Classifier weights feedback signals 2x vs. automatic success/failure detection
 - Skill: `gsd:rate-unit` — simple command that tags the last completed unit
 

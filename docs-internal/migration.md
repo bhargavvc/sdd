@@ -45,4 +45,4 @@ After migrating, verify the output with:
 /gsd doctor
 ```
 
-This checks `.gsd/` integrity and flags any structural issues.
+This checks `.sdd/` integrity and flags any structural issues.

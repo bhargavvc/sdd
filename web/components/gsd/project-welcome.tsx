@@ -48,7 +48,7 @@ function getVariant(detection: ProjectDetection): WelcomeVariant {
       return {
         icon: <ArrowUpCircle className="h-8 w-8 text-foreground" strokeWidth={1.5} />,
         headline: "GSD v1 project found",
-        body: "This project has a .planning/ folder from an earlier GSD version. Migration converts your existing planning data into the new .gsd/ format.",
+        body: "This project has a .planning/ folder from an earlier GSD version. Migration converts your existing planning data into the new .sdd/ format.",
         detail: "Your original files will be preserved — migration creates the new structure alongside them.",
         primaryLabel: "Migrate to v2",
         primaryCommand: "/gsd migrate",

@@ -6,10 +6,10 @@
 
 ## Problem Statement
 
-GSD currently has two disconnected onboarding paths:
+SDD currently has two disconnected onboarding paths:
 
 1. **App onboarding** (`onboarding.ts`) — pre-TUI, only handles LLM/tool auth. Runs once ever, no project awareness.
-2. **Project bootstrap** (`showSmartEntry()`) — silently creates `.gsd/` and drops you into the discuss prompt with zero explanation.
+2. **Project bootstrap** (`showSmartEntry()`) — silently creates `.sdd/` and drops you into the discuss prompt with zero explanation.
 
 Neither detects v1 `.planning/` directories, explains what GSD is, offers project-level configuration, or helps returning users entering a new folder.
 
@@ -21,11 +21,11 @@ Neither detects v1 `.planning/` directories, explains what GSD is, offers projec
 
 | Detected State | Behavior |
 |---|---|
-| No `.gsd/`, no `.planning/` | **Init Wizard** (new project onboarding) |
-| No `.gsd/`, has `.planning/` | **Migration offer** → `/gsd migrate` or skip |
-| Has `.gsd/`, no milestones | Current flow (discuss prompt) |
-| Has `.gsd/`, has milestones | Current flow (smart entry / auto resume) |
-| First-ever GSD launch (no `~/.gsd/`) | **Global setup** first, then project init |
+| No `.sdd/`, no `.planning/` | **Init Wizard** (new project onboarding) |
+| No `.sdd/`, has `.planning/` | **Migration offer** → `/gsd migrate` or skip |
+| Has `.sdd/`, no milestones | Current flow (discuss prompt) |
+| Has `.sdd/`, has milestones | Current flow (smart entry / auto resume) |
+| First-ever GSD launch (no `~/.sdd/`) | **Global setup** first, then project init |
 
 ### Q2: Should there be an onboarding wizard?
 
@@ -43,19 +43,19 @@ Both wizards should be:
 
 ## Architecture
 
-### New File: `src/resources/extensions/gsd/init-wizard.ts`
+### New File: `src/resources/extensions/sdd/init-wizard.ts`
 
 Project-level init wizard. Responsible for the interactive experience when entering a new folder.
 
-### New File: `src/resources/extensions/gsd/detection.ts`
+### New File: `src/resources/extensions/sdd/detection.ts`
 
 Pure detection functions. No UI, no side effects.
 
-### Modified: `src/resources/extensions/gsd/guided-flow.ts`
+### Modified: `src/resources/extensions/sdd/guided-flow.ts`
 
 `showSmartEntry()` gains a detection preamble before the current logic.
 
-### Modified: `src/resources/extensions/gsd/commands.ts`
+### Modified: `src/resources/extensions/sdd/commands.ts`
 
 New subcommands: `/gsd init`, `/gsd setup`. Existing `/gsd migrate` stays.
 
@@ -79,7 +79,7 @@ interface ProjectDetection {
   /** Is this the first time GSD has been used on this machine? */
   isFirstEverLaunch: boolean;
 
-  /** Does ~/.gsd/ exist with preferences? */
+  /** Does ~/.sdd/ exist with preferences? */
   hasGlobalSetup: boolean;
 
   /** v1 details (if state === 'v1-planning') */
@@ -134,7 +134,7 @@ Quick filesystem scan (no heavy reads):
 
 ### Task 1.4: `isFirstEverLaunch(): boolean`
 
-Returns `true` if `~/.gsd/` doesn't exist or has no `preferences.md`.
+Returns `true` if `~/.sdd/` doesn't exist or has no `preferences.md`.
 
 ---
 
@@ -197,7 +197,7 @@ Not all preferences belong in the init wizard. The filter: **"What would you reg
 | Pref | Why at init time | Default |
 |------|-----------------|---------|
 | **`mode`** (solo / team) | Changes git strategy, merge behavior, everything downstream. Wrong default = friction on every milestone. | `solo` |
-| **`git.commit_docs`** | Whether `.gsd/` plans get committed to git. Team projects usually want `true`, throwaway prototypes want `false`. Affects the very first commit. | `true` |
+| **`git.commit_docs`** | Whether `.sdd/` plans get committed to git. Team projects usually want `true`, throwaway prototypes want `false`. Affects the very first commit. | `true` |
 | **`git.isolation`** (worktree / branch / none) | Worktree isolation fails in some setups (submodules, shallow clones). Better to detect + ask upfront than crash during first auto run. | `worktree` |
 | **`verification_commands`** | "How do we verify code works?" — e.g. `npm test`, `cargo test`, `make check`. Auto-detected from project signals (package.json scripts, Makefile, etc.) and confirmed. Critical for auto-mode to actually validate work. | `[]` (auto-detect) |
 | **`custom_instructions`** | Project-specific rules the LLM should follow. E.g. "use Tailwind, not CSS modules", "always write tests", "this is a monorepo, only touch packages/api". First milestone benefits hugely from these. | `[]` |
@@ -255,7 +255,7 @@ Flow:
 ```
 Step 1: Detection scan (automatic, instant, no prompt)
    ├─ v1 .planning/ found? → Offer migration (Task 3.2)
-   ├─ .gsd/ already exists? → Re-init safety (Task 3.3)
+   ├─ .sdd/ already exists? → Re-init safety (Task 3.3)
    └─ Clean folder → Continue to step 2
 
 Step 2: Project Recognition (informational, no prompt needed)
@@ -280,7 +280,7 @@ Step 5: Verification Commands (auto-populated from detection)
 
 Step 6: Git Preferences
    "Git settings for this project:"
-     Commit .gsd/ plans to git?  [Y/n]         ← default yes
+     Commit .sdd/ plans to git?  [Y/n]         ← default yes
      Isolation strategy:         [worktree]     ← default, warn if submodules
      Main branch:                [main]         ← auto-detected, confirm if ambiguous
 
@@ -296,9 +296,9 @@ Step 8: Advanced (collapsed by default, expandable)
      Skip research?     [no] / yes
      Auto-push on merge? [yes] / no
 
-Step 9: Bootstrap .gsd/ structure
-   - Creates .gsd/milestones/
-   - Creates .gsd/preferences.md (from wizard answers)
+Step 9: Bootstrap .sdd/ structure
+   - Creates .sdd/milestones/
+   - Creates .sdd/preferences.md (from wizard answers)
    - Creates .gitignore entries
    - Seeds CONTEXT.md with detected project signals
    - Commits "chore: init gsd" (if commit_docs enabled)
@@ -330,7 +330,7 @@ When `.planning/` is detected in `showSmartEntry()`:
 
 ### Task 3.3: Re-init safety
 
-If `.gsd/` already exists when `/gsd init` is run:
+If `.sdd/` already exists when `/gsd init` is run:
 - Show current state (X milestones, Y slices)
 - Offer: "Reset preferences" / "Re-run project detection" / "Cancel"
 - Never destructively delete milestones via init
@@ -361,19 +361,19 @@ if (detection.state === 'v1-planning') {
   // 'fresh' falls through to normal init
 }
 
-// No .gsd/ — run project init wizard
+// No .sdd/ — run project init wizard
 if (detection.state === 'none') {
   await showProjectInit(ctx, pi, basePath, detection);
   return;
 }
 
-// Existing .gsd/ — current logic continues unchanged
+// Existing .sdd/ — current logic continues unchanged
 ```
 
 ### Task 4.2: Preserve zero-friction for returning users
 
-The detection + init wizard only triggers when `.gsd/` doesn't exist.
-Once `.gsd/` exists, the flow is identical to today — no regressions.
+The detection + init wizard only triggers when `.sdd/` doesn't exist.
+Once `.sdd/` exists, the flow is identical to today — no regressions.
 
 ---
 
@@ -384,13 +384,13 @@ Once `.gsd/` exists, the flow is identical to today — no regressions.
 - `detectProjectState()` with various folder layouts
 - `detectV1Planning()` with real and fake `.planning/` dirs
 - `detectProjectSignals()` with different project types
-- `isFirstEverLaunch()` with/without `~/.gsd/`
+- `isFirstEverLaunch()` with/without `~/.sdd/`
 
 ### Task 5.2: Init wizard integration tests
 
-- New folder → wizard triggers → `.gsd/` created correctly
+- New folder → wizard triggers → `.sdd/` created correctly
 - v1 folder → migration offer shown
-- Existing `.gsd/` → wizard skipped, normal flow
+- Existing `.sdd/` → wizard skipped, normal flow
 - Re-run `/gsd init` on existing project → safe behavior
 
 ### Task 5.3: Global setup tests
@@ -405,12 +405,12 @@ Once `.gsd/` exists, the flow is identical to today — no regressions.
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `src/resources/extensions/gsd/detection.ts` | **NEW** | Pure detection functions |
-| `src/resources/extensions/gsd/init-wizard.ts` | **NEW** | Project init wizard UI |
-| `src/resources/extensions/gsd/global-setup.ts` | **NEW** | Global setup wizard (refactored from onboarding.ts) |
+| `src/resources/extensions/sdd/detection.ts` | **NEW** | Pure detection functions |
+| `src/resources/extensions/sdd/init-wizard.ts` | **NEW** | Project init wizard UI |
+| `src/resources/extensions/sdd/global-setup.ts` | **NEW** | Global setup wizard (refactored from onboarding.ts) |
 | `src/onboarding.ts` | **MODIFY** | Delegate to global-setup.ts, keep boot integration |
-| `src/resources/extensions/gsd/guided-flow.ts` | **MODIFY** | Add detection preamble to showSmartEntry() |
-| `src/resources/extensions/gsd/commands.ts` | **MODIFY** | Add `/gsd init` and `/gsd setup` subcommands |
+| `src/resources/extensions/sdd/guided-flow.ts` | **MODIFY** | Add detection preamble to showSmartEntry() |
+| `src/resources/extensions/sdd/commands.ts` | **MODIFY** | Add `/gsd init` and `/gsd setup` subcommands |
 | Tests (TBD paths) | **NEW** | Detection, init, setup tests |
 
 ## Open Questions for Discussion

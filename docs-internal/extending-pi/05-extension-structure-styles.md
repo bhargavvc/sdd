@@ -4,14 +4,14 @@
 ### Single File (simplest)
 
 ```
-~/.gsd/agent/extensions/
+~/.sdd/agent/extensions/
 └── my-extension.ts
 ```
 
 ### Directory with index.ts (multi-file)
 
 ```
-~/.gsd/agent/extensions/
+~/.sdd/agent/extensions/
 └── my-extension/
     ├── index.ts        # Entry point (must export default function)
     ├── tools.ts
@@ -21,7 +21,7 @@
 ### Package with Dependencies (npm packages needed)
 
 ```
-~/.gsd/agent/extensions/
+~/.sdd/agent/extensions/
 └── my-extension/
     ├── package.json
     ├── package-lock.json

@@ -27,11 +27,11 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const prefsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/preferences.ts")
-  const routerResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/model-router.ts")
-  const budgetResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/context-budget.ts")
-  const historyResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/routing-history.ts")
-  const metricsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/metrics.ts")
+  const prefsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/preferences.ts")
+  const routerResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/model-router.ts")
+  const budgetResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/context-budget.ts")
+  const historyResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/routing-history.ts")
+  const metricsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/metrics.ts")
 
   const prefsPath = prefsResolution.modulePath
   const routerPath = routerResolution.modulePath
@@ -69,7 +69,7 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
     'const metricsMod = await import(pathToFileURL(process.env.GSD_SETTINGS_METRICS_MODULE).href);',
 
     // 1. Effective preferences (may be null if no preferences files exist)
-    'const loaded = prefsMod.loadEffectiveGSDPreferences();',
+    'const loaded = prefsMod.loadEffectiveSDDPreferences();',
     'let preferences = null;',
     'if (loaded) {',
     '  const p = loaded.preferences;',

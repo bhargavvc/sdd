@@ -35,7 +35,7 @@ Returns: `{ files_changed: u32, insertions: u32, deletions: u32, summary: String
 Implementation: Diff between two trees/index/workdir, count deltas
 
 ### 1.4 — `git_diff_name_status(repo_path, from_ref, to_ref, pathspec?) -> Vec<GitNameStatus>`
-Replaces: `git diff --name-status main...branch -- .gsd/` (worktree-manager.ts, 3 calls)
+Replaces: `git diff --name-status main...branch -- .sdd/` (worktree-manager.ts, 3 calls)
 Returns: `Vec<{ status: String, path: String }>`
 Implementation: Tree-to-tree diff with pathspec filter
 
@@ -44,7 +44,7 @@ Replaces: `git diff --numstat main branch` (worktree-manager.ts, 1 call)
 Returns: `Vec<{ added: u32, removed: u32, path: String }>`
 
 ### 1.6 — `git_diff_content(repo_path, from_ref, to_ref, pathspec?, exclude?) -> String`
-Replaces: `git diff main...branch -- .gsd/` and `-- . :(exclude).gsd/` (worktree-manager.ts, 2 calls)
+Replaces: `git diff main...branch -- .sdd/` and `-- . :(exclude).sdd/` (worktree-manager.ts, 2 calls)
 Returns: Unified diff string
 
 ### 1.7 — `git_log_oneline(repo_path, from_ref, to_ref) -> Vec<GitLogEntry>`
@@ -69,7 +69,7 @@ Replaces: `git ls-files "<exclusion>"` (doctor.ts, 1 call)
 Implementation: Read index, filter by pathspec
 
 ### 1.12 — `git_for_each_ref(repo_path, prefix) -> Vec<String>`
-Replaces: `git for-each-ref refs/gsd/snapshots/ --format=%(refname)` (commands.ts, 1 call)
+Replaces: `git for-each-ref refs/sdd/snapshots/ --format=%(refname)` (commands.ts, 1 call)
 Implementation: `repo.references_glob(prefix/*)`
 
 ### 1.13 — `git_conflict_files(repo_path) -> Vec<String>`

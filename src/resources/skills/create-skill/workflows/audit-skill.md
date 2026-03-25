@@ -16,7 +16,7 @@
 Enumerate skills from both directories:
 ```bash
 echo "=== Global skills ==="
-ls ~/.gsd/agent/skills/ 2>/dev/null || echo "(none)"
+ls ~/.sdd/agent/skills/ 2>/dev/null || echo "(none)"
 
 echo "=== Project-local skills ==="
 ls .pi/agent/skills/ 2>/dev/null || echo "(none)"
@@ -26,7 +26,7 @@ Present as:
 ```
 Available skills:
 
-Global (~/.gsd/agent/skills/):
+Global (~/.sdd/agent/skills/):
 1. create-skill
 2. manage-stripe
 ...

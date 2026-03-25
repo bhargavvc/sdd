@@ -8,7 +8,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import {
 	startFileWatcher,
 	stopFileWatcher,
-} from "../resources/extensions/gsd/file-watcher.ts";
+} from "../resources/extensions/sdd/file-watcher.ts";
 
 function createTempAgentDir(): string {
 	const tmp = mkdtempSync(join(tmpdir(), "gsd-fw-test-"));

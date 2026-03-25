@@ -417,7 +417,7 @@ pub fn git_diff_stat(
 
 /// Get name-status diff between two refs with optional pathspec filter.
 /// `use_merge_base`: if true, uses three-dot semantics (diff from merge base).
-/// Replaces: `git diff --name-status main...branch -- .gsd/`
+/// Replaces: `git diff --name-status main...branch -- .sdd/`
 #[napi]
 pub fn git_diff_name_status(
     repo_path: String,
@@ -523,8 +523,8 @@ pub fn git_diff_numstat(
 
 /// Get unified diff content between two refs with optional pathspec/exclude.
 /// `use_merge_base`: if true, uses three-dot semantics.
-/// `exclude`: optional pathspec to exclude (e.g., ".gsd/").
-/// Replaces: `git diff main...branch -- .gsd/` and `-- . :(exclude).gsd/`
+/// `exclude`: optional pathspec to exclude (e.g., ".sdd/").
+/// Replaces: `git diff main...branch -- .sdd/` and `-- . :(exclude).sdd/`
 #[napi]
 pub fn git_diff_content(
     repo_path: String,
@@ -792,7 +792,7 @@ pub fn git_ls_files(repo_path: String, pathspec: String) -> Result<Vec<String>> 
 }
 
 /// List references matching a prefix.
-/// Replaces: `git for-each-ref refs/gsd/snapshots/ --format=%(refname)`
+/// Replaces: `git for-each-ref refs/sdd/snapshots/ --format=%(refname)`
 #[napi]
 pub fn git_for_each_ref(repo_path: String, prefix: String) -> Result<Vec<String>> {
     let repo = open_repo(&repo_path)?;

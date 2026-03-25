@@ -121,8 +121,8 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/undo.ts")
-  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/paths.ts")
+  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/undo.ts")
+  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/paths.ts")
   const undoModulePath = undoResolution.modulePath
   const pathsModulePath = pathsResolution.modulePath
 

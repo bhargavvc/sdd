@@ -50,7 +50,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/visualizer-data.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/visualizer-data.ts")
   const visualizerModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(visualizerModulePath))) {

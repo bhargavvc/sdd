@@ -8,7 +8,7 @@
  *
  * This solves the `npm link` branch-drift problem: without dist/resources/,
  * `initResources()` reads from src/resources/ which changes with git branch
- * switches, causing stale extensions to be synced to ~/.gsd/agent/ for ALL
+ * switches, causing stale extensions to be synced to ~/.sdd/agent/ for ALL
  * projects using gsd.
  */
 

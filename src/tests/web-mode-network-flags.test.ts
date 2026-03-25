@@ -79,8 +79,8 @@ test('launchWebMode forwards custom host, port, and allowed origins to subproces
   const status = await webMode.launchWebMode(
     {
       cwd: '/tmp/project',
-      projectSessionsDir: '/tmp/.gsd/sessions',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
       host: '0.0.0.0',
       port: 8080,
@@ -126,8 +126,8 @@ test('launchWebMode omits GSD_WEB_ALLOWED_ORIGINS when none provided', async (t)
   await webMode.launchWebMode(
     {
       cwd: '/tmp/project',
-      projectSessionsDir: '/tmp/.gsd/sessions',
-      agentDir: '/tmp/.gsd/agent',
+      projectSessionsDir: '/tmp/.sdd/sessions',
+      agentDir: '/tmp/.sdd/agent',
       packageRoot: tmp,
     },
     {

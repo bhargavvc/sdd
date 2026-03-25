@@ -8,7 +8,7 @@
  *   - linuxPython venv detection
  */
 
-import { createTestContext } from "../../gsd/tests/test-helpers.ts";
+import { createTestContext } from "../../sdd/tests/test-helpers.ts";
 import { diagnoseSounddeviceError, ensureVoiceVenv } from "../linux-ready.ts";
 
 const { assertEq, assertTrue, report } = createTestContext();

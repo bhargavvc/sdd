@@ -295,9 +295,9 @@ if (-not $DryRun) {
 
 if (-not $DryRun) {
     Section "── Step 6: Verify recovery branch ──────────────────────────────────────"
-    $fileList = & git ls-tree -r --name-only $recoveryBranch 2>/dev/null | Where-Object { $_ -notmatch '^\.gsd/' }
+    $fileList = & git ls-tree -r --name-only $recoveryBranch 2>/dev/null | Where-Object { $_ -notmatch '^\.sdd/' }
     $fileCount = @($fileList).Count
-    Info "Files recoverable (excluding .gsd/ state files): $fileCount"
+    Info "Files recoverable (excluding .sdd/ state files): $fileCount"
     $fileList | Select-Object -First 30 | ForEach-Object { Write-Host "  $_" }
     if ($fileCount -gt 30) { Dim "  ... and $($fileCount - 30) more" }
 }

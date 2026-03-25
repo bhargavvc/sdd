@@ -2,9 +2,9 @@
 
 ## Problem Statement
 
-GSD has solid API key infrastructure (AuthStorage, OAuth flows, rate-limit backoff, multi-key rotation) but lacks a user-facing CLI for day-to-day key management. Users currently must either:
+SDD has solid API key infrastructure (AuthStorage, OAuth flows, rate-limit backoff, multi-key rotation) but lacks a user-facing CLI for day-to-day key management. Users currently must either:
 - Run the full onboarding wizard to add keys
-- Manually edit `~/.gsd/agent/auth.json`
+- Manually edit `~/.sdd/agent/auth.json`
 - Use the limited `/gsd setup keys` flow (only covers 5 tool keys, no LLM keys)
 
 There's no way to list, test, remove, or inspect key health from the CLI.
@@ -29,14 +29,14 @@ Build `/gsd keys` — a comprehensive API key management command with subcommand
 
 | File | Purpose |
 |------|---------|
-| `src/resources/extensions/gsd/key-manager.ts` | Core key manager logic (list, add, remove, test, rotate, doctor) |
-| `src/resources/extensions/gsd/tests/key-manager.test.ts` | Unit tests |
+| `src/resources/extensions/sdd/key-manager.ts` | Core key manager logic (list, add, remove, test, rotate, doctor) |
+| `src/resources/extensions/sdd/tests/key-manager.test.ts` | Unit tests |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `src/resources/extensions/gsd/commands.ts` | Add `/gsd keys` subcommand routing + completions |
+| `src/resources/extensions/sdd/commands.ts` | Add `/gsd keys` subcommand routing + completions |
 
 ### No changes to core packages
 
@@ -49,7 +49,7 @@ All work stays in the GSD extension layer. We use `AuthStorage` as-is — no mod
 ### What it shows
 
 ```
-GSD API Key Manager
+SDD API Key Manager
 
   LLM Providers
   ✓ anthropic        — OAuth (expires in 23h 41m)
@@ -71,7 +71,7 @@ GSD API Key Manager
   Search Providers
   ✓ tavily           — API key (tvly-...x92k)
 
-  Source: ~/.gsd/agent/auth.json
+  Source: ~/.sdd/agent/auth.json
   3 keys configured | 2 from env vars | 1 OAuth token
 ```
 

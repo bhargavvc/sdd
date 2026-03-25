@@ -1128,7 +1128,7 @@ export function ProjectSelectionGate() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                    Welcome to GSD
+                    Welcome to SDD
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Set a development root to get started. GSD will discover projects inside it.

@@ -26,7 +26,7 @@ export interface ProjectMetadata {
 const EXCLUDED_DIRS = new Set(["node_modules", ".git"]);
 
 /**
- * Parse a project's `.gsd/STATE.md` for active milestone, slice, phase,
+ * Parse a project's `.sdd/STATE.md` for active milestone, slice, phase,
  * and milestone completion tally.
  *
  * Returns `null` when the file is missing or unreadable.

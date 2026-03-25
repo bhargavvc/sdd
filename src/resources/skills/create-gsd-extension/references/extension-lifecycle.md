@@ -6,7 +6,7 @@ The extension lifecycle from load to shutdown, including the full event flow.
 Extensions load when GSD starts (or on `/reload`). The default export function runs synchronously — subscribe to events and register tools/commands during this call.
 
 ```
-GSD starts
+SDD starts
   └─► Extension default function runs
       ├── pi.on("event", handler)      ← Subscribe
       ├── pi.registerTool({...})       ← Register tools

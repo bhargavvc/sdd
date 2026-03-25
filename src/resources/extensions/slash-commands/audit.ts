@@ -2,7 +2,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent
 
 export default function auditCommand(pi: ExtensionAPI) {
 	pi.registerCommand("audit", {
-		description: "Audit the current codebase against a specific goal and write a structured report to .gsd/audits/",
+		description: "Audit the current codebase against a specific goal and write a structured report to .sdd/audits/",
 		async handler(args: string, ctx: ExtensionCommandContext) {
 			// ── Step 1: Get the audit goal ────────────────────────────────────────
 
@@ -20,7 +20,7 @@ export default function auditCommand(pi: ExtensionAPI) {
 				goal = input.trim();
 			}
 
-			// ── Step 2: Build output path (.gsd/audits/<timestamp>-<slug>.md) ────
+			// ── Step 2: Build output path (.sdd/audits/<timestamp>-<slug>.md) ────
 
 			const now = new Date();
 			const timestamp = now
@@ -35,11 +35,11 @@ export default function auditCommand(pi: ExtensionAPI) {
 				.replace(/^-+|-+$/g, "")
 				.slice(0, 40);
 
-			const outputPath = `.gsd/audits/${timestamp}-${slug}.md`;
+			const outputPath = `.sdd/audits/${timestamp}-${slug}.md`;
 
 			// ── Step 3: Ensure the output directory exists ───────────────────────
 
-			await pi.exec("mkdir", ["-p", ".gsd/audits"]);
+			await pi.exec("mkdir", ["-p", ".sdd/audits"]);
 
 			// ── Step 4: Send the audit prompt to the agent ───────────────────────
 

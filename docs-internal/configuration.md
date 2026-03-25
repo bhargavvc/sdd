@@ -1,14 +1,14 @@
 # Configuration
 
-GSD preferences live in `~/.gsd/preferences.md` (global) or `.gsd/preferences.md` (project-local). Manage interactively with `/gsd prefs`.
+SDD preferences live in `~/.sdd/preferences.md` (global) or `.sdd/preferences.md` (project-local). Manage interactively with `/gsd prefs`.
 
 ## `/gsd prefs` Commands
 
 | Command | Description |
 |---------|-------------|
 | `/gsd prefs` | Open the global preferences wizard (default) |
-| `/gsd prefs global` | Interactive wizard for global preferences (`~/.gsd/preferences.md`) |
-| `/gsd prefs project` | Interactive wizard for project preferences (`.gsd/preferences.md`) |
+| `/gsd prefs global` | Interactive wizard for global preferences (`~/.sdd/preferences.md`) |
+| `/gsd prefs project` | Interactive wizard for project preferences (`.sdd/preferences.md`) |
 | `/gsd prefs status` | Show current preference files, merged values, and skill resolution status |
 | `/gsd prefs wizard` | Alias for `/gsd prefs global` |
 | `/gsd prefs setup` | Alias for `/gsd prefs wizard` — creates preferences file if missing |
@@ -42,8 +42,8 @@ token_profile: balanced
 
 | Scope | Path | Applies to |
 |-------|------|-----------|
-| Global | `~/.gsd/preferences.md` | All projects |
-| Project | `.gsd/preferences.md` | Current project only |
+| Global | `~/.sdd/preferences.md` | All projects |
+| Project | `.sdd/preferences.md` | Current project only |
 
 **Merge behavior:**
 - **Scalar fields** (`skill_discovery`, `budget_ceiling`): project wins if defined
@@ -52,7 +52,7 @@ token_profile: balanced
 
 ## Global API Keys (`/gsd config`)
 
-Tool API keys are stored globally in `~/.gsd/agent/auth.json` and apply to all projects automatically. Set them once with `/gsd config` — no need to configure per-project `.env` files.
+Tool API keys are stored globally in `~/.sdd/agent/auth.json` and apply to all projects automatically. Set them once with `/gsd config` — no need to configure per-project `.env` files.
 
 ```bash
 /gsd config
@@ -70,7 +70,7 @@ This opens an interactive wizard showing which keys are configured and which are
 
 ### How it works
 
-1. `/gsd config` saves keys to `~/.gsd/agent/auth.json`
+1. `/gsd config` saves keys to `~/.sdd/agent/auth.json`
 2. On every session start, `loadToolApiKeys()` reads the file and sets environment variables
 3. Keys apply to all projects — no per-project setup required
 4. Environment variables (`export BRAVE_API_KEY=...`) take precedence over saved keys
@@ -78,19 +78,19 @@ This opens an interactive wizard showing which keys are configured and which are
 
 ## MCP Servers
 
-GSD can connect to external MCP servers configured in project files. This is useful for local tools, internal APIs, self-hosted services, or integrations that aren't built in as native GSD extensions.
+SDD can connect to external MCP servers configured in project files. This is useful for local tools, internal APIs, self-hosted services, or integrations that aren't built in as native GSD extensions.
 
 ### Config file locations
 
-GSD reads MCP client configuration from these project-local paths:
+SDD reads MCP client configuration from these project-local paths:
 
 - `.mcp.json`
-- `.gsd/mcp.json`
+- `.sdd/mcp.json`
 
 If both files exist, server names are merged and the first definition found wins. Use:
 
 - `.mcp.json` for repo-shared MCP configuration you may want to commit
-- `.gsd/mcp.json` for local-only MCP configuration you do **not** want to share
+- `.sdd/mcp.json` for local-only MCP configuration you do **not** want to share
 
 ### Supported transports
 
@@ -149,7 +149,7 @@ Recommended verification order:
 - Use absolute paths for local executables and scripts when possible.
 - For `stdio` servers, prefer setting required environment variables directly in the MCP config instead of relying on an interactive shell profile.
 - If a server is team-shared and safe to commit, `.mcp.json` is usually the better home.
-- If a server depends on machine-local paths, personal services, or local-only secrets, prefer `.gsd/mcp.json`.
+- If a server depends on machine-local paths, personal services, or local-only secrets, prefer `.sdd/mcp.json`.
 
 ## Environment Variables
 
@@ -188,12 +188,12 @@ models:
 
 ### Custom Model Definitions (`models.json`)
 
-Define custom models and providers in `~/.gsd/agent/models.json`. This lets you add models not included in the default registry — useful for self-hosted endpoints (Ollama, vLLM, LM Studio), fine-tuned models, proxies, or new provider releases.
+Define custom models and providers in `~/.sdd/agent/models.json`. This lets you add models not included in the default registry — useful for self-hosted endpoints (Ollama, vLLM, LM Studio), fine-tuned models, proxies, or new provider releases.
 
-GSD resolves models.json with fallback logic:
-1. `~/.gsd/agent/models.json` — primary (GSD)
+SDD resolves models.json with fallback logic:
+1. `~/.sdd/agent/models.json` — primary (GSD)
 2. `~/.pi/agent/models.json` — fallback (Pi)
-3. If neither exists, creates `~/.gsd/agent/models.json`
+3. If neither exists, creates `~/.sdd/agent/models.json`
 
 **Quick example for local models (Ollama):**
 
@@ -354,7 +354,7 @@ Auto-generate HTML reports after milestone completion:
 auto_report: true    # default: true
 ```
 
-Reports are written to `.gsd/reports/` as self-contained HTML files with embedded CSS/JS.
+Reports are written to `.sdd/reports/` as self-contained HTML files with embedded CSS/JS.
 
 ### `unique_milestone_ids`
 
@@ -380,9 +380,9 @@ git:
   main_branch: main           # primary branch name
   merge_strategy: squash      # how worktree branches merge: "squash" or "merge"
   isolation: worktree         # git isolation: "worktree", "branch", or "none"
-  commit_docs: true           # commit .gsd/ artifacts to git (set false to keep local)
+  commit_docs: true           # commit .sdd/ artifacts to git (set false to keep local)
   manage_gitignore: true      # set false to prevent GSD from modifying .gitignore
-  worktree_post_create: .gsd/hooks/post-worktree-create  # script to run after worktree creation
+  worktree_post_create: .sdd/hooks/post-worktree-create  # script to run after worktree creation
   auto_pr: false              # create a PR on milestone completion (requires push_branches)
   pr_target_branch: develop   # target branch for auto-created PRs (default: main branch)
 ```
@@ -398,7 +398,7 @@ git:
 | `main_branch` | string | `"main"` | Primary branch name |
 | `merge_strategy` | string | `"squash"` | How worktree branches merge: `"squash"` (combine all commits) or `"merge"` (preserve individual commits) |
 | `isolation` | string | `"worktree"` | Auto-mode isolation: `"worktree"` (separate directory), `"branch"` (work in project root — useful for submodule-heavy repos), or `"none"` (no isolation — commits on current branch, no worktree or milestone branch) |
-| `commit_docs` | boolean | `true` | Commit `.gsd/` planning artifacts to git. Set `false` to keep local-only |
+| `commit_docs` | boolean | `true` | Commit `.sdd/` planning artifacts to git. Set `false` to keep local-only |
 | `manage_gitignore` | boolean | `true` | When `false`, GSD will not modify `.gitignore` at all — no baseline patterns, no self-healing. Use if you manage your own `.gitignore` |
 | `worktree_post_create` | string | (none) | Script to run after worktree creation. Receives `SOURCE_DIR` and `WORKTREE_DIR` env vars |
 | `auto_pr` | boolean | `false` | Automatically create a pull request when a milestone completes. Requires `auto_push: true` and `gh` CLI installed and authenticated |
@@ -410,14 +410,14 @@ Script to run after a worktree is created (both auto-mode and manual `/worktree`
 
 ```yaml
 git:
-  worktree_post_create: .gsd/hooks/post-worktree-create
+  worktree_post_create: .sdd/hooks/post-worktree-create
 ```
 
 The script receives two environment variables:
 - `SOURCE_DIR` — the original project root
 - `WORKTREE_DIR` — the newly created worktree path
 
-Example hook script (`.gsd/hooks/post-worktree-create`):
+Example hook script (`.sdd/hooks/post-worktree-create`):
 
 ```bash
 #!/bin/bash
@@ -473,7 +473,7 @@ github:
 
 **Requirements:**
 - `gh` CLI installed and authenticated (`gh auth login`)
-- Sync mapping is persisted in `.gsd/.github-sync.json`
+- Sync mapping is persisted in `.sdd/.github-sync.json`
 - Rate-limit aware — skips sync when GitHub API rate limit is low
 
 **Commands:**
@@ -578,7 +578,7 @@ prefer_skills:
 avoid_skills: []
 ```
 
-Skills can be bare names (looked up in `~/.gsd/agent/skills/`) or absolute paths.
+Skills can be bare names (looked up in `~/.sdd/agent/skills/`) or absolute paths.
 
 ### `skill_rules`
 
@@ -604,13 +604,13 @@ custom_instructions:
   - "Prefer functional patterns over classes"
 ```
 
-For project-specific knowledge (patterns, gotchas, lessons learned), use `.gsd/KNOWLEDGE.md` instead — it's injected into every agent prompt automatically. Add entries with `/gsd knowledge rule|pattern|lesson <description>`.
+For project-specific knowledge (patterns, gotchas, lessons learned), use `.sdd/KNOWLEDGE.md` instead — it's injected into every agent prompt automatically. Add entries with `/gsd knowledge rule|pattern|lesson <description>`.
 
 ### `RUNTIME.md` — Runtime Context (v2.39)
 
-Declare project-level runtime context in `.gsd/RUNTIME.md`. This file is inlined into task execution prompts, giving the agent accurate information about your runtime environment without relying on hallucinated paths or URLs.
+Declare project-level runtime context in `.sdd/RUNTIME.md`. This file is inlined into task execution prompts, giving the agent accurate information about your runtime environment without relying on hallucinated paths or URLs.
 
-**Location:** `.gsd/RUNTIME.md`
+**Location:** `.sdd/RUNTIME.md`
 
 **Example:**
 

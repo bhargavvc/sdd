@@ -114,7 +114,7 @@ should_scan() {
   esac
   # Skip generated/vendor dirs
   case "$file" in
-    node_modules/*|dist/*|coverage/*|.gsd/*)
+    node_modules/*|dist/*|coverage/*|.sdd/*)
       return 1 ;;
   esac
   return 0

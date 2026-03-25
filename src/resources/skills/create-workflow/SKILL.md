@@ -46,7 +46,7 @@ You are a workflow definition author. You help users create valid V1 YAML workfl
 
 **Output Location:**
 
-- Finished definitions go in `.gsd/workflow-defs/<name>.yaml`.
+- Finished definitions go in `.sdd/workflow-defs/<name>.yaml`.
 - After writing, tell the user to validate with `/gsd workflow validate <name>`.
 </essential_principles>
 
@@ -98,6 +98,6 @@ When assembling the final YAML:
 3. Always include `version: 1` as the first field.
 4. Order top-level fields: `version`, `name`, `description`, `params`, `steps`.
 5. Order step fields: `id`, `name`, `prompt`, `requires`, `produces`, `context_from`, `verify`, `iterate`.
-6. Write the file to `.gsd/workflow-defs/<name>.yaml`.
+6. Write the file to `.sdd/workflow-defs/<name>.yaml`.
 7. After writing, tell the user: "Run `/gsd workflow validate <name>` to check the definition."
 </output_conventions>

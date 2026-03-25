@@ -44,7 +44,7 @@ test("getExtensionKey normalizes top-level .ts and .js entry names to the same k
     "ask-user-questions",
   );
   assert.equal(
-    getExtensionKey("/tmp/extensions/gsd/index.js", extensionsDir),
+    getExtensionKey("/tmp/extensions/sdd/index.js", extensionsDir),
     "gsd",
   );
 });

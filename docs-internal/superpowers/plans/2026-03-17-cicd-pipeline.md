@@ -293,7 +293,7 @@ try {
 
   // Check that .gsd directory was created
   if (!existsSync(join(tmp, ".gsd"))) {
-    console.error("Expected .gsd/ directory not found after init");
+    console.error("Expected .sdd/ directory not found after init");
     process.exit(1);
   }
 

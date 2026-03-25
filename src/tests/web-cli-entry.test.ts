@@ -21,7 +21,7 @@ test("resolveGsdCliEntry prefers the built loader for packaged standalone intera
   const packageRoot = makeFixture([
     "dist/loader.js",
     "src/loader.ts",
-    "src/resources/extensions/gsd/tests/resolve-ts.mjs",
+    "src/resources/extensions/sdd/tests/resolve-ts.mjs",
   ]);
 
   t.after(() => { rmSync(packageRoot, { recursive: true, force: true }); });
@@ -45,7 +45,7 @@ test("resolveGsdCliEntry prefers the source loader for source-dev interactive se
   const packageRoot = makeFixture([
     "dist/loader.js",
     "src/loader.ts",
-    "src/resources/extensions/gsd/tests/resolve-ts.mjs",
+    "src/resources/extensions/sdd/tests/resolve-ts.mjs",
   ]);
 
   t.after(() => { rmSync(packageRoot, { recursive: true, force: true }); });
@@ -81,7 +81,7 @@ test("resolveGsdCliEntry appends rpc arguments for bridge sessions", (t) => {
     execPath: "/custom/node",
     hostKind: "packaged-standalone",
     mode: "rpc",
-    sessionDir: "/tmp/.gsd/sessions/project-c",
+    sessionDir: "/tmp/.sdd/sessions/project-c",
   });
 
   assert.deepEqual(entry, {
@@ -92,7 +92,7 @@ test("resolveGsdCliEntry appends rpc arguments for bridge sessions", (t) => {
       "rpc",
       "--continue",
       "--session-dir",
-      "/tmp/.gsd/sessions/project-c",
+      "/tmp/.sdd/sessions/project-c",
     ],
     cwd: "/tmp/project-c",
   });

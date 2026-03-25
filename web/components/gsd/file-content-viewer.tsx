@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { Loader2, Save, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { CodeEditor } from "@/components/gsd/code-editor"
+import { CodeEditor } from "@/components/sdd/code-editor"
 import { useEditorFontSize } from "@/lib/use-editor-font-size"
 import { useTheme } from "next-themes"
 

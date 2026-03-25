@@ -398,10 +398,10 @@ fi
 if ! $DRY_RUN; then
   section "── Step 6: Verify recovery branch ──────────────────────────────────────"
 
-  FILE_LIST="$(git ls-tree -r --name-only "${RECOVERY_BRANCH}" 2>/dev/null | grep -v '^\.gsd/' || true)"
+  FILE_LIST="$(git ls-tree -r --name-only "${RECOVERY_BRANCH}" 2>/dev/null | grep -v '^\.sdd/' || true)"
   FILE_COUNT="$(echo "$FILE_LIST" | grep -c . || true)"
 
-  info "Files recoverable (excluding .gsd/ state files): ${FILE_COUNT}"
+  info "Files recoverable (excluding .sdd/ state files): ${FILE_COUNT}"
   echo "$FILE_LIST" | head -30 | while IFS= read -r f; do echo "  $f"; done
   if [[ "$FILE_COUNT" -gt 30 ]]; then
     dim "  ... and $((FILE_COUNT - 30)) more"

@@ -2,13 +2,13 @@
 #
 # CRITICAL DATA-LOSS BUG: GSD versions 2.30.0-2.35.x unconditionally added
 # ".gsd" to .gitignore via ensureGitignore(), causing git to report all
-# tracked .gsd/ files as deleted. Fixed in v2.36.0 (PR #1367).
+# tracked .sdd/ files as deleted. Fixed in v2.36.0 (PR #1367).
 #
 # This script:
 #   1. Detects whether the repo was affected
 #   2. Finds the last clean commit before the damage
-#   3. Restores all deleted .gsd/ files from that commit
-#   4. Removes the bad ".gsd" line from .gitignore (if .gsd/ is tracked)
+#   3. Restores all deleted .sdd/ files from that commit
+#   4. Removes the bad ".gsd" line from .gitignore (if .sdd/ is tracked)
 #   5. Prints a ready-to-commit summary
 #
 # Usage:
@@ -99,25 +99,25 @@ if ($DryRun) {
     Write-Warn "DRY-RUN mode — no changes will be made."
 }
 
-# ── Step 1: Detect .gsd/ ─────────────────────────────────────────────────────
+# ── Step 1: Detect .sdd/ ─────────────────────────────────────────────────────
 
-Write-Section "── Step 1: Detect .gsd/ directory ─────────────────────────────────"
+Write-Section "── Step 1: Detect .sdd/ directory ─────────────────────────────────"
 
 $gsdDir = Join-Path $repoRoot '.gsd'
 $GsdIsSymlink = $false
 
 if (-not (Test-Path $gsdDir)) {
-    Write-Ok ".gsd/ does not exist in this repo — not affected."
+    Write-Ok ".sdd/ does not exist in this repo — not affected."
     exit 0
 }
 
 if (Test-ReparsePoint $gsdDir) {
     # Scenario C: migration succeeded (symlink/junction in place) but git index was never
-    # cleaned — tracked .gsd/* files still appear as deleted through the reparse point.
+    # cleaned — tracked .sdd/* files still appear as deleted through the reparse point.
     $GsdIsSymlink = $true
-    Write-Warn ".gsd/ is a symlink/junction — checking for stale git index entries (Scenario C)..."
+    Write-Warn ".sdd/ is a symlink/junction — checking for stale git index entries (Scenario C)..."
 } else {
-    Write-Info ".gsd/ is a real directory (Scenario A/B)."
+    Write-Info ".sdd/ is a real directory (Scenario A/B)."
 }
 
 # ── Step 2: Check .gitignore for .gsd entry ──────────────────────────────────
@@ -144,7 +144,7 @@ if (Test-Path $gitignorePath) {
 if ($GsdIsSymlink) {
     # Symlink layout: .gsd SHOULD be ignored (it's external state).
     if (-not $gsdIgnoreLine) {
-        Write-Warn '".gsd" missing from .gitignore — will add (migration complete, .gsd/ is external).'
+        Write-Warn '".gsd" missing from .gitignore — will add (migration complete, .sdd/ is external).'
     } else {
         Write-Ok '".gsd" already in .gitignore — correct for external-state layout.'
     }
@@ -157,16 +157,16 @@ if ($GsdIsSymlink) {
     }
 }
 
-# ── Step 3: Find deleted .gsd/ files ─────────────────────────────────────────
+# ── Step 3: Find deleted .sdd/ files ─────────────────────────────────────────
 
-Write-Section "── Step 3: Find deleted .gsd/ files ───────────────────────────────"
+Write-Section "── Step 3: Find deleted .sdd/ files ───────────────────────────────"
 
 # Files deleted in working tree (tracked but missing)
-$deletedRaw = Invoke-Git @('ls-files', '--deleted', '--', '.gsd/*') -AllowFailure
+$deletedRaw = Invoke-Git @('ls-files', '--deleted', '--', '.sdd/*') -AllowFailure
 $deletedFiles = if ($deletedRaw) { $deletedRaw -split "`n" | Where-Object { $_ } } else { @() }
 
 # Files tracked in HEAD right now
-$trackedInHeadRaw = Invoke-Git @('ls-tree', '-r', '--name-only', 'HEAD', '--', '.gsd/') -AllowFailure
+$trackedInHeadRaw = Invoke-Git @('ls-tree', '-r', '--name-only', 'HEAD', '--', '.sdd/') -AllowFailure
 $trackedInHead = if ($trackedInHeadRaw) { $trackedInHeadRaw -split "`n" | Where-Object { $_ } } else { @() }
 
 $deletedFromHistory = @()
@@ -181,18 +181,18 @@ if ($GsdIsSymlink) {
         exit 0
     }
     $indexCount = if ($trackedInHead.Count -gt 0) { $trackedInHead.Count } else { $deletedFiles.Count }
-    Write-Warn "Scenario C: $indexCount .gsd/ file(s) tracked in git index but inaccessible through reparse point."
+    Write-Warn "Scenario C: $indexCount .sdd/ file(s) tracked in git index but inaccessible through reparse point."
     Write-Info "Files are safe in external storage — only the git index needs cleaning."
 } else {
     # Files deleted in committed history (post-commit damage scenario — Scenario B)
-    $deletedHistoryRaw = Invoke-Git @('log', '--all', '--diff-filter=D', '--name-only', '--format=', '--', '.gsd/*') -AllowFailure
+    $deletedHistoryRaw = Invoke-Git @('log', '--all', '--diff-filter=D', '--name-only', '--format=', '--', '.sdd/*') -AllowFailure
     $deletedFromHistory = if ($deletedHistoryRaw) {
         $deletedHistoryRaw -split "`n" | Where-Object { $_ -match '^\.gsd' } | Sort-Object -Unique
     } else { @() }
 
     # Nothing was ever tracked in any scenario
     if ($trackedInHead.Count -eq 0 -and $deletedFiles.Count -eq 0 -and $deletedFromHistory.Count -eq 0) {
-        Write-Ok "No .gsd/ files tracked in this repo — not affected by #1364."
+        Write-Ok "No .sdd/ files tracked in this repo — not affected by #1364."
         if ($gsdIgnoreLine) {
             Write-Warn '".gsd" is still in .gitignore but there is nothing to restore.'
         }
@@ -201,9 +201,9 @@ if ($GsdIsSymlink) {
 
     # Determine scenario
     if ($trackedInHead.Count -gt 0) {
-        Write-Info "Scenario A: $($trackedInHead.Count) .gsd/ files still tracked in HEAD."
+        Write-Info "Scenario A: $($trackedInHead.Count) .sdd/ files still tracked in HEAD."
     } elseif ($deletedFromHistory.Count -gt 0) {
-        Write-Warn "Scenario B: $($deletedFromHistory.Count) .gsd/ file(s) were tracked but deleted in a committed change:"
+        Write-Warn "Scenario B: $($deletedFromHistory.Count) .sdd/ file(s) were tracked but deleted in a committed change:"
         $deletedFromHistory | Select-Object -First 20 | ForEach-Object { Write-Host "    - $_" }
         if ($deletedFromHistory.Count -gt 20) {
             Write-Host "    ... and $($deletedFromHistory.Count - 20) more"
@@ -211,7 +211,7 @@ if ($GsdIsSymlink) {
     }
 
     if ($deletedFiles.Count -gt 0) {
-        Write-Warn "$($deletedFiles.Count) .gsd/ file(s) are missing from working tree (tracked but deleted/gitignored):"
+        Write-Warn "$($deletedFiles.Count) .sdd/ file(s) are missing from working tree (tracked but deleted/gitignored):"
         $deletedFiles | Select-Object -First 20 | ForEach-Object { Write-Host "    - $_" }
         if ($deletedFiles.Count -gt 20) {
             Write-Host "    ... and $($deletedFiles.Count - 20) more"
@@ -221,10 +221,10 @@ if ($GsdIsSymlink) {
     # HEAD has files and working tree is clean — only .gitignore needs fixing
     if ($trackedInHead.Count -gt 0 -and $deletedFiles.Count -eq 0) {
         if (-not $gsdIgnoreLine) {
-            Write-Ok "No action needed — .gsd/ is tracked in HEAD and .gitignore is clean."
+            Write-Ok "No action needed — .sdd/ is tracked in HEAD and .gitignore is clean."
             exit 0
         }
-        Write-Info ".gsd/ is tracked in HEAD and working tree is clean — only .gitignore needs fixing."
+        Write-Info ".sdd/ is tracked in HEAD and working tree is clean — only .gitignore needs fixing."
     }
 }
 
@@ -253,10 +253,10 @@ if ($GsdIsSymlink) {
         }
     }
 
-    # Strategy 2: find commit that deleted .gsd/ files
+    # Strategy 2: find commit that deleted .sdd/ files
     if (-not $damageCommit -and $deletedFromHistory.Count -gt 0) {
-        Write-Info "Searching for the commit that deleted .gsd/ files from the index..."
-        $deleteCommits = Invoke-Git @('log', '--all', '--diff-filter=D', '--format=%H', '--', '.gsd/*') -AllowFailure
+        Write-Info "Searching for the commit that deleted .sdd/ files from the index..."
+        $deleteCommits = Invoke-Git @('log', '--all', '--diff-filter=D', '--format=%H', '--', '.sdd/*') -AllowFailure
         if ($deleteCommits) {
             $damageCommit = ($deleteCommits -split "`n" | Where-Object { $_ } | Select-Object -First 1)
         }
@@ -274,15 +274,15 @@ if ($GsdIsSymlink) {
         Write-Info "Restoring from: $cleanCommit — $cleanMsg"
     }
 
-    # Verify restore point has .gsd/ files
-    $restorable = Invoke-Git @('ls-tree', '-r', '--name-only', $cleanCommit, '--', '.gsd/') -AllowFailure
+    # Verify restore point has .sdd/ files
+    $restorable = Invoke-Git @('ls-tree', '-r', '--name-only', $cleanCommit, '--', '.sdd/') -AllowFailure
     $restorableFiles = if ($restorable) { $restorable -split "`n" | Where-Object { $_ } } else { @() }
 
     if ($restorableFiles.Count -eq 0) {
-        Exit-Fatal "No .gsd/ files found in restore point $cleanCommit — cannot recover. Check git log manually."
+        Exit-Fatal "No .sdd/ files found in restore point $cleanCommit — cannot recover. Check git log manually."
     }
 
-    Write-Ok "Restore point has $($restorableFiles.Count) .gsd/ files available."
+    Write-Ok "Restore point has $($restorableFiles.Count) .sdd/ files available."
 }
 
 # ── Step 5: Clean index (Scenario C) or restore deleted files (Scenario A/B) ─
@@ -290,34 +290,34 @@ if ($GsdIsSymlink) {
 if ($GsdIsSymlink) {
     Write-Section "── Step 5: Clean stale git index entries ───────────────────────────"
 
-    Write-Info "Running: git rm -r --cached --ignore-unmatch .gsd/ ..."
+    Write-Info "Running: git rm -r --cached --ignore-unmatch .sdd/ ..."
     Invoke-GitOrDryRun -GitArgs @('rm', '-r', '--cached', '--ignore-unmatch', '.gsd') -Display "rm -r --cached --ignore-unmatch .gsd"
 
     if (-not $DryRun) {
-        $stillStaleRaw = Invoke-Git @('ls-files', '--deleted', '--', '.gsd/*') -AllowFailure
+        $stillStaleRaw = Invoke-Git @('ls-files', '--deleted', '--', '.sdd/*') -AllowFailure
         $stillStale = if ($stillStaleRaw) { $stillStaleRaw -split "`n" | Where-Object { $_ } } else { @() }
         if ($stillStale.Count -eq 0) {
-            Write-Ok "Git index cleaned — no stale .gsd/ entries remain."
+            Write-Ok "Git index cleaned — no stale .sdd/ entries remain."
         } else {
             Write-Warn "$($stillStale.Count) stale entr(ies) still present — may need manual cleanup."
         }
     }
 } else {
-    Write-Section "── Step 5: Restore deleted .gsd/ files ────────────────────────────"
+    Write-Section "── Step 5: Restore deleted .sdd/ files ────────────────────────────"
 
     $needsRestore = ($deletedFiles.Count -gt 0) -or ($deletedFromHistory.Count -gt 0 -and $trackedInHead.Count -eq 0)
 
     if (-not $needsRestore) {
         Write-Ok "No deleted files to restore — skipping."
     } else {
-        Write-Info "Restoring .gsd/ files from $cleanCommit..."
-        Invoke-GitOrDryRun -GitArgs @('checkout', $cleanCommit, '--', '.gsd/') -Display "checkout $cleanCommit -- .gsd/"
+        Write-Info "Restoring .sdd/ files from $cleanCommit..."
+        Invoke-GitOrDryRun -GitArgs @('checkout', $cleanCommit, '--', '.sdd/') -Display "checkout $cleanCommit -- .sdd/"
 
         if (-not $DryRun) {
-            $stillMissingRaw = Invoke-Git @('ls-files', '--deleted', '--', '.gsd/*') -AllowFailure
+            $stillMissingRaw = Invoke-Git @('ls-files', '--deleted', '--', '.sdd/*') -AllowFailure
             $stillMissing = if ($stillMissingRaw) { $stillMissingRaw -split "`n" | Where-Object { $_ } } else { @() }
             if ($stillMissing.Count -eq 0) {
-                Write-Ok "All .gsd/ files restored successfully."
+                Write-Ok "All .sdd/ files restored successfully."
             } else {
                 Write-Warn "$($stillMissing.Count) file(s) still missing after restore — may need manual recovery:"
                 $stillMissing | Select-Object -First 10 | ForEach-Object { Write-Host "    - $_" }
@@ -333,7 +333,7 @@ Write-Section "── Step 6: Fix .gitignore ───────────�
 if ($GsdIsSymlink) {
     # Scenario C: .gsd IS external — it should be in .gitignore.  Add if missing.
     if (-not $gsdIgnoreLine) {
-        Write-Info 'Adding ".gsd" to .gitignore (migration complete — .gsd/ is external state)...'
+        Write-Info 'Adding ".gsd" to .gitignore (migration complete — .sdd/ is external state)...'
         if ($DryRun) {
             Write-Host "  (dry-run) Would append: .gsd" -ForegroundColor Yellow
         } else {
@@ -354,7 +354,7 @@ if ($GsdIsSymlink) {
             Write-Host "  (dry-run) Would remove line: .gsd" -ForegroundColor Yellow
         } else {
             # Filter out the exact bare ".gsd" line — preserve all other content including
-            # sub-path patterns like ".gsd/", ".gsd/activity/" and comments
+            # sub-path patterns like ".sdd/", ".sdd/activity/" and comments
             $cleaned = $gitignoreLines | Where-Object { $_.Trim() -ne '.gsd' }
             # Write with UTF-8 no BOM to match git's expectations
             [System.IO.File]::WriteAllLines($gitignorePath, $cleaned, [System.Text.UTF8Encoding]::new($false))
@@ -368,18 +368,18 @@ if ($GsdIsSymlink) {
 Write-Section "── Step 7: Stage recovery changes ──────────────────────────────────"
 
 if (-not $DryRun) {
-    $changed = Invoke-Git @('status', '--short', '--', '.gsd/', '.gitignore') -AllowFailure
+    $changed = Invoke-Git @('status', '--short', '--', '.sdd/', '.gitignore') -AllowFailure
     if (-not $changed) {
         Write-Ok "No staged changes — working tree was already clean."
     } else {
         if ($GsdIsSymlink) {
             # Scenario C: git rm --cached already staged the index cleanup.
-            # Only stage .gitignore — adding .gsd/ would fail (now gitignored).
+            # Only stage .gitignore — adding .sdd/ would fail (now gitignored).
             Invoke-Git @('add', '.gitignore') -AllowFailure | Out-Null
         } else {
-            Invoke-Git @('add', '.gsd/', '.gitignore') -AllowFailure | Out-Null
+            Invoke-Git @('add', '.sdd/', '.gitignore') -AllowFailure | Out-Null
         }
-        $stagedRaw  = Invoke-Git @('diff', '--cached', '--name-only', '--', '.gsd/', '.gitignore') -AllowFailure
+        $stagedRaw  = Invoke-Git @('diff', '--cached', '--name-only', '--', '.sdd/', '.gitignore') -AllowFailure
         $stagedFiles = if ($stagedRaw) { $stagedRaw -split "`n" | Where-Object { $_ } } else { @() }
         Write-Ok "$($stagedFiles.Count) file(s) staged and ready to commit."
     }
@@ -392,16 +392,16 @@ Write-Section "── Summary ────────────────�
 if ($DryRun) {
     Write-Host "Dry-run complete. Re-run without -DryRun to apply changes." -ForegroundColor Yellow
 } else {
-    $finalStagedRaw  = Invoke-Git @('diff', '--cached', '--name-only', '--', '.gsd/', '.gitignore') -AllowFailure
+    $finalStagedRaw  = Invoke-Git @('diff', '--cached', '--name-only', '--', '.sdd/', '.gitignore') -AllowFailure
     $finalStaged = if ($finalStagedRaw) { $finalStagedRaw -split "`n" | Where-Object { $_ } } else { @() }
 
     if ($finalStaged.Count -gt 0) {
         Write-Host "Recovery complete. Commit with:" -ForegroundColor Green
         Write-Host ""
         if ($GsdIsSymlink) {
-            Write-Host '  git commit -m "fix: clean stale .gsd/ index entries after external-state migration"'
+            Write-Host '  git commit -m "fix: clean stale .sdd/ index entries after external-state migration"'
         } else {
-            Write-Host '  git commit -m "fix: restore .gsd/ files deleted by #1364 regression"'
+            Write-Host '  git commit -m "fix: restore .sdd/ files deleted by #1364 regression"'
         }
         Write-Host ""
         Write-Host "Staged files:"

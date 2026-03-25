@@ -1,4 +1,4 @@
-//! GSD `.gsd/` directory file parser.
+//! GSD `.sdd/` directory file parser.
 //!
 //! Parses markdown files containing YAML-like frontmatter, section headings,
 //! and structured content used by GSD's planning system (roadmaps, plans,
@@ -7,7 +7,7 @@
 //! Key operations:
 //! - `parseFrontmatter`: split frontmatter from body, parse YAML-like key-value pairs
 //! - `extractSection`: extract content under a specific heading
-//! - `batchParseGsdFiles`: walk a `.gsd/` tree and parse all `.md` files in parallel
+//! - `batchParseGsdFiles`: walk a `.sdd/` tree and parse all `.md` files in parallel
 //! - `parseRoadmapFile`: parse structured roadmap data from content
 
 use std::path::Path;
@@ -724,7 +724,7 @@ pub fn extract_all_sections(content: String, level: Option<u32>) -> String {
     sections_to_json(&sections)
 }
 
-/// Batch-parse all `.md` files in a `.gsd/` directory tree.
+/// Batch-parse all `.md` files in a `.sdd/` directory tree.
 ///
 /// Reads all markdown files under the given directory, parses frontmatter
 /// and extracts all level-2 sections for each file. Returns all results

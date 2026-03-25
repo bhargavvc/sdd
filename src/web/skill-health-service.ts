@@ -23,7 +23,7 @@ export async function collectSkillHealthData(projectCwdOverride?: string): Promi
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/skill-health.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/skill-health.ts")
   const skillHealthModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(skillHealthModulePath))) {

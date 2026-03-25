@@ -26,7 +26,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/forensics.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/forensics.ts")
   const forensicsModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(forensicsModulePath))) {

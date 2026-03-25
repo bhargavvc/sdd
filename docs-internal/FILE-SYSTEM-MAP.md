@@ -683,64 +683,64 @@
 |------|-----------------|-------------|
 | web/app/layout.tsx | Web UI | Root Next.js layout with theme provider and font |
 | web/app/page.tsx | Web UI | Entry page loading GSDAppShell |
-| web/components/gsd/app-shell.tsx | Web UI | Main app shell — sidebar, panels, terminal, commands |
-| web/components/gsd/sidebar.tsx | Web UI | Multi-panel sidebar with milestone explorer |
-| web/components/gsd/status-bar.tsx | Web UI | Status bar with workspace state and metrics |
+| web/components/sdd/app-shell.tsx | Web UI | Main app shell — sidebar, panels, terminal, commands |
+| web/components/sdd/sidebar.tsx | Web UI | Multi-panel sidebar with milestone explorer |
+| web/components/sdd/status-bar.tsx | Web UI | Status bar with workspace state and metrics |
 
 ### Main Views
 
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
-| web/components/gsd/dashboard.tsx | Web UI | Dashboard with workflow actions and metrics |
-| web/components/gsd/chat-mode.tsx | Web UI | Chat interface for agent interaction |
-| web/components/gsd/projects-view.tsx | Web UI | Project browser and selector |
-| web/components/gsd/files-view.tsx | Web UI | File browser and explorer |
-| web/components/gsd/activity-view.tsx | Web UI | Activity log and history view |
-| web/components/gsd/roadmap.tsx | Web UI, GSD Workflow | Milestone roadmap visualization |
-| web/components/gsd/visualizer-view.tsx | Web UI, Doctor/Diagnostics | Workflow visualization |
-| web/components/gsd/project-welcome.tsx | Web UI | Welcome screen for new projects |
-| web/components/gsd/knowledge-captures-panel.tsx | Web UI | Knowledge and capture management |
+| web/components/sdd/dashboard.tsx | Web UI | Dashboard with workflow actions and metrics |
+| web/components/sdd/chat-mode.tsx | Web UI | Chat interface for agent interaction |
+| web/components/sdd/projects-view.tsx | Web UI | Project browser and selector |
+| web/components/sdd/files-view.tsx | Web UI | File browser and explorer |
+| web/components/sdd/activity-view.tsx | Web UI | Activity log and history view |
+| web/components/sdd/roadmap.tsx | Web UI, GSD Workflow | Milestone roadmap visualization |
+| web/components/sdd/visualizer-view.tsx | Web UI, Doctor/Diagnostics | Workflow visualization |
+| web/components/sdd/project-welcome.tsx | Web UI | Welcome screen for new projects |
+| web/components/sdd/knowledge-captures-panel.tsx | Web UI | Knowledge and capture management |
 
 ### Terminal
 
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
-| web/components/gsd/terminal.tsx | Web UI | Terminal widget with input mode handling |
-| web/components/gsd/shell-terminal.tsx | Web UI | Shell terminal with PTY integration |
-| web/components/gsd/main-session-terminal.tsx | Web UI | Main session terminal display |
-| web/components/gsd/dual-terminal.tsx | Web UI | Side-by-side terminal layout |
+| web/components/sdd/terminal.tsx | Web UI | Terminal widget with input mode handling |
+| web/components/sdd/shell-terminal.tsx | Web UI | Shell terminal with PTY integration |
+| web/components/sdd/main-session-terminal.tsx | Web UI | Main session terminal display |
+| web/components/sdd/dual-terminal.tsx | Web UI | Side-by-side terminal layout |
 
 ### Commands & Dialogs
 
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
-| web/components/gsd/command-surface.tsx | Web UI, Commands | Command palette and slash command dispatcher |
-| web/components/gsd/remaining-command-panels.tsx | Web UI, Commands | History, undo, export, cleanup panels |
-| web/components/gsd/diagnostics-panels.tsx | Web UI, Doctor/Diagnostics | Doctor, forensics, skill health panels |
-| web/components/gsd/settings-panels.tsx | Web UI, Config | Settings and preferences panels |
-| web/components/gsd/guided-dialog.tsx | Web UI | Generic guided dialog component |
-| web/components/gsd/update-banner.tsx | Web UI | Update notification banner |
-| web/components/gsd/scope-badge.tsx | Web UI | Scope badge indicator |
-| web/components/gsd/loading-skeletons.tsx | Web UI | Loading skeleton placeholders |
-| web/components/gsd/code-editor.tsx | Web UI | Code editor display component |
-| web/components/gsd/file-content-viewer.tsx | Web UI | File content viewer and previewer |
-| web/components/gsd/focused-panel.tsx | Web UI | Focused panel layout component |
+| web/components/sdd/command-surface.tsx | Web UI, Commands | Command palette and slash command dispatcher |
+| web/components/sdd/remaining-command-panels.tsx | Web UI, Commands | History, undo, export, cleanup panels |
+| web/components/sdd/diagnostics-panels.tsx | Web UI, Doctor/Diagnostics | Doctor, forensics, skill health panels |
+| web/components/sdd/settings-panels.tsx | Web UI, Config | Settings and preferences panels |
+| web/components/sdd/guided-dialog.tsx | Web UI | Generic guided dialog component |
+| web/components/sdd/update-banner.tsx | Web UI | Update notification banner |
+| web/components/sdd/scope-badge.tsx | Web UI | Scope badge indicator |
+| web/components/sdd/loading-skeletons.tsx | Web UI | Loading skeleton placeholders |
+| web/components/sdd/code-editor.tsx | Web UI | Code editor display component |
+| web/components/sdd/file-content-viewer.tsx | Web UI | File content viewer and previewer |
+| web/components/sdd/focused-panel.tsx | Web UI | Focused panel layout component |
 
 ### Onboarding
 
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
-| web/components/gsd/onboarding-gate.tsx | Web UI, Onboarding | Gate and orchestration for onboarding flow |
-| web/components/gsd/onboarding/step-welcome.tsx | Web UI, Onboarding | Welcome step |
-| web/components/gsd/onboarding/step-mode.tsx | Web UI, Onboarding | User mode selection step |
-| web/components/gsd/onboarding/step-provider.tsx | Web UI, Onboarding | LLM provider selection step |
-| web/components/gsd/onboarding/step-authenticate.tsx | Web UI, Onboarding, Auth/OAuth | Authentication step |
-| web/components/gsd/onboarding/step-dev-root.tsx | Web UI, Onboarding | Dev root directory selection step |
-| web/components/gsd/onboarding/step-project.tsx | Web UI, Onboarding | Project selection step |
-| web/components/gsd/onboarding/step-remote.tsx | Web UI, Onboarding | Remote configuration step |
-| web/components/gsd/onboarding/step-optional.tsx | Web UI, Onboarding | Optional settings step |
-| web/components/gsd/onboarding/step-ready.tsx | Web UI, Onboarding | Ready confirmation step |
-| web/components/gsd/onboarding/wizard-stepper.tsx | Web UI, Onboarding | Stepper progress indicator |
+| web/components/sdd/onboarding-gate.tsx | Web UI, Onboarding | Gate and orchestration for onboarding flow |
+| web/components/sdd/onboarding/step-welcome.tsx | Web UI, Onboarding | Welcome step |
+| web/components/sdd/onboarding/step-mode.tsx | Web UI, Onboarding | User mode selection step |
+| web/components/sdd/onboarding/step-provider.tsx | Web UI, Onboarding | LLM provider selection step |
+| web/components/sdd/onboarding/step-authenticate.tsx | Web UI, Onboarding, Auth/OAuth | Authentication step |
+| web/components/sdd/onboarding/step-dev-root.tsx | Web UI, Onboarding | Dev root directory selection step |
+| web/components/sdd/onboarding/step-project.tsx | Web UI, Onboarding | Project selection step |
+| web/components/sdd/onboarding/step-remote.tsx | Web UI, Onboarding | Remote configuration step |
+| web/components/sdd/onboarding/step-optional.tsx | Web UI, Onboarding | Optional settings step |
+| web/components/sdd/onboarding/step-ready.tsx | Web UI, Onboarding | Ready confirmation step |
+| web/components/sdd/onboarding/wizard-stepper.tsx | Web UI, Onboarding | Stepper progress indicator |
 
 ### API Routes
 
@@ -864,7 +864,7 @@
 | native/crates/engine/src/ps.rs | Native/Rust Tools | Cross-platform process tree management |
 | native/crates/engine/src/clipboard.rs | Native/Rust Tools | Clipboard read/write for text and images |
 | native/crates/engine/src/json_parse.rs | Text Processing, Native/Rust Tools | Streaming JSON parser with partial recovery |
-| native/crates/engine/src/gsd_parser.rs | GSD Workflow, Native/Rust Tools | .gsd/ directory file parser (markdown, frontmatter) |
+| native/crates/engine/src/gsd_parser.rs | GSD Workflow, Native/Rust Tools | .sdd/ directory file parser (markdown, frontmatter) |
 | native/crates/engine/src/ttsr.rs | TTSR, Native/Rust Tools | TTSR regex engine with compiled RegexSet |
 | native/crates/engine/src/stream_process.rs | Text Processing, Native/Rust Tools | Bash stream processor (UTF-8, ANSI strip, binary) |
 | native/crates/engine/src/xxhash.rs | Native/Rust Tools | xxHash32 for hashline edit tool |
@@ -966,7 +966,7 @@ Quick lookup: which files are part of each system?
 | **AST** | native/crates/ast/*, packages/native/src/ast/ |
 | **Async Jobs** | src/resources/extensions/async-jobs/* |
 | **Auth / OAuth** | pi-ai/src/utils/oauth/*, src/web/web-auth-storage.ts, core/auth-storage.ts, src/pi-migration.ts, aws-auth/index.ts, web/lib/auth.ts |
-| **Auto Engine** | src/resources/extensions/gsd/auto*.ts, gsd/auto-loop.ts, gsd/auto-supervisor.ts, gsd/unit-runtime.ts |
+| **Auto Engine** | src/resources/extensions/sdd/auto*.ts, gsd/auto-loop.ts, gsd/auto-supervisor.ts, gsd/unit-runtime.ts |
 | **Bg Shell** | src/resources/extensions/bg-shell/* |
 | **Browser Tools** | src/resources/extensions/browser-tools/* |
 | **Build System** | scripts/*, native/crates/engine/build.rs |
@@ -981,7 +981,7 @@ Quick lookup: which files are part of each system?
 | **Extension Registry** | src/extension-discovery.ts, src/extension-registry.ts, src/bundled-extension-paths.ts |
 | **Extensions** | pi-coding-agent/src/core/extensions/*, src/resource-loader.ts |
 | **File Search** | native/crates/engine/src/grep.rs, glob.rs, fd.rs, fs_cache.rs, packages/native/src/grep/*, fd/*, core/tools/grep.ts, find.ts |
-| **GSD Workflow** | src/resources/extensions/gsd/* (non-auto), gsd/reports.ts, gsd/notifications.ts, gsd/prompts/*, gsd/workflow-templates/* |
+| **GSD Workflow** | src/resources/extensions/sdd/* (non-auto), gsd/reports.ts, gsd/notifications.ts, gsd/prompts/*, gsd/workflow-templates/* |
 | **Google Search** | src/resources/extensions/google-search/index.ts |
 | **Headless Mode** | src/headless*.ts |
 | **Image Processing** | native/crates/engine/src/image.rs, packages/native/src/image/*, utils/image-*.ts, web/lib/image-utils.ts |
@@ -996,7 +996,7 @@ Quick lookup: which files are part of each system?
 | **Model System** | pi-coding-agent/src/core/model-*.ts, pi-ai/src/models*.ts, pi-ai/src/api-registry.ts, gsd/model-router.ts |
 | **Native / Rust Tools** | native/crates/engine/src/* |
 | **Node.js Bindings** | packages/native/src/* |
-| **Onboarding** | src/onboarding.ts, src/wizard.ts, web/components/gsd/onboarding/*, web/app/api/onboarding/* |
+| **Onboarding** | src/onboarding.ts, src/wizard.ts, web/components/sdd/onboarding/*, web/app/api/onboarding/* |
 | **Permissions** | core/extensions/project-trust.ts, core/auth-storage.ts |
 | **Remote Questions** | src/resources/extensions/remote-questions/* |
 | **Search the Web** | src/resources/extensions/search-the-web/* |

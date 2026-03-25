@@ -1069,7 +1069,7 @@ Make browser-tools able to emit outputs that directly support GSD slice/task com
 
 ## Why it matters
 
-You explicitly want browser tools to power automatic verification and testing during `@agent/extensions/gsd/` use.
+You explicitly want browser tools to power automatic verification and testing during `@agent/extensions/sdd/` use.
 
 ## What it enables
 
@@ -1185,7 +1185,7 @@ These are the ideas that move the extension from excellent tooling into a genuin
 5. `browser_verify_flow`
 6. `browser_run_task`
 
-## Biggest wins for GSD
+## Biggest wins for SDD
 
 1. explicit verification outputs
 2. debug bundles on failure

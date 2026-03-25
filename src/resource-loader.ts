@@ -13,7 +13,7 @@ import { loadRegistry, readManifestFromEntryPath, isExtensionEnabled, ensureRegi
 //
 // Why this matters: with `npm link`, src/resources/ points into the gsd-2 repo's
 // working tree. Switching branches there changes src/resources/ for ALL projects
-// that use gsd — causing stale/broken extensions to be synced to ~/.gsd/agent/.
+// that use gsd — causing stale/broken extensions to be synced to ~/.sdd/agent/.
 // dist/resources/ is populated by the build step (`npm run copy-resources`) and
 // reflects the built state, not the currently checked-out branch.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -280,7 +280,7 @@ function copyDirRecursive(src: string, dest: string): void {
  *
  * Native ESM `import()` ignores NODE_PATH — it resolves packages by walking
  * up the directory tree from the importing file. Extension files synced to
- * ~/.gsd/agent/extensions/ have no ancestor node_modules, so imports of
+ * ~/.sdd/agent/extensions/ have no ancestor node_modules, so imports of
  * @gsd/* packages fail. The symlink makes Node's standard resolution find
  * them without requiring every call site to use jiti.
  */
@@ -377,19 +377,19 @@ function pruneRemovedBundledExtensions(
 }
 
 /**
- * Syncs all bundled resources to agentDir (~/.gsd/agent/) on every launch.
+ * Syncs all bundled resources to agentDir (~/.sdd/agent/) on every launch.
  *
- * - extensions/ → ~/.gsd/agent/extensions/   (overwrite when version changes)
- * - agents/     → ~/.gsd/agent/agents/        (overwrite when version changes)
- * - skills/     → ~/.gsd/agent/skills/        (overwrite when version changes)
- * - GSD-WORKFLOW.md → ~/.gsd/agent/GSD-WORKFLOW.md (fallback for env var miss)
+ * - extensions/ → ~/.sdd/agent/extensions/   (overwrite when version changes)
+ * - agents/     → ~/.sdd/agent/agents/        (overwrite when version changes)
+ * - skills/     → ~/.sdd/agent/skills/        (overwrite when version changes)
+ * - GSD-WORKFLOW.md → ~/.sdd/agent/GSD-WORKFLOW.md (fallback for env var miss)
  *
  * Skips the copy when the managed-resources.json version matches the current
  * GSD version, avoiding ~128ms of synchronous cpSync on every startup.
  * After `npm update -g @glittercowboy/gsd`, versions will differ and the
  * copy runs once to land the new resources.
  *
- * Inspectable: `ls ~/.gsd/agent/extensions/`
+ * Inspectable: `ls ~/.sdd/agent/extensions/`
  */
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
@@ -403,7 +403,7 @@ export function initResources(agentDir: string): void {
   // up even when the version/hash match causes the full sync to be skipped.
   pruneRemovedBundledExtensions(manifest, agentDir)
 
-  // Ensure ~/.gsd/agent/node_modules symlinks to GSD's node_modules on EVERY
+  // Ensure ~/.sdd/agent/node_modules symlinks to GSD's node_modules on EVERY
   // launch, not just during resource syncs. A stale/broken symlink makes ALL
   // extensions fail to resolve @gsd/* packages, rendering GSD non-functional.
   ensureNodeModulesSymlink(agentDir)
@@ -455,7 +455,7 @@ export function hasStaleCompiledExtensionSiblings(extensionsDir: string): boolea
 
 /**
  * Constructs a DefaultResourceLoader that loads extensions from both
- * ~/.gsd/agent/extensions/ (GSD's default) and ~/.pi/agent/extensions/ (pi's default).
+ * ~/.sdd/agent/extensions/ (GSD's default) and ~/.pi/agent/extensions/ (pi's default).
  * This allows users to use extensions from either location.
  */
 // Cache bundled extension keys at module load — avoids re-scanning the extensions

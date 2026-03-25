@@ -28,46 +28,46 @@ test('layout.tsx exports a Viewport with device-width', () => {
 // ── app-shell.tsx ───────────────────────────────────────────────────────────
 
 test('app-shell.tsx has a mobile hamburger menu toggle', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('mobile-nav-toggle'), 'should have mobile-nav-toggle test id')
   assert.ok(src.includes('Menu'), 'should import Menu icon for hamburger')
 })
 
 test('app-shell.tsx hides desktop sidebar on mobile with md:flex', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   // The desktop sidebar wrapper should use hidden + md:flex
   assert.ok(src.includes('hidden md:flex'), 'desktop sidebar should be hidden on mobile')
 })
 
 test('app-shell.tsx has a mobile nav drawer', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('mobile-nav-drawer'), 'should have mobile-nav-drawer test id')
   assert.ok(src.includes('mobile-nav-overlay'), 'should have mobile-nav-overlay test id')
 })
 
 test('app-shell.tsx has a mobile milestone drawer', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('mobile-milestone-drawer'), 'should have mobile-milestone-drawer test id')
   assert.ok(src.includes('mobile-milestone-toggle'), 'should have mobile-milestone-toggle test id')
 })
 
 test('app-shell.tsx has a mobile bottom bar', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('mobile-bottom-bar'), 'should have mobile-bottom-bar test id')
 })
 
 test('app-shell.tsx header uses responsive padding', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('md:px-4'), 'header should have responsive horizontal padding')
 })
 
 test('app-shell.tsx hides project label on small screens', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   assert.ok(src.includes('hidden sm:inline'), 'project label should be hidden on mobile')
 })
 
 test('app-shell.tsx hides desktop milestone sidebar on mobile', () => {
-  const src = readComponent('components/gsd/app-shell.tsx')
+  const src = readComponent('components/sdd/app-shell.tsx')
   // The milestone sidebar resize handle should be hidden on mobile
   assert.ok(
     src.includes('hidden md:flex') || src.includes('hidden md:block'),
@@ -78,13 +78,13 @@ test('app-shell.tsx hides desktop milestone sidebar on mobile', () => {
 // ── sidebar.tsx ──────────────────────────────────────────────────────────────
 
 test('sidebar.tsx supports a mobile prop', () => {
-  const src = readComponent('components/gsd/sidebar.tsx')
+  const src = readComponent('components/sdd/sidebar.tsx')
   assert.ok(src.includes('mobile?:'), 'Sidebar should accept a mobile prop')
   assert.ok(src.includes('mobile?: boolean'), 'mobile prop should be boolean')
 })
 
 test('sidebar.tsx has a MobileNavPanel with touch-friendly targets', () => {
-  const src = readComponent('components/gsd/sidebar.tsx')
+  const src = readComponent('components/sdd/sidebar.tsx')
   assert.ok(src.includes('mobile-nav-panel'), 'should have mobile-nav-panel test id')
   assert.ok(src.includes('min-h-[44px]'), 'nav items should have 44px minimum touch target height')
 })
@@ -92,25 +92,25 @@ test('sidebar.tsx has a MobileNavPanel with touch-friendly targets', () => {
 // ── dashboard.tsx ───────────────────────────────────────────────────────────
 
 test('dashboard.tsx has responsive grid for metric cards', () => {
-  const src = readComponent('components/gsd/dashboard.tsx')
+  const src = readComponent('components/sdd/dashboard.tsx')
   assert.ok(src.includes('sm:grid-cols-2'), 'metric grid should stack to 2 cols on sm')
   assert.ok(src.includes('xl:grid-cols-4'), 'metric grid should expand to 4 cols on xl')
 })
 
 test('dashboard.tsx has responsive padding on content area', () => {
-  const src = readComponent('components/gsd/dashboard.tsx')
+  const src = readComponent('components/sdd/dashboard.tsx')
   assert.ok(src.includes('md:p-6'), 'content area should have responsive padding')
 })
 
 test('dashboard.tsx has responsive header padding', () => {
-  const src = readComponent('components/gsd/dashboard.tsx')
+  const src = readComponent('components/sdd/dashboard.tsx')
   assert.ok(src.includes('md:px-6'), 'dashboard header should have responsive horizontal padding')
 })
 
 // ── status-bar.tsx ──────────────────────────────────────────────────────────
 
 test('status-bar.tsx hides branch info on small screens', () => {
-  const src = readComponent('components/gsd/status-bar.tsx')
+  const src = readComponent('components/sdd/status-bar.tsx')
   // Branch info should be hidden on mobile
   assert.ok(
     src.includes('hidden sm:flex'),
@@ -119,12 +119,12 @@ test('status-bar.tsx hides branch info on small screens', () => {
 })
 
 test('status-bar.tsx has responsive text sizing', () => {
-  const src = readComponent('components/gsd/status-bar.tsx')
+  const src = readComponent('components/sdd/status-bar.tsx')
   assert.ok(src.includes('md:text-xs'), 'status bar should have responsive text size')
 })
 
 test('status-bar.tsx has responsive gap spacing', () => {
-  const src = readComponent('components/gsd/status-bar.tsx')
+  const src = readComponent('components/sdd/status-bar.tsx')
   assert.ok(src.includes('md:gap-4'), 'status bar should have responsive gap')
 })
 

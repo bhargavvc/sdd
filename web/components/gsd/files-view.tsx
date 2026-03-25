@@ -23,8 +23,8 @@ import {
 import { cn } from "@/lib/utils"
 import { useGSDWorkspaceState, buildProjectUrl } from "@/lib/gsd-workspace-store"
 import { authFetch } from "@/lib/auth"
-import { FileContentViewer } from "@/components/gsd/file-content-viewer"
-import { ChatPane } from "@/components/gsd/chat-mode"
+import { FileContentViewer } from "@/components/sdd/file-content-viewer"
+import { ChatPane } from "@/components/sdd/chat-mode"
 
 type RootMode = "gsd" | "project"
 
@@ -460,7 +460,7 @@ function tabKey(root: RootMode, path: string): string {
 }
 
 function tabDisplayPath(tab: OpenTab): string {
-  return tab.root === "gsd" ? `.gsd/${tab.path}` : tab.path
+  return tab.root === "gsd" ? `.sdd/${tab.path}` : tab.path
 }
 
 function tabLabel(tab: OpenTab): string {
@@ -958,7 +958,7 @@ export function FilesView() {
   }, [])
 
   const handleCopyPath = useCallback((path: string) => {
-    const displayPath = activeRoot === "gsd" ? `.gsd/${path}` : path
+    const displayPath = activeRoot === "gsd" ? `.sdd/${path}` : path
     void navigator.clipboard.writeText(displayPath)
   }, [activeRoot])
 
@@ -1054,7 +1054,7 @@ export function FilesView() {
       if (!filePath) continue
 
       // Determine root and relative path
-      const gsdPrefix = ".gsd/"
+      const gsdPrefix = ".sdd/"
       let root: RootMode = "project"
       let relativePath = filePath
 
@@ -1137,7 +1137,7 @@ export function FilesView() {
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            GSD
+            SDD
           </button>
           <button
             onClick={() => { setLeftPanel("tree"); handleTreeRootChange("project") }}
@@ -1216,7 +1216,7 @@ export function FilesView() {
             </div>
           ) : tree && tree.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground text-xs">
-              {activeRoot === "gsd" ? "No .gsd/ files found" : "No files found"}
+              {activeRoot === "gsd" ? "No .sdd/ files found" : "No files found"}
             </div>
           ) : tree ? (
             <>

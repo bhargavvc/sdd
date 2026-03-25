@@ -3,9 +3,9 @@ GSD-specific skill ecosystem details: directory conventions, discovery mechanics
 </overview>
 
 <skill_directories>
-GSD supports two skill directories, checked in order:
+SDD supports two skill directories, checked in order:
 
-**User-scope (global):** `~/.gsd/agent/skills/`
+**User-scope (global):** `~/.sdd/agent/skills/`
 - Available in every GSD session regardless of working directory
 - Installed by default or by the user
 
@@ -18,7 +18,7 @@ Skills in both directories follow the same SKILL.md format and router pattern co
 </skill_directories>
 
 <skill_discovery>
-GSD auto-discovers skills at session start and during auto-mode:
+SDD auto-discovers skills at session start and during auto-mode:
 
 **Session start:** All skills in both directories are enumerated and their names + descriptions are injected into the system prompt as `<available_skills>`.
 
@@ -42,7 +42,7 @@ Skill metadata has validation constraints:
 - **Staleness detection:** Skills unused for 60+ days are flagged as stale
 - **Pass/fail rates:** Derived from unit completion status when a skill is active
 
-Telemetry data is stored in `~/.gsd/metrics.json` alongside other GSD metrics.
+Telemetry data is stored in `~/.sdd/metrics.json` alongside other GSD metrics.
 </skill_telemetry>
 
 <skill_health>

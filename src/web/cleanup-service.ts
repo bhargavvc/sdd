@@ -24,7 +24,7 @@ export async function collectCleanupData(projectCwdOverride?: string): Promise<C
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/native-git-bridge.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/native-git-bridge.ts")
   const cleanupModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(cleanupModulePath))) {
@@ -52,7 +52,7 @@ export async function collectCleanupData(projectCwdOverride?: string): Promise<C
     'const branchList = branches.map(b => ({ name: b, merged: mergedSet.has(b) }));',
     // Get snapshot refs
     'let refs = [];',
-    'try { refs = mod.nativeForEachRef(basePath, "refs/gsd/snapshots/"); } catch {}',
+    'try { refs = mod.nativeForEachRef(basePath, "refs/sdd/snapshots/"); } catch {}',
     'const snapshotList = refs.map(r => {',
     '  const parts = r.split(" ");',
     '  return { ref: parts[0] || r, date: parts.length > 1 ? parts.slice(1).join(" ") : "" };',
@@ -113,7 +113,7 @@ export async function executeCleanup(
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/native-git-bridge.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/native-git-bridge.ts")
   const cleanupModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(cleanupModulePath))) {

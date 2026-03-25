@@ -50,10 +50,10 @@ git rebase origin/main
 
 ## Working with GSD (team workflow)
 
-GSD uses worktree-based isolation for multi-developer work. If you're contributing with GSD running, enable team mode in your project preferences:
+SDD uses worktree-based isolation for multi-developer work. If you're contributing with GSD running, enable team mode in your project preferences:
 
 ```yaml
-# .gsd/preferences.md
+# .sdd/preferences.md
 ---
 version: 1
 mode: team
@@ -146,7 +146,7 @@ The codebase is organized into these areas. All are open to contributions:
 | AI/LLM layer | `packages/pi-ai` | Provider integrations, model handling |
 | Agent core | `packages/pi-agent-core` | Agent orchestration — RFC required for changes |
 | Coding agent | `packages/pi-coding-agent` | The main coding agent |
-| GSD extension | `src/resources/extensions/gsd/` | GSD workflow — RFC required for auto-mode |
+| GSD extension | `src/resources/extensions/sdd/` | GSD workflow — RFC required for auto-mode |
 | Native bindings | `native/` | Platform-specific native code |
 | CI/Build | `.github/`, `scripts/` | Workflows, build scripts |
 

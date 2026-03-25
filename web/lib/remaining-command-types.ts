@@ -1,5 +1,5 @@
 // Browser-safe TypeScript interfaces for remaining GSD command surfaces.
-// Mirrors upstream types from src/resources/extensions/gsd/ modules:
+// Mirrors upstream types from src/resources/extensions/sdd/ modules:
 //   metrics.ts, commands.ts, types.ts, undo, cleanup, export, steer
 // Do NOT import from those modules directly — they use Node.js APIs
 // unavailable in the browser.

@@ -27,16 +27,16 @@
 gsd -e ./path/to/extension.ts
 
 # Check GSD startup output for errors
-# Extension errors are logged but don't crash GSD
+# Extension errors are logged but don't crash SDD
 ```
 
 ## Step 3: Verify File Location
 
 Extensions must be in auto-discovery paths:
-- `~/.gsd/agent/extensions/*.ts`
-- `~/.gsd/agent/extensions/*/index.ts`
-- `.gsd/extensions/*.ts`
-- `.gsd/extensions/*/index.ts`
+- `~/.sdd/agent/extensions/*.ts`
+- `~/.sdd/agent/extensions/*/index.ts`
+- `.sdd/extensions/*.ts`
+- `.sdd/extensions/*/index.ts`
 
 The file must `export default function(pi: ExtensionAPI) { ... }`.
 

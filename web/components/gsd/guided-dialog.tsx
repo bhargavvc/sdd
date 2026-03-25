@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { ChatPane } from "@/components/gsd/chat-mode"
+import { ChatPane } from "@/components/sdd/chat-mode"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

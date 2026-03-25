@@ -86,7 +86,7 @@ Then proceed directly to the workflow.
 ## Skill Structure Quick Reference
 
 **Skill directories:**
-- Global: `~/.gsd/agent/skills/{skill-name}/`
+- Global: `~/.sdd/agent/skills/{skill-name}/`
 - Project-local: `.pi/agent/skills/{skill-name}/`
 
 **Simple skill (single file):**

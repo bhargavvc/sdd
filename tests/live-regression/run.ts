@@ -4,7 +4,7 @@
  * These tests run AFTER `npm publish` against the installed `gsd` binary.
  * They exercise the dispatch loop state machine end-to-end by:
  *
- * 1. Creating real `.gsd/` directory structures with milestone artifacts
+ * 1. Creating real `.sdd/` directory structures with milestone artifacts
  * 2. Calling `gsd headless query` to verify state derivation
  * 3. Verifying phase transitions match expected outcomes
  * 4. Testing crash recovery (lock file lifecycle)

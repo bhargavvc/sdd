@@ -6,7 +6,7 @@ import {
   nativeHasChanges,
   nativeHasMergeConflicts,
   nativeGetCurrentBranch,
-} from "../resources/extensions/gsd/native-git-bridge.ts"
+} from "../resources/extensions/sdd/native-git-bridge.ts"
 import { resolveBridgeRuntimeConfig } from "./bridge-service.ts"
 import {
   GIT_SUMMARY_SCOPE,

@@ -16,7 +16,7 @@
 
 import { createJiti } from '@mariozechner/jiti'
 import { fileURLToPath } from 'node:url'
-import type { GSDState } from './resources/extensions/gsd/types.js'
+import type { SDDState } from './resources/extensions/sdd/types.js'
 import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
@@ -29,17 +29,17 @@ async function loadExtensionModules() {
   const sessionModule = await jiti.import(gsdExtensionPath('session-status-io.ts'), {}) as any
   const prefsModule = await jiti.import(gsdExtensionPath('preferences.ts'), {}) as any
   return {
-    deriveState: stateModule.deriveState as (basePath: string) => Promise<GSDState>,
+    deriveState: stateModule.deriveState as (basePath: string) => Promise<SDDState>,
     resolveDispatch: dispatchModule.resolveDispatch as (opts: any) => Promise<any>,
     readAllSessionStatuses: sessionModule.readAllSessionStatuses as (basePath: string) => any[],
-    loadEffectiveGSDPreferences: prefsModule.loadEffectiveGSDPreferences as () => any,
+    loadEffectiveSDDPreferences: prefsModule.loadEffectiveSDDPreferences as () => any,
   }
 }
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface QuerySnapshot {
-  state: GSDState
+  state: SDDState
   next: {
     action: 'dispatch' | 'stop' | 'skip'
     unitType?: string
@@ -66,7 +66,7 @@ export interface QueryResult {
 // ─── Implementation ─────────────────────────────────────────────────────────
 
 export async function handleQuery(basePath: string): Promise<QueryResult> {
-  const { deriveState, resolveDispatch, readAllSessionStatuses, loadEffectiveGSDPreferences } = await loadExtensionModules()
+  const { deriveState, resolveDispatch, readAllSessionStatuses, loadEffectiveSDDPreferences } = await loadExtensionModules()
   const state = await deriveState(basePath)
 
   // Derive next dispatch action
@@ -77,7 +77,7 @@ export async function handleQuery(basePath: string): Promise<QueryResult> {
       reason: state.phase === 'complete' ? 'All milestones complete.' : state.nextAction,
     }
   } else {
-    const loaded = loadEffectiveGSDPreferences()
+    const loaded = loadEffectiveSDDPreferences()
     const dispatch = await resolveDispatch({
       basePath,
       mid: state.activeMilestone.id,

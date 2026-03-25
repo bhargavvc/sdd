@@ -22,7 +22,7 @@ parallel:
 /gsd parallel start
 ```
 
-GSD scans your milestones, checks dependencies and file overlap, shows an eligibility report, and spawns workers for eligible milestones.
+SDD scans your milestones, checks dependencies and file overlap, shows an eligibility report, and spawns workers for eligible milestones.
 
 3. Monitor progress:
 
@@ -58,7 +58,7 @@ GSD scans your milestones, checks dependencies and file overlap, shows an eligib
 │  └──────────┘  └──────────┘  └──────────┘              │
 │       │              │              │                   │
 │       ▼              ▼              ▼                   │
-│  .gsd/worktrees/ .gsd/worktrees/ .gsd/worktrees/       │
+│  .sdd/worktrees/ .sdd/worktrees/ .sdd/worktrees/       │
 │  M001/           M003/           M005/                  │
 │  (milestone/     (milestone/     (milestone/            │
 │   M001 branch)    M003 branch)    M005 branch)          │
@@ -75,15 +75,15 @@ Each worker is a separate `gsd` process with complete isolation:
 | **Git branch** | `milestone/<MID>` — one branch per milestone |
 | **State derivation** | `GSD_MILESTONE_LOCK` env var — `deriveState()` only sees the assigned milestone |
 | **Context window** | Separate process — each worker has its own agent sessions |
-| **Metrics** | Each worktree has its own `.gsd/metrics.json` |
-| **Crash recovery** | Each worktree has its own `.gsd/auto.lock` |
+| **Metrics** | Each worktree has its own `.sdd/metrics.json` |
+| **Crash recovery** | Each worktree has its own `.sdd/auto.lock` |
 
 ### Coordination
 
 Workers and the coordinator communicate through file-based IPC:
 
-- **Session status files** (`.gsd/parallel/<MID>.status.json`) — workers write heartbeats, the coordinator reads them
-- **Signal files** (`.gsd/parallel/<MID>.signal.json`) — coordinator writes signals, workers consume them
+- **Session status files** (`.sdd/parallel/<MID>.status.json`) — workers write heartbeats, the coordinator reads them
+- **Signal files** (`.sdd/parallel/<MID>.signal.json`) — coordinator writes signals, workers consume them
 - **Atomic writes** — write-to-temp + rename prevents partial reads
 
 ## Eligibility Analysis
@@ -126,7 +126,7 @@ File overlaps are warnings, not blockers. Both milestones work in separate workt
 
 ## Configuration
 
-Add to `~/.gsd/preferences.md` or `.gsd/preferences.md`:
+Add to `~/.sdd/preferences.md` or `.sdd/preferences.md`:
 
 ```yaml
 ---
@@ -200,7 +200,7 @@ When milestones complete, their worktree changes need to merge back to main.
 
 ### Conflict Handling
 
-1. `.gsd/` state files (STATE.md, metrics.json, etc.) — **auto-resolved** by accepting the milestone branch version
+1. `.sdd/` state files (STATE.md, metrics.json, etc.) — **auto-resolved** by accepting the milestone branch version
 2. Code conflicts — **stop and report**. The merge halts, showing which files conflict. Resolve manually and retry with `/gsd parallel merge <MID>`.
 
 ### Example
@@ -231,7 +231,7 @@ When `budget_ceiling` is set, the coordinator tracks aggregate cost across all w
 
 `/gsd doctor` detects parallel session issues:
 
-- **Stale parallel sessions** — Worker process died without cleanup. Doctor finds `.gsd/parallel/*.status.json` files with dead PIDs or expired heartbeats and removes them.
+- **Stale parallel sessions** — Worker process died without cleanup. Doctor finds `.sdd/parallel/*.status.json` files with dead PIDs or expired heartbeats and removes them.
 
 Run `/gsd doctor --fix` to clean up automatically.
 
@@ -255,12 +255,12 @@ The coordinator runs stale detection during `refreshWorkerStatuses()` and automa
 | **Budget ceiling** | Aggregate cost enforcement across all workers |
 | **Signal-based shutdown** | Graceful stop via file signals + SIGTERM |
 | **Doctor integration** | Detects and cleans up orphaned sessions |
-| **Conflict-aware merge** | Stops on code conflicts, auto-resolves `.gsd/` state conflicts |
+| **Conflict-aware merge** | Stops on code conflicts, auto-resolves `.sdd/` state conflicts |
 
 ## File Layout
 
 ```
-.gsd/
+.sdd/
 ├── parallel/                    # Coordinator ↔ worker IPC
 │   ├── M002.status.json         # Worker heartbeat + progress
 │   ├── M002.signal.json         # Coordinator → worker signals
@@ -268,7 +268,7 @@ The coordinator runs stale detection during `refreshWorkerStatuses()` and automa
 │   └── M003.signal.json
 ├── worktrees/                   # Git worktrees (one per milestone)
 │   ├── M002/                    # M002's isolated checkout
-│   │   ├── .gsd/                # M002's own state files
+│   │   ├── .sdd/                # M002's own state files
 │   │   │   ├── auto.lock
 │   │   │   ├── metrics.json
 │   │   │   └── milestones/
@@ -278,7 +278,7 @@ The coordinator runs stale detection during `refreshWorkerStatuses()` and automa
 └── ...
 ```
 
-Both `.gsd/parallel/` and `.gsd/worktrees/` are gitignored — they're runtime-only coordination files that never get committed.
+Both `.sdd/parallel/` and `.sdd/worktrees/` are gitignored — they're runtime-only coordination files that never get committed.
 
 ## Troubleshooting
 
@@ -301,7 +301,7 @@ Workers now persist their state to disk automatically. If a worker process dies,
 ### Merge conflicts after parallel completion
 
 1. Run `/gsd parallel merge` to see which milestones have conflicts
-2. Resolve conflicts in the worktree at `.gsd/worktrees/<MID>/`
+2. Resolve conflicts in the worktree at `.sdd/worktrees/<MID>/`
 3. Retry with `/gsd parallel merge <MID>`
 
 ### Workers seem stuck

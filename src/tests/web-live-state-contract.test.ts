@@ -140,20 +140,20 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo Milestone",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S01",
             title: "Demo Slice",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S01/S01-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S01/tasks",
+            planPath: ".sdd/milestones/M001/slices/S01/S01-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S01/tasks",
             tasks: [
               {
                 id: "T01",
                 title: "Wire boot",
                 done: false,
-                planPath: ".gsd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
+                planPath: ".sdd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
               },
             ],
           },
@@ -198,7 +198,7 @@ function fakeBootPayload(sessionPath: string) {
   return {
     project: {
       cwd: "/tmp/demo-project",
-      sessionsDir: "/tmp/demo-project/.gsd/sessions",
+      sessionsDir: "/tmp/demo-project/.sdd/sessions",
       packageRoot: repoRoot,
     },
     workspace: fakeWorkspaceIndex(),
@@ -245,7 +245,7 @@ function fakeBootPayload(sessionPath: string) {
     bridge: {
       phase: "ready",
       projectCwd: "/tmp/demo-project",
-      projectSessionsDir: "/tmp/demo-project/.gsd/sessions",
+      projectSessionsDir: "/tmp/demo-project/.sdd/sessions",
       packageRoot: repoRoot,
       startedAt: "2026-03-15T03:30:00.000Z",
       updatedAt: "2026-03-15T03:30:01.000Z",

@@ -191,20 +191,20 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo Milestone",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S02",
             title: "First-run setup wizard",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S02/S02-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S02/tasks",
+            planPath: ".sdd/milestones/M001/slices/S02/S02-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S02/tasks",
             tasks: [
               {
                 id: "T01",
                 title: "Establish shared onboarding auth truth and browser setup API",
                 done: false,
-                planPath: ".gsd/milestones/M001/slices/S02/tasks/T01-PLAN.md",
+                planPath: ".sdd/milestones/M001/slices/S02/tasks/T01-PLAN.md",
               },
             ],
           },

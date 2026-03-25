@@ -36,10 +36,10 @@ function canonicalizePath(path: string): string {
 function sessionBaseVariants(baseSessionsDir: string): string[] {
   const variants = new Set<string>([baseSessionsDir])
   const normalized = baseSessionsDir.replace(/\\/g, "/")
-  if (normalized.endsWith("/.gsd/sessions")) {
+  if (normalized.endsWith("/.sdd/sessions")) {
     variants.add(join(dirname(baseSessionsDir), "agent", "sessions"))
   }
-  if (normalized.endsWith("/.gsd/agent/sessions")) {
+  if (normalized.endsWith("/.sdd/agent/sessions")) {
     variants.add(join(dirname(dirname(baseSessionsDir)), "sessions"))
   }
   return [...variants]
@@ -297,7 +297,7 @@ export function seedInterruptedRunRecoverySessions(options: {
               type: "toolCall",
               id: "tool-read-1",
               name: "read",
-              arguments: { path: ".gsd/milestones/M002/slices/S04/S04-PLAN.md" },
+              arguments: { path: ".sdd/milestones/M002/slices/S04/S04-PLAN.md" },
             },
             {
               type: "toolCall",

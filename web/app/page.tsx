@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 
 const GSDAppShell = dynamic(
-  () => import("@/components/gsd/app-shell").then((mod) => mod.GSDAppShell),
+  () => import("@/components/sdd/app-shell").then((mod) => mod.GSDAppShell),
   {
     ssr: false,
     loading: () => (

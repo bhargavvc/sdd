@@ -28,7 +28,7 @@ body:
     attributes:
       label: Summary
       description: One sentence describing what is broken.
-      placeholder: Running `/gsd inspect` reports "No GSD database available" even though `.gsd/gsd.db` exists.
+      placeholder: Running `/gsd inspect` reports "No GSD database available" even though `.sdd/gsd.db` exists.
     validations:
       required: true
 

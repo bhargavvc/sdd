@@ -44,22 +44,22 @@ test("resolveSubprocessModule returns source .ts path when NOT under node_module
   const packageRoot = "/home/user/projects/gsd"
   const result = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/workspace-index.ts",
+    "resources/extensions/sdd/workspace-index.ts",
     // existsSync not needed — should return src path without checking dist
   )
 
   assert.deepEqual(result, {
-    modulePath: join(packageRoot, "src", "resources/extensions/gsd/workspace-index.ts"),
+    modulePath: join(packageRoot, "src", "resources/extensions/sdd/workspace-index.ts"),
     useCompiledJs: false,
   })
 })
 
 test("resolveSubprocessModule returns compiled .js path when under node_modules and dist file exists", () => {
   const packageRoot = "/usr/lib/node_modules/gsd-pi"
-  const distPath = join(packageRoot, "dist", "resources/extensions/gsd/workspace-index.js")
+  const distPath = join(packageRoot, "dist", "resources/extensions/sdd/workspace-index.js")
   const result = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/workspace-index.ts",
+    "resources/extensions/sdd/workspace-index.ts",
     (p: string) => p === distPath,
   )
 
@@ -73,22 +73,22 @@ test("resolveSubprocessModule falls back to source .ts when under node_modules b
   const packageRoot = "/usr/lib/node_modules/gsd-pi"
   const result = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/workspace-index.ts",
+    "resources/extensions/sdd/workspace-index.ts",
     () => false, // dist file does not exist
   )
 
   assert.deepEqual(result, {
-    modulePath: join(packageRoot, "src", "resources/extensions/gsd/workspace-index.ts"),
+    modulePath: join(packageRoot, "src", "resources/extensions/sdd/workspace-index.ts"),
     useCompiledJs: false,
   })
 })
 
 test("resolveSubprocessModule handles Windows paths under node_modules", () => {
   const packageRoot = "C:\\Users\\dev\\AppData\\node_modules\\gsd-pi"
-  const distPath = join(packageRoot, "dist", "resources/extensions/gsd/auto.js")
+  const distPath = join(packageRoot, "dist", "resources/extensions/sdd/auto.js")
   const result = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/auto.ts",
+    "resources/extensions/sdd/auto.ts",
     (p: string) => p === distPath,
   )
 
@@ -103,13 +103,13 @@ test("resolveSubprocessModule strips .ts extension when building dist .js path",
   let checkedPath = ""
   resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/doctor.ts",
+    "resources/extensions/sdd/doctor.ts",
     (p: string) => { checkedPath = p; return true },
   )
 
   assert.equal(
     checkedPath,
-    join(packageRoot, "dist", "resources/extensions/gsd/doctor.js"),
+    join(packageRoot, "dist", "resources/extensions/sdd/doctor.js"),
     "should check for .js file in dist/, not .ts",
   )
 })

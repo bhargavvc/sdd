@@ -36,7 +36,7 @@ Maximize quality-of-life for the autocomplete system by adding missing argument 
 
 ## Files Modified
 - `packages/pi-coding-agent/src/modes/interactive/interactive-mode.ts` — thinking completions
-- `src/resources/extensions/gsd/commands.ts` — 2nd-level descriptions
+- `src/resources/extensions/sdd/commands.ts` — 2nd-level descriptions
 - `packages/pi-tui/src/tests/autocomplete.test.ts` — new test file
 - `packages/pi-tui/src/tests/fuzzy.test.ts` — new test file
 

@@ -25,7 +25,7 @@ import { homedir, tmpdir } from "node:os";
 // ── Fixed functions (from worktree.ts after fix) ─────────────────────────
 
 function findWorktreeSegment(normalizedPath) {
-  const directMarker = "/.gsd/worktrees/";
+  const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
@@ -156,7 +156,7 @@ execSync('git config user.name "Test"', { cwd: PROJECT_DIR, stdio: "pipe" });
 execSync('git config user.email "test@test.com"', { cwd: PROJECT_DIR, stdio: "pipe" });
 writeFileSync(join(PROJECT_DIR, "README.md"), "hello\n");
 execSync("git add -A && git commit -m init", { cwd: PROJECT_DIR, stdio: "pipe" });
-execSync("git worktree add .gsd/worktrees/M001 -b worktree/M001", { cwd: PROJECT_DIR, stdio: "pipe" });
+execSync("git worktree add .sdd/worktrees/M001 -b worktree/M001", { cwd: PROJECT_DIR, stdio: "pipe" });
 console.log("Created project with symlinked .gsd and real git worktree\n");
 
 let passed = 0;
@@ -168,8 +168,8 @@ function test(name, actual, expected) {
 
 // ── Simulate worker environment ──────────────────────────────────────────
 
-process.chdir(`${PROJECT_DIR}/.gsd/worktrees/M001`);
-const workerCwd = process.cwd(); // Resolves symlinks → /root/.gsd/projects/.../worktrees/M001
+process.chdir(`${PROJECT_DIR}/.sdd/worktrees/M001`);
+const workerCwd = process.cwd(); // Resolves symlinks → /root/.sdd/projects/.../worktrees/M001
 
 console.log("=== Test 1: resolveProjectRoot returns real project ===\n");
 console.log(`  Worker cwd (resolved): ${workerCwd}`);
@@ -242,7 +242,7 @@ delete process.env.GSD_PROJECT_ROOT;
 console.log("\n=== Test 7: Non-worktree paths unaffected ===\n");
 
 test("Regular project path unchanged", resolveProjectRoot("/some/project"), "/some/project");
-test("Direct worktree layout still works", resolveProjectRoot("/foo/.gsd/worktrees/M001"), "/foo");
+test("Direct worktree layout still works", resolveProjectRoot("/foo/.sdd/worktrees/M001"), "/foo");
 
 // ── Summary ──────────────────────────────────────────────────────────────
 

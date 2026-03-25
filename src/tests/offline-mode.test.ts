@@ -78,21 +78,21 @@ test("isAllLocalChain returns false for empty list", () => {
 
 test("INFRA_ERROR_CODES includes ECONNREFUSED", async () => {
 	const { INFRA_ERROR_CODES } = await import(
-		"../../src/resources/extensions/gsd/auto/infra-errors.ts"
+		"../../src/resources/extensions/sdd/auto/infra-errors.ts"
 	);
 	assert.strictEqual(INFRA_ERROR_CODES.has("ECONNREFUSED"), true);
 });
 
 test("INFRA_ERROR_CODES includes ENOTFOUND", async () => {
 	const { INFRA_ERROR_CODES } = await import(
-		"../../src/resources/extensions/gsd/auto/infra-errors.ts"
+		"../../src/resources/extensions/sdd/auto/infra-errors.ts"
 	);
 	assert.strictEqual(INFRA_ERROR_CODES.has("ENOTFOUND"), true);
 });
 
 test("INFRA_ERROR_CODES includes ENETUNREACH", async () => {
 	const { INFRA_ERROR_CODES } = await import(
-		"../../src/resources/extensions/gsd/auto/infra-errors.ts"
+		"../../src/resources/extensions/sdd/auto/infra-errors.ts"
 	);
 	assert.strictEqual(INFRA_ERROR_CODES.has("ENETUNREACH"), true);
 });
@@ -101,7 +101,7 @@ test("INFRA_ERROR_CODES includes ENETUNREACH", async () => {
 
 test("isInfrastructureError returns code for ECONNREFUSED when offline", async () => {
 	const { isInfrastructureError } = await import(
-		"../../src/resources/extensions/gsd/auto/infra-errors.ts"
+		"../../src/resources/extensions/sdd/auto/infra-errors.ts"
 	);
 	const savedOffline = process.env.PI_OFFLINE;
 	process.env.PI_OFFLINE = "1";

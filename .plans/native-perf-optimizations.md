@@ -74,7 +74,7 @@ cleared every dispatch via `invalidateAllCaches()`. Each `resolveMilestoneFile`,
 `resolveSliceFile`, `resolveTaskFile` triggers separate directory reads.
 
 ### Solution
-Add a Rust function that walks the entire `.gsd/` tree once and returns a flat
+Add a Rust function that walks the entire `.sdd/` tree once and returns a flat
 file listing. The JS side builds a Map from this, making all path resolution O(1)
 lookups instead of repeated `readdirSync` + regex matching.
 
@@ -126,8 +126,8 @@ and can stay in JS.
 - `native/crates/engine/src/gsd_parser.rs` — new functions + rawContent field
 
 ### TypeScript
-- `src/resources/extensions/gsd/native-parser-bridge.ts` — new bridge functions
-- `src/resources/extensions/gsd/state.ts` — simplified batch cache
-- `src/resources/extensions/gsd/paths.ts` — native tree cache
-- `src/resources/extensions/gsd/session-forensics.ts` — native JSONL
-- `src/resources/extensions/gsd/files.ts` — native plan/summary parsers
+- `src/resources/extensions/sdd/native-parser-bridge.ts` — new bridge functions
+- `src/resources/extensions/sdd/state.ts` — simplified batch cache
+- `src/resources/extensions/sdd/paths.ts` — native tree cache
+- `src/resources/extensions/sdd/session-forensics.ts` — native JSONL
+- `src/resources/extensions/sdd/files.ts` — native plan/summary parsers

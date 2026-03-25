@@ -127,7 +127,7 @@ export async function GET(request: Request): Promise<Response> {
   // Mode B: return file content
   const resolvedPath = resolveSecurePath(pathParam, root);
   if (!resolvedPath) {
-    const label = rootParam === "project" ? "project root" : ".gsd/";
+    const label = rootParam === "project" ? "project root" : ".sdd/";
     return Response.json(
       { error: `Invalid path: path must be relative within ${label} and cannot contain '..' or start with '/'` },
       { status: 400, headers },
@@ -211,7 +211,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const resolvedPath = resolveSecurePath(pathParam, root);
   if (!resolvedPath) {
-    const label = rootParam === "project" ? "project root" : ".gsd/";
+    const label = rootParam === "project" ? "project root" : ".sdd/";
     return Response.json(
       { error: `Invalid path: path must be relative within ${label} and cannot contain '..' or start with '/'` },
       { status: 400 },
@@ -267,7 +267,7 @@ export async function PATCH(request: Request): Promise<Response> {
 
   const projectCwd = requireProjectCwd(request);
   const root = getRootForMode(rootParam as RootMode, projectCwd);
-  const label = rootParam === "project" ? "project root" : ".gsd/";
+  const label = rootParam === "project" ? "project root" : ".sdd/";
 
   const resolvedFrom = resolveSecurePath(from, root);
   if (!resolvedFrom) {
@@ -340,7 +340,7 @@ export async function DELETE(request: Request): Promise<Response> {
 
   const projectCwd = requireProjectCwd(request);
   const root = getRootForMode(rootParam, projectCwd);
-  const label = rootParam === "project" ? "project root" : ".gsd/";
+  const label = rootParam === "project" ? "project root" : ".sdd/";
 
   const resolvedPath = resolveSecurePath(pathParam, root);
   if (!resolvedPath) {
@@ -407,7 +407,7 @@ export async function PUT(request: Request): Promise<Response> {
 
   const projectCwd = requireProjectCwd(request);
   const root = getRootForMode(rootParam as RootMode, projectCwd);
-  const label = rootParam === "project" ? "project root" : ".gsd/";
+  const label = rootParam === "project" ? "project root" : ".sdd/";
 
   const resolvedPath = resolveSecurePath(pathParam, root);
   if (!resolvedPath) {

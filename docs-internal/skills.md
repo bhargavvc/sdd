@@ -4,7 +4,7 @@ Skills are specialized instruction sets that GSD loads when the task matches. Th
 
 ## Bundled Skills
 
-GSD ships with these skills, installed to `~/.gsd/agent/skills/`:
+SDD ships with these skills, installed to `~/.sdd/agent/skills/`:
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
@@ -59,18 +59,18 @@ skill_rules:
 ### Resolution Order
 
 Skills can be referenced by:
-1. **Bare name** — e.g., `frontend-design` → scans `~/.gsd/agent/skills/` and project skills
-2. **Absolute path** — e.g., `/Users/you/.gsd/agent/skills/my-skill/SKILL.md`
+1. **Bare name** — e.g., `frontend-design` → scans `~/.sdd/agent/skills/` and project skills
+2. **Absolute path** — e.g., `/Users/you/.sdd/agent/skills/my-skill/SKILL.md`
 3. **Directory path** — e.g., `~/custom-skills/my-skill` → looks for `SKILL.md` inside
 
-User skills (`~/.gsd/agent/skills/`) take precedence over project skills.
+User skills (`~/.sdd/agent/skills/`) take precedence over project skills.
 
 ## Custom Skills
 
 Create your own skills by adding a directory with a `SKILL.md` file:
 
 ```
-~/.gsd/agent/skills/my-skill/
+~/.sdd/agent/skills/my-skill/
   SKILL.md           — instructions for the LLM
   references/        — optional reference files
 ```
@@ -82,13 +82,13 @@ The `SKILL.md` file contains instructions the LLM follows when the skill is acti
 Place skills in your project for project-specific guidance:
 
 ```
-.gsd/agent/skills/my-project-skill/
+.sdd/agent/skills/my-project-skill/
   SKILL.md
 ```
 
 ## Skill Lifecycle Management
 
-GSD tracks skill performance across auto-mode sessions and surfaces health data to help you maintain skill quality.
+SDD tracks skill performance across auto-mode sessions and surfaces health data to help you maintain skill quality.
 
 ### Skill Telemetry
 
@@ -124,6 +124,6 @@ Stale skills are excluded from automatic matching but remain invokable explicitl
 
 ### Heal-Skill (Post-Unit Analysis)
 
-When configured as a post-unit hook, GSD can analyze whether the agent deviated from a skill's instructions during execution. If significant drift is detected (outdated API patterns, incorrect guidance), it writes proposed fixes to `.gsd/skill-review-queue.md` for human review.
+When configured as a post-unit hook, GSD can analyze whether the agent deviated from a skill's instructions during execution. If significant drift is detected (outdated API patterns, incorrect guidance), it writes proposed fixes to `.sdd/skill-review-queue.md` for human review.
 
 Key design principle: skills are **never auto-modified**. Research shows curated skills outperform auto-generated ones significantly, so the human review step is critical.

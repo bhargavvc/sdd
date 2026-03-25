@@ -25,7 +25,7 @@ export async function collectHooksData(projectCwdOverride?: string): Promise<Hoo
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/post-unit-hooks.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/sdd/post-unit-hooks.ts")
   const hooksModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(hooksModulePath))) {
@@ -38,7 +38,7 @@ export async function collectHooksData(projectCwdOverride?: string): Promise<Hoo
   }
 
   // getHookStatus() internally calls resolvePostUnitHooks() and resolvePreDispatchHooks()
-  // from preferences.ts, which read from process.cwd()/.gsd/preferences.md.
+  // from preferences.ts, which read from process.cwd()/.sdd/preferences.md.
   // We set cwd to projectCwd so preferences resolution finds the right files.
   // In a cold child process, cycleCounts is empty, so activeCycles will be {}.
   const script = [

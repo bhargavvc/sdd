@@ -43,7 +43,7 @@
 | `/gsd keys` | API key manager — list, add, remove, test, rotate, doctor |
 | `/gsd doctor` | Runtime health checks with auto-fix — issues surface in real time across widget, visualizer, and HTML reports (v2.40) |
 | `/gsd inspect` | Show SQLite DB diagnostics |
-| `/gsd init` | Project init wizard — detect, configure, bootstrap `.gsd/` |
+| `/gsd init` | Project init wizard — detect, configure, bootstrap `.sdd/` |
 | `/gsd setup` | Global setup status and configuration |
 | `/gsd skill-health` | Skill lifecycle dashboard — usage stats, success rates, token trends, staleness warnings |
 | `/gsd skill-health <name>` | Detailed view for a single skill |
@@ -123,10 +123,10 @@ See [Parallel Orchestration](./parallel-orchestration.md) for full documentation
 
 | Command | Description |
 |---------|-------------|
-| `/github-sync bootstrap` | Initial setup — creates GitHub Milestones, Issues, and draft PRs from current `.gsd/` state |
+| `/github-sync bootstrap` | Initial setup — creates GitHub Milestones, Issues, and draft PRs from current `.sdd/` state |
 | `/github-sync status` | Show sync mapping counts (milestones, slices, tasks) |
 
-Enable with `github.enabled: true` in preferences. Requires `gh` CLI installed and authenticated. Sync mapping is persisted in `.gsd/.github-sync.json`.
+Enable with `github.enabled: true` in preferences. Requires `gh` CLI installed and authenticated. Sync mapping is persisted in `.sdd/.github-sync.json`.
 
 ## Git Commands
 
@@ -180,7 +180,7 @@ Enable with `github.enabled: true` in preferences. Requires `gh` CLI installed a
 | `gsd --help` (`-h`) | Print help and exit |
 | `gsd sessions` | Interactive session picker — list all saved sessions for the current directory and choose one to resume |
 | `gsd --debug` | Enable structured JSONL diagnostic logging for troubleshooting dispatch and state issues |
-| `gsd config` | Set up global API keys for search and docs tools (saved to `~/.gsd/agent/auth.json`, applies to all projects). See [Global API Keys](./configuration.md#global-api-keys-gsd-config). |
+| `gsd config` | Set up global API keys for search and docs tools (saved to `~/.sdd/agent/auth.json`, applies to all projects). See [Global API Keys](./configuration.md#global-api-keys-gsd-config). |
 | `gsd update` | Update GSD to the latest version |
 | `gsd headless new-milestone` | Create a new milestone from a context file (headless — no TUI required) |
 
@@ -304,4 +304,4 @@ If already up to date, it reports so and takes no action.
 /gsd export --html --all
 ```
 
-Reports are saved to `.gsd/reports/` with a browseable `index.html` that links to all generated snapshots.
+Reports are saved to `.sdd/reports/` with a browseable `index.html` that links to all generated snapshots.

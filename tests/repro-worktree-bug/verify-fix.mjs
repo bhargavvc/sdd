@@ -15,7 +15,7 @@ import { homedir, tmpdir } from "node:os";
 // ── Fixed functions (copied from worktree.ts after fix) ─────────────────
 
 function findWorktreeSegment(normalizedPath) {
-  const directMarker = "/.gsd/worktrees/";
+  const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
@@ -129,11 +129,11 @@ writeFileSync(join(PROJECT_DIR, "README.md"), "hello\n");
 execSync("git add -A && git commit -m init", { cwd: PROJECT_DIR, stdio: "pipe" });
 
 // Create a REAL git worktree (so .git file exists with gitdir pointer)
-execSync("git worktree add .gsd/worktrees/M001 -b worktree/M001", {
+execSync("git worktree add .sdd/worktrees/M001 -b worktree/M001", {
   cwd: PROJECT_DIR,
   stdio: "pipe",
 });
-console.log("Created real git worktree at .gsd/worktrees/M001\n");
+console.log("Created real git worktree at .sdd/worktrees/M001\n");
 
 let passed = 0;
 let failed = 0;
@@ -155,7 +155,7 @@ function test(name, actual, expected) {
 console.log("=== Layer 1: GSD_PROJECT_ROOT env var ===\n");
 
 process.env.GSD_PROJECT_ROOT = PROJECT_DIR;
-const resolvedPath = realpathSync(`${PROJECT_DIR}/.gsd/worktrees/M001`);
+const resolvedPath = realpathSync(`${PROJECT_DIR}/.sdd/worktrees/M001`);
 test(
   "GSD_PROJECT_ROOT overrides path resolution",
   resolveProjectRoot(resolvedPath),
@@ -169,7 +169,7 @@ console.log("\n=== Direct layout (no symlink collision) ===\n");
 
 test(
   "Direct layout resolves correctly",
-  resolveProjectRoot("/foo/.gsd/worktrees/M001"),
+  resolveProjectRoot("/foo/.sdd/worktrees/M001"),
   "/foo",
 );
 
@@ -184,7 +184,7 @@ test(
 console.log("\n=== Layer 2: Symlink-resolved path with git fallback ===\n");
 
 // chdir into worktree via symlink — process.cwd() resolves symlinks
-process.chdir(`${PROJECT_DIR}/.gsd/worktrees/M001`);
+process.chdir(`${PROJECT_DIR}/.sdd/worktrees/M001`);
 const workerCwd = process.cwd();
 console.log(`  Worker cwd (resolved): ${workerCwd}`);
 console.log(`  Expected project root: ${PROJECT_DIR}`);

@@ -8,7 +8,7 @@
 
 ## Context
 
-GSD auto-mode orchestrates a multi-session pipeline where each "unit" of work runs in a fresh LLM session. The pipeline for a single milestone with N slices and M tasks per slice runs through:
+SDD auto-mode orchestrates a multi-session pipeline where each "unit" of work runs in a fresh LLM session. The pipeline for a single milestone with N slices and M tasks per slice runs through:
 
 ```
 research-milestone → plan-milestone →

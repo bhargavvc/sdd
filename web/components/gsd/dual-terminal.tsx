@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { GripVertical, Loader2 } from "lucide-react"
-import { MainSessionTerminal } from "@/components/gsd/main-session-terminal"
-import { ShellTerminal } from "@/components/gsd/shell-terminal"
+import { MainSessionTerminal } from "@/components/sdd/main-session-terminal"
+import { ShellTerminal } from "@/components/sdd/shell-terminal"
 import { useTerminalFontSize } from "@/lib/use-terminal-font-size"
 import { useGSDWorkspaceState } from "@/lib/gsd-workspace-store"
 import { derivePendingWorkflowCommandLabel } from "@/lib/workflow-action-execution"

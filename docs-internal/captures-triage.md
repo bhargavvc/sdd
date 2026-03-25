@@ -13,7 +13,7 @@ While auto-mode is running (or any time):
 /gsd capture "the auth flow should support OAuth, not just JWT"
 ```
 
-Captures are appended to `.gsd/CAPTURES.md` and triaged automatically between tasks.
+Captures are appended to `.sdd/CAPTURES.md` and triaged automatically between tasks.
 
 ## How It Works
 
@@ -23,7 +23,7 @@ Captures are appended to `.gsd/CAPTURES.md` and triaged automatically between ta
 capture → triage → confirm → resolve → resume
 ```
 
-1. **Capture** — `/gsd capture "thought"` appends to `.gsd/CAPTURES.md` with a timestamp and unique ID
+1. **Capture** — `/gsd capture "thought"` appends to `.sdd/CAPTURES.md` with a timestamp and unique ID
 2. **Triage** — at natural seams between tasks (in `handleAgentEnd`), GSD detects pending captures and classifies them
 3. **Confirm** — the user is shown the proposed resolution and confirms or adjusts
 4. **Resolve** — the resolution is applied (task injection, replan trigger, deferral, etc.)
@@ -72,7 +72,7 @@ Capture context is automatically injected into:
 
 ## Worktree Awareness
 
-Captures always resolve to the **original project root's** `.gsd/CAPTURES.md`, not the worktree's local copy. This ensures captures from a steering terminal are visible to the auto-mode session running in a worktree.
+Captures always resolve to the **original project root's** `.sdd/CAPTURES.md`, not the worktree's local copy. This ensures captures from a steering terminal are visible to the auto-mode session running in a worktree.
 
 ## Commands
 

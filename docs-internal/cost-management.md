@@ -1,6 +1,6 @@
 # Cost Management
 
-GSD tracks token usage and cost for every unit of work dispatched during auto mode. This data powers the dashboard, budget enforcement, and cost projections.
+SDD tracks token usage and cost for every unit of work dispatched during auto mode. This data powers the dashboard, budget enforcement, and cost projections.
 
 ## Cost Tracking
 
@@ -12,7 +12,7 @@ Every unit's metrics are captured automatically:
 - **Tool calls** — number of tool invocations
 - **Message counts** — assistant and user messages
 
-Data is stored in `.gsd/metrics.json` and survives across sessions.
+Data is stored in `.sdd/metrics.json` and survives across sessions.
 
 ### Viewing Costs
 

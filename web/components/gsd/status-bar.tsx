@@ -21,7 +21,7 @@ import {
   formatTokenCount,
   type ProjectTotals,
 } from "@/lib/visualizer-types"
-import { ScopeBadgeInline } from "@/components/gsd/scope-badge"
+import { ScopeBadgeInline } from "@/components/sdd/scope-badge"
 import { authFetch } from "@/lib/auth"
 
 function toneClass(tone: ReturnType<typeof getStatusPresentation>["tone"]): string {

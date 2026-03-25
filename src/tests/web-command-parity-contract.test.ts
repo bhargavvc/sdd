@@ -15,7 +15,7 @@ const {
   setCommandSurfacePending,
   surfaceOutcomeToOpenRequest,
 } = await import("../../web/lib/command-surface-contract.ts")
-const gsdExtension = await import("../resources/extensions/gsd/index.ts")
+const gsdExtension = await import("../resources/extensions/sdd/index.ts")
 
 const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">([
   ["settings", "surface"],
@@ -679,7 +679,7 @@ test("surface action state keeps compaction summaries inspectable", () => {
 })
 
 test("command-surface session affordances use the shared store action path", () => {
-  const commandSurfacePath = resolve(import.meta.dirname, "../../web/components/gsd/command-surface.tsx")
+  const commandSurfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx")
   const commandSurfaceSource = readFileSync(commandSurfacePath, "utf-8")
 
   assert.match(
