@@ -128,7 +128,7 @@ should_scan() {
   esac
   # Skip node_modules, dist, coverage
   case "$file" in
-    node_modules/*|dist/*|coverage/*|.gsd/*)
+    node_modules/*|dist/*|coverage/*|.sdd/*)
       return 1 ;;
   esac
   return 0

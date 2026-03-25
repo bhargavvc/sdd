@@ -1,0 +1,18 @@
+{
+  "id": "sdd",
+  "name": "SDD Workflow",
+  "version": "1.0.0",
+  "description": "Core SDD workflow engine — milestone planning, execution, and tracking",
+  "tier": "core",
+  "requires": { "platform": ">=2.29.0" },
+  "provides": {
+    "tools": [
+      "bash", "write", "read", "edit",
+      "sdd_decision_save", "sdd_summary_save",
+      "sdd_requirement_update", "sdd_milestone_generate_id"
+    ],
+    "commands": ["sdd", "kill", "worktree", "exit"],
+    "hooks": ["session_start"],
+    "shortcuts": ["Ctrl+Alt+G"]
+  }
+}

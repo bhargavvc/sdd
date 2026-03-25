@@ -4,7 +4,7 @@
  * The model references lines by `LINE#ID` tags from read output.
  * Each tag uniquely identifies a line, so edits remain stable even when lines shift.
  */
-import type { AgentTool } from "@gsd/pi-agent-core";
+import type { AgentTool } from "@sdd/pi-agent-core";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile, unlink as fsUnlink, writeFile as fsWriteFile } from "fs/promises";

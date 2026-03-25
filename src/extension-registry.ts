@@ -3,7 +3,7 @@
  *
  * Extensions without manifests always load (backwards compatible).
  * A fresh install has an empty registry — all extensions enabled by default.
- * The only way an extension stops loading is an explicit `gsd extensions disable <id>`.
+ * The only way an extension stops loading is an explicit `sdd extensions disable <id>`.
  */
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";

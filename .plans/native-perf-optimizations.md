@@ -2,7 +2,7 @@
 
 ## Overview
 
-Four native Rust optimizations to eliminate hot-path bottlenecks in GSD's dispatch cycle.
+Four native Rust optimizations to eliminate hot-path bottlenecks in SDD's dispatch cycle.
 Building on the existing git2 migration and native parser infrastructure.
 
 ---
@@ -10,7 +10,7 @@ Building on the existing git2 migration and native parser infrastructure.
 ## 1. Native deriveState — Eliminate Frontmatter Re-serialization
 
 ### Problem
-`state.ts:134-176` — When `nativeBatchParseGsdFiles()` returns parsed files, the JS
+`state.ts:134-176` — When `nativeBatchParseSddFiles()` returns parsed files, the JS
 side re-serializes frontmatter back into YAML strings so downstream parsers can re-parse
 them. This is a round-trip waste: Rust parses → JS re-serializes → JS re-parses.
 
@@ -26,12 +26,12 @@ refactor. Instead:
 
 **Approach: Make Rust return the original file content alongside parsed data.**
 
-Add a new field `rawContent: String` to `ParsedGsdFile` that contains the complete
+Add a new field `rawContent: String` to `ParsedSddFile` that contains the complete
 original file content. The JS batch cache stores this directly, eliminating the
 re-serialization entirely. Downstream parsers get exactly what `loadFile()` would return.
 
 ### Implementation
-- **Rust** (`gsd_parser.rs`): Add `raw_content` field to `ParsedGsdFile`, populate with
+- **Rust** (`sdd_parser.rs`): Add `raw_content` field to `ParsedSddFile`, populate with
   the original file content read from disk.
 - **TS** (`native-parser-bridge.ts`): Expose `rawContent` in `BatchParsedFile`.
 - **TS** (`state.ts`): Replace the 30-line re-serialization loop with
@@ -54,7 +54,7 @@ Add a Rust JSONL parser that streams through the file with constant memory, retu
 structured data. Uses `serde_json` for parsing and handles arbitrary file sizes.
 
 ### Implementation
-- **Rust** (`gsd_parser.rs`): Add `parse_jsonl_tail(path, max_entries?)` function that:
+- **Rust** (`sdd_parser.rs`): Add `parse_jsonl_tail(path, max_entries?)` function that:
   1. Memory-maps or streams the file from the tail
   2. Parses each line as JSON
   3. Returns the last N entries as a JSON array string
@@ -74,13 +74,13 @@ cleared every dispatch via `invalidateAllCaches()`. Each `resolveMilestoneFile`,
 `resolveSliceFile`, `resolveTaskFile` triggers separate directory reads.
 
 ### Solution
-Add a Rust function that walks the entire `.gsd/` tree once and returns a flat
+Add a Rust function that walks the entire `.sdd/` tree once and returns a flat
 file listing. The JS side builds a Map from this, making all path resolution O(1)
 lookups instead of repeated `readdirSync` + regex matching.
 
 ### Implementation
-- **Rust** (`gsd_parser.rs`): The `batchParseGsdFiles` already walks the tree.
-  Add `scan_gsd_tree(directory)` that returns `Vec<{ path, isDir, name }>` for
+- **Rust** (`sdd_parser.rs`): The `batchParseSddFiles` already walks the tree.
+  Add `scan_sdd_tree(directory)` that returns `Vec<{ path, isDir, name }>` for
   ALL entries (not just .md files).
 - **TS** (`native-parser-bridge.ts`): Add bridge function.
 - **TS** (`paths.ts`): Add native tree cache. On first access, call native scan
@@ -104,7 +104,7 @@ called most frequently during `deriveState`. `parseContinue` is called infrequen
 and can stay in JS.
 
 ### Implementation
-- **Rust** (`gsd_parser.rs`): Add `parse_plan_file(content)` and `parse_summary_file(content)`.
+- **Rust** (`sdd_parser.rs`): Add `parse_plan_file(content)` and `parse_summary_file(content)`.
 - **TS** (`native-parser-bridge.ts`): Add bridge functions with JS fallback.
 - **TS** (`files.ts`): Call native versions first, fall back to JS.
 
@@ -123,11 +123,11 @@ and can stay in JS.
 ## Files Modified
 
 ### Rust
-- `native/crates/engine/src/gsd_parser.rs` — new functions + rawContent field
+- `native/crates/engine/src/sdd_parser.rs` — new functions + rawContent field
 
 ### TypeScript
-- `src/resources/extensions/gsd/native-parser-bridge.ts` — new bridge functions
-- `src/resources/extensions/gsd/state.ts` — simplified batch cache
-- `src/resources/extensions/gsd/paths.ts` — native tree cache
-- `src/resources/extensions/gsd/session-forensics.ts` — native JSONL
-- `src/resources/extensions/gsd/files.ts` — native plan/summary parsers
+- `src/resources/extensions/sdd/native-parser-bridge.ts` — new bridge functions
+- `src/resources/extensions/sdd/state.ts` — simplified batch cache
+- `src/resources/extensions/sdd/paths.ts` — native tree cache
+- `src/resources/extensions/sdd/session-forensics.ts` — native JSONL
+- `src/resources/extensions/sdd/files.ts` — native plan/summary parsers

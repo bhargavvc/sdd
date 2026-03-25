@@ -1,13 +1,13 @@
 # Remote Questions
 
-Remote questions allow GSD to ask for user input via Slack, Discord, or Telegram when running in headless auto-mode. When GSD encounters a decision point that needs human input, it posts the question to your configured channel and polls for a response.
+Remote questions allow SDD to ask for user input via Slack, Discord, or Telegram when running in headless auto-mode. When SDD encounters a decision point that needs human input, it posts the question to your configured channel and polls for a response.
 
 ## Setup
 
 ### Discord
 
 ```
-/gsd remote discord
+/sdd remote discord
 ```
 
 The setup wizard:
@@ -16,7 +16,7 @@ The setup wizard:
 3. Lists servers the bot belongs to (or lets you pick)
 4. Lists text channels in the selected server
 5. Sends a test message to confirm permissions
-6. Saves the configuration to `~/.gsd/preferences.md`
+6. Saves the configuration to `~/.sdd/preferences.md`
 
 **Bot requirements:**
 - A Discord bot application with a token (from [Discord Developer Portal](https://discord.com/developers/applications))
@@ -30,7 +30,7 @@ The setup wizard:
 ### Slack
 
 ```
-/gsd remote slack
+/sdd remote slack
 ```
 
 The setup wizard:
@@ -48,7 +48,7 @@ The setup wizard:
 ### Telegram
 
 ```
-/gsd remote telegram
+/sdd remote telegram
 ```
 
 The setup wizard:
@@ -65,7 +65,7 @@ The setup wizard:
 
 ## Configuration
 
-Remote questions are configured in `~/.gsd/preferences.md`:
+Remote questions are configured in `~/.sdd/preferences.md`:
 
 ```yaml
 remote_questions:
@@ -77,13 +77,13 @@ remote_questions:
 
 ## How It Works
 
-1. GSD encounters a decision point during auto-mode
+1. SDD encounters a decision point during auto-mode
 2. The question is posted to your configured channel as a rich embed (Discord) or Block Kit message (Slack)
-3. GSD polls for a response at the configured interval
+3. SDD polls for a response at the configured interval
 4. You respond by:
    - **Reacting** with a number emoji (1️⃣, 2️⃣, etc.) for single-question prompts
    - **Replying** to the message with a number (`1`), comma-separated numbers (`1,3`), or free text
-5. GSD picks up the response and continues execution
+5. SDD picks up the response and continues execution
 6. A ✅ reaction is added to the prompt message to confirm receipt
 
 ### Response Formats
@@ -99,17 +99,17 @@ remote_questions:
 
 ### Timeouts
 
-If no response is received within `timeout_minutes`, the prompt times out and GSD continues with a timeout result. The LLM handles timeouts according to the task context — typically by making a conservative default choice or pausing auto-mode.
+If no response is received within `timeout_minutes`, the prompt times out and SDD continues with a timeout result. The LLM handles timeouts according to the task context — typically by making a conservative default choice or pausing auto-mode.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/gsd remote` | Show remote questions menu and current status |
-| `/gsd remote slack` | Set up Slack integration |
-| `/gsd remote discord` | Set up Discord integration |
-| `/gsd remote status` | Show current configuration and last prompt status |
-| `/gsd remote disconnect` | Remove remote questions configuration |
+| `/sdd remote` | Show remote questions menu and current status |
+| `/sdd remote slack` | Set up Slack integration |
+| `/sdd remote discord` | Set up Discord integration |
+| `/sdd remote status` | Show current configuration and last prompt status |
+| `/sdd remote disconnect` | Remove remote questions configuration |
 
 ## Discord vs Slack Feature Comparison
 

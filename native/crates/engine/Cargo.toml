@@ -1,11 +1,11 @@
 [package]
-name = "gsd-engine"
+name = "sdd-engine"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "N-API native addon for GSD — exposes high-performance Rust modules to Node.js"
+description = "N-API native addon for SDD — exposes high-performance Rust modules to Node.js"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,8 +13,8 @@ test = false
 doctest = false
 
 [dependencies]
-gsd-ast = { path = "../ast" }
-gsd-grep = { path = "../grep" }
+sdd-ast = { path = "../ast" }
+sdd-grep = { path = "../grep" }
 arboard = "3"
 dashmap = "6"
 globset = "0.4"

@@ -64,13 +64,13 @@ Pre-release versions on `next`:
    Developer opens PR targeting next
    CI runs on PR (build, test, typecheck, windows)
    PR is reviewed and merged to next
-   Pipeline publishes gsd-pi@2.34.0-next.N with @next tag
+   Pipeline publishes sdd-pi@2.34.0-next.N with @next tag
 
 2. Stabilization
    Maintainer runs: gh workflow dispatch create-release -- version=2.34
    Workflow creates release/2.34 from next
    Only fix: commits allowed on release/2.34 (enforced by branch protection)
-   Pipeline publishes gsd-pi@2.34.0-rc.N with @rc tag
+   Pipeline publishes sdd-pi@2.34.0-rc.N with @rc tag
    Back-merges fixes to next automatically
 
 3. Production Release

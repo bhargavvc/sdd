@@ -1,10 +1,10 @@
-// GSD Provider Fallback Resolver Tests
+// SDD Provider Fallback Resolver Tests
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import { describe, it, beforeEach, mock } from "node:test";
 import assert from "node:assert/strict";
 import { FallbackResolver } from "./fallback-resolver.js";
-import type { Api, Model } from "@gsd/pi-ai";
+import type { Api, Model } from "@sdd/pi-ai";
 import type { AuthStorage } from "./auth-storage.js";
 import type { ModelRegistry } from "./model-registry.js";
 import type { FallbackChainEntry, SettingsManager } from "./settings-manager.js";

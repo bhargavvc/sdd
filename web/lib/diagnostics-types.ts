@@ -1,5 +1,5 @@
 // Browser-safe TypeScript interfaces for diagnostics panels.
-// Mirrors upstream types from src/resources/extensions/gsd/forensics.ts,
+// Mirrors upstream types from src/resources/extensions/sdd/forensics.ts,
 // doctor.ts, and skill-health.ts — do NOT import from those modules directly,
 // as they use Node.js APIs unavailable in the browser.
 
@@ -57,7 +57,7 @@ export interface ForensicRecentUnit {
 }
 
 export interface ForensicReport {
-  gsdVersion: string
+  sddVersion: string
   timestamp: string
   basePath: string
   activeMilestone: string | null

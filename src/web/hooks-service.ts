@@ -8,14 +8,14 @@ import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 import type { HooksData } from "../../web/lib/remaining-command-types.ts"
 
 const HOOKS_MAX_BUFFER = 512 * 1024
-const HOOKS_MODULE_ENV = "GSD_HOOKS_MODULE"
+const HOOKS_MODULE_ENV = "SDD_HOOKS_MODULE"
 
 function resolveHooksModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "post-unit-hooks.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "post-unit-hooks.ts")
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -38,7 +38,7 @@ export async function collectHooksData(projectCwdOverride?: string): Promise<Hoo
   }
 
   // getHookStatus() internally calls resolvePostUnitHooks() and resolvePreDispatchHooks()
-  // from preferences.ts, which read from process.cwd()/.gsd/preferences.md.
+  // from preferences.ts, which read from process.cwd()/.sdd/preferences.md.
   // We set cwd to projectCwd so preferences resolution finds the right files.
   // In a cold child process, cycleCounts is empty, so activeCycles will be {}.
   const script = [

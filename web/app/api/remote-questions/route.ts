@@ -41,7 +41,7 @@ const AUTH_PROVIDER_IDS: Record<RemoteChannel, string> = {
 // ─── Auth.json Helpers ────────────────────────────────────────────────────────
 
 function getAuthPath(): string {
-  return join(homedir(), ".gsd", "agent", "auth.json")
+  return join(homedir(), ".sdd", "agent", "auth.json")
 }
 
 function readAuthData(): Record<string, unknown> {
@@ -84,7 +84,7 @@ function maskToken(token: string): string {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getPreferencesPath(): string {
-  return join(homedir(), ".gsd", "preferences.md")
+  return join(homedir(), ".sdd", "preferences.md")
 }
 
 function clamp(value: number | undefined, defaultVal: number, min: number, max: number): number {

@@ -57,10 +57,10 @@ function encodeCwd(cwd: string): string {
 	return cwd.replace(/\//g, "--");
 }
 
-const gsdHome = process.env.GSD_HOME || path.join(os.homedir(), ".gsd");
+const sddHome = process.env.SDD_HOME || path.join(os.homedir(), ".sdd");
 
 function getIsolationBaseDir(cwd: string, taskId: string): string {
-	return path.join(gsdHome, "wt", encodeCwd(cwd), taskId);
+	return path.join(sddHome, "wt", encodeCwd(cwd), taskId);
 }
 
 // Track active isolation dirs for cleanup on exit
@@ -160,7 +160,7 @@ async function applyBaseline(
 ): Promise<void> {
 	// Apply staged diff
 	if (baseline.stagedDiff.trim()) {
-		const patchPath = path.join(worktreeDir, ".gsd-staged.patch");
+		const patchPath = path.join(worktreeDir, ".sdd-staged.patch");
 		fs.writeFileSync(patchPath, baseline.stagedDiff);
 		try {
 			await git(["apply", "--binary", patchPath], worktreeDir);
@@ -174,7 +174,7 @@ async function applyBaseline(
 
 	// Apply unstaged diff on top
 	if (baseline.unstagedDiff.trim()) {
-		const patchPath = path.join(worktreeDir, ".gsd-unstaged.patch");
+		const patchPath = path.join(worktreeDir, ".sdd-unstaged.patch");
 		fs.writeFileSync(patchPath, baseline.unstagedDiff);
 		try {
 			await git(["apply", "--binary", patchPath], worktreeDir);
@@ -197,7 +197,7 @@ async function applyBaseline(
 	// without accidentally including the parent's dirty state in the delta.
 	await gitSilent(["add", "-A"], worktreeDir);
 	await gitSilent(
-		["commit", "--allow-empty", "-m", "gsd: baseline snapshot"],
+		["commit", "--allow-empty", "-m", "sdd: baseline snapshot"],
 		worktreeDir,
 	);
 }
@@ -443,7 +443,7 @@ export async function mergeDeltaPatches(
 	const combined = patches.map((p) => p.content).join("\n");
 	const patchFile = path.join(
 		os.tmpdir(),
-		`gsd-merge-${Date.now()}.patch`,
+		`sdd-merge-${Date.now()}.patch`,
 	);
 
 	const appliedPatches: string[] = [];
@@ -489,7 +489,7 @@ export async function mergeDeltaPatches(
 
 export function readIsolationMode(): IsolationMode {
 	try {
-		const { getAgentDir } = require("@gsd/pi-coding-agent");
+		const { getAgentDir } = require("@sdd/pi-coding-agent");
 		const settingsPath = path.join(getAgentDir(), "settings.json");
 		if (!fs.existsSync(settingsPath)) return "none";
 		const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));

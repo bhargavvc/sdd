@@ -32,10 +32,10 @@ test("toPosixPath: handles Windows UNC paths", () => {
 	assert.equal(toPosixPath("\\\\server\\share\\dir"), "//server/share/dir");
 });
 
-test("toPosixPath: handles .gsd/worktrees path on Windows", () => {
+test("toPosixPath: handles .sdd/worktrees path on Windows", () => {
 	assert.equal(
-		toPosixPath("C:\\Users\\name\\project\\.gsd\\worktrees\\M001"),
-		"C:/Users/name/project/.gsd/worktrees/M001",
+		toPosixPath("C:\\Users\\name\\project\\.sdd\\worktrees\\M001"),
+		"C:/Users/name/project/.sdd/worktrees/M001",
 	);
 });
 
@@ -74,7 +74,7 @@ const WINDOWS_ABS_PATH_RE = /[A-Z]:\\[A-Za-z]/;
 test("buildSystemPrompt: no Windows absolute paths with backslashes in output", () => {
 	// Simulate a Windows-like cwd
 	const prompt = buildSystemPrompt({
-		cwd: "D:\\Projects\\my-app\\.gsd\\worktrees\\M002",
+		cwd: "D:\\Projects\\my-app\\.sdd\\worktrees\\M002",
 	});
 	const lines = prompt.split("\n");
 	const violations = lines.filter(line => WINDOWS_ABS_PATH_RE.test(line));

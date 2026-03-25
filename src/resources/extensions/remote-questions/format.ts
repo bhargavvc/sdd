@@ -26,7 +26,7 @@ export function formatForSlack(prompt: RemotePrompt): SlackBlock[] {
   const blocks: SlackBlock[] = [
     {
       type: "header",
-      text: { type: "plain_text", text: "GSD needs your input" },
+      text: { type: "plain_text", text: "SDD needs your input" },
     },
   ];
 
@@ -216,7 +216,7 @@ function escapeHtml(s: string): string {
 }
 
 export function formatForTelegram(prompt: RemotePrompt): TelegramMessage {
-  const lines: string[] = ["<b>GSD needs your input</b>", ""];
+  const lines: string[] = ["<b>SDD needs your input</b>", ""];
 
   for (let qi = 0; qi < prompt.questions.length; qi++) {
     const q = prompt.questions[qi];

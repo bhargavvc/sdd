@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { Agent } from "@gsd/pi-agent-core";
+import { Agent } from "@sdd/pi-agent-core";
 import { AuthStorage } from "./auth-storage.js";
 import { AgentSession } from "./agent-session.js";
 import { ModelRegistry } from "./model-registry.js";

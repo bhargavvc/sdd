@@ -35,7 +35,7 @@ Returns: `{ files_changed: u32, insertions: u32, deletions: u32, summary: String
 Implementation: Diff between two trees/index/workdir, count deltas
 
 ### 1.4 — `git_diff_name_status(repo_path, from_ref, to_ref, pathspec?) -> Vec<GitNameStatus>`
-Replaces: `git diff --name-status main...branch -- .gsd/` (worktree-manager.ts, 3 calls)
+Replaces: `git diff --name-status main...branch -- .sdd/` (worktree-manager.ts, 3 calls)
 Returns: `Vec<{ status: String, path: String }>`
 Implementation: Tree-to-tree diff with pathspec filter
 
@@ -44,7 +44,7 @@ Replaces: `git diff --numstat main branch` (worktree-manager.ts, 1 call)
 Returns: `Vec<{ added: u32, removed: u32, path: String }>`
 
 ### 1.6 — `git_diff_content(repo_path, from_ref, to_ref, pathspec?, exclude?) -> String`
-Replaces: `git diff main...branch -- .gsd/` and `-- . :(exclude).gsd/` (worktree-manager.ts, 2 calls)
+Replaces: `git diff main...branch -- .sdd/` and `-- . :(exclude).sdd/` (worktree-manager.ts, 2 calls)
 Returns: Unified diff string
 
 ### 1.7 — `git_log_oneline(repo_path, from_ref, to_ref) -> Vec<GitLogEntry>`
@@ -57,11 +57,11 @@ Returns: `Vec<{ path: String, branch: String, is_bare: bool }>`
 Implementation: `Repository::worktrees()` + individual worktree info
 
 ### 1.9 — `git_branch_list(repo_path, pattern?) -> Vec<String>`
-Replaces: `git branch --list milestone/*`, `git branch --list gsd/*` (doctor.ts, commands.ts, 3 calls)
+Replaces: `git branch --list milestone/*`, `git branch --list sdd/*` (doctor.ts, commands.ts, 3 calls)
 Returns: Branch names matching pattern
 
 ### 1.10 — `git_branch_list_merged(repo_path, target, pattern?) -> Vec<String>`
-Replaces: `git branch --merged main --list gsd/*` (commands.ts, 1 call)
+Replaces: `git branch --merged main --list sdd/*` (commands.ts, 1 call)
 Returns: Branch names merged into target
 
 ### 1.11 — `git_ls_files(repo_path, pathspec) -> Vec<String>`
@@ -69,7 +69,7 @@ Replaces: `git ls-files "<exclusion>"` (doctor.ts, 1 call)
 Implementation: Read index, filter by pathspec
 
 ### 1.12 — `git_for_each_ref(repo_path, prefix) -> Vec<String>`
-Replaces: `git for-each-ref refs/gsd/snapshots/ --format=%(refname)` (commands.ts, 1 call)
+Replaces: `git for-each-ref refs/sdd/snapshots/ --format=%(refname)` (commands.ts, 1 call)
 Implementation: `repo.references_glob(prefix/*)`
 
 ### 1.13 — `git_conflict_files(repo_path) -> Vec<String>`
@@ -193,10 +193,10 @@ Update each TypeScript file to use native bridge functions:
 - `createWorktree()` → use `nativeWorktreeAdd()`, `nativeBranchForceReset()`
 - `listWorktrees()` → use `nativeWorktreeList()`
 - `removeWorktree()` → use `nativeWorktreeRemove()`, `nativeWorktreePrune()`, `nativeBranchDelete()`
-- `diffWorktreeGSD()` → use `nativeDiffNameStatus()`
+- `diffWorktreeSDD()` → use `nativeDiffNameStatus()`
 - `diffWorktreeAll()` → use `nativeDiffNameStatus()`
 - `diffWorktreeNumstat()` → use `nativeDiffNumstat()`
-- `getWorktreeGSDDiff()` → use `nativeDiffContent()`
+- `getWorktreeSDDDiff()` → use `nativeDiffContent()`
 - `getWorktreeCodeDiff()` → use `nativeDiffContent()`
 - `getWorktreeLog()` → use `nativeLogOneline()`
 - `mergeWorktreeToMain()` → use `nativeMergeSquash()` + `nativeCommit()`
@@ -209,7 +209,7 @@ Update each TypeScript file to use native bridge functions:
 ### 4.4 — auto.ts
 - `git rev-parse --git-dir` → use `nativeIsRepo()`
 - `git init -b` → use `nativeInit()`
-- `git add -A .gsd .gitignore && git commit` → use `nativeAddPaths()` + `nativeCommit()`
+- `git add -A .sdd .gitignore && git commit` → use `nativeAddPaths()` + `nativeCommit()`
 
 ### 4.5 — auto-supervisor.ts
 - `detectWorkingTreeActivity()` → use `nativeHasChanges()` (already exists!)

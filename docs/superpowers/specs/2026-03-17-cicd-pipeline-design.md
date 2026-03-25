@@ -1,16 +1,16 @@
-# CI/CD Pipeline Design — GSD 2
+# CI/CD Pipeline Design — SDD
 
 ## Overview
 
-A three-stage promotion pipeline for GSD 2 that moves merged PRs through Dev → Test → Prod using npm dist-tags as environment markers, GitHub Environments for approval gates, and Docker images for both CI acceleration and end-user distribution.
+A three-stage promotion pipeline for SDD that moves merged PRs through Dev → Test → Prod using npm dist-tags as environment markers, GitHub Environments for approval gates, and Docker images for both CI acceleration and end-user distribution.
 
 ## Goals
 
-1. Every merged PR is immediately installable via `npx gsd-pi@dev`
+1. Every merged PR is immediately installable via `npx sdd-pi@dev`
 2. Verified builds auto-promote to `@next` for early adopters
 3. Production releases require manual approval and optional live-LLM validation
 4. CI builds are fast and reproducible via pre-built Docker builder image
-5. End users can run GSD via Docker as an alternative to npm
+5. End users can run SDD via Docker as an alternative to npm
 6. LLM-dependent behavior is testable without API calls via recorded fixtures
 
 ## Non-Goals
@@ -18,7 +18,7 @@ A three-stage promotion pipeline for GSD 2 that moves merged PRs through Dev →
 - Replacing the existing PR gate workflow (`ci.yml`)
 - Replacing the native binary cross-compilation workflow (`build-native.yml`)
 - Cross-platform native binary builds (macOS/Windows remain on `build-native.yml`)
-- Hosting GSD as a web service
+- Hosting SDD as a web service
 - Automated prompt regression testing (future work)
 
 ## Pipeline Architecture
@@ -33,8 +33,8 @@ A three-stage promotion pipeline for GSD 2 that moves merged PRs through Dev →
 │  STAGE: DEV                          Environment: dev        │
 │                                                              │
 │  1. Version stamp: <current>-dev.<short-sha>                 │
-│  2. npm publish gsd-pi@<version>-dev.<sha> --tag dev         │
-│  3. Smoke test: npx gsd-pi@dev --version                    │
+│  2. npm publish sdd-pi@<version>-dev.<sha> --tag dev         │
+│  3. Smoke test: npx sdd-pi@dev --version                    │
 │                                                              │
 │  Note: Build/test/typecheck already ran in ci.yml            │
 │  Docker: Build CI builder image (only if Dockerfile changed) │
@@ -43,13 +43,13 @@ A three-stage promotion pipeline for GSD 2 that moves merged PRs through Dev →
 ┌──────────────────────────────────────────────────────────────┐
 │  STAGE: TEST                         Environment: test       │
 │                                                              │
-│  1. Install gsd-pi@dev from registry                         │
+│  1. Install sdd-pi@dev from registry                         │
 │  2. CLI smoke tests (--version, init, help, config)          │
 │  3. Dry-run fixture suite (recorded LLM conversations)       │
 │     - Agent session replay with fixture provider             │
 │     - Tool use round-trips verified                          │
 │     - Extension loading validated                            │
-│  4. npm dist-tag add gsd-pi@<version> next                   │
+│  4. npm dist-tag add sdd-pi@<version> next                   │
 │                                                              │
 │  Docker: Build + push runtime image to GHCR as :next         │
 └──────────────────────────┬──────────────────────────────────┘
@@ -61,7 +61,7 @@ A three-stage promotion pipeline for GSD 2 that moves merged PRs through Dev →
 │     - Gated behind workflow input flag                       │
 │     - Uses ANTHROPIC_API_KEY / OPENAI_API_KEY secrets        │
 │     - Budget-capped: small models, short conversations       │
-│  2. npm dist-tag add gsd-pi@<version> latest                 │
+│  2. npm dist-tag add sdd-pi@<version> latest                 │
 │  3. GitHub Release created with changelog                    │
 │  4. Docker: tag runtime image as :latest + :v<version>       │
 │  5. Post-publish smoke test against @latest                  │
@@ -80,7 +80,7 @@ The `-dev.` prerelease identifier is distinct from the existing `-next.` convent
 
 ### Native Binary Strategy for Dev Publishes
 
-Dev versions (`@dev` tag) use the native binaries from the most recent stable `build-native.yml` release. The `optionalDependencies` in `package.json` use `>=` ranges, so a `-dev.` version of `gsd-pi` resolves the latest stable `@gsd-build/engine-*` packages from the registry.
+Dev versions (`@dev` tag) use the native binaries from the most recent stable `build-native.yml` release. The `optionalDependencies` in `package.json` use `>=` ranges, so a `-dev.` version of `sdd-pi` resolves the latest stable `@gsd-build/engine-*` packages from the registry.
 
 If a PR modifies Rust native crate code (`native/` directory), the dev publish will bundle stale native binaries. This is acceptable because:
 - Native crate changes are infrequent and always accompanied by a `v*` tag release
@@ -105,9 +105,9 @@ Policy:
 
 | Failure | Impact | Recovery |
 |---------|--------|----------|
-| Dev publish succeeds, smoke test fails | Broken version on `@dev` tag | Next successful merge overwrites `@dev`. Manual fix: `npm dist-tag add gsd-pi@<last-good> dev` |
-| Test stage fails after promoting to `@next` | Broken version on `@next` tag | Manual: `npm dist-tag add gsd-pi@<last-good> next`. `@latest` is never affected. |
-| Prod promotion publishes `@latest` then found broken | Broken production release | Manual: `npm dist-tag add gsd-pi@<previous-stable> latest` and `docker tag ghcr.io/gsd-build/gsd-pi:<previous> latest && docker push`. Post-mortem required. |
+| Dev publish succeeds, smoke test fails | Broken version on `@dev` tag | Next successful merge overwrites `@dev`. Manual fix: `npm dist-tag add sdd-pi@<last-good> dev` |
+| Test stage fails after promoting to `@next` | Broken version on `@next` tag | Manual: `npm dist-tag add sdd-pi@<last-good> next`. `@latest` is never affected. |
+| Prod promotion publishes `@latest` then found broken | Broken production release | Manual: `npm dist-tag add sdd-pi@<previous-stable> latest` and `docker tag ghcr.io/bhargavvc/sdd-pi:<previous> latest && docker push`. Post-mortem required. |
 | Docker push succeeds, npm dist-tag fails | Images and npm out of sync | Re-run the failed job (GitHub Actions retry). Images are tagged by version so stale tags are harmless. |
 | GHCR push fails | No Docker image for this version | Non-blocking — npm publish is the primary distribution. Docker image can be rebuilt manually. |
 
@@ -131,7 +131,7 @@ Two images from a single `Dockerfile` at the repo root.
 
 #### CI Builder Image
 
-- **Name:** `ghcr.io/gsd-build/gsd-ci-builder`
+- **Name:** `ghcr.io/bhargavvc/sdd-ci-builder`
 - **Base:** `node:22-bookworm`
 - **Contains:** Node 22, Rust stable toolchain, `aarch64-linux-gnu` cross-compiler
 - **Size:** ~2 GB
@@ -148,13 +148,13 @@ Builder images are tagged with both `:latest` and a date stamp (e.g., `:2026-03-
 
 #### Runtime Image
 
-- **Name:** `ghcr.io/gsd-build/gsd-pi`
+- **Name:** `ghcr.io/bhargavvc/sdd-pi`
 - **Base:** `node:22-slim`
-- **Contains:** Node 22, git, `gsd-pi` installed globally
+- **Contains:** Node 22, git, `sdd-pi` installed globally
 - **Size:** ~250 MB
 - **Tags:** `:latest`, `:next`, `:v2.27.0`
 - **Published:** On every Prod promotion
-- **Purpose:** `docker run ghcr.io/gsd-build/gsd-pi` as alternative to `npx`
+- **Purpose:** `docker run ghcr.io/bhargavvc/sdd-pi` as alternative to `npx`
 
 ### Why These Base Images
 
@@ -183,11 +183,11 @@ FixtureProvider (intercept layer)
 
 ### Integration Design
 
-The `FixtureProvider` implements the `Provider` interface from `@gsd/pi-ai` (the same interface all 20+ built-in providers implement). It registers itself via environment variable detection at provider initialization:
+The `FixtureProvider` implements the `Provider` interface from `@sdd/pi-ai` (the same interface all 20+ built-in providers implement). It registers itself via environment variable detection at provider initialization:
 
 ```typescript
 // Pseudocode — actual implementation will follow pi-ai patterns
-import type { Provider, StreamingResponse } from "@gsd/pi-ai";
+import type { Provider, StreamingResponse } from "@sdd/pi-ai";
 
 class FixtureProvider implements Provider {
   // In record mode: wraps the real provider, saves responses
@@ -212,15 +212,15 @@ class FixtureProvider implements Provider {
 
 Key integration details:
 - **Streaming:** Fixture replay simulates streaming by yielding saved response chunks with minimal delay. This exercises the same consumer code paths as real streaming.
-- **Registration:** When `GSD_FIXTURE_MODE` is set, the fixture provider wraps the configured real provider. No changes to provider selection logic needed.
+- **Registration:** When `SDD_FIXTURE_MODE` is set, the fixture provider wraps the configured real provider. No changes to provider selection logic needed.
 - **Provider-agnostic:** Fixtures are captured at the `Provider` interface level (above HTTP transport), so they work regardless of which underlying provider was used during recording.
 
 ### Modes
 
 | Mode | Trigger | Behavior |
 |------|---------|----------|
-| **Record** | `GSD_FIXTURE_MODE=record GSD_FIXTURE_DIR=./fixtures` | Wraps real provider, saves request/response pairs |
-| **Replay** | `GSD_FIXTURE_MODE=replay GSD_FIXTURE_DIR=./fixtures` | Returns saved responses, zero API calls |
+| **Record** | `SDD_FIXTURE_MODE=record SDD_FIXTURE_DIR=./fixtures` | Wraps real provider, saves request/response pairs |
+| **Replay** | `SDD_FIXTURE_MODE=replay SDD_FIXTURE_DIR=./fixtures` | Returns saved responses, zero API calls |
 | **Off** | Default (no env vars) | Normal operation, no interception |
 
 ### Fixture Format
@@ -281,7 +281,7 @@ Committed to repo under `tests/fixtures/recordings/`. Each fixture is 5-50KB of 
 
 ### Dev Version Cleanup
 
-Old `-dev.` versions accumulate on npm with every merged PR. A scheduled workflow (`cleanup-dev-versions.yml`) runs weekly and unpublishes dev versions older than 30 days via `npm unpublish gsd-pi@<old-dev-version>`. This prevents registry bloat while keeping recent dev versions available.
+Old `-dev.` versions accumulate on npm with every merged PR. A scheduled workflow (`cleanup-dev-versions.yml`) runs weekly and unpublishes dev versions older than 30 days via `npm unpublish sdd-pi@<old-dev-version>`. This prevents registry bloat while keeping recent dev versions available.
 
 ## New Files & Scripts
 
@@ -326,11 +326,11 @@ All test files use `.ts` with `--experimental-strip-types` for consistency with 
 {
   "test:smoke": "node --experimental-strip-types tests/smoke/run.ts",
   "test:fixtures": "node --experimental-strip-types tests/fixtures/run.ts",
-  "test:fixtures:record": "GSD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
-  "test:live": "GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
+  "test:fixtures:record": "SDD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
+  "test:live": "SDD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
   "pipeline:version-stamp": "node scripts/version-stamp.mjs",
-  "docker:build-runtime": "docker build --target runtime -t ghcr.io/gsd-build/gsd-pi .",
-  "docker:build-builder": "docker build --target builder -t ghcr.io/gsd-build/gsd-ci-builder ."
+  "docker:build-runtime": "docker build --target runtime -t ghcr.io/bhargavvc/sdd-pi .",
+  "docker:build-builder": "docker build --target builder -t ghcr.io/bhargavvc/sdd-ci-builder ."
 }
 ```
 
@@ -348,10 +348,10 @@ All test files use `.ts` with `--experimental-strip-types` for consistency with 
 
 ## Success Criteria
 
-1. A merged PR is installable via `npx gsd-pi@dev` within 15 minutes (assumes warm CI builder image cache)
+1. A merged PR is installable via `npx sdd-pi@dev` within 15 minutes (assumes warm CI builder image cache)
 2. Fixture replay tests complete in under 60 seconds with zero API calls
 3. The full Dev → Test promotion completes without human intervention
 4. Prod promotion is blocked until a maintainer explicitly approves
-5. `docker run ghcr.io/gsd-build/gsd-pi --version` returns the correct version
+5. `docker run ghcr.io/bhargavvc/sdd-pi --version` returns the correct version
 6. Existing `ci.yml` and `build-native.yml` workflows continue to work unchanged
 7. CI builder image reduces toolchain setup from ~3-5 min to ~30s pull

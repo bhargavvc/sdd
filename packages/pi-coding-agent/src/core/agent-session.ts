@@ -22,9 +22,9 @@ import type {
 	AgentState,
 	AgentTool,
 	ThinkingLevel,
-} from "@gsd/pi-agent-core";
-import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@gsd/pi-ai";
-import { modelsAreEqual, resetApiProviders, supportsXhigh } from "@gsd/pi-ai";
+} from "@sdd/pi-agent-core";
+import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@sdd/pi-ai";
+import { modelsAreEqual, resetApiProviders, supportsXhigh } from "@sdd/pi-ai";
 import { Type } from "@sinclair/typebox";
 import { getDocsPath } from "../config.js";
 import { getErrorMessage } from "../utils/error.js";

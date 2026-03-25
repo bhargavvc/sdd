@@ -1,6 +1,6 @@
 // Browser-safe TypeScript interfaces for the workflow visualizer.
-// Mirrors upstream types from src/resources/extensions/gsd/visualizer-data.ts
-// and src/resources/extensions/gsd/metrics.ts — do NOT import from those
+// Mirrors upstream types from src/resources/extensions/sdd/visualizer-data.ts
+// and src/resources/extensions/sdd/metrics.ts — do NOT import from those
 // modules directly, as they use Node.js APIs unavailable in the browser.
 
 // ─── Core Structures ──────────────────────────────────────────────────────────

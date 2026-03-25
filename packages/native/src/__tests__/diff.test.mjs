@@ -19,8 +19,8 @@ const addonDir = path.resolve(
 );
 const platformTag = `${process.platform}-${process.arch}`;
 const candidates = [
-  path.join(addonDir, `gsd_engine.${platformTag}.node`),
-  path.join(addonDir, "gsd_engine.dev.node"),
+  path.join(addonDir, `sdd_engine.${platformTag}.node`),
+  path.join(addonDir, "sdd_engine.dev.node"),
 ];
 
 let native;
@@ -35,7 +35,7 @@ for (const candidate of candidates) {
 
 if (!native) {
   console.error(
-    "Native addon not found. Run `npm run build:native -w @gsd/native` first.",
+    "Native addon not found. Run `npm run build:native -w @sdd/native` first.",
   );
   process.exit(1);
 }

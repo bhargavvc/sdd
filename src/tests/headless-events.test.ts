@@ -5,7 +5,7 @@
  * the headless orchestrator to reduce stdout noise for orchestrators.
  *
  * Uses extracted parsing logic (mirrors headless.ts) to avoid
- * transitive @gsd/native import that breaks in test environment.
+ * transitive @sdd/native import that breaks in test environment.
  */
 
 import test from 'node:test'
@@ -87,7 +87,7 @@ function parseHeadlessArgs(argv: string[]): HeadlessOptions {
 // ─── parseHeadlessArgs: --events flag ──────────────────────────────────────
 
 test('--events parses comma-separated event types into a Set', () => {
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--events', 'agent_end,extension_ui_request', 'auto'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--events', 'agent_end,extension_ui_request', 'auto'])
   assert.ok(opts.eventFilter instanceof Set)
   assert.equal(opts.eventFilter!.size, 2)
   assert.ok(opts.eventFilter!.has('agent_end'))
@@ -95,29 +95,29 @@ test('--events parses comma-separated event types into a Set', () => {
 })
 
 test('--events implies --json', () => {
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--events', 'agent_end', 'auto'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--events', 'agent_end', 'auto'])
   assert.equal(opts.json, true)
 })
 
 test('--events with single type', () => {
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--events', 'agent_end', 'auto'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--events', 'agent_end', 'auto'])
   assert.equal(opts.eventFilter!.size, 1)
   assert.ok(opts.eventFilter!.has('agent_end'))
 })
 
 test('no --events flag means no filter', () => {
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--json', 'auto'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--json', 'auto'])
   assert.equal(opts.eventFilter, undefined)
 })
 
 test('--events with all common types', () => {
   const types = 'agent_start,agent_end,tool_execution_start,tool_execution_end,extension_ui_request'
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--events', types, 'auto'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--events', types, 'auto'])
   assert.equal(opts.eventFilter!.size, 5)
 })
 
 test('--events combined with other flags', () => {
-  const opts = parseHeadlessArgs(['node', 'gsd', 'headless', '--timeout', '60000', '--events', 'agent_end', '--verbose', 'next'])
+  const opts = parseHeadlessArgs(['node', 'sdd', 'headless', '--timeout', '60000', '--events', 'agent_end', '--verbose', 'next'])
   assert.equal(opts.timeout, 60000)
   assert.equal(opts.verbose, true)
   assert.equal(opts.command, 'next')

@@ -1,7 +1,7 @@
 # Token Optimization Suite — Implementation Plan
 
 ## Overview
-Comprehensive token optimization across the GSD dispatch pipeline. Six phases targeting
+Comprehensive token optimization across the SDD dispatch pipeline. Six phases targeting
 prompt caching, accurate token counting, structured data compression, prompt compression,
 semantic context selection, and context distillation.
 
@@ -9,7 +9,7 @@ semantic context selection, and context distillation.
 **Goal:** Restructure dispatch prompt assembly for maximum cache hit rates.
 
 ### What
-Anthropic prompt caching gives 90% savings on cached input tokens. Currently, GSD places
+Anthropic prompt caching gives 90% savings on cached input tokens. Currently, SDD places
 `cache_control` on system prompts and the last user message (in `packages/pi-ai/src/providers/anthropic.ts`).
 But dispatch prompts in `auto-prompts.ts` mix static and dynamic content throughout,
 reducing cache prefix reuse.
@@ -32,10 +32,10 @@ reducing cache prefix reuse.
    Already tracks `cacheRead` and `cacheWrite` tokens — add derived percentage.
 
 ### Files Modified
-- `src/resources/extensions/gsd/prompt-cache-optimizer.ts` (NEW)
-- `src/resources/extensions/gsd/auto-prompts.ts` (modify builders)
-- `src/resources/extensions/gsd/metrics.ts` (add cache hit rate)
-- `src/resources/extensions/gsd/tests/prompt-cache-optimizer.test.ts` (NEW)
+- `src/resources/extensions/sdd/prompt-cache-optimizer.ts` (NEW)
+- `src/resources/extensions/sdd/auto-prompts.ts` (modify builders)
+- `src/resources/extensions/sdd/metrics.ts` (add cache hit rate)
+- `src/resources/extensions/sdd/tests/prompt-cache-optimizer.test.ts` (NEW)
 
 ---
 
@@ -63,10 +63,10 @@ different tokenizer, so counts can be off by 15-25%. This causes budget under/ov
    on the configured execution model's provider.
 
 ### Files Modified
-- `src/resources/extensions/gsd/token-counter.ts` (extend)
-- `src/resources/extensions/gsd/context-budget.ts` (provider-aware ratio)
-- `src/resources/extensions/gsd/tests/token-counter.test.ts` (NEW)
-- `src/resources/extensions/gsd/tests/context-budget.test.ts` (extend)
+- `src/resources/extensions/sdd/token-counter.ts` (extend)
+- `src/resources/extensions/sdd/context-budget.ts` (provider-aware ratio)
+- `src/resources/extensions/sdd/tests/token-counter.test.ts` (NEW)
+- `src/resources/extensions/sdd/tests/context-budget.test.ts` (extend)
 
 ---
 
@@ -96,10 +96,10 @@ using indentation and tabular patterns instead.
 
 ### Files Modified
 - `package.json` (add dependency)
-- `src/resources/extensions/gsd/structured-data-formatter.ts` (NEW)
-- `src/resources/extensions/gsd/context-store.ts` (add TOON variants)
-- `src/resources/extensions/gsd/auto-prompts.ts` (use TOON when level != full)
-- `src/resources/extensions/gsd/tests/structured-data-formatter.test.ts` (NEW)
+- `src/resources/extensions/sdd/structured-data-formatter.ts` (NEW)
+- `src/resources/extensions/sdd/context-store.ts` (add TOON variants)
+- `src/resources/extensions/sdd/auto-prompts.ts` (use TOON when level != full)
+- `src/resources/extensions/sdd/tests/structured-data-formatter.test.ts` (NEW)
 
 ---
 
@@ -128,11 +128,11 @@ compress them using LLMLingua-2. This preserves information density while reduci
    - Budget profile auto-enables compress for `budget` and `balanced`
 
 ### Files Modified
-- `src/resources/extensions/gsd/prompt-compressor.ts` (NEW)
-- `src/resources/extensions/gsd/context-budget.ts` (integrate)
-- `src/resources/extensions/gsd/preferences.ts` (add compression_strategy)
-- `src/resources/extensions/gsd/types.ts` (add CompressionStrategy type)
-- `src/resources/extensions/gsd/tests/prompt-compressor.test.ts` (NEW)
+- `src/resources/extensions/sdd/prompt-compressor.ts` (NEW)
+- `src/resources/extensions/sdd/context-budget.ts` (integrate)
+- `src/resources/extensions/sdd/preferences.ts` (add compression_strategy)
+- `src/resources/extensions/sdd/types.ts` (add CompressionStrategy type)
+- `src/resources/extensions/sdd/tests/prompt-compressor.test.ts` (NEW)
 
 ### Note
 LLMLingua-2 JS port (`@atjsh/llmlingua-2`) is experimental. We'll implement the interface
@@ -170,11 +170,11 @@ entire files. For large files, this wastes tokens on irrelevant sections.
    - Auto-enabled for `budget` and `balanced` profiles
 
 ### Files Modified
-- `src/resources/extensions/gsd/semantic-chunker.ts` (NEW)
-- `src/resources/extensions/gsd/auto-prompts.ts` (integrate with inlineFile)
-- `src/resources/extensions/gsd/preferences.ts` (add context_selection)
-- `src/resources/extensions/gsd/types.ts` (add ContextSelectionMode type)
-- `src/resources/extensions/gsd/tests/semantic-chunker.test.ts` (NEW)
+- `src/resources/extensions/sdd/semantic-chunker.ts` (NEW)
+- `src/resources/extensions/sdd/auto-prompts.ts` (integrate with inlineFile)
+- `src/resources/extensions/sdd/preferences.ts` (add context_selection)
+- `src/resources/extensions/sdd/types.ts` (add ContextSelectionMode type)
+- `src/resources/extensions/sdd/tests/semantic-chunker.test.ts` (NEW)
 
 ---
 
@@ -199,9 +199,9 @@ When a slice has many dependencies, this consumes a large portion of the context
    - Budget pressure is above 50%
 
 ### Files Modified
-- `src/resources/extensions/gsd/summary-distiller.ts` (NEW)
-- `src/resources/extensions/gsd/auto-prompts.ts` (integrate with inlineDependencySummaries)
-- `src/resources/extensions/gsd/tests/summary-distiller.test.ts` (NEW)
+- `src/resources/extensions/sdd/summary-distiller.ts` (NEW)
+- `src/resources/extensions/sdd/auto-prompts.ts` (integrate with inlineDependencySummaries)
+- `src/resources/extensions/sdd/tests/summary-distiller.test.ts` (NEW)
 
 ---
 

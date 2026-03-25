@@ -1,5 +1,5 @@
-import type { AgentTool } from "@gsd/pi-agent-core";
-import type { ImageContent, TextContent } from "@gsd/pi-ai";
+import type { AgentTool } from "@sdd/pi-agent-core";
+import type { ImageContent, TextContent } from "@sdd/pi-ai";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";

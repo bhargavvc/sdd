@@ -1,8 +1,8 @@
-# Contributing to GSD-2
+# Contributing to SDD
 
-We're glad you're here. GSD-2 is an open project and contributions are welcome across the entire codebase. We hold a high bar for what gets merged — not to be gatekeepers, but because every change ships to real users and stability matters.
+We're glad you're here. SDD is an open project and contributions are welcome across the entire codebase. We hold a high bar for what gets merged — not to be gatekeepers, but because every change ships to real users and stability matters.
 
-Read [VISION.md](VISION.md) before contributing. It defines what GSD-2 is, what it isn't, and what we won't accept.
+Read [VISION.md](VISION.md) before contributing. It defines what SDD is, what it isn't, and what we won't accept.
 
 ## Before you start
 
@@ -91,7 +91,7 @@ The codebase is organized into these areas. All are open to contributions:
 | AI/LLM layer | `packages/pi-ai` | Provider integrations, model handling |
 | Agent core | `packages/pi-agent-core` | Agent orchestration — RFC required for changes |
 | Coding agent | `packages/pi-coding-agent` | The main coding agent |
-| GSD extension | `src/resources/extensions/gsd/` | GSD workflow — RFC required for auto-mode |
+| SDD extension | `src/resources/extensions/sdd/` | SDD workflow — RFC required for auto-mode |
 | Native bindings | `native/` | Platform-specific native code |
 | CI/Build | `.github/`, `scripts/` | Workflows, build scripts |
 

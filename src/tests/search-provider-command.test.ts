@@ -45,7 +45,7 @@ function withEnv(
 }
 
 function makeTmpAuth(data: Record<string, unknown> = {}): { authPath: string; cleanup: () => void } {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-cmd-test-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-cmd-test-'))
   const authPath = join(tmp, 'auth.json')
   writeFileSync(authPath, JSON.stringify(data))
   return { authPath, cleanup: () => rmSync(tmp, { recursive: true, force: true }) }

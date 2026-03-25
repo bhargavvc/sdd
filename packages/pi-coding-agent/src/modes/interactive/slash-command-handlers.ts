@@ -11,19 +11,19 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { ThinkingLevel } from "@gsd/pi-agent-core";
+import type { ThinkingLevel } from "@sdd/pi-agent-core";
 import type {
 	EditorAction,
 	EditorComponent,
 	MarkdownTheme,
-} from "@gsd/pi-tui";
+} from "@sdd/pi-tui";
 import {
 	type Component,
 	Container,
 	Markdown,
 	Spacer,
 	Text,
-} from "@gsd/pi-tui";
+} from "@sdd/pi-tui";
 import { spawn, spawnSync } from "child_process";
 import {
 	getShareViewerUrl,
@@ -41,7 +41,7 @@ import { appKey, editorKey, formatKeyForDisplay } from "./components/keybinding-
 import { SelectSubmenu, THINKING_DESCRIPTIONS } from "./components/settings-selector.js";
 import { theme } from "./theme/theme.js";
 
-import type { TUI } from "@gsd/pi-tui";
+import type { TUI } from "@sdd/pi-tui";
 
 // ---------------------------------------------------------------------------
 // Context interface — the subset of InteractiveMode needed by slash commands

@@ -1,35 +1,35 @@
 # Architecture Overview
 
-GSD is a TypeScript application built on the [Pi SDK](https://github.com/badlogic/pi-mono). It embeds the Pi coding agent and extends it with the GSD workflow engine, auto mode state machine, and project management primitives.
+SDD is a TypeScript application built on the [Pi SDK](https://github.com/badlogic/pi-mono). It embeds the Pi coding agent and extends it with the SDD workflow engine, auto mode state machine, and project management primitives.
 
 ## System Structure
 
 ```
-gsd (CLI binary)
-  └─ loader.ts          Sets PI_PACKAGE_DIR, GSD env vars, dynamic-imports cli.ts
+sdd (CLI binary)
+  └─ loader.ts          Sets PI_PACKAGE_DIR, SDD env vars, dynamic-imports cli.ts
       └─ cli.ts         Wires SDK managers, loads extensions, starts InteractiveMode
           ├─ onboarding.ts   First-run setup wizard (LLM provider + tool keys)
           ├─ wizard.ts       Env hydration from stored auth.json credentials
-          ├─ app-paths.ts    ~/.gsd/agent/, ~/.gsd/sessions/, auth.json
-          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.gsd/agent/
+          ├─ app-paths.ts    ~/.sdd/agent/, ~/.sdd/sessions/, auth.json
+          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.sdd/agent/
           └─ src/resources/
-              ├─ extensions/gsd/    Core GSD extension
+              ├─ extensions/sdd/    Core SDD extension
               ├─ extensions/...     12 supporting extensions
               ├─ agents/            scout, researcher, worker
               ├─ AGENTS.md          Agent routing instructions
-              └─ GSD-WORKFLOW.md    Manual bootstrap protocol
+              └─ SDD-WORKFLOW.md    Manual bootstrap protocol
 
-gsd headless              Headless mode — CI/cron orchestration via RPC child process
-gsd --mode mcp            MCP server mode — exposes tools over stdin/stdout
+sdd headless              Headless mode — CI/cron orchestration via RPC child process
+sdd --mode mcp            MCP server mode — exposes tools over stdin/stdout
 
-vscode-extension/         VS Code extension — chat participant (@gsd), sidebar dashboard, RPC integration
+vscode-extension/         VS Code extension — chat participant (@sdd), sidebar dashboard, RPC integration
 ```
 
 ## Key Design Decisions
 
 ### State Lives on Disk
 
-`.gsd/` is the sole source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions. This enables crash recovery, multi-terminal steering, and session resumption.
+`.sdd/` is the sole source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions. This enables crash recovery, multi-terminal steering, and session resumption.
 
 ### Two-File Loader Pattern
 
@@ -37,11 +37,11 @@ vscode-extension/         VS Code extension — chat participant (@gsd), sidebar
 
 ### `pkg/` Shim Directory
 
-`PI_PACKAGE_DIR` points to `pkg/` (not project root) to avoid Pi's theme resolution colliding with GSD's `src/` directory. Contains only `piConfig` and theme assets.
+`PI_PACKAGE_DIR` points to `pkg/` (not project root) to avoid Pi's theme resolution colliding with SDD's `src/` directory. Contains only `piConfig` and theme assets.
 
 ### Always-Overwrite Sync
 
-Bundled extensions and agents are synced to `~/.gsd/agent/` on every launch, not just first run. This means `npm update -g` takes effect immediately.
+Bundled extensions and agents are synced to `~/.sdd/agent/` on every launch, not just first run. This means `npm update -g` takes effect immediately.
 
 ### Lazy Provider Loading
 
@@ -55,7 +55,7 @@ Every dispatch creates a new agent session. The LLM starts with a clean context 
 
 | Extension | What It Provides |
 |-----------|-----------------|
-| **GSD** | Core workflow engine — auto mode, state machine, commands, dashboard |
+| **SDD** | Core workflow engine — auto mode, state machine, commands, dashboard |
 | **Browser Tools** | Playwright-based browser automation — navigation, forms, screenshots, PDF export, device emulation, visual regression, structured data extraction, route mocking, accessibility tree inspection, and semantic actions |
 | **Search the Web** | Brave Search, Tavily, or Jina page extraction |
 | **Google Search** | Gemini-powered web search with AI-synthesized answers |
@@ -98,7 +98,7 @@ Performance-critical operations use a Rust N-API engine:
 - **fd** — fuzzy file path discovery
 - **clipboard** — native clipboard access
 - **git** — libgit2-backed git read operations (v2.16+)
-- **parser** — GSD file parsing and frontmatter extraction
+- **parser** — SDD file parsing and frontmatter extraction
 
 ## Dispatch Pipeline
 

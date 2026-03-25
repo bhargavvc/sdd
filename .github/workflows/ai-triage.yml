@@ -39,7 +39,7 @@ jobs:
             const type = isIssue ? 'issue' : 'pull_request';
             const existingLabels = (item.labels || []).map(l => l.name);
 
-            const prompt = `You are a GitHub issue/PR triage bot for the GSD-2 project. Your job is to:
+            const prompt = `You are a GitHub issue/PR triage bot for the SDD project. Your job is to:
             1. Classify the ${type} with appropriate labels
             2. Detect if it violates project guidelines
 
@@ -88,7 +88,7 @@ jobs:
             - "complexity-without-value": Adds abstraction/indirection without user-visible improvement
             - "heavy-orchestration": Duplicates what agent infrastructure already provides
             - "missing-info": Issue is too vague to act on (no repro steps, no context)
-            - "off-topic": Not related to GSD-2 at all
+            - "off-topic": Not related to SDD at all
             - "security-in-public": Appears to report a security vulnerability publicly
 
             If aligned is false, provide a brief, polite explanation (2-3 sentences) of why this was flagged.
@@ -169,7 +169,7 @@ jobs:
               };
 
               const securityNote = result.violation_type === 'security-in-public'
-                ? `\n\n**If this is a security vulnerability, please delete this ${type} and use [GitHub\'s private vulnerability reporting](https://github.com/gsd-build/GSD-2/security/advisories/new) instead.** See [CONTRIBUTING.md](https://github.com/gsd-build/GSD-2/blob/main/CONTRIBUTING.md#security) for details.`
+                ? `\n\n**If this is a security vulnerability, please delete this ${type} and use [GitHub\'s private vulnerability reporting](https://github.com/bhargavvc/SDD/security/advisories/new) instead.** See [CONTRIBUTING.md](https://github.com/bhargavvc/SDD/blob/main/CONTRIBUTING.md#security) for details.`
                 : '';
 
               const comment = `👋 Thanks for opening this ${type}!
@@ -180,7 +180,7 @@ jobs:
 
             ${result.explanation}
 
-            Please review our [VISION.md](https://github.com/gsd-build/GSD-2/blob/main/VISION.md) and [CONTRIBUTING.md](https://github.com/gsd-build/GSD-2/blob/main/CONTRIBUTING.md) for project guidelines.${securityNote}
+            Please review our [VISION.md](https://github.com/bhargavvc/SDD/blob/main/VISION.md) and [CONTRIBUTING.md](https://github.com/bhargavvc/SDD/blob/main/CONTRIBUTING.md) for project guidelines.${securityNote}
 
             A maintainer will review this shortly. If you believe this was flagged in error, no action is needed — we'll take a look.
 

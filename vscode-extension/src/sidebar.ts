@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import type { GsdClient, SessionStats, ThinkingLevel } from "./gsd-client.js";
+import type { SddClient, SessionStats, ThinkingLevel } from "./sdd-client.js";
 
 /**
  * WebviewViewProvider that renders a sidebar panel showing connection status,
  * model info, thinking level, token usage, cost, and quick action controls.
  */
-export class GsdSidebarProvider implements vscode.WebviewViewProvider {
-	public static readonly viewId = "gsd-sidebar";
+export class SddSidebarProvider implements vscode.WebviewViewProvider {
+	public static readonly viewId = "sdd-sidebar";
 
 	private view?: vscode.WebviewView;
 	private disposables: vscode.Disposable[] = [];
@@ -14,7 +14,7 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 
 	constructor(
 		private readonly extensionUri: vscode.Uri,
-		private readonly client: GsdClient,
+		private readonly client: SddClient,
 	) {
 		this.disposables.push(
 			client.onConnectionChange(() => this.refresh()),
@@ -41,40 +41,40 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.onDidReceiveMessage(async (msg: { command: string; value?: string }) => {
 			switch (msg.command) {
 				case "start":
-					await vscode.commands.executeCommand("gsd.start");
+					await vscode.commands.executeCommand("sdd.start");
 					break;
 				case "stop":
-					await vscode.commands.executeCommand("gsd.stop");
+					await vscode.commands.executeCommand("sdd.stop");
 					break;
 				case "newSession":
-					await vscode.commands.executeCommand("gsd.newSession");
+					await vscode.commands.executeCommand("sdd.newSession");
 					break;
 				case "cycleModel":
-					await vscode.commands.executeCommand("gsd.cycleModel");
+					await vscode.commands.executeCommand("sdd.cycleModel");
 					break;
 				case "cycleThinking":
-					await vscode.commands.executeCommand("gsd.cycleThinking");
+					await vscode.commands.executeCommand("sdd.cycleThinking");
 					break;
 				case "switchModel":
-					await vscode.commands.executeCommand("gsd.switchModel");
+					await vscode.commands.executeCommand("sdd.switchModel");
 					break;
 				case "setThinking":
-					await vscode.commands.executeCommand("gsd.setThinking");
+					await vscode.commands.executeCommand("sdd.setThinking");
 					break;
 				case "compact":
-					await vscode.commands.executeCommand("gsd.compact");
+					await vscode.commands.executeCommand("sdd.compact");
 					break;
 				case "abort":
-					await vscode.commands.executeCommand("gsd.abort");
+					await vscode.commands.executeCommand("sdd.abort");
 					break;
 				case "exportHtml":
-					await vscode.commands.executeCommand("gsd.exportHtml");
+					await vscode.commands.executeCommand("sdd.exportHtml");
 					break;
 				case "sessionStats":
-					await vscode.commands.executeCommand("gsd.sessionStats");
+					await vscode.commands.executeCommand("sdd.sessionStats");
 					break;
 				case "listCommands":
-					await vscode.commands.executeCommand("gsd.listCommands");
+					await vscode.commands.executeCommand("sdd.listCommands");
 					break;
 				case "toggleAutoCompaction":
 					if (this.client.isConnected) {

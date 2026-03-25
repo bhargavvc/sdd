@@ -1,6 +1,6 @@
-import type { ImageContent } from "@gsd/pi-ai";
-import { ImageFormat, parseImage, SamplingFilter } from "@gsd/native/image";
-import type { NativeImageHandle } from "@gsd/native/image";
+import type { ImageContent } from "@sdd/pi-ai";
+import { ImageFormat, parseImage, SamplingFilter } from "@sdd/native/image";
+import type { NativeImageHandle } from "@sdd/native/image";
 
 export interface ImageResizeOptions {
 	maxWidth?: number; // Default: 2000

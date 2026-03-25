@@ -2,14 +2,14 @@
 
 ## Goal
 
-Make the **left pane in Power User Mode** render the **real native GSD/pi TUI** while staying attached to the **same authoritative main session** already used by:
+Make the **left pane in Power User Mode** render the **real native SDD/pi TUI** while staying attached to the **same authoritative main session** already used by:
 
 - the web chat view
 - dashboard / progress / status surfaces
 - command surfaces
 - session browser / recovery surfaces
 
-At the same time, keep the **right pane unchanged** as a **separate PTY-backed GSD session**.
+At the same time, keep the **right pane unchanged** as a **separate PTY-backed SDD session**.
 
 ## Required outcome
 
@@ -36,18 +36,18 @@ The current right-side PTY session remains:
 
 ### Left pane today
 
-The left pane is currently `web/components/gsd/terminal.tsx`, which is **not** the native TUI. It is a browser-native summary / interaction surface backed by:
+The left pane is currently `web/components/sdd/terminal.tsx`, which is **not** the native TUI. It is a browser-native summary / interaction surface backed by:
 
 - `/api/boot`
 - `/api/session/events`
 - `/api/session/command`
-- `web/lib/gsd-workspace-store.tsx`
+- `web/lib/sdd-workspace-store.tsx`
 
-It renders bridge state, transcript summaries, tool activity, and an input box, but not the real pi/GSD terminal UI.
+It renders bridge state, transcript summaries, tool activity, and an input box, but not the real pi/SDD terminal UI.
 
 ### Right pane today
 
-The right pane is `web/components/gsd/shell-terminal.tsx`, backed by:
+The right pane is `web/components/sdd/shell-terminal.tsx`, backed by:
 
 - `node-pty`
 - `/api/terminal/stream`
@@ -56,7 +56,7 @@ The right pane is `web/components/gsd/shell-terminal.tsx`, backed by:
 - `/api/terminal/sessions`
 - `web/lib/pty-manager.ts`
 
-It launches a separate interactive `gsd` process.
+It launches a separate interactive `sdd` process.
 
 ### Main bridge today
 
@@ -105,7 +105,7 @@ Today `InteractiveMode` constructs `ProcessTerminal` directly. To render the nat
 
 ### Required refactor
 
-Refactor interactive-mode construction so it can accept a `Terminal` implementation from `@gsd/pi-tui` rather than always using `ProcessTerminal`.
+Refactor interactive-mode construction so it can accept a `Terminal` implementation from `@sdd/pi-tui` rather than always using `ProcessTerminal`.
 
 ### Constraints
 
@@ -115,7 +115,7 @@ Refactor interactive-mode construction so it can accept a `Terminal` implementat
 
 ## 2. Build a browser-backed terminal adapter for the main session
 
-Add a new terminal host for the left pane that implements the `@gsd/pi-tui` `Terminal` contract using browser transport instead of process stdin/stdout.
+Add a new terminal host for the left pane that implements the `@sdd/pi-tui` `Terminal` contract using browser transport instead of process stdin/stdout.
 
 ### Browser-backed terminal responsibilities
 
@@ -146,12 +146,12 @@ There must be **one main AgentSession**, not one per surface.
 
 ## 4. Replace the left pane with a native-TUI browser terminal
 
-In `web/components/gsd/dual-terminal.tsx`, replace the current left browser summary terminal with a new component that renders the real native TUI attached to the main session.
+In `web/components/sdd/dual-terminal.tsx`, replace the current left browser summary terminal with a new component that renders the real native TUI attached to the main session.
 
 ### Desired component behavior
 
 - connect to the browser-backed main-session terminal transport
-- render the actual native GSD/pi TUI
+- render the actual native SDD/pi TUI
 - send keyboard input and resize events
 - never spawn a second main session
 - reconnect cleanly after panel toggles / page reloads
@@ -230,7 +230,7 @@ Create the transport layer for the left pane.
 
 - browser-terminal host inside the main bridge runtime
 - new API routes under something like `web/app/api/bridge-terminal/*`
-- new browser component under `web/components/gsd/`
+- new browser component under `web/components/sdd/`
 
 ### Deliverable
 
@@ -263,12 +263,12 @@ Swap Power User Mode left pane from browser summary terminal to the native TUI t
 
 ### Likely files
 
-- `web/components/gsd/dual-terminal.tsx`
+- `web/components/sdd/dual-terminal.tsx`
 - new left terminal component
 
 ### Deliverable
 
-Left pane visually and behaviorally matches native GSD/pi TUI while remaining attached to the main session.
+Left pane visually and behaviorally matches native SDD/pi TUI while remaining attached to the main session.
 
 ## Phase 5 — state synchronization hardening
 
@@ -280,7 +280,7 @@ Ensure left-TUI-originated changes immediately update browser-native surfaces.
 
 - `packages/pi-coding-agent/src/core/agent-session.ts`
 - `src/web/bridge-service.ts`
-- `web/lib/gsd-workspace-store.tsx`
+- `web/lib/sdd-workspace-store.tsx`
 
 ### Deliverable
 
@@ -397,19 +397,19 @@ The right-pane PTY path should remain independent. Reusing PTY-specific assumpti
 - `packages/pi-tui/src/tui.ts`
 
 ### Web left-pane UI
-- `web/components/gsd/dual-terminal.tsx`
-- new bridge-native terminal component under `web/components/gsd/`
+- `web/components/sdd/dual-terminal.tsx`
+- new bridge-native terminal component under `web/components/sdd/`
 
 ### Existing right-pane UI to keep stable
-- `web/components/gsd/shell-terminal.tsx`
+- `web/components/sdd/shell-terminal.tsx`
 - `web/lib/pty-manager.ts`
 - `web/app/api/terminal/*`
 
 ### Browser sync surfaces
-- `web/lib/gsd-workspace-store.tsx`
-- `web/components/gsd/chat-mode.tsx`
-- `web/components/gsd/dashboard.tsx`
-- `web/components/gsd/command-surface.tsx`
+- `web/lib/sdd-workspace-store.tsx`
+- `web/components/sdd/chat-mode.tsx`
+- `web/components/sdd/dashboard.tsx`
+- `web/components/sdd/command-surface.tsx`
 
 ## Final architecture rule
 

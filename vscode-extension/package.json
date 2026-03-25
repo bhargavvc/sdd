@@ -1,24 +1,24 @@
 {
-  "name": "gsd-2",
-  "displayName": "GSD-2",
-  "description": "VS Code integration for the GSD-2 coding agent — sidebar dashboard, @gsd chat participant, and 15 commands",
+  "name": "sdd",
+  "displayName": "SDD",
+  "description": "VS Code integration for the SDD coding agent — sidebar dashboard, @sdd chat participant, and 15 commands",
   "publisher": "FluxLabs",
   "version": "0.1.0",
   "icon": "logo.jpg",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gsd-build/gsd-2"
+    "url": "https://github.com/bhargavvc/sdd"
   },
-  "homepage": "https://github.com/gsd-build/gsd-2/blob/main/vscode-extension/README.md",
+  "homepage": "https://github.com/bhargavvc/sdd/blob/main/vscode-extension/README.md",
   "bugs": {
-    "url": "https://github.com/gsd-build/gsd-2/issues"
+    "url": "https://github.com/bhargavvc/sdd/issues"
   },
   "keywords": [
     "ai",
     "agent",
     "coding",
-    "gsd",
+    "sdd",
     "chat",
     "automation",
     "claude",
@@ -43,79 +43,79 @@
   "contributes": {
     "commands": [
       {
-        "command": "gsd.start",
-        "title": "GSD: Start Agent"
+        "command": "sdd.start",
+        "title": "SDD: Start Agent"
       },
       {
-        "command": "gsd.stop",
-        "title": "GSD: Stop Agent"
+        "command": "sdd.stop",
+        "title": "SDD: Stop Agent"
       },
       {
-        "command": "gsd.newSession",
-        "title": "GSD: New Session"
+        "command": "sdd.newSession",
+        "title": "SDD: New Session"
       },
       {
-        "command": "gsd.sendMessage",
-        "title": "GSD: Send Message"
+        "command": "sdd.sendMessage",
+        "title": "SDD: Send Message"
       },
       {
-        "command": "gsd.cycleModel",
-        "title": "GSD: Cycle Model"
+        "command": "sdd.cycleModel",
+        "title": "SDD: Cycle Model"
       },
       {
-        "command": "gsd.cycleThinking",
-        "title": "GSD: Cycle Thinking Level"
+        "command": "sdd.cycleThinking",
+        "title": "SDD: Cycle Thinking Level"
       },
       {
-        "command": "gsd.compact",
-        "title": "GSD: Compact Context"
+        "command": "sdd.compact",
+        "title": "SDD: Compact Context"
       },
       {
-        "command": "gsd.abort",
-        "title": "GSD: Abort Current Operation"
+        "command": "sdd.abort",
+        "title": "SDD: Abort Current Operation"
       },
       {
-        "command": "gsd.exportHtml",
-        "title": "GSD: Export Conversation as HTML"
+        "command": "sdd.exportHtml",
+        "title": "SDD: Export Conversation as HTML"
       },
       {
-        "command": "gsd.sessionStats",
-        "title": "GSD: Show Session Stats"
+        "command": "sdd.sessionStats",
+        "title": "SDD: Show Session Stats"
       },
       {
-        "command": "gsd.runBash",
-        "title": "GSD: Run Bash Command"
+        "command": "sdd.runBash",
+        "title": "SDD: Run Bash Command"
       },
       {
-        "command": "gsd.switchModel",
-        "title": "GSD: Switch Model"
+        "command": "sdd.switchModel",
+        "title": "SDD: Switch Model"
       },
       {
-        "command": "gsd.setThinking",
-        "title": "GSD: Set Thinking Level"
+        "command": "sdd.setThinking",
+        "title": "SDD: Set Thinking Level"
       },
       {
-        "command": "gsd.steer",
-        "title": "GSD: Steer Agent"
+        "command": "sdd.steer",
+        "title": "SDD: Steer Agent"
       },
       {
-        "command": "gsd.listCommands",
-        "title": "GSD: List Available Commands"
+        "command": "sdd.listCommands",
+        "title": "SDD: List Available Commands"
       }
     ],
     "keybindings": [
       {
-        "command": "gsd.newSession",
+        "command": "sdd.newSession",
         "key": "ctrl+shift+g ctrl+shift+n",
         "mac": "cmd+shift+g cmd+shift+n"
       },
       {
-        "command": "gsd.cycleModel",
+        "command": "sdd.cycleModel",
         "key": "ctrl+shift+g ctrl+shift+m",
         "mac": "cmd+shift+g cmd+shift+m"
       },
       {
-        "command": "gsd.cycleThinking",
+        "command": "sdd.cycleThinking",
         "key": "ctrl+shift+g ctrl+shift+t",
         "mac": "cmd+shift+g cmd+shift+t"
       }
@@ -123,44 +123,44 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "gsd",
-          "title": "GSD",
+          "id": "sdd",
+          "title": "SDD",
           "icon": "$(hubot)"
         }
       ]
     },
     "views": {
-      "gsd": [
+      "sdd": [
         {
           "type": "webview",
-          "id": "gsd-sidebar",
-          "name": "GSD Agent"
+          "id": "sdd-sidebar",
+          "name": "SDD Agent"
         }
       ]
     },
     "chatParticipants": [
       {
-        "id": "gsd.agent",
-        "name": "gsd",
-        "fullName": "GSD Agent",
-        "description": "GSD-2 coding agent",
+        "id": "sdd.agent",
+        "name": "sdd",
+        "fullName": "SDD Agent",
+        "description": "SDD coding agent",
         "isSticky": true
       }
     ],
     "configuration": {
-      "title": "GSD",
+      "title": "SDD",
       "properties": {
-        "gsd.binaryPath": {
+        "sdd.binaryPath": {
           "type": "string",
-          "default": "gsd",
-          "description": "Path to the GSD binary"
+          "default": "sdd",
+          "description": "Path to the SDD binary"
         },
-        "gsd.autoStart": {
+        "sdd.autoStart": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically start the GSD agent when the extension activates"
+          "description": "Automatically start the SDD agent when the extension activates"
         },
-        "gsd.autoCompaction": {
+        "sdd.autoCompaction": {
           "type": "boolean",
           "default": true,
           "description": "Enable automatic context compaction"

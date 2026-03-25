@@ -29,7 +29,7 @@ function registerTempCleanup(): void {
 		}
 	});
 }
-import { processStreamChunk, type StreamState } from "@gsd/native";
+import { processStreamChunk, type StreamState } from "@sdd/native";
 import { getShellConfig, getShellEnv, killProcessTree, sanitizeCommand } from "../utils/shell.js";
 import type { BashOperations } from "./tools/bash.js";
 import { DEFAULT_MAX_BYTES, truncateTail } from "./tools/truncate.js";

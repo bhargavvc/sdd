@@ -1,5 +1,5 @@
 /**
- * GSD Welcome Screen
+ * SDD Welcome Screen
  *
  * Two-panel bar layout: full-width accent bars at top/bottom (matching the
  * auto-mode progress widget style), logo left (fixed width), info right.
@@ -8,7 +8,7 @@
 
 import os from 'node:os'
 import chalk from 'chalk'
-import { GSD_LOGO } from './logo.js'
+import { SDD_LOGO } from './logo.js'
 
 export interface WelcomeScreenOptions {
   version: string
@@ -41,7 +41,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Narrow terminal fallback
   if (termWidth < 70) {
-    process.stderr.write(`\n  Get Shit Done v${version}\n  ${shortCwd}\n\n`)
+    process.stderr.write(`\n  Spec-Driven Development v${version}\n  ${shortCwd}\n\n`)
     return
   }
 
@@ -55,10 +55,10 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
   const H = '─', DV = '│', DS = '├'
 
   // ── Left rows: blank + 6 logo lines + blank (8 total) ───────────────────────
-  const leftRows = ['', ...GSD_LOGO, '']
+  const leftRows = ['', ...SDD_LOGO, '']
 
   // ── Right rows (8 total, null = divider) ────────────────────────────────────
-  const titleLeft  = `  ${chalk.bold('Get Shit Done')}`
+  const titleLeft  = `  ${chalk.bold('Spec-Driven Development')}`
   const titleRight = chalk.dim(`v${version}`)
   const titleFill  = RIGHT_INNER - visLen(titleLeft) - visLen(titleRight)
   const titleRow   = titleLeft + ' '.repeat(Math.max(1, titleFill)) + titleRight
@@ -72,7 +72,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Tools left, hint right-aligned on the same row
   const toolsLeft  = toolParts.length > 0 ? chalk.dim('  ' + toolParts.join('  ·  ')) : ''
-  const hintRight  = chalk.dim('/gsd to begin  ·  /gsd help')
+  const hintRight  = chalk.dim('/sdd to begin  ·  /sdd help')
   const footerFill = RIGHT_INNER - visLen(toolsLeft) - visLen(hintRight)
   const footerRow  = toolsLeft + ' '.repeat(Math.max(1, footerFill)) + hintRight
 

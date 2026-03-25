@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
-import { GsdClient, ThinkingLevel } from "./gsd-client.js";
+import { SddClient, ThinkingLevel } from "./sdd-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
-import { GsdSidebarProvider } from "./sidebar.js";
+import { SddSidebarProvider } from "./sidebar.js";
 
-let client: GsdClient | undefined;
-let sidebarProvider: GsdSidebarProvider | undefined;
+let client: SddClient | undefined;
+let sidebarProvider: SddSidebarProvider | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
-		vscode.window.showWarningMessage("GSD agent is not running.");
+		vscode.window.showWarningMessage("SDD agent is not running.");
 		return false;
 	}
 	return true;
@@ -20,15 +20,15 @@ function handleError(err: unknown, context: string): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-	const config = vscode.workspace.getConfiguration("gsd");
-	const binaryPath = config.get<string>("binaryPath", "gsd");
+	const config = vscode.workspace.getConfiguration("sdd");
+	const binaryPath = config.get<string>("binaryPath", "sdd");
 	const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
-	client = new GsdClient(binaryPath, cwd);
+	client = new SddClient(binaryPath, cwd);
 	context.subscriptions.push(client);
 
 	// Log stderr to an output channel
-	const outputChannel = vscode.window.createOutputChannel("GSD-2 Agent");
+	const outputChannel = vscode.window.createOutputChannel("SDD Agent");
 	context.subscriptions.push(outputChannel);
 
 	client.onError((msg) => {
@@ -37,18 +37,18 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	client.onConnectionChange((connected) => {
 		if (connected) {
-			vscode.window.setStatusBarMessage("$(hubot) GSD connected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) SDD connected", 3000);
 		} else {
-			vscode.window.setStatusBarMessage("$(hubot) GSD disconnected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) SDD disconnected", 3000);
 		}
 	});
 
 	// -- Sidebar -----------------------------------------------------------
 
-	sidebarProvider = new GsdSidebarProvider(context.extensionUri, client);
+	sidebarProvider = new SddSidebarProvider(context.extensionUri, client);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
-			GsdSidebarProvider.viewId,
+			SddSidebarProvider.viewId,
 			sidebarProvider,
 		),
 	);
@@ -61,37 +61,37 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Start
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.start", async () => {
+		vscode.commands.registerCommand("sdd.start", async () => {
 			try {
 				await client!.start();
 				// Apply auto-compaction setting
-				const autoCompaction = vscode.workspace.getConfiguration("gsd").get<boolean>("autoCompaction", true);
+				const autoCompaction = vscode.workspace.getConfiguration("sdd").get<boolean>("autoCompaction", true);
 				await client!.setAutoCompaction(autoCompaction).catch(() => {});
 				sidebarProvider?.refresh();
-				vscode.window.showInformationMessage("GSD agent started.");
+				vscode.window.showInformationMessage("SDD agent started.");
 			} catch (err) {
-				handleError(err, "Failed to start GSD");
+				handleError(err, "Failed to start SDD");
 			}
 		}),
 	);
 
 	// Stop
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.stop", async () => {
+		vscode.commands.registerCommand("sdd.stop", async () => {
 			await client!.stop();
 			sidebarProvider?.refresh();
-			vscode.window.showInformationMessage("GSD agent stopped.");
+			vscode.window.showInformationMessage("SDD agent stopped.");
 		}),
 	);
 
 	// New Session
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.newSession", async () => {
+		vscode.commands.registerCommand("sdd.newSession", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.newSession();
 				sidebarProvider?.refresh();
-				vscode.window.showInformationMessage("New GSD session started.");
+				vscode.window.showInformationMessage("New SDD session started.");
 			} catch (err) {
 				handleError(err, "Failed to start new session");
 			}
@@ -100,10 +100,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Send Message
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.sendMessage", async () => {
+		vscode.commands.registerCommand("sdd.sendMessage", async () => {
 			if (!requireConnected()) return;
 			const message = await vscode.window.showInputBox({
-				prompt: "Enter message for GSD",
+				prompt: "Enter message for SDD",
 				placeHolder: "What should I do?",
 			});
 			if (!message) return;
@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Abort
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.abort", async () => {
+		vscode.commands.registerCommand("sdd.abort", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.abort();
@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Cycle Model
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.cycleModel", async () => {
+		vscode.commands.registerCommand("sdd.cycleModel", async () => {
 			if (!requireConnected()) return;
 			try {
 				const result = await client!.cycleModel();
@@ -150,7 +150,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Switch Model (QuickPick)
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.switchModel", async () => {
+		vscode.commands.registerCommand("sdd.switchModel", async () => {
 			if (!requireConnected()) return;
 			try {
 				const models = await client!.getAvailableModels();
@@ -179,7 +179,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Cycle Thinking Level
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.cycleThinking", async () => {
+		vscode.commands.registerCommand("sdd.cycleThinking", async () => {
 			if (!requireConnected()) return;
 			try {
 				const result = await client!.cycleThinkingLevel();
@@ -197,7 +197,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Set Thinking Level (QuickPick)
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.setThinking", async () => {
+		vscode.commands.registerCommand("sdd.setThinking", async () => {
 			if (!requireConnected()) return;
 			const levels: ThinkingLevel[] = ["off", "low", "medium", "high"];
 			const selected = await vscode.window.showQuickPick(levels, {
@@ -216,7 +216,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Compact Context
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.compact", async () => {
+		vscode.commands.registerCommand("sdd.compact", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.compact();
@@ -230,11 +230,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Export HTML
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.exportHtml", async () => {
+		vscode.commands.registerCommand("sdd.exportHtml", async () => {
 			if (!requireConnected()) return;
 			try {
 				const saveUri = await vscode.window.showSaveDialog({
-					defaultUri: vscode.Uri.file("gsd-conversation.html"),
+					defaultUri: vscode.Uri.file("sdd-conversation.html"),
 					filters: { "HTML Files": ["html"] },
 				});
 				const outputPath = saveUri?.fsPath;
@@ -248,7 +248,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Session Stats
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.sessionStats", async () => {
+		vscode.commands.registerCommand("sdd.sessionStats", async () => {
 			if (!requireConnected()) return;
 			try {
 				const stats = await client!.getSessionStats();
@@ -273,7 +273,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Run Bash Command
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.runBash", async () => {
+		vscode.commands.registerCommand("sdd.runBash", async () => {
 			if (!requireConnected()) return;
 			const command = await vscode.window.showInputBox({
 				prompt: "Enter bash command to execute",
@@ -301,7 +301,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Steer Agent
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.steer", async () => {
+		vscode.commands.registerCommand("sdd.steer", async () => {
 			if (!requireConnected()) return;
 			const message = await vscode.window.showInputBox({
 				prompt: "Enter steering message (interrupts current operation)",
@@ -318,7 +318,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// List Available Commands
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.listCommands", async () => {
+		vscode.commands.registerCommand("sdd.listCommands", async () => {
 			if (!requireConnected()) return;
 			try {
 				const commands = await client!.getCommands();
@@ -347,7 +347,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Auto-start ---------------------------------------------------------
 
 	if (config.get<boolean>("autoStart", false)) {
-		vscode.commands.executeCommand("gsd.start");
+		vscode.commands.executeCommand("sdd.start");
 	}
 }
 

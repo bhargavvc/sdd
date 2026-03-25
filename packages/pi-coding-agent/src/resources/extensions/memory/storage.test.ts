@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { MemoryStorage } from "./storage.js";
 
 function makeTmpDir(): string {
-	return mkdtempSync(join(tmpdir(), "gsd-memory-storage-test-"));
+	return mkdtempSync(join(tmpdir(), "sdd-memory-storage-test-"));
 }
 
 function wait(ms: number): Promise<void> {

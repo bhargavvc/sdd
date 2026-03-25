@@ -74,7 +74,7 @@ export async function runRpcMode(session: AgentSession): Promise<never> {
 	// Shutdown request flag
 	let shutdownRequested = false;
 
-	const embeddedTerminalEnabled = process.env.GSD_WEB_BRIDGE_TUI === "1";
+	const embeddedTerminalEnabled = process.env.SDD_WEB_BRIDGE_TUI === "1";
 	const remoteTerminal = embeddedTerminalEnabled
 		? new RemoteTerminal({
 				onWrite: (data) => {

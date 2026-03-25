@@ -8,8 +8,8 @@
  * All provider logic lives in provider.ts (S01) — this is pure UI wiring.
  */
 
-import type { ExtensionAPI } from '@gsd/pi-coding-agent'
-import type { AutocompleteItem } from '@gsd/pi-tui'
+import type { ExtensionAPI } from '@sdd/pi-coding-agent'
+import type { AutocompleteItem } from '@sdd/pi-tui'
 import {
   getTavilyApiKey,
   getBraveApiKey,

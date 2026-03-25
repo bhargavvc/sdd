@@ -6,8 +6,8 @@ resolver = "2"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-authors = ["GSD Contributors"]
-repository = "https://github.com/gsd-build/gsd-2"
+authors = ["SDD Contributors"]
+repository = "https://github.com/bhargavvc/sdd"
 
 [profile.release]
 opt-level = 3

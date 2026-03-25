@@ -8,7 +8,7 @@
 
 import type { Readable } from 'node:stream'
 
-import { RpcClient, attachJsonlLineReader, serializeJsonLine } from '@gsd/pi-coding-agent'
+import { RpcClient, attachJsonlLineReader, serializeJsonLine } from '@sdd/pi-coding-agent'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -88,7 +88,7 @@ export function formatProgress(event: Record<string, unknown>, verbose: boolean)
 
     case 'extension_ui_request':
       if (event.method === 'notify') {
-        return `[gsd]     ${event.message ?? ''}`
+        return `[sdd]     ${event.message ?? ''}`
       }
       if (event.method === 'setStatus') {
         return `[status]  ${event.message ?? ''}`

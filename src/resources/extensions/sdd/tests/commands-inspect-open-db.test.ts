@@ -1,0 +1,46 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import os from "node:os";
+import path from "node:path";
+import fs from "node:fs";
+
+import { handleInspect } from "../commands-inspect.ts";
+import { closeDatabase, openDatabase } from "../sdd-db.ts";
+
+test("/sdd inspect opens existing database when it was not yet opened in session", async () => {
+  closeDatabase();
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-inspect-db-"));
+  const prevCwd = process.cwd();
+
+  try {
+    const sddDir = path.join(tmp, ".sdd");
+    fs.mkdirSync(sddDir, { recursive: true });
+    const dbPath = path.join(sddDir, "sdd.db");
+
+    assert.equal(openDatabase(dbPath), true);
+    closeDatabase();
+
+    process.chdir(tmp);
+
+    const notifications: Array<{ message: string; level: string }> = [];
+    const ctx = {
+      ui: {
+        notify(message: string, level: string) {
+          notifications.push({ message, level });
+        },
+      },
+    } as any;
+
+    await handleInspect(ctx);
+
+    assert.equal(notifications.length, 1);
+    assert.equal(notifications[0].level, "info");
+    assert.match(notifications[0].message, /=== SDD Database Inspect ===/);
+    assert.doesNotMatch(notifications[0].message, /No SDD database available/);
+  } finally {
+    process.chdir(prevCwd);
+    closeDatabase();
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

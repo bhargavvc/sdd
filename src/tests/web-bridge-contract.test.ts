@@ -10,7 +10,7 @@ import { StringDecoder } from "node:string_decoder";
 const repoRoot = process.cwd();
 const bridge = await import("../web/bridge-service.ts");
 const onboarding = await import("../web/onboarding-service.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@sdd/pi-coding-agent");
 const bootRoute = await import("../../web/app/api/boot/route.ts");
 const commandRoute = await import("../../web/app/api/session/command/route.ts");
 const eventsRoute = await import("../../web/app/api/session/events/route.ts");
@@ -53,10 +53,10 @@ function attachJsonLineReader(stream: PassThrough, onLine: (line: string) => voi
 }
 
 function makeWorkspaceFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-bridge-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-bridge-"));
   const projectCwd = join(root, "project");
   const sessionsDir = join(root, "sessions");
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001");
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
 
@@ -141,20 +141,20 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo Milestone",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S01",
             title: "Demo Slice",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S01/S01-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S01/tasks",
+            planPath: ".sdd/milestones/M001/slices/S01/S01-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S01/tasks",
             tasks: [
               {
                 id: "T01",
                 title: "Wire boot",
                 done: false,
-                planPath: ".gsd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
+                planPath: ".sdd/milestones/M001/slices/S01/tasks/T01-PLAN.md",
               },
             ],
           },
@@ -294,9 +294,9 @@ test("/api/boot returns current-project workspace data, resumable sessions, onbo
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),
@@ -384,10 +384,10 @@ test("/api/boot uses the authoritative auto helper by default and stays snapshot
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: autoModulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: autoModulePath,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),
@@ -449,9 +449,9 @@ test("bridge service is a singleton for the project runtime and /api/session/com
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),
@@ -527,9 +527,9 @@ test("/api/session/events streams bridge status, agent events, and extension_ui_
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),
@@ -621,9 +621,9 @@ test("bridge command/runtime failures are inspectable and redact secret material
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),

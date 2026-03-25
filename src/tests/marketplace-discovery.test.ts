@@ -19,8 +19,8 @@ import {
   inspectPlugin,
   discoverMarketplace,
   resolvePluginRoot
-} from '../resources/extensions/gsd/marketplace-discovery.js';
-import { getMarketplaceFixtures } from '../resources/extensions/gsd/tests/marketplace-test-fixtures.js';
+} from '../resources/extensions/sdd/marketplace-discovery.js';
+import { getMarketplaceFixtures } from '../resources/extensions/sdd/tests/marketplace-test-fixtures.js';
 
 const fixtureSetup = getMarketplaceFixtures(import.meta.dirname);
 const fixtures = fixtureSetup.fixtures;

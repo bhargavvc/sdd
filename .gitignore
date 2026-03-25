@@ -1,5 +1,5 @@
 
-# ── GSD project state (development-only, lives in worktree branches) ──
+# ── SDD project state (development-only, lives in worktree branches) ──
 package-lock.json
 .claude/
 RELEASE-GUIDE.md
@@ -39,12 +39,12 @@ tmp/
 packages/*/dist/
 packages/*/node_modules/
 
-# ── GSD baseline (auto-generated) ──
+# ── SDD baseline (auto-generated) ──
 dist/
 !/pkg/dist/modes/
 !/pkg/dist/core/export-html/
 .bg_shell
-.gsd*.tgz
+.sdd*.tgz
 .artifacts/
 AGENTS.md
 .bg-shell/
@@ -53,12 +53,12 @@ TODOS.md
 .audits/
 docs/coherence-audit/
 
-# ── GSD project state (per-worktree, never committed) ──
-.gsd/
+# ── SDD project state (per-worktree, never committed) ──
+.sdd/
 
 # ── Stale lock files (npm is canonical) ──
 pnpm-lock.yaml
 bun.lock
 
-# ── GSD baseline (auto-generated) ──
-.gsd
+# ── SDD baseline (auto-generated) ──
+.sdd

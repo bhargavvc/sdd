@@ -42,7 +42,7 @@ export interface FixtureRecording {
  * Returns the current fixture mode from the environment.
  */
 export function getFixtureMode(): "record" | "replay" | "off" {
-  const mode = process.env.GSD_FIXTURE_MODE?.toLowerCase();
+  const mode = process.env.SDD_FIXTURE_MODE?.toLowerCase();
   if (mode === "record") return "record";
   if (mode === "replay") return "replay";
   return "off";
@@ -52,7 +52,7 @@ export function getFixtureMode(): "record" | "replay" | "off" {
  * Returns the fixture recordings directory path.
  */
 export function getFixtureDir(): string {
-  return process.env.GSD_FIXTURE_DIR || new URL("recordings", import.meta.url).pathname;
+  return process.env.SDD_FIXTURE_DIR || new URL("recordings", import.meta.url).pathname;
 }
 
 /**

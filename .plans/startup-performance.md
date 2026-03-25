@@ -1,15 +1,15 @@
-# GSD Startup Performance Analysis & Optimization Plan
+# SDD Startup Performance Analysis & Optimization Plan
 
 ## Measured Baseline (macOS, Node v25.6.1)
 
-### `gsd --version` (simplest possible path): **2.2 seconds**
+### `sdd --version` (simplest possible path): **2.2 seconds**
 
 | Phase | Time | Notes |
 |-------|------|-------|
 | Node.js process startup | ~160ms | Unavoidable |
 | loader.js top-level imports | ~13ms | fs, app-paths, logo |
 | undici import + proxy setup | ~200ms | EnvHttpProxyAgent |
-| **@gsd/pi-coding-agent barrel import** | **~970ms** | THE BOTTLENECK |
+| **@sdd/pi-coding-agent barrel import** | **~970ms** | THE BOTTLENECK |
 | cli.js other imports | ~3ms | resource-loader, wizard, etc. |
 | Arg parsing + version print | ~0ms | |
 | Measured wall time overhead | ~700ms | ESM resolution, gc, etc. |
@@ -18,7 +18,7 @@
 
 | Phase | Time | Notes |
 |-------|------|-------|
-| @gsd/pi-coding-agent import | ~750ms | (cached from loader measurement) |
+| @sdd/pi-coding-agent import | ~750ms | (cached from loader measurement) |
 | ensureManagedTools | ~0ms | No-op after first run |
 | AuthStorage + env keys | ~3ms | |
 | ModelRegistry | ~1ms | |
@@ -26,7 +26,7 @@
 | **initResources (cpSync)** | **~128ms** | Copies all extensions/skills/agents on every launch |
 | **resourceLoader.reload()** | **~2535ms** | jiti-compiles 17+ extensions from TypeScript |
 
-### Inside @gsd/pi-coding-agent (barrel import breakdown)
+### Inside @sdd/pi-coding-agent (barrel import breakdown)
 
 | Sub-module | Time | Notes |
 |------------|------|-------|
@@ -45,14 +45,14 @@
 ### 1. Extension JIT compilation via jiti (~2.5s)
 Every launch compiles 17+ TypeScript extensions to JavaScript using jiti. No caching (`moduleCache: false` is explicitly set). This is the single largest cost.
 
-### 2. Barrel import of @gsd/pi-coding-agent (~1s)
+### 2. Barrel import of @sdd/pi-coding-agent (~1s)
 `cli.js` line 1 does a barrel import pulling in ALL exports including all LLM provider SDKs, TUI components, theme system, compaction, blob store, etc.
 
 ### 3. Eager LLM SDK loading (~660ms inside barrel)
 All provider SDKs are imported at module evaluation time in `pi-ai/index.js`, even though only one provider is typically configured.
 
 ### 4. initResources copies files every launch (~128ms)
-`cpSync` with `force: true` copies all bundled resources to `~/.gsd/agent/` on every startup, even when nothing changed.
+`cpSync` with `force: true` copies all bundled resources to `~/.sdd/agent/` on every startup, even when nothing changed.
 
 ### 5. undici import (~200ms)
 Imported in loader.js for proxy support. Not needed for most users.
@@ -68,10 +68,10 @@ Parse argv BEFORE importing cli.js. In loader.js, check for `--version`/`-v` and
 
 **File**: `src/loader.ts`
 **Change**: Add arg check before `await import('./cli.js')`
-**Impact**: `gsd --version` goes from 2.2s → ~0.2s
+**Impact**: `sdd --version` goes from 2.2s → ~0.2s
 
 #### 1B. Skip initResources when unchanged
-Compare `managed-resources.json` version against current `GSD_VERSION`. If they match, skip the `cpSync` entirely.
+Compare `managed-resources.json` version against current `SDD_VERSION`. If they match, skip the `cpSync` entirely.
 
 **File**: `src/resource-loader.ts` → `initResources()`
 **Change**: Early return if versions match
@@ -153,5 +153,5 @@ Instead of one barrel export, provide separate entry points for core, interactiv
 
 | Scenario | Before | After (Phase 1-3) | After (All) |
 |----------|--------|-------------------|-------------|
-| `gsd --version` | 2.2s | **~0.2s** | ~0.2s |
+| `sdd --version` | 2.2s | **~0.2s** | ~0.2s |
 | Interactive startup | ~3.8s | **~1.5s** | **~0.8s** |

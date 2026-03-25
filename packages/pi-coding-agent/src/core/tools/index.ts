@@ -113,7 +113,7 @@ export {
 } from "../lsp/index.js";
 export type { LspServerStatus } from "../lsp/client.js";
 
-import type { AgentTool } from "@gsd/pi-agent-core";
+import type { AgentTool } from "@sdd/pi-agent-core";
 import { type BashToolOptions, bashTool, createBashTool } from "./bash.js";
 import { createEditTool, editTool } from "./edit.js";
 import { createFindTool, findTool } from "./find.js";

@@ -116,7 +116,7 @@ export async function detectLspmux(): Promise<LspmuxState> {
 		return cachedState;
 	}
 
-	if (process.env.PI_DISABLE_LSPMUX === "1" || process.env.GSD_DISABLE_LSPMUX === "1") {
+	if (process.env.PI_DISABLE_LSPMUX === "1" || process.env.SDD_DISABLE_LSPMUX === "1") {
 		cachedState = { available: false, running: false, binaryPath: null, config: null };
 		cacheTimestamp = now;
 		return cachedState;

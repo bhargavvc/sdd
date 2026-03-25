@@ -36,7 +36,7 @@ const {
   dispatchBrowserSlashCommand,
 } = await import("../../web/lib/browser-slash-command-dispatch.ts")
 
-const { GSDWorkspaceStore } = await import("../../web/lib/gsd-workspace-store.tsx")
+const { SDDWorkspaceStore } = await import("../../web/lib/sdd-workspace-store.tsx")
 
 // ─── Block 1: Type exports (R103, R104, R105) ───────────────────────────────
 
@@ -56,7 +56,7 @@ describe("diagnostics type exports", () => {
 
   it("ForensicReport has all required fields", () => {
     const report: ForensicReport = {
-      gsdVersion: "1.0.0",
+      sddVersion: "1.0.0",
       timestamp: new Date().toISOString(),
       basePath: "/tmp/test",
       activeMilestone: "M001",
@@ -70,7 +70,7 @@ describe("diagnostics type exports", () => {
       completedKeyCount: 0,
       metrics: null,
     }
-    assert.equal(typeof report.gsdVersion, "string")
+    assert.equal(typeof report.sddVersion, "string")
     assert.equal(typeof report.timestamp, "string")
     assert.deepEqual(report.anomalies, [])
     assert.deepEqual(report.recentUnits, [])
@@ -249,35 +249,35 @@ describe("diagnostics contract state", () => {
 // ─── Block 3: Dispatch→surface pipeline (R103, R104, R105) ──────────────────
 
 describe("diagnostics dispatch→surface pipeline", () => {
-  it("/gsd forensics dispatches to gsd-forensics surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd forensics", {})
+  it("/sdd forensics dispatches to sdd-forensics surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd forensics", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-forensics")
+      assert.equal(outcome.surface, "sdd-forensics")
     }
   })
 
-  it("/gsd doctor dispatches to gsd-doctor surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd doctor", {})
+  it("/sdd doctor dispatches to sdd-doctor surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd doctor", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-doctor")
+      assert.equal(outcome.surface, "sdd-doctor")
     }
   })
 
-  it("/gsd skill-health dispatches to gsd-skill-health surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd skill-health", {})
+  it("/sdd skill-health dispatches to sdd-skill-health surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd skill-health", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-skill-health")
+      assert.equal(outcome.surface, "sdd-skill-health")
     }
   })
 
-  it("/gsd doctor fix dispatches to gsd-doctor surface with args", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd doctor fix", {})
+  it("/sdd doctor fix dispatches to sdd-doctor surface with args", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd doctor fix", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-doctor")
+      assert.equal(outcome.surface, "sdd-doctor")
     }
   })
 })
@@ -285,19 +285,19 @@ describe("diagnostics dispatch→surface pipeline", () => {
 // ─── Block 4: Surface→section mapping (R103, R104, R105) ────────────────────
 
 describe("diagnostics surface→section mapping", () => {
-  it("gsd-forensics surface maps to gsd-forensics section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-forensics" as any } as any)
-    assert.equal(section, "gsd-forensics")
+  it("sdd-forensics surface maps to sdd-forensics section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "sdd-forensics" as any } as any)
+    assert.equal(section, "sdd-forensics")
   })
 
-  it("gsd-doctor surface maps to gsd-doctor section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-doctor" as any } as any)
-    assert.equal(section, "gsd-doctor")
+  it("sdd-doctor surface maps to sdd-doctor section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "sdd-doctor" as any } as any)
+    assert.equal(section, "sdd-doctor")
   })
 
-  it("gsd-skill-health surface maps to gsd-skill-health section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-skill-health" as any } as any)
-    assert.equal(section, "gsd-skill-health")
+  it("sdd-skill-health surface maps to sdd-skill-health section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "sdd-skill-health" as any } as any)
+    assert.equal(section, "sdd-skill-health")
   })
 })
 
@@ -305,42 +305,42 @@ describe("diagnostics surface→section mapping", () => {
 //
 // These methods are arrow-function class fields (instance properties, not on
 // the prototype). We verify via compile-time type assertion that the method
-// names exist on GSDWorkspaceStore, then do a runtime check that the class
+// names exist on SDDWorkspaceStore, then do a runtime check that the class
 // constructor itself is exported and usable.
 
 // Compile-time assertion: if any of these method names were removed from the
 // class, TypeScript would error on these type aliases.
-type _AssertLoadForensics = InstanceType<typeof GSDWorkspaceStore>["loadForensicsDiagnostics"]
-type _AssertLoadDoctor = InstanceType<typeof GSDWorkspaceStore>["loadDoctorDiagnostics"]
-type _AssertApplyFixes = InstanceType<typeof GSDWorkspaceStore>["applyDoctorFixes"]
-type _AssertLoadSkillHealth = InstanceType<typeof GSDWorkspaceStore>["loadSkillHealthDiagnostics"]
+type _AssertLoadForensics = InstanceType<typeof SDDWorkspaceStore>["loadForensicsDiagnostics"]
+type _AssertLoadDoctor = InstanceType<typeof SDDWorkspaceStore>["loadDoctorDiagnostics"]
+type _AssertApplyFixes = InstanceType<typeof SDDWorkspaceStore>["applyDoctorFixes"]
+type _AssertLoadSkillHealth = InstanceType<typeof SDDWorkspaceStore>["loadSkillHealthDiagnostics"]
 
 describe("diagnostics store methods", () => {
-  it("GSDWorkspaceStore is a constructable class export", () => {
-    assert.equal(typeof GSDWorkspaceStore, "function", "GSDWorkspaceStore should be a class/function export")
+  it("SDDWorkspaceStore is a constructable class export", () => {
+    assert.equal(typeof SDDWorkspaceStore, "function", "SDDWorkspaceStore should be a class/function export")
   })
 
   it("loadForensicsDiagnostics is a recognized method name on the store type", () => {
     // The compile-time type alias _AssertLoadForensics above already proves the
     // field exists. At runtime, arrow-field methods are on instances, not
     // prototype. We verify the field name appears in the actions Pick type by
-    // checking the useGSDWorkspaceActions hook references it in the exports.
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadForensicsDiagnostics"> = "loadForensicsDiagnostics"
+    // checking the useSDDWorkspaceActions hook references it in the exports.
+    const methodName: keyof Pick<InstanceType<typeof SDDWorkspaceStore>, "loadForensicsDiagnostics"> = "loadForensicsDiagnostics"
     assert.equal(methodName, "loadForensicsDiagnostics")
   })
 
   it("loadDoctorDiagnostics is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadDoctorDiagnostics"> = "loadDoctorDiagnostics"
+    const methodName: keyof Pick<InstanceType<typeof SDDWorkspaceStore>, "loadDoctorDiagnostics"> = "loadDoctorDiagnostics"
     assert.equal(methodName, "loadDoctorDiagnostics")
   })
 
   it("applyDoctorFixes is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "applyDoctorFixes"> = "applyDoctorFixes"
+    const methodName: keyof Pick<InstanceType<typeof SDDWorkspaceStore>, "applyDoctorFixes"> = "applyDoctorFixes"
     assert.equal(methodName, "applyDoctorFixes")
   })
 
   it("loadSkillHealthDiagnostics is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadSkillHealthDiagnostics"> = "loadSkillHealthDiagnostics"
+    const methodName: keyof Pick<InstanceType<typeof SDDWorkspaceStore>, "loadSkillHealthDiagnostics"> = "loadSkillHealthDiagnostics"
     assert.equal(methodName, "loadSkillHealthDiagnostics")
   })
 })

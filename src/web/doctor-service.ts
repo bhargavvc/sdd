@@ -8,14 +8,14 @@ import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 import type { DoctorReport, DoctorFixResult } from "../../web/lib/diagnostics-types.ts"
 
 const DOCTOR_MAX_BUFFER = 2 * 1024 * 1024
-const DOCTOR_MODULE_ENV = "GSD_DOCTOR_MODULE"
+const DOCTOR_MODULE_ENV = "SDD_DOCTOR_MODULE"
 
 function resolveDoctorModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "doctor.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "doctor.ts")
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 function validateModulePaths(
@@ -53,8 +53,8 @@ function runDoctorChild(
         env: {
           ...process.env,
           [DOCTOR_MODULE_ENV]: doctorModulePath,
-          GSD_DOCTOR_BASE: projectCwd,
-          GSD_DOCTOR_SCOPE: scope ?? "",
+          SDD_DOCTOR_BASE: projectCwd,
+          SDD_DOCTOR_SCOPE: scope ?? "",
         },
         maxBuffer: DOCTOR_MAX_BUFFER,
       },
@@ -84,9 +84,9 @@ export async function collectDoctorData(scope?: string, projectCwdOverride?: str
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${DOCTOR_MODULE_ENV}).href);`,
-    'const basePath = process.env.GSD_DOCTOR_BASE;',
-    'const scope = process.env.GSD_DOCTOR_SCOPE || undefined;',
-    'const report = await mod.runGSDDoctor(basePath, { fix: false, scope });',
+    'const basePath = process.env.SDD_DOCTOR_BASE;',
+    'const scope = process.env.SDD_DOCTOR_SCOPE || undefined;',
+    'const report = await mod.runSDDDoctor(basePath, { fix: false, scope });',
     'const summary = mod.summarizeDoctorIssues(report.issues);',
     'const result = {',
     '  ok: report.ok,',
@@ -125,9 +125,9 @@ export async function applyDoctorFixes(scope?: string, projectCwdOverride?: stri
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${DOCTOR_MODULE_ENV}).href);`,
-    'const basePath = process.env.GSD_DOCTOR_BASE;',
-    'const scope = process.env.GSD_DOCTOR_SCOPE || undefined;',
-    'const report = await mod.runGSDDoctor(basePath, { fix: true, scope });',
+    'const basePath = process.env.SDD_DOCTOR_BASE;',
+    'const scope = process.env.SDD_DOCTOR_SCOPE || undefined;',
+    'const report = await mod.runSDDDoctor(basePath, { fix: true, scope });',
     'const result = {',
     '  ok: report.ok,',
     '  fixesApplied: report.fixesApplied,',

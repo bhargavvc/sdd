@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { getBudgetAlertLevel, getNewBudgetAlertLevel, getBudgetEnforcementAction } from "../resources/extensions/gsd/auto-budget.js";
+import { getBudgetAlertLevel, getNewBudgetAlertLevel, getBudgetEnforcementAction } from "../resources/extensions/sdd/auto-budget.js";
 
 describe("auto-budget", () => {
   describe("getBudgetAlertLevel", () => {

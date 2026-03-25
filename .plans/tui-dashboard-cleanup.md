@@ -7,11 +7,11 @@ the operator experience during auto-mode runs.
 
 ## Scope
 Files in scope:
-- `src/resources/extensions/gsd/auto-dashboard.ts`
-- `src/resources/extensions/gsd/dashboard-overlay.ts`
-- `src/resources/extensions/gsd/visualizer-overlay.ts`
-- `src/resources/extensions/gsd/visualizer-views.ts`
-- `src/resources/extensions/gsd/visualizer-data.ts`
+- `src/resources/extensions/sdd/auto-dashboard.ts`
+- `src/resources/extensions/sdd/dashboard-overlay.ts`
+- `src/resources/extensions/sdd/visualizer-overlay.ts`
+- `src/resources/extensions/sdd/visualizer-views.ts`
+- `src/resources/extensions/sdd/visualizer-data.ts`
 - `src/resources/extensions/shared/ui.ts`
 - New: `src/resources/extensions/shared/format-utils.ts`
 - Test files for all of the above

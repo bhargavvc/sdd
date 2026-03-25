@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { showInterviewRound, type Question, type RoundResult } from "../shared/tui.js";
 
 export default function createSlashCommand(pi: ExtensionAPI) {
@@ -211,8 +211,8 @@ function sendPrompt(description: string, result: RoundResult, pi: ExtensionAPI):
 ${contextSection}
 Write the complete file contents for two files:
 
-1. \`~/.gsd/agent/extensions/slash-commands/<name>.ts\` — the command implementation
-2. Update \`~/.gsd/agent/extensions/slash-commands/index.ts\` — import and register the new command alongside existing ones
+1. \`~/.sdd/agent/extensions/slash-commands/<name>.ts\` — the command implementation
+2. Update \`~/.sdd/agent/extensions/slash-commands/index.ts\` — import and register the new command alongside existing ones
 
 Rules you must follow exactly:
 - Command registration: \`pi.registerCommand("name", { description, handler })\`
@@ -225,7 +225,7 @@ Rules you must follow exactly:
 - To show a text input dialog: \`await ctx.ui.input("prompt", "placeholder")\` — returns the string or null
 - \`pi\` is captured in closure from the outer \`export default function(pi: ExtensionAPI)\` — use it freely inside the handler
 - No \`ctx.session\`, no \`ctx.sendMessage\`, no \`args[]\` array — these do not exist
-- Import type: \`import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";\`
+- Import type: \`import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";\`
 - Export default: \`export default function <camelCaseName>(pi: ExtensionAPI) { ... }\`
 
 After writing the files, run \`/reload\` to load the new command.`;

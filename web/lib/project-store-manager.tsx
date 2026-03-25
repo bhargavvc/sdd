@@ -1,10 +1,10 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { GSDWorkspaceStore } from "./gsd-workspace-store"
+import { SDDWorkspaceStore } from "./sdd-workspace-store"
 
 /**
- * ProjectStoreManager maintains a Map<string, GSDWorkspaceStore> of per-project
+ * ProjectStoreManager maintains a Map<string, SDDWorkspaceStore> of per-project
  * stores with SSE lifecycle management. Only the active project's store keeps its
  * SSE connection open — background stores are disconnected to save resources.
  *
@@ -12,7 +12,7 @@ import { GSDWorkspaceStore } from "./gsd-workspace-store"
  * reactively read the active project path.
  */
 export class ProjectStoreManager {
-  private stores = new Map<string, GSDWorkspaceStore>()
+  private stores = new Map<string, SDDWorkspaceStore>()
   private activeProjectCwd: string | null = null
   private listeners = new Set<() => void>()
 
@@ -27,7 +27,7 @@ export class ProjectStoreManager {
 
   // ─── Public API ──────────────────────────────────────────────────────────
 
-  getActiveStore(): GSDWorkspaceStore | null {
+  getActiveStore(): SDDWorkspaceStore | null {
     if (!this.activeProjectCwd) return null
     return this.stores.get(this.activeProjectCwd) ?? null
   }
@@ -40,7 +40,7 @@ export class ProjectStoreManager {
    * Switch to the given project. Disconnects SSE on the previous active store,
    * creates a new store if needed (lazily), reconnects SSE on re-activated stores.
    */
-  switchProject(projectCwd: string): GSDWorkspaceStore {
+  switchProject(projectCwd: string): SDDWorkspaceStore {
     // Disconnect SSE on current active store
     if (this.activeProjectCwd && this.activeProjectCwd !== projectCwd) {
       const prev = this.stores.get(this.activeProjectCwd)
@@ -50,7 +50,7 @@ export class ProjectStoreManager {
     // Get or create store for new project
     let store = this.stores.get(projectCwd)
     if (!store) {
-      store = new GSDWorkspaceStore(projectCwd)
+      store = new SDDWorkspaceStore(projectCwd)
       this.stores.set(projectCwd, store)
       store.start()
     } else {

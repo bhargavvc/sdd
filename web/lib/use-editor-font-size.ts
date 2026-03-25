@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 
-const STORAGE_KEY = "gsd-editor-font-size"
+const STORAGE_KEY = "sdd-editor-font-size"
 const DEFAULT_SIZE = 14
 const CHANGE_EVENT = "editor-font-size-changed"
 
@@ -10,7 +10,7 @@ const CHANGE_EVENT = "editor-font-size-changed"
  * Persists editor font size to localStorage and syncs across components/tabs.
  *
  * Observability:
- *   - `localStorage.getItem('gsd-editor-font-size')` → current persisted value
+ *   - `localStorage.getItem('sdd-editor-font-size')` → current persisted value
  *   - Window event `editor-font-size-changed` fires on every local change
  *   - `storage` events sync across tabs
  */

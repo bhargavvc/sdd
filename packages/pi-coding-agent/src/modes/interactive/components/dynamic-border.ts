@@ -1,4 +1,4 @@
-import type { Component } from "@gsd/pi-tui";
+import type { Component } from "@sdd/pi-tui";
 import { theme } from "../theme/theme.js";
 
 /**

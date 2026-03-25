@@ -13,8 +13,8 @@ const require = createRequire(import.meta.url);
 const addonDir = path.resolve(__dirname, "..", "..", "..", "..", "native", "addon");
 const platformTag = `${process.platform}-${process.arch}`;
 const candidates = [
-  path.join(addonDir, `gsd_engine.${platformTag}.node`),
-  path.join(addonDir, "gsd_engine.dev.node"),
+  path.join(addonDir, `sdd_engine.${platformTag}.node`),
+  path.join(addonDir, "sdd_engine.dev.node"),
 ];
 
 let native;
@@ -28,13 +28,13 @@ for (const candidate of candidates) {
 }
 
 if (!native) {
-  console.error("Native addon not found. Run `npm run build:native -w @gsd/native` first.");
+  console.error("Native addon not found. Run `npm run build:native -w @sdd/native` first.");
   process.exit(1);
 }
 
 describe("native fd: fuzzyFind()", () => {
   test("finds files matching a query", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "main.rs"), "fn main() {}");
@@ -52,7 +52,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("returns empty results for non-matching query", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "hello.txt"), "hello");
@@ -67,7 +67,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("respects maxResults limit", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     for (let i = 0; i < 10; i++) {
@@ -85,7 +85,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("directories have trailing slash and bonus score", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.mkdirSync(path.join(tmpDir, "models"));
@@ -103,7 +103,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("empty query returns all entries", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "a.txt"), "a");
@@ -123,7 +123,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("fuzzy subsequence matching works", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "MyComponentFile.tsx"), "export {}");
@@ -143,7 +143,7 @@ describe("native fd: fuzzyFind()", () => {
     const previousTtl = process.env.FS_SCAN_CACHE_TTL_MS;
     process.env.FS_SCAN_CACHE_TTL_MS = "10000";
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => {
       native.invalidateFsScanCache(tmpDir);
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -175,7 +175,7 @@ describe("native fd: fuzzyFind()", () => {
   });
 
   test("results are sorted by score descending", (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-fd-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-fd-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "main.ts"), "");

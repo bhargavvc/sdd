@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import type { ToolDeps } from "../state.js";
 
@@ -6,7 +6,7 @@ import type { ToolDeps } from "../state.js";
  * State persistence tools — save/restore cookies, localStorage, sessionStorage.
  */
 
-const STATE_DIR = ".gsd/browser-state";
+const STATE_DIR = ".sdd/browser-state";
 
 export function registerStatePersistenceTools(pi: ExtensionAPI, deps: ToolDeps): void {
 	// -------------------------------------------------------------------------
@@ -17,7 +17,7 @@ export function registerStatePersistenceTools(pi: ExtensionAPI, deps: ToolDeps):
 		label: "Browser Save State",
 		description:
 			"Save cookies, localStorage, and sessionStorage to disk so authenticated sessions survive browser restarts. " +
-			"State files are written to .gsd/browser-state/ and should be gitignored (may contain auth tokens). " +
+			"State files are written to .sdd/browser-state/ and should be gitignored (may contain auth tokens). " +
 			"Never displays secret values in output.",
 		parameters: Type.Object({
 			name: Type.Optional(

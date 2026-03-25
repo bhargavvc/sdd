@@ -1,11 +1,11 @@
 # Troubleshooting
 
-## `/gsd doctor`
+## `/sdd doctor`
 
-The built-in diagnostic tool validates `.gsd/` integrity:
+The built-in diagnostic tool validates `.sdd/` integrity:
 
 ```
-/gsd doctor
+/sdd doctor
 ```
 
 It checks:
@@ -25,13 +25,13 @@ It checks:
 - Stale cache after a crash — the in-memory file listing doesn't reflect new artifacts
 - The LLM didn't produce the expected artifact file
 
-**Fix:** Run `/gsd doctor` to repair state, then resume with `/gsd auto`. If the issue persists, check that the expected artifact file exists on disk.
+**Fix:** Run `/sdd doctor` to repair state, then resume with `/sdd auto`. If the issue persists, check that the expected artifact file exists on disk.
 
 ### Auto mode stops with "Loop detected"
 
 **Cause:** A unit failed to produce its expected artifact twice in a row.
 
-**Fix:** Check the task plan for clarity. If the plan is ambiguous, refine it manually, then `/gsd auto` to resume.
+**Fix:** Check the task plan for clarity. If the plan is ambiguous, refine it manually, then `/sdd auto` to resume.
 
 ### Wrong files in worktree
 
@@ -41,9 +41,9 @@ It checks:
 
 **Fix:** This was fixed in v2.14+. If you're on an older version, update. The dispatch prompt now includes explicit working directory instructions.
 
-### `command not found: gsd` after install
+### `command not found: sdd` after install
 
-**Symptoms:** `npm install -g gsd-pi` succeeds but `gsd` isn't found.
+**Symptoms:** `npm install -g sdd-pi` succeeds but `sdd` isn't found.
 
 **Cause:** npm's global bin directory isn't in your shell's `$PATH`.
 
@@ -59,14 +59,14 @@ echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**Workaround:** Run `npx gsd-pi` or `$(npm prefix -g)/bin/gsd` directly.
+**Workaround:** Run `npx sdd-pi` or `$(npm prefix -g)/bin/sdd` directly.
 
 **Common causes:**
 - **Homebrew Node** — `/opt/homebrew/bin` should be in PATH but sometimes isn't if Homebrew init is missing from your shell profile
 - **Version manager (nvm, fnm, mise)** — global bin is version-specific; ensure your version manager initializes in your shell config
-- **oh-my-zsh** — the `gitfast` plugin aliases `gsd` to `git svn dcommit`. Check with `alias gsd` and unalias if needed
+- **oh-my-zsh** — the `gitfast` plugin aliases `sdd` to `git svn dcommit`. Check with `alias sdd` and unalias if needed
 
-### `npm install -g gsd-pi` fails
+### `npm install -g sdd-pi` fails
 
 **Common causes:**
 - Missing workspace packages — fixed in v2.10.4+
@@ -77,7 +77,7 @@ source ~/.zshrc
 
 **Symptoms:** Auto mode pauses with a provider error (rate limit, server error, auth failure).
 
-**How GSD handles it (v2.26):**
+**How SDD handles it (v2.26):**
 
 | Error type | Auto-resume? | Delay |
 |-----------|-------------|-------|
@@ -85,7 +85,7 @@ source ~/.zshrc
 | Server error (500, 502, 503, "overloaded") | ✅ Yes | 30s |
 | Auth/billing ("unauthorized", "invalid key") | ❌ No | Manual resume |
 
-For transient errors, GSD pauses briefly and resumes automatically. For permanent errors, configure fallback models:
+For transient errors, SDD pauses briefly and resumes automatically. For permanent errors, configure fallback models:
 
 ```yaml
 models:
@@ -95,61 +95,61 @@ models:
       - openrouter/minimax/minimax-m2.5
 ```
 
-**Headless mode:** `gsd headless auto` auto-restarts the entire process on crash (default 3 attempts with exponential backoff). Combined with provider error auto-resume, this enables true overnight unattended execution.
+**Headless mode:** `sdd headless auto` auto-restarts the entire process on crash (default 3 attempts with exponential backoff). Combined with provider error auto-resume, this enables true overnight unattended execution.
 
 ### Budget ceiling reached
 
 **Symptoms:** Auto mode pauses with "Budget ceiling reached."
 
-**Fix:** Increase `budget_ceiling` in preferences, or switch to `budget` token profile to reduce per-unit cost, then resume with `/gsd auto`.
+**Fix:** Increase `budget_ceiling` in preferences, or switch to `budget` token profile to reduce per-unit cost, then resume with `/sdd auto`.
 
 ### Stale lock file
 
 **Symptoms:** Auto mode won't start, says another session is running.
 
-**Fix:** GSD automatically detects stale locks — if the owning PID is dead, the lock is cleaned up and re-acquired on the next `/gsd auto`. This includes stranded `.gsd.lock/` directories left by `proper-lockfile` after crashes. If automatic recovery fails, delete `.gsd/auto.lock` and the `.gsd.lock/` directory manually:
+**Fix:** SDD automatically detects stale locks — if the owning PID is dead, the lock is cleaned up and re-acquired on the next `/sdd auto`. This includes stranded `.sdd.lock/` directories left by `proper-lockfile` after crashes. If automatic recovery fails, delete `.sdd/auto.lock` and the `.sdd.lock/` directory manually:
 
 ```bash
-rm -f .gsd/auto.lock
-rm -rf "$(dirname .gsd)/.gsd.lock"
+rm -f .sdd/auto.lock
+rm -rf "$(dirname .sdd)/.sdd.lock"
 ```
 
 ### Git merge conflicts
 
-**Symptoms:** Worktree merge fails on `.gsd/` files.
+**Symptoms:** Worktree merge fails on `.sdd/` files.
 
-**Fix:** GSD auto-resolves conflicts on `.gsd/` runtime files. For content conflicts in code files, the LLM is given an opportunity to resolve them via a fix-merge session. If that fails, manual resolution is needed.
+**Fix:** SDD auto-resolves conflicts on `.sdd/` runtime files. For content conflicts in code files, the LLM is given an opportunity to resolve them via a fix-merge session. If that fails, manual resolution is needed.
 
 ### Pre-dispatch says the milestone integration branch no longer exists
 
-**Symptoms:** Auto mode or `/gsd doctor` reports that a milestone recorded an integration branch that no longer exists in git.
+**Symptoms:** Auto mode or `/sdd doctor` reports that a milestone recorded an integration branch that no longer exists in git.
 
-**What it means:** The milestone's `.gsd/milestones/<MID>/<MID>-META.json` still points at the branch that was active when the milestone started, but that branch has since been renamed or deleted.
+**What it means:** The milestone's `.sdd/milestones/<MID>/<MID>-META.json` still points at the branch that was active when the milestone started, but that branch has since been renamed or deleted.
 
 **Current behavior:**
-- If GSD can deterministically recover to a safe branch, it no longer hard-stops auto mode.
+- If SDD can deterministically recover to a safe branch, it no longer hard-stops auto mode.
 - Safe fallbacks are:
   - explicit `git.main_branch` when configured and present
   - the repo's detected default integration branch (for example `main` or `master`)
-- In that case `/gsd doctor` reports a warning and `/gsd doctor fix` rewrites the stale metadata to the effective branch.
-- GSD still blocks when no safe fallback branch can be determined.
+- In that case `/sdd doctor` reports a warning and `/sdd doctor fix` rewrites the stale metadata to the effective branch.
+- SDD still blocks when no safe fallback branch can be determined.
 
 **Fix:**
-- Run `/gsd doctor fix` to rewrite the stale milestone metadata automatically when the fallback is obvious.
-- If GSD still blocks, recreate the missing branch or update your git preferences so `git.main_branch` points at a real branch.
+- Run `/sdd doctor fix` to rewrite the stale milestone metadata automatically when the fallback is obvious.
+- If SDD still blocks, recreate the missing branch or update your git preferences so `git.main_branch` points at a real branch.
 
-### Transient `EBUSY` / `EPERM` / `EACCES` while writing `.gsd/` files
+### Transient `EBUSY` / `EPERM` / `EACCES` while writing `.sdd/` files
 
-**Symptoms:** On Windows, auto mode or doctor occasionally fails while updating `.gsd/` files with errors like `EBUSY`, `EPERM`, or `EACCES`.
+**Symptoms:** On Windows, auto mode or doctor occasionally fails while updating `.sdd/` files with errors like `EBUSY`, `EPERM`, or `EACCES`.
 
-**Cause:** Antivirus, indexers, editors, or filesystem watchers can briefly lock the destination or temp file just as GSD performs the atomic rename.
+**Cause:** Antivirus, indexers, editors, or filesystem watchers can briefly lock the destination or temp file just as SDD performs the atomic rename.
 
-**Current behavior:** GSD now retries those transient rename failures with a short bounded backoff before surfacing an error. The retry is intentionally limited so genuine filesystem problems still fail loudly instead of hanging forever.
+**Current behavior:** SDD now retries those transient rename failures with a short bounded backoff before surfacing an error. The retry is intentionally limited so genuine filesystem problems still fail loudly instead of hanging forever.
 
 **Fix:**
 - Re-run the operation; most transient lock races clear quickly.
 - If the error persists, close tools that may be holding the file open and then retry.
-- If repeated failures continue, run `/gsd doctor` to confirm the repo state is still healthy and report the exact path + error code.
+- If repeated failures continue, run `/sdd doctor` to confirm the repo state is still healthy and report the exact path + error code.
 
 ## MCP Client Issues
 
@@ -158,12 +158,12 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 **Symptoms:** `mcp_servers` reports no servers configured.
 
 **Common causes:**
-- No `.mcp.json` or `.gsd/mcp.json` file exists in the current project
+- No `.mcp.json` or `.sdd/mcp.json` file exists in the current project
 - The config file is malformed JSON
-- The server is configured in a different project directory than the one where you launched GSD
+- The server is configured in a different project directory than the one where you launched SDD
 
 **Fix:**
-- Add the server to `.mcp.json` or `.gsd/mcp.json`
+- Add the server to `.mcp.json` or `.sdd/mcp.json`
 - Verify the file parses as JSON
 - Re-run `mcp_servers(refresh=true)`
 
@@ -177,7 +177,7 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 - The server is waiting on an unavailable dependency or backend service
 
 **Fix:**
-- Run the configured command directly outside GSD and confirm the server actually starts
+- Run the configured command directly outside SDD and confirm the server actually starts
 - Check that any backend URLs or required services are reachable
 - For local custom servers, verify the implementation is using an MCP SDK or a correct stdio protocol implementation
 
@@ -208,14 +208,14 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 **Fix:**
 - Re-run `mcp_discover(server="name")` and confirm the exact required argument names
 - Call the tool with `mcp_call(server="name", tool="tool_name", args={...})`
-- If you're developing GSD itself, rebuild after schema changes with `npm run build`
+- If you're developing SDD itself, rebuild after schema changes with `npm run build`
 
-### Local stdio server works manually but not in GSD
+### Local stdio server works manually but not in SDD
 
-**Symptoms:** Running the server command manually seems fine, but GSD can't connect.
+**Symptoms:** Running the server command manually seems fine, but SDD can't connect.
 
 **Common causes:**
-- The server depends on shell state that GSD doesn't inherit
+- The server depends on shell state that SDD doesn't inherit
 - Relative paths only work from a different working directory
 - Required environment variables exist in your shell but not in the MCP config
 
@@ -224,11 +224,11 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 - Set required environment variables in the MCP config's `env` block
 - If needed, set `cwd` explicitly in the server definition
 
-### Session lock stolen by `/gsd` in another terminal
+### Session lock stolen by `/sdd` in another terminal
 
-**Symptoms:** Running `/gsd` (step mode) in a second terminal causes a running auto-mode session to lose its lock.
+**Symptoms:** Running `/sdd` (step mode) in a second terminal causes a running auto-mode session to lose its lock.
 
-**Fix:** Fixed in v2.36.0. Bare `/gsd` no longer steals the session lock from a running auto-mode session. Upgrade to the latest version.
+**Fix:** Fixed in v2.36.0. Bare `/sdd` no longer steals the session lock from a running auto-mode session. Upgrade to the latest version.
 
 ### Worktree commits landing on main instead of milestone branch
 
@@ -249,34 +249,34 @@ rm -rf "$(dirname .gsd)/.gsd.lock"
 ### Reset auto mode state
 
 ```bash
-rm .gsd/auto.lock
-rm .gsd/completed-units.json
+rm .sdd/auto.lock
+rm .sdd/completed-units.json
 ```
 
-Then `/gsd auto` to restart from current disk state.
+Then `/sdd auto` to restart from current disk state.
 
 ### Reset routing history
 
 If adaptive model routing is producing bad results, clear the routing history:
 
 ```bash
-rm .gsd/routing-history.json
+rm .sdd/routing-history.json
 ```
 
 ### Full state rebuild
 
 ```
-/gsd doctor
+/sdd doctor
 ```
 
 Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detected inconsistencies.
 
 ## Getting Help
 
-- **GitHub Issues:** [github.com/gsd-build/GSD-2/issues](https://github.com/gsd-build/GSD-2/issues)
-- **Dashboard:** `Ctrl+Alt+G` or `/gsd status` for real-time diagnostics
-- **Forensics:** `/gsd forensics` for structured post-mortem analysis of auto-mode failures
-- **Session logs:** `.gsd/activity/` contains JSONL session dumps for crash forensics
+- **GitHub Issues:** [github.com/bhargavvc/SDD/issues](https://github.com/bhargavvc/SDD/issues)
+- **Dashboard:** `Ctrl+Alt+G` or `/sdd status` for real-time diagnostics
+- **Forensics:** `/sdd forensics` for structured post-mortem analysis of auto-mode failures
+- **Session logs:** `.sdd/activity/` contains JSONL session dumps for crash forensics
 
 ## Windows-Specific Issues
 
@@ -298,11 +298,11 @@ Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detecte
 
 ## Database Issues
 
-### "GSD database is not available"
+### "SDD database is not available"
 
-**Symptoms:** `gsd_decision_save` (or its alias `gsd_save_decision`), `gsd_requirement_update` (or `gsd_update_requirement`), or `gsd_summary_save` (or `gsd_save_summary`) fail with this error.
+**Symptoms:** `sdd_decision_save` (or its alias `sdd_save_decision`), `sdd_requirement_update` (or `sdd_update_requirement`), or `sdd_summary_save` (or `sdd_save_summary`) fail with this error.
 
-**Cause:** The SQLite database wasn't initialized. This happens in manual `/gsd` sessions (non-auto mode) on versions before v2.29.
+**Cause:** The SQLite database wasn't initialized. This happens in manual `/sdd` sessions (non-auto mode) on versions before v2.29.
 
 **Fix:** Updated in v2.29+ to auto-initialize the database on first tool call. Upgrade to the latest version.
 
@@ -320,7 +320,7 @@ Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detecte
 
 ### "LSP isn't available in this workspace"
 
-GSD auto-detects language servers based on project files (e.g. `package.json` → TypeScript, `Cargo.toml` → Rust, `go.mod` → Go). If no servers are detected, the agent skips LSP features.
+SDD auto-detects language servers based on project files (e.g. `package.json` → TypeScript, `Cargo.toml` → Rust, `go.mod` → Go). If no servers are detected, the agent skips LSP features.
 
 **Check status:**
 ```
@@ -338,4 +338,4 @@ This shows which servers are active and, if none are found, diagnoses why — in
 | Rust | `rustup component add rust-analyzer` |
 | Go | `go install golang.org/x/tools/gopls@latest` |
 
-After installing, run `lsp reload` to restart detection without restarting GSD.
+After installing, run `lsp reload` to restart detection without restarting SDD.

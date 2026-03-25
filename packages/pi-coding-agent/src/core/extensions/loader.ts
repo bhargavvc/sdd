@@ -10,11 +10,11 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "@mariozechner/jiti";
-import * as _bundledPiAgentCore from "@gsd/pi-agent-core";
-import * as _bundledPiAi from "@gsd/pi-ai";
-import * as _bundledPiAiOauth from "@gsd/pi-ai/oauth";
-import type { KeyId } from "@gsd/pi-tui";
-import * as _bundledPiTui from "@gsd/pi-tui";
+import * as _bundledPiAgentCore from "@sdd/pi-agent-core";
+import * as _bundledPiAi from "@sdd/pi-ai";
+import * as _bundledPiAiOauth from "@sdd/pi-ai/oauth";
+import type { KeyId } from "@sdd/pi-tui";
+import * as _bundledPiTui from "@sdd/pi-tui";
 // Static imports of packages that extensions may use.
 // These MUST be static so Bun bundles them into the compiled binary.
 // The virtualModules option then makes them available to extensions.
@@ -31,7 +31,7 @@ import * as _bundledMcpServerStreamableHttp from "@modelcontextprotocol/sdk/serv
 import * as _bundledMcpTypes from "@modelcontextprotocol/sdk/types.js";
 import { getAgentDir, isBunBinary } from "../../config.js";
 // NOTE: This import works because loader.ts exports are NOT re-exported from index.ts,
-// avoiding a circular dependency. Extensions can import from @gsd/pi-coding-agent.
+// avoiding a circular dependency. Extensions can import from @sdd/pi-coding-agent.
 import * as _bundledPiCodingAgent from "../../index.js";
 import { createEventBus, type EventBus } from "../event-bus.js";
 import type { ExecOptions } from "../exec.js";
@@ -56,11 +56,11 @@ import type {
  */
 const STATIC_BUNDLED_MODULES: Record<string, unknown> = {
 	"@sinclair/typebox": _bundledTypebox,
-	"@gsd/pi-agent-core": _bundledPiAgentCore,
-	"@gsd/pi-tui": _bundledPiTui,
-	"@gsd/pi-ai": _bundledPiAi,
-	"@gsd/pi-ai/oauth": _bundledPiAiOauth,
-	"@gsd/pi-coding-agent": _bundledPiCodingAgent,
+	"@sdd/pi-agent-core": _bundledPiAgentCore,
+	"@sdd/pi-tui": _bundledPiTui,
+	"@sdd/pi-ai": _bundledPiAi,
+	"@sdd/pi-ai/oauth": _bundledPiAiOauth,
+	"@sdd/pi-coding-agent": _bundledPiCodingAgent,
 	"yaml": _bundledYaml,
 	"@modelcontextprotocol/sdk/client": _bundledMcpClient,
 	"@modelcontextprotocol/sdk/client/stdio": _bundledMcpStdio,
@@ -90,7 +90,7 @@ const STATIC_BUNDLED_MODULES: Record<string, unknown> = {
 const VIRTUAL_MODULES: Record<string, unknown> = { ...STATIC_BUNDLED_MODULES };
 
 const require = createRequire(import.meta.url);
-const EXTENSION_TIMING_ENABLED = process.env.GSD_STARTUP_TIMING === "1" || process.env.PI_TIMING === "1";
+const EXTENSION_TIMING_ENABLED = process.env.SDD_STARTUP_TIMING === "1" || process.env.PI_TIMING === "1";
 
 /**
  * Bundled npm packages whose subpath exports should be auto-resolved for extensions.
@@ -322,19 +322,19 @@ function getAliases(): Record<string, string> {
 		// Auto-discovered subpath exports (lowest priority — overridden by manual entries below)
 		...autoDiscovered,
 		// Manual entries for workspace packages and packages needing special resolution
-		"@gsd/pi-coding-agent": packageIndex,
-		"@gsd/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@gsd/pi-agent-core"),
-		"@gsd/pi-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@gsd/pi-tui"),
-		"@gsd/pi-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@gsd/pi-ai"),
-		"@gsd/pi-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@gsd/pi-ai/oauth"),
+		"@sdd/pi-coding-agent": packageIndex,
+		"@sdd/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@sdd/pi-agent-core"),
+		"@sdd/pi-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@sdd/pi-tui"),
+		"@sdd/pi-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@sdd/pi-ai"),
+		"@sdd/pi-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@sdd/pi-ai/oauth"),
 		"@sinclair/typebox": typeboxRoot,
 		"yaml": yamlRoot,
 		// Aliases for external PI ecosystem packages that import from the original scope
 		"@mariozechner/pi-coding-agent": packageIndex,
-		"@mariozechner/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@gsd/pi-agent-core"),
-		"@mariozechner/pi-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@gsd/pi-tui"),
-		"@mariozechner/pi-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@gsd/pi-ai"),
-		"@mariozechner/pi-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@gsd/pi-ai/oauth"),
+		"@mariozechner/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@sdd/pi-agent-core"),
+		"@mariozechner/pi-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@sdd/pi-tui"),
+		"@mariozechner/pi-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@sdd/pi-ai"),
+		"@mariozechner/pi-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@sdd/pi-ai/oauth"),
 	};
 
 	return _aliases;

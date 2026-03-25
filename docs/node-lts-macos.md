@@ -2,7 +2,7 @@
 
 If you installed Node.js via Homebrew (`brew install node`), you're tracking the **latest current release** — which can include odd-numbered development versions (e.g. 23.x, 25.x). These aren't LTS and may have breaking changes or instability.
 
-GSD requires Node.js **v22 or later** and works best on an **LTS (even-numbered) release**. This guide shows how to pin Node 24 LTS using Homebrew.
+SDD requires Node.js **v22 or later** and works best on an **LTS (even-numbered) release**. This guide shows how to pin Node 24 LTS using Homebrew.
 
 ## Check your current version
 
@@ -37,7 +37,7 @@ node --version
 ## Why pin to LTS?
 
 - **Stability** — LTS releases receive bug fixes and security patches for 30 months
-- **Compatibility** — npm packages (including GSD) test against LTS versions
+- **Compatibility** — npm packages (including SDD) test against LTS versions
 - **No surprises** — `brew upgrade` won't jump you to an unstable development release
 
 ## Prevent accidental upgrades
@@ -64,12 +64,12 @@ If you need multiple Node versions (e.g. 22 and 24), consider using a version ma
 
 These let you set per-project Node versions via `.node-version` or `.nvmrc` files.
 
-## Verify GSD works
+## Verify SDD works
 
 After pinning:
 
 ```bash
 node --version   # v24.x.x
-npm install -g gsd-pi
-gsd --version
+npm install -g sdd-pi
+sdd --version
 ```

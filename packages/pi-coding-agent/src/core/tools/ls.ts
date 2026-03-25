@@ -1,4 +1,4 @@
-import type { AgentTool } from "@gsd/pi-agent-core";
+import type { AgentTool } from "@sdd/pi-agent-core";
 import { type Static, Type } from "@sinclair/typebox";
 import { existsSync, readdirSync, statSync } from "fs";
 import nodePath from "path";

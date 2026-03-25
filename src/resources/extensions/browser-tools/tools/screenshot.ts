@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import type { ToolDeps } from "../state.js";
 import { getScreenshotFormatOverride, getScreenshotQualityDefault } from "../capture.js";

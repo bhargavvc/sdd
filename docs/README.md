@@ -1,6 +1,6 @@
-# GSD Documentation
+# SDD Documentation
 
-Welcome to the GSD documentation. This covers everything from getting started to advanced configuration, auto-mode internals, and extending GSD with the Pi SDK.
+Welcome to the SDD documentation. This covers everything from getting started to advanced configuration, auto-mode internals, and extending SDD with the Pi SDK.
 
 ## User Documentation
 
@@ -21,8 +21,8 @@ Welcome to the GSD documentation. This covers everything from getting started to
 | [Parallel Orchestration](./parallel-orchestration.md) | Run multiple milestones simultaneously with worker isolation and coordination |
 | [Working in Teams](./working-in-teams.md) | Unique milestone IDs, `.gitignore` setup, and shared planning artifacts |
 | [Skills](./skills.md) | Bundled skills, skill discovery, and custom skill authoring |
-| [Migration from v1](./migration.md) | Migrating `.planning` directories from the original GSD |
-| [Troubleshooting](./troubleshooting.md) | Common issues, `/gsd doctor` (real-time visibility v2.40), `/gsd forensics` (full debugger v2.40), and recovery procedures |
+| [Migration from v1](./migration.md) | Migrating `.planning` directories from the original SDD |
+| [Troubleshooting](./troubleshooting.md) | Common issues, `/sdd doctor` (real-time visibility v2.40), `/sdd forensics` (full debugger v2.40), and recovery procedures |
 | [Web Interface](./web-interface.md) | Browser-based project management with `pi --web` (v2.41) |
 | [VS Code Extension](../vscode-extension/README.md) | Chat participant, sidebar dashboard, and RPC integration for VS Code |
 
@@ -37,7 +37,7 @@ Welcome to the GSD documentation. This covers everything from getting started to
 
 ## Pi SDK Documentation
 
-These guides cover the underlying Pi SDK that GSD is built on. Useful if you want to extend GSD or build your own agent application.
+These guides cover the underlying Pi SDK that SDD is built on. Useful if you want to extend SDD or build your own agent application.
 
 | Guide | Description |
 |-------|-------------|

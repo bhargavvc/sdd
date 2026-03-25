@@ -1,4 +1,4 @@
-const flag = (process.env.GSD_STARTUP_TIMING ?? process.env.PI_TIMING ?? "").toLowerCase();
+const flag = (process.env.SDD_STARTUP_TIMING ?? process.env.PI_TIMING ?? "").toLowerCase();
 const ENABLED = flag === "1" || flag === "true" || flag === "yes";
 
 const timings: Array<{ label: string; ms: number }> = [];
@@ -14,7 +14,7 @@ export function markStartup(label: string): void {
 export function printStartupTimings(): void {
   if (!ENABLED || timings.length === 0) return;
   const total = timings.reduce((sum, timing) => sum + timing.ms, 0);
-  process.stderr.write("\n--- GSD Startup Timings ---\n");
+  process.stderr.write("\n--- SDD Startup Timings ---\n");
   for (const timing of timings) {
     process.stderr.write(`  ${timing.label}: ${timing.ms}ms\n`);
   }

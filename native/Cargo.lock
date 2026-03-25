@@ -525,7 +525,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gsd-ast"
+name = "sdd-ast"
 version = "0.1.0"
 dependencies = [
  "ast-grep-core",
@@ -575,15 +575,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "gsd-engine"
+name = "sdd-engine"
 version = "0.1.0"
 dependencies = [
  "arboard",
  "dashmap",
  "git2",
  "globset",
- "gsd-ast",
- "gsd-grep",
+ "sdd-ast",
+ "sdd-grep",
  "html-to-markdown-rs",
  "ignore",
  "image",
@@ -603,7 +603,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gsd-grep"
+name = "sdd-grep"
 version = "0.1.0"
 dependencies = [
  "grep-matcher",

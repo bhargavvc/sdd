@@ -11,7 +11,7 @@ export async function GET(request: Request): Promise<Response> {
 
   const projectCwd = resolveProjectCwd(request);
 
-  // When no project is configured (no GSD_WEB_PROJECT_CWD env and no ?project param),
+  // When no project is configured (no SDD_WEB_PROJECT_CWD env and no ?project param),
   // return a minimal "no project" payload so the frontend can show the project picker.
   if (!projectCwd) {
     return Response.json({

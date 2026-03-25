@@ -1,4 +1,4 @@
-import { DefaultResourceLoader } from '@gsd/pi-coding-agent'
+import { DefaultResourceLoader } from '@sdd/pi-coding-agent'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -11,9 +11,9 @@ import { loadRegistry, readManifestFromEntryPath, isExtensionEnabled, ensureRegi
 // Resolve resources directory — prefer dist/resources/ (stable, set at build time)
 // over src/resources/ (live working tree, changes with git branch).
 //
-// Why this matters: with `npm link`, src/resources/ points into the gsd-2 repo's
+// Why this matters: with `npm link`, src/resources/ points into the sdd repo's
 // working tree. Switching branches there changes src/resources/ for ALL projects
-// that use gsd — causing stale/broken extensions to be synced to ~/.gsd/agent/.
+// that use sdd — causing stale/broken extensions to be synced to ~/.sdd/agent/.
 // dist/resources/ is populated by the build step (`npm run copy-resources`) and
 // reflects the built state, not the currently checked-out branch.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -29,12 +29,12 @@ const bundledExtensionsDir = join(resourcesDir, 'extensions')
 const resourceVersionManifestName = 'managed-resources.json'
 
 interface ManagedResourceManifest {
-  gsdVersion: string
+  sddVersion: string
   syncedAt?: number
   /** Content fingerprint of bundled resources — detects same-version content changes. */
   contentHash?: string
   /**
-   * Root-level files installed in extensions/ by this GSD version.
+   * Root-level files installed in extensions/ by this SDD version.
    * Used on the next upgrade to detect and prune files that were removed or
    * moved into a subdirectory, preventing orphaned non-extension files from
    * causing extension load errors.
@@ -53,10 +53,10 @@ function getManagedResourceManifestPath(agentDir: string): string {
   return join(agentDir, resourceVersionManifestName)
 }
 
-function getBundledGsdVersion(): string {
-  // Prefer GSD_VERSION env var (set once by loader.ts) to avoid re-reading package.json
-  if (process.env.GSD_VERSION && process.env.GSD_VERSION !== '0.0.0') {
-    return process.env.GSD_VERSION
+function getBundledSddVersion(): string {
+  // Prefer SDD_VERSION env var (set once by loader.ts) to avoid re-reading package.json
+  if (process.env.SDD_VERSION && process.env.SDD_VERSION !== '0.0.0') {
+    return process.env.SDD_VERSION
   }
   try {
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf-8'))
@@ -79,7 +79,7 @@ function writeManagedResourceManifest(agentDir: string): void {
   } catch { /* non-fatal */ }
 
   const manifest: ManagedResourceManifest = {
-    gsdVersion: getBundledGsdVersion(),
+    sddVersion: getBundledSddVersion(),
     syncedAt: Date.now(),
     contentHash: computeResourceFingerprint(),
     installedExtensionRootFiles,
@@ -90,7 +90,7 @@ function writeManagedResourceManifest(agentDir: string): void {
 export function readManagedResourceVersion(agentDir: string): string | null {
   try {
     const manifest = JSON.parse(readFileSync(getManagedResourceManifestPath(agentDir), 'utf-8')) as ManagedResourceManifest
-    return typeof manifest?.gsdVersion === 'string' ? manifest.gsdVersion : null
+    return typeof manifest?.sddVersion === 'string' ? manifest.sddVersion : null
   } catch {
     return null
   }
@@ -257,18 +257,18 @@ function copyDirRecursive(src: string, dest: string): void {
 }
 
 /**
- * Creates (or updates) a symlink at agentDir/node_modules pointing to GSD's
+ * Creates (or updates) a symlink at agentDir/node_modules pointing to SDD's
  * own node_modules directory.
  *
  * Native ESM `import()` ignores NODE_PATH — it resolves packages by walking
  * up the directory tree from the importing file. Extension files synced to
- * ~/.gsd/agent/extensions/ have no ancestor node_modules, so imports of
- * @gsd/* packages fail. The symlink makes Node's standard resolution find
+ * ~/.sdd/agent/extensions/ have no ancestor node_modules, so imports of
+ * @sdd/* packages fail. The symlink makes Node's standard resolution find
  * them without requiring every call site to use jiti.
  */
 function ensureNodeModulesSymlink(agentDir: string): void {
   const agentNodeModules = join(agentDir, 'node_modules')
-  const gsdNodeModules = join(packageRoot, 'node_modules')
+  const sddNodeModules = join(packageRoot, 'node_modules')
 
   try {
     const stat = lstatSync(agentNodeModules)
@@ -276,7 +276,7 @@ function ensureNodeModulesSymlink(agentDir: string): void {
     if (stat.isSymbolicLink()) {
       const existing = readlinkSync(agentNodeModules)
       // Symlink exists — verify it points to the correct, existing target
-      if (existing === gsdNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
+      if (existing === sddNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
       // Stale or wrong target — remove and recreate
       unlinkSync(agentNodeModules)
     } else {
@@ -288,22 +288,22 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   }
 
   try {
-    symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
+    symlinkSync(sddNodeModules, agentNodeModules, 'junction')
   } catch (err) {
-    // This failure makes GSD non-functional — extensions can't resolve @gsd/* packages
-    console.error(`[gsd] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
+    // This failure makes SDD non-functional — extensions can't resolve @sdd/* packages
+    console.error(`[sdd] WARN: Failed to symlink ${agentNodeModules} → ${sddNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 
 /**
- * Prune root-level extension files that were installed by a previous GSD version
+ * Prune root-level extension files that were installed by a previous SDD version
  * but have since been removed or relocated to a subdirectory.
  *
  * Two strategies:
  * 1. Manifest-based (preferred): the manifest records which root files were installed
  *    last time; any that are no longer in the current bundle are deleted.
  * 2. Known-stale fallback: for upgrades from versions before manifest tracking,
- *    explicitly delete files known to have been moved (e.g. env-utils.js → gsd/).
+ *    explicitly delete files known to have been moved (e.g. env-utils.js → sdd/).
  */
 function pruneRemovedBundledExtensions(
   manifest: ManagedResourceManifest | null,
@@ -338,29 +338,29 @@ function pruneRemovedBundledExtensions(
   // Always remove known stale files regardless of manifest state.
   // These were installed by pre-manifest versions so they may not appear in
   // installedExtensionRootFiles even when a manifest exists.
-  // env-utils.js was moved from extensions/ root → gsd/ in v2.39.x (#1634)
+  // env-utils.js was moved from extensions/ root → sdd/ in v2.39.x (#1634)
   removeIfStale('env-utils.js')
 }
 
 /**
- * Syncs all bundled resources to agentDir (~/.gsd/agent/) on every launch.
+ * Syncs all bundled resources to agentDir (~/.sdd/agent/) on every launch.
  *
- * - extensions/ → ~/.gsd/agent/extensions/   (overwrite when version changes)
- * - agents/     → ~/.gsd/agent/agents/        (overwrite when version changes)
- * - skills/     → ~/.gsd/agent/skills/        (overwrite when version changes)
- * - GSD-WORKFLOW.md → ~/.gsd/agent/GSD-WORKFLOW.md (fallback for env var miss)
+ * - extensions/ → ~/.sdd/agent/extensions/   (overwrite when version changes)
+ * - agents/     → ~/.sdd/agent/agents/        (overwrite when version changes)
+ * - skills/     → ~/.sdd/agent/skills/        (overwrite when version changes)
+ * - SDD-WORKFLOW.md → ~/.sdd/agent/SDD-WORKFLOW.md (fallback for env var miss)
  *
  * Skips the copy when the managed-resources.json version matches the current
- * GSD version, avoiding ~128ms of synchronous cpSync on every startup.
- * After `npm update -g @glittercowboy/gsd`, versions will differ and the
+ * SDD version, avoiding ~128ms of synchronous cpSync on every startup.
+ * After `npm update -g @glittercowboy/sdd`, versions will differ and the
  * copy runs once to land the new resources.
  *
- * Inspectable: `ls ~/.gsd/agent/extensions/`
+ * Inspectable: `ls ~/.sdd/agent/extensions/`
  */
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
 
-  const currentVersion = getBundledGsdVersion()
+  const currentVersion = getBundledSddVersion()
   const manifest = readManagedResourceManifest(agentDir)
 
   // Always prune root-level extension files that were removed from the bundle.
@@ -369,15 +369,15 @@ export function initResources(agentDir: string): void {
   // up even when the version/hash match causes the full sync to be skipped.
   pruneRemovedBundledExtensions(manifest, agentDir)
 
-  // Ensure ~/.gsd/agent/node_modules symlinks to GSD's node_modules on EVERY
+  // Ensure ~/.sdd/agent/node_modules symlinks to SDD's node_modules on EVERY
   // launch, not just during resource syncs. A stale/broken symlink makes ALL
-  // extensions fail to resolve @gsd/* packages, rendering GSD non-functional.
+  // extensions fail to resolve @sdd/* packages, rendering SDD non-functional.
   ensureNodeModulesSymlink(agentDir)
 
   // Skip the full copy when both version AND content fingerprint match.
   // Version-only checks miss same-version content changes (npm link dev workflow,
   // hotfixes within a release). The content hash catches those at ~1ms cost.
-  if (manifest && manifest.gsdVersion === currentVersion) {
+  if (manifest && manifest.sddVersion === currentVersion) {
     // Version matches — check content fingerprint for same-version staleness.
     const currentHash = computeResourceFingerprint()
     const hasStaleExtensionFiles = hasStaleCompiledExtensionSiblings(join(agentDir, 'extensions'))
@@ -392,11 +392,11 @@ export function initResources(agentDir: string): void {
   syncResourceDir(join(resourcesDir, 'agents'), join(agentDir, 'agents'))
   syncResourceDir(join(resourcesDir, 'skills'), join(agentDir, 'skills'))
 
-  // Sync GSD-WORKFLOW.md to agentDir as a fallback for when GSD_WORKFLOW_PATH
+  // Sync SDD-WORKFLOW.md to agentDir as a fallback for when SDD_WORKFLOW_PATH
   // env var is not set (e.g. fork/dev builds, alternative entry points).
-  const workflowSrc = join(resourcesDir, 'GSD-WORKFLOW.md')
+  const workflowSrc = join(resourcesDir, 'SDD-WORKFLOW.md')
   if (existsSync(workflowSrc)) {
-    try { copyFileSync(workflowSrc, join(agentDir, 'GSD-WORKFLOW.md')) } catch { /* non-fatal */ }
+    try { copyFileSync(workflowSrc, join(agentDir, 'SDD-WORKFLOW.md')) } catch { /* non-fatal */ }
   }
 
   // Ensure all newly copied files are owner-writable so the next run can
@@ -421,7 +421,7 @@ export function hasStaleCompiledExtensionSiblings(extensionsDir: string): boolea
 
 /**
  * Constructs a DefaultResourceLoader that loads extensions from both
- * ~/.gsd/agent/extensions/ (GSD's default) and ~/.pi/agent/extensions/ (pi's default).
+ * ~/.sdd/agent/extensions/ (SDD's default) and ~/.pi/agent/extensions/ (pi's default).
  * This allows users to use extensions from either location.
  */
 // Cache bundled extension keys at module load — avoids re-scanning the extensions

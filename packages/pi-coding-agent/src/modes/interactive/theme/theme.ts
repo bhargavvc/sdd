@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { EditorTheme, MarkdownTheme, SelectListTheme } from "@gsd/pi-tui";
+import type { EditorTheme, MarkdownTheme, SelectListTheme } from "@sdd/pi-tui";
 import { type Static, Type } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import chalk from "chalk";
@@ -8,14 +8,14 @@ import {
 	highlightCode as nativeHighlightCode,
 	supportsLanguage,
 	type HighlightColors,
-} from "@gsd/native";
+} from "@sdd/native";
 import { getCustomThemesDir } from "../../../config.js";
 import { builtinThemes } from "./themes.js";
 
 // Issue #453: native preview highlighting can wedge the entire interactive
 // session after a successful file tool. Keep the safer plain-text path as the
 // default and allow native highlighting only as an explicit opt-in.
-const NATIVE_TUI_HIGHLIGHT_ENABLED = process.env.GSD_ENABLE_NATIVE_TUI_HIGHLIGHT === "1";
+const NATIVE_TUI_HIGHLIGHT_ENABLED = process.env.SDD_ENABLE_NATIVE_TUI_HIGHLIGHT === "1";
 
 // ============================================================================
 // Types & Schema
@@ -645,7 +645,7 @@ function getDefaultTheme(): string {
 // ============================================================================
 
 // Use globalThis to share theme across module loaders (tsx + jiti in dev mode)
-const THEME_KEY = Symbol.for("@gsd/pi-coding-agent:theme");
+const THEME_KEY = Symbol.for("@sdd/pi-coding-agent:theme");
 
 // Export theme as a getter that reads from globalThis
 // This ensures all module instances (tsx, jiti) see the same theme
@@ -1072,7 +1072,7 @@ export function getEditorTheme(): EditorTheme {
 	};
 }
 
-export function getSettingsListTheme(): import("@gsd/pi-tui").SettingsListTheme {
+export function getSettingsListTheme(): import("@sdd/pi-tui").SettingsListTheme {
 	return {
 		label: (text: string, selected: boolean) => (selected ? theme.fg("accent", text) : text),
 		value: (text: string, selected: boolean) => (selected ? theme.fg("accent", text) : theme.fg("muted", text)),

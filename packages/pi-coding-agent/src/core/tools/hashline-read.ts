@@ -8,8 +8,8 @@
  *
  * These tags are used by the hashline_edit tool to address lines precisely.
  */
-import type { AgentTool } from "@gsd/pi-agent-core";
-import type { ImageContent, TextContent } from "@gsd/pi-ai";
+import type { AgentTool } from "@sdd/pi-agent-core";
+import type { ImageContent, TextContent } from "@sdd/pi-ai";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";

@@ -1,7 +1,7 @@
 /**
  * Shared interview round UI widget.
  *
- * Used by /interview-me and /gsd-new-project.
+ * Used by /interview-me and /sdd-new-project.
  *
  * Renders a paged, keyboard-driven question UI with:
  * - Single-select (radio) questions
@@ -25,15 +25,15 @@
  *   Esc          exit confirmation
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { type Theme } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
+import { type Theme } from "@sdd/pi-coding-agent";
 import {
 	Editor,
 	Key,
 	matchesKey,
 	truncateToWidth,
 	type TUI,
-} from "@gsd/pi-tui";
+} from "@sdd/pi-tui";
 import { makeUI, INDENT } from "./ui.js";
 
 // ─── Exported types ───────────────────────────────────────────────────────────

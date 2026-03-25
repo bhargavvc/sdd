@@ -66,7 +66,7 @@ test('parseCliArgs does not set network flags when not provided', () => {
 // ─── launchWebMode env forwarding ────────────────────────────────────
 
 test('launchWebMode forwards custom host, port, and allowed origins to subprocess env', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-web-net-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-web-net-'))
   const standaloneRoot = join(tmp, 'dist', 'web', 'standalone')
   const serverPath = join(standaloneRoot, 'server.js')
   mkdirSync(standaloneRoot, { recursive: true })
@@ -78,8 +78,8 @@ test('launchWebMode forwards custom host, port, and allowed origins to subproces
     const status = await webMode.launchWebMode(
       {
         cwd: '/tmp/project',
-        projectSessionsDir: '/tmp/.gsd/sessions',
-        agentDir: '/tmp/.gsd/agent',
+        projectSessionsDir: '/tmp/.sdd/sessions',
+        agentDir: '/tmp/.sdd/agent',
         packageRoot: tmp,
         host: '0.0.0.0',
         port: 8080,
@@ -106,16 +106,16 @@ test('launchWebMode forwards custom host, port, and allowed origins to subproces
     assert.ok(spawnEnv)
     assert.equal(spawnEnv!.HOSTNAME, '0.0.0.0')
     assert.equal(spawnEnv!.PORT, '8080')
-    assert.equal(spawnEnv!.GSD_WEB_HOST, '0.0.0.0')
-    assert.equal(spawnEnv!.GSD_WEB_PORT, '8080')
-    assert.equal(spawnEnv!.GSD_WEB_ALLOWED_ORIGINS, 'http://192.168.1.10:8080,http://tailscale-host:8080')
+    assert.equal(spawnEnv!.SDD_WEB_HOST, '0.0.0.0')
+    assert.equal(spawnEnv!.SDD_WEB_PORT, '8080')
+    assert.equal(spawnEnv!.SDD_WEB_ALLOWED_ORIGINS, 'http://192.168.1.10:8080,http://tailscale-host:8080')
   } finally {
     rmSync(tmp, { recursive: true, force: true })
   }
 })
 
-test('launchWebMode omits GSD_WEB_ALLOWED_ORIGINS when none provided', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-web-no-origins-'))
+test('launchWebMode omits SDD_WEB_ALLOWED_ORIGINS when none provided', async () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-web-no-origins-'))
   const standaloneRoot = join(tmp, 'dist', 'web', 'standalone')
   const serverPath = join(standaloneRoot, 'server.js')
   mkdirSync(standaloneRoot, { recursive: true })
@@ -127,8 +127,8 @@ test('launchWebMode omits GSD_WEB_ALLOWED_ORIGINS when none provided', async () 
     await webMode.launchWebMode(
       {
         cwd: '/tmp/project',
-        projectSessionsDir: '/tmp/.gsd/sessions',
-        agentDir: '/tmp/.gsd/agent',
+        projectSessionsDir: '/tmp/.sdd/sessions',
+        agentDir: '/tmp/.sdd/agent',
         packageRoot: tmp,
       },
       {
@@ -146,7 +146,7 @@ test('launchWebMode omits GSD_WEB_ALLOWED_ORIGINS when none provided', async () 
     )
 
     assert.ok(spawnEnv)
-    assert.equal(spawnEnv!.GSD_WEB_ALLOWED_ORIGINS, undefined)
+    assert.equal(spawnEnv!.SDD_WEB_ALLOWED_ORIGINS, undefined)
   } finally {
     rmSync(tmp, { recursive: true, force: true })
   }
@@ -155,7 +155,7 @@ test('launchWebMode omits GSD_WEB_ALLOWED_ORIGINS when none provided', async () 
 // ─── runWebCliBranch end-to-end forwarding ───────────────────────────
 
 test('runWebCliBranch forwards --host, --port, --allowed-origins to launchWebMode', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-web-branch-flags-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-web-branch-flags-'))
   const projectDir = join(tmp, 'project')
   mkdirSync(projectDir, { recursive: true })
 

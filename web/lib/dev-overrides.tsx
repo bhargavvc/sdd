@@ -9,7 +9,7 @@ import { authFetch } from "@/lib/auth"
  * Build-time hint — may be `false` even in source-dev if the build happened
  * without the env var. The runtime check via `/api/dev-mode` is authoritative.
  */
-const BUILD_TIME_HINT = process.env.NEXT_PUBLIC_GSD_DEV === "1"
+const BUILD_TIME_HINT = process.env.NEXT_PUBLIC_SDD_DEV === "1"
 
 /**
  * Exported for static guards that run before the runtime check resolves.

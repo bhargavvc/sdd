@@ -61,7 +61,7 @@ repository point to a known GitHub host.
 **RULE: Pass `-R` (or `--repo`) on EVERY `gh` command:**
 
 ```bash
-gh <command> -R gsd-build/gsd-2
+gh <command> -R bhargavvc/sdd
 ```
 
 This applies to ALL `gh` subcommands: `pr`, `issue`, `run`, `api`, `release`, `project`, etc.
@@ -78,44 +78,44 @@ This applies to ALL `gh` subcommands: `pr`, `issue`, `run`, `api`, `release`, `p
 
 ```bash
 # List open PRs
-gh pr list -R gsd-build/gsd-2
+gh pr list -R bhargavvc/sdd
 
 # View PR details
-gh pr view <number> -R gsd-build/gsd-2
+gh pr view <number> -R bhargavvc/sdd
 
 # Check PR CI status
-gh pr checks <number> -R gsd-build/gsd-2
+gh pr checks <number> -R bhargavvc/sdd
 
 # Create PR
-gh pr create -R gsd-build/gsd-2 --title "title" --body "body"
+gh pr create -R bhargavvc/sdd --title "title" --body "body"
 
 # View PR comments
-gh api repos/gsd-build/gsd-2/pulls/<number>/comments
+gh api repos/bhargavvc/sdd/pulls/<number>/comments
 ```
 
 ### Issues
 
 ```bash
 # List issues
-gh issue list -R gsd-build/gsd-2
+gh issue list -R bhargavvc/sdd
 
 # List by label
-gh issue list -R gsd-build/gsd-2 --label "priority:p1" --state open
+gh issue list -R bhargavvc/sdd --label "priority:p1" --state open
 
 # Create issue with labels and milestone
-gh issue create -R gsd-build/gsd-2 \
+gh issue create -R bhargavvc/sdd \
   --title "feat: add feature X" \
   --label "priority:p1" --label "type:feature" \
   --milestone "v1.0"
 
 # View issue
-gh issue view <number> -R gsd-build/gsd-2
+gh issue view <number> -R bhargavvc/sdd
 
 # Close issue with comment
-gh issue close <number> -R gsd-build/gsd-2 --comment "Implemented in PR #N"
+gh issue close <number> -R bhargavvc/sdd --comment "Implemented in PR #N"
 
 # Edit labels on issue
-gh issue edit <number> -R gsd-build/gsd-2 \
+gh issue edit <number> -R bhargavvc/sdd \
   --add-label "status:in-progress" \
   --remove-label "status:needs-grooming"
 ```
@@ -124,11 +124,11 @@ gh issue edit <number> -R gsd-build/gsd-2 \
 
 ```bash
 # List all labels
-gh label list -R gsd-build/gsd-2
+gh label list -R bhargavvc/sdd
 
 # Create label
 gh label create "priority:p1" --color "E99695" \
-  --description "High priority" -R gsd-build/gsd-2
+  --description "High priority" -R bhargavvc/sdd
 ```
 
 See [labels.md](./references/labels.md) for the full taxonomy and color codes.
@@ -137,14 +137,14 @@ See [labels.md](./references/labels.md) for the full taxonomy and color codes.
 
 ```bash
 # List projects
-gh project list --owner gsd-build
+gh project list --owner bhargavvc
 
 # Create project
-gh project create --owner gsd-build --title "gsd-2 Backlog"
+gh project create --owner bhargavvc --title "sdd Backlog"
 
 # Add issue to project
-gh project item-add 1 --owner gsd-build \
-  --url https://github.com/gsd-build/gsd-2/issues/42
+gh project item-add 1 --owner bhargavvc \
+  --url https://github.com/bhargavvc/sdd/issues/42
 ```
 
 See [projects-v2.md](./references/projects-v2.md) for field creation and item editing commands.
@@ -155,14 +155,14 @@ See [projects-v2.md](./references/projects-v2.md) for field creation and item ed
 
 ```bash
 # List milestones
-gh api repos/gsd-build/gsd-2/milestones
+gh api repos/bhargavvc/sdd/milestones
 
 # Create milestone
-gh api repos/gsd-build/gsd-2/milestones \
+gh api repos/bhargavvc/sdd/milestones \
   -X POST -f title="v1.0" -f due_on="2026-03-31T00:00:00Z"
 
 # Assign milestone to issue
-gh api repos/gsd-build/gsd-2/issues/42 \
+gh api repos/bhargavvc/sdd/issues/42 \
   -X PATCH -F milestone=1
 ```
 
@@ -172,49 +172,49 @@ See [milestones.md](./references/milestones.md) for full CRUD reference.
 
 ```bash
 # List recent runs
-gh run list -R gsd-build/gsd-2 --limit 5
+gh run list -R bhargavvc/sdd --limit 5
 
 # View specific run
-gh run view <run-id> -R gsd-build/gsd-2
+gh run view <run-id> -R bhargavvc/sdd
 
 # View failed job logs
-gh run view <run-id> -R gsd-build/gsd-2 --log-failed
+gh run view <run-id> -R bhargavvc/sdd --log-failed
 ```
 
 ### Releases
 
 ```bash
 # List releases
-gh release list -R gsd-build/gsd-2
+gh release list -R bhargavvc/sdd
 
 # View latest release
-gh release view --repo gsd-build/gsd-2
+gh release view --repo bhargavvc/sdd
 ```
 
 ### API (Direct)
 
 ```bash
 # GET request
-gh api repos/gsd-build/gsd-2
+gh api repos/bhargavvc/sdd
 
 # POST with fields
-gh api repos/gsd-build/gsd-2/issues -f title="Bug" -f body="Details"
+gh api repos/bhargavvc/sdd/issues -f title="Bug" -f body="Details"
 
 # GraphQL
 gh api graphql -f query='{ viewer { login } }'
 
 # Paginated results
-gh api repos/gsd-build/gsd-2/contributors --paginate
+gh api repos/bhargavvc/sdd/contributors --paginate
 ```
 
 ### Repository
 
 ```bash
 # Clone
-gh repo clone gsd-build/gsd-2
+gh repo clone bhargavvc/sdd
 
 # View repo info
-gh repo view -R gsd-build/gsd-2
+gh repo view -R bhargavvc/sdd
 ```
 
 </gh_commands>
@@ -225,13 +225,13 @@ gh repo view -R gsd-build/gsd-2
 
 ```bash
 # JSON output
-gh pr list -R gsd-build/gsd-2 --json number,title,state
+gh pr list -R bhargavvc/sdd --json number,title,state
 
 # JQ filtering
-gh pr list -R gsd-build/gsd-2 --json number,title --jq '.[].title'
+gh pr list -R bhargavvc/sdd --json number,title --jq '.[].title'
 
 # Template formatting
-gh pr list -R gsd-build/gsd-2 --json number,title \
+gh pr list -R bhargavvc/sdd --json number,title \
   --template '{{range .}}#{{.number}} {{.title}}{{"\n"}}{{end}}'
 ```
 

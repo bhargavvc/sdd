@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 
 // ─── Imports ──────────────────────────────────────────────────────────
 const workspaceIndex = await import(
-  "../resources/extensions/gsd/workspace-index.ts"
+  "../resources/extensions/sdd/workspace-index.ts"
 );
 const filesRoute = await import("../../web/app/api/files/route.ts");
 
@@ -14,23 +14,23 @@ const filesRoute = await import("../../web/app/api/files/route.ts");
 const workspaceStatus = await import("../../web/lib/workspace-status.ts");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-function makeGsdFixture(): { root: string; gsdDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-"));
-  const gsdDir = join(root, ".gsd");
-  mkdirSync(gsdDir, { recursive: true });
+function makeSddFixture(): { root: string; sddDir: string; cleanup: () => void } {
+  const root = mkdtempSync(join(tmpdir(), "sdd-state-surfaces-"));
+  const sddDir = join(root, ".sdd");
+  mkdirSync(sddDir, { recursive: true });
   return {
     root,
-    gsdDir,
+    sddDir,
     cleanup: () => rmSync(root, { recursive: true, force: true }),
   };
 }
 
 // ─── Group 1: Workspace index — risk/depends/demo fields ─────────────
 test("indexWorkspace extracts risk, depends, and demo from roadmap", async () => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
 
   try {
-    const milestoneDir = join(gsdDir, "milestones", "M001");
+    const milestoneDir = join(sddDir, "milestones", "M001");
     const sliceDir = join(milestoneDir, "slices", "S01");
     const tasksDir = join(sliceDir, "tasks");
     mkdirSync(tasksDir, { recursive: true });
@@ -82,10 +82,10 @@ test("indexWorkspace extracts risk, depends, and demo from roadmap", async () =>
 });
 
 test("indexWorkspace handles slices without risk/depends/demo", async () => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
 
   try {
-    const milestoneDir = join(gsdDir, "milestones", "M001");
+    const milestoneDir = join(sddDir, "milestones", "M001");
     const sliceDir = join(milestoneDir, "slices", "S01");
     mkdirSync(join(sliceDir, "tasks"), { recursive: true });
 
@@ -195,17 +195,17 @@ test("getTaskStatus returns correct statuses", () => {
 });
 
 // ─── Group 3: Files API — tree listing ───────────────────────────────
-test("files API returns tree listing of .gsd/ directory", async () => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+test("files API returns tree listing of .sdd/ directory", async () => {
+  const { root, sddDir, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     // Create some files
-    writeFileSync(join(gsdDir, "STATE.md"), "# State\nactive");
-    writeFileSync(join(gsdDir, "PROJECT.md"), "# Project");
-    const msDir = join(gsdDir, "milestones", "M001");
+    writeFileSync(join(sddDir, "STATE.md"), "# State\nactive");
+    writeFileSync(join(sddDir, "PROJECT.md"), "# Project");
+    const msDir = join(sddDir, "milestones", "M001");
     mkdirSync(msDir, { recursive: true });
     writeFileSync(join(msDir, "M001-ROADMAP.md"), "# Roadmap");
 
@@ -229,21 +229,21 @@ test("files API returns tree listing of .gsd/ directory", async () => {
     assert.ok(Array.isArray(milestones.children));
     assert.ok(milestones.children.length > 0);
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
 // ─── Group 4: Files API — file content ───────────────────────────────
 test("files API returns file content for valid path", async () => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const { root, sddDir, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     const fileContent = "# State\n\nCurrent milestone: M001";
-    writeFileSync(join(gsdDir, "STATE.md"), fileContent);
+    writeFileSync(join(sddDir, "STATE.md"), fileContent);
 
     const request = new Request("http://localhost:3000/api/files?path=STATE.md");
     const response = await filesRoute.GET(request);
@@ -252,19 +252,19 @@ test("files API returns file content for valid path", async () => {
     const data = await response.json();
     assert.equal(data.content, fileContent);
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
 test("files API returns content for nested files", async () => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const { root, sddDir, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
-    const msDir = join(gsdDir, "milestones", "M001");
+    const msDir = join(sddDir, "milestones", "M001");
     mkdirSync(msDir, { recursive: true });
     writeFileSync(join(msDir, "M001-ROADMAP.md"), "# Roadmap content");
 
@@ -277,18 +277,18 @@ test("files API returns content for nested files", async () => {
     const data = await response.json();
     assert.equal(data.content, "# Roadmap content");
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
 // ─── Group 5: Files API — security: path traversal rejection ─────────
 test("files API rejects path traversal with ../", async () => {
-  const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const { root, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     const request = new Request(
       "http://localhost:3000/api/files?path=../etc/passwd",
@@ -299,17 +299,17 @@ test("files API rejects path traversal with ../", async () => {
     const data = await response.json();
     assert.ok(data.error, "Expected error message in response");
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
 test("files API rejects absolute paths", async () => {
-  const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const { root, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     const request = new Request(
       "http://localhost:3000/api/files?path=/etc/passwd",
@@ -320,17 +320,17 @@ test("files API rejects absolute paths", async () => {
     const data = await response.json();
     assert.ok(data.error);
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
 test("files API returns 404 for missing files", async () => {
-  const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const { root, cleanup } = makeSddFixture();
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     const request = new Request(
       "http://localhost:3000/api/files?path=nonexistent.md",
@@ -341,17 +341,17 @@ test("files API returns 404 for missing files", async () => {
     const data = await response.json();
     assert.ok(data.error);
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   }
 });
 
-test("files API returns empty tree when .gsd/ does not exist", async () => {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-empty-"));
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+test("files API returns empty tree when .sdd/ does not exist", async () => {
+  const root = mkdtempSync(join(tmpdir(), "sdd-state-surfaces-empty-"));
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   try {
-    process.env.GSD_WEB_PROJECT_CWD = root;
+    process.env.SDD_WEB_PROJECT_CWD = root;
 
     const request = new Request("http://localhost:3000/api/files");
     const response = await filesRoute.GET(request);
@@ -360,7 +360,7 @@ test("files API returns empty tree when .gsd/ does not exist", async () => {
     const data = await response.json();
     assert.deepEqual(data.tree, []);
   } finally {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     rmSync(root, { recursive: true, force: true });
   }
 });
@@ -368,11 +368,11 @@ test("files API returns empty tree when .gsd/ does not exist", async () => {
 // ─── Group 6: Mock-free invariant — no static mock data ──────────────
 
 const VIEW_FILES = [
-  "web/components/gsd/dashboard.tsx",
-  "web/components/gsd/roadmap.tsx",
-  "web/components/gsd/activity-view.tsx",
-  "web/components/gsd/files-view.tsx",
-  "web/components/gsd/dual-terminal.tsx",
+  "web/components/sdd/dashboard.tsx",
+  "web/components/sdd/roadmap.tsx",
+  "web/components/sdd/activity-view.tsx",
+  "web/components/sdd/files-view.tsx",
+  "web/components/sdd/dual-terminal.tsx",
 ];
 
 // Patterns that indicate hardcoded mock data arrays
@@ -382,7 +382,7 @@ const MOCK_DATA_PATTERNS = [
   /const\s+recentActivity\s*=\s*\[/,      // const recentActivity = [...]
   /const\s+currentSliceTasks\s*=\s*\[/,   // const currentSliceTasks = [...]
   /const\s+modelUsage\s*=\s*\[/,          // const modelUsage = [...]
-  /const\s+gsdFiles\s*=\s*\[/,            // const gsdFiles = [...]
+  /const\s+sddFiles\s*=\s*\[/,            // const sddFiles = [...]
   /AutoModeState.*idle.*working/,          // old enum-style mock state
   /Lorem\s+ipsum/i,                        // lorem placeholder text
   /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z["'](?:.*,\s*$)/m,  // hardcoded ISO timestamps in array literals
@@ -408,23 +408,23 @@ test("view components contain no static mock data arrays", () => {
 test("view components read from real data sources (store or API)", () => {
   // Views that derive state from the workspace store
   const STORE_VIEWS = [
-    "web/components/gsd/dashboard.tsx",
-    "web/components/gsd/roadmap.tsx",
-    "web/components/gsd/activity-view.tsx",
-    "web/components/gsd/terminal.tsx",
+    "web/components/sdd/dashboard.tsx",
+    "web/components/sdd/roadmap.tsx",
+    "web/components/sdd/activity-view.tsx",
+    "web/components/sdd/terminal.tsx",
   ];
 
   // FilesView fetches from /api/files (real endpoint), not the workspace store — that's correct
   const API_VIEWS = [
-    { path: "web/components/gsd/files-view.tsx", apiPattern: "/api/files" },
+    { path: "web/components/sdd/files-view.tsx", apiPattern: "/api/files" },
   ];
 
   for (const filePath of STORE_VIEWS) {
     const fullPath = resolve(import.meta.dirname, "../..", filePath);
     const source = readFileSync(fullPath, "utf-8");
     assert.ok(
-      source.includes("gsd-workspace-store"),
-      `${filePath} does not import from gsd-workspace-store — store-backed views must read real store state`,
+      source.includes("sdd-workspace-store"),
+      `${filePath} does not import from sdd-workspace-store — store-backed views must read real store state`,
     );
   }
 
@@ -442,7 +442,7 @@ test("view components read from real data sources (store or API)", () => {
 // from the dashboard. Live signals are visible in the terminal/power mode instead.
 
 test("status bar consumes statusTexts from store", () => {
-  const statusBarPath = resolve(import.meta.dirname, "../../web/components/gsd/status-bar.tsx");
+  const statusBarPath = resolve(import.meta.dirname, "../../web/components/sdd/status-bar.tsx");
   const source = readFileSync(statusBarPath, "utf-8");
 
   assert.ok(
@@ -456,10 +456,10 @@ test("status bar consumes statusTexts from store", () => {
 });
 
 test("browser shell renders title overrides, widgets, and editor prefills from store-backed state", () => {
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
-  const appShellPath = resolve(import.meta.dirname, "../../web/components/gsd/app-shell.tsx");
-  const statusBarPath = resolve(import.meta.dirname, "../../web/components/gsd/status-bar.tsx");
-  const terminalPath = resolve(import.meta.dirname, "../../web/components/gsd/terminal.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
+  const appShellPath = resolve(import.meta.dirname, "../../web/components/sdd/app-shell.tsx");
+  const statusBarPath = resolve(import.meta.dirname, "../../web/components/sdd/status-bar.tsx");
+  const terminalPath = resolve(import.meta.dirname, "../../web/components/sdd/terminal.tsx");
 
   const storeSource = readFileSync(storePath, "utf-8");
   const appShellSource = readFileSync(appShellPath, "utf-8");
@@ -476,13 +476,13 @@ test("browser shell renders title overrides, widgets, and editor prefills from s
   assert.match(terminalSource, /MAX_VISIBLE_WIDGET_LINES = 6/, "terminal.tsx must bound widget rendering so extension widgets cannot grow without limit");
   assert.match(terminalSource, /widget\.placement \?\? "aboveEditor"/, "terminal.tsx must preserve the existing default above-editor placement semantics");
 
-  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "gsd-workspace-store.tsx must expose a consume-once editor prefill action");
+  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "sdd-workspace-store.tsx must expose a consume-once editor prefill action");
   assert.match(terminalSource, /consumeEditorTextBuffer/, "terminal.tsx must consume editor prefill state instead of replaying it forever");
   assert.match(terminalSource, /setInput\(buffer\)/, "terminal.tsx must visibly prefill the command input from editorTextBuffer");
 });
 
 test("terminal consumes activeToolExecution from store", () => {
-  const terminalPath = resolve(import.meta.dirname, "../../web/components/gsd/terminal.tsx");
+  const terminalPath = resolve(import.meta.dirname, "../../web/components/sdd/terminal.tsx");
   const source = readFileSync(terminalPath, "utf-8");
 
   assert.ok(
@@ -493,11 +493,11 @@ test("terminal consumes activeToolExecution from store", () => {
 
 test("live browser panels consume live selectors and expose inspectable freshness markers", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts")
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx")
-  const dashboardPath = resolve(import.meta.dirname, "../../web/components/gsd/dashboard.tsx")
-  const sidebarPath = resolve(import.meta.dirname, "../../web/components/gsd/sidebar.tsx")
-  const roadmapPath = resolve(import.meta.dirname, "../../web/components/gsd/roadmap.tsx")
-  const statusBarPath = resolve(import.meta.dirname, "../../web/components/gsd/status-bar.tsx")
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx")
+  const dashboardPath = resolve(import.meta.dirname, "../../web/components/sdd/dashboard.tsx")
+  const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx")
+  const roadmapPath = resolve(import.meta.dirname, "../../web/components/sdd/roadmap.tsx")
+  const statusBarPath = resolve(import.meta.dirname, "../../web/components/sdd/status-bar.tsx")
 
   const contractSource = readFileSync(contractPath, "utf-8")
   const storeSource = readFileSync(storePath, "utf-8")
@@ -507,13 +507,13 @@ test("live browser panels consume live selectors and expose inspectable freshnes
   const statusBarSource = readFileSync(statusBarPath, "utf-8")
 
   assert.match(contractSource, /export interface WorkspaceRecoverySummary/, "command-surface-contract.ts must expose a shared recovery summary shape for live panels")
-  assert.match(storeSource, /live_state_invalidation/, "gsd-workspace-store.tsx must handle typed live_state_invalidation events")
-  assert.match(storeSource, /\/api\/live-state/, "gsd-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
-  assert.match(storeSource, /softBootRefreshCount/, "gsd-workspace-store.tsx must expose a soft boot refresh counter for observability")
-  assert.match(storeSource, /targetedRefreshCount/, "gsd-workspace-store.tsx must expose a targeted refresh counter for observability")
-  assert.match(storeSource, /getLiveWorkspaceIndex/, "gsd-workspace-store.tsx must expose a live workspace selector")
-  assert.match(storeSource, /getLiveAutoDashboard/, "gsd-workspace-store.tsx must expose a live auto selector")
-  assert.match(storeSource, /getLiveResumableSessions/, "gsd-workspace-store.tsx must expose a live resumable-sessions selector")
+  assert.match(storeSource, /live_state_invalidation/, "sdd-workspace-store.tsx must handle typed live_state_invalidation events")
+  assert.match(storeSource, /\/api\/live-state/, "sdd-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
+  assert.match(storeSource, /softBootRefreshCount/, "sdd-workspace-store.tsx must expose a soft boot refresh counter for observability")
+  assert.match(storeSource, /targetedRefreshCount/, "sdd-workspace-store.tsx must expose a targeted refresh counter for observability")
+  assert.match(storeSource, /getLiveWorkspaceIndex/, "sdd-workspace-store.tsx must expose a live workspace selector")
+  assert.match(storeSource, /getLiveAutoDashboard/, "sdd-workspace-store.tsx must expose a live auto selector")
+  assert.match(storeSource, /getLiveResumableSessions/, "sdd-workspace-store.tsx must expose a live resumable-sessions selector")
 
   assert.match(dashboardSource, /getLiveWorkspaceIndex/, "dashboard.tsx must derive roadmap state from the live workspace selector")
   assert.match(dashboardSource, /getLiveAutoDashboard/, "dashboard.tsx must derive auto metrics from the live auto selector")
@@ -532,9 +532,9 @@ test("live browser panels consume live selectors and expose inspectable freshnes
 })
 
 test("workflow action surfaces route new-milestone CTAs through the shared command path", () => {
-  const dashboardPath = resolve(import.meta.dirname, "../../web/components/gsd/dashboard.tsx")
-  const sidebarPath = resolve(import.meta.dirname, "../../web/components/gsd/sidebar.tsx")
-  const chatPath = resolve(import.meta.dirname, "../../web/components/gsd/chat-mode.tsx")
+  const dashboardPath = resolve(import.meta.dirname, "../../web/components/sdd/dashboard.tsx")
+  const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx")
+  const chatPath = resolve(import.meta.dirname, "../../web/components/sdd/chat-mode.tsx")
 
   const dashboardSource = readFileSync(dashboardPath, "utf-8")
   const sidebarSource = readFileSync(sidebarPath, "utf-8")
@@ -549,14 +549,14 @@ test("workflow action surfaces route new-milestone CTAs through the shared comma
   assert.doesNotMatch(dashboardSource, /NewMilestoneDialog/, "dashboard.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(sidebarSource, /NewMilestoneDialog/, "sidebar.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(chatSource, /NewMilestoneDialog/, "chat-mode.tsx must not import or render the deprecated new-milestone dialog")
-  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/gsd auto", bridge\)/, "chat-mode.tsx must not hardcode a special /gsd auto path for new-milestone CTA dispatch")
+  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/sdd auto", bridge\)/, "chat-mode.tsx must not hardcode a special /sdd auto path for new-milestone CTA dispatch")
 })
 
 test("sidebar Git affordance opens a real git-summary surface with visible repo/not-repo/error states", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
-  const surfacePath = resolve(import.meta.dirname, "../../web/components/gsd/command-surface.tsx");
-  const sidebarPath = resolve(import.meta.dirname, "../../web/components/gsd/sidebar.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
+  const surfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx");
+  const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx");
 
   const contractSource = readFileSync(contractPath, "utf-8");
   const storeSource = readFileSync(storePath, "utf-8");
@@ -566,8 +566,8 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
   assert.match(contractSource, /gitSummary:/, "command-surface-contract.ts must retain git-summary state on the shared surface");
   assert.match(contractSource, /load_git_summary/, "command-surface-contract.ts must model git-summary loading as an explicit action");
 
-  assert.match(storeSource, /loadGitSummary/, "gsd-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
-  assert.match(storeSource, /\/api\/git/, "gsd-workspace-store.tsx must fetch the current-project git route for the Git surface");
+  assert.match(storeSource, /loadGitSummary/, "sdd-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
+  assert.match(storeSource, /\/api\/git/, "sdd-workspace-store.tsx must fetch the current-project git route for the Git surface");
 
   assert.match(surfaceSource, /data-testid="command-surface-git-summary"/, "command-surface.tsx must render a git-summary panel");
   assert.match(surfaceSource, /data-testid="command-surface-git-not-repo"/, "command-surface.tsx must keep not-a-repo state browser-visible");
@@ -578,10 +578,10 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
 
 test("recovery diagnostics surface stays on a dedicated route with explicit stale and action state", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
-  const surfacePath = resolve(import.meta.dirname, "../../web/components/gsd/command-surface.tsx");
-  const dashboardPath = resolve(import.meta.dirname, "../../web/components/gsd/dashboard.tsx");
-  const sidebarPath = resolve(import.meta.dirname, "../../web/components/gsd/sidebar.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
+  const surfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx");
+  const dashboardPath = resolve(import.meta.dirname, "../../web/components/sdd/dashboard.tsx");
+  const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx");
 
   const contractSource = readFileSync(contractPath, "utf-8");
   const storeSource = readFileSync(storePath, "utf-8");
@@ -593,9 +593,9 @@ test("recovery diagnostics surface stays on a dedicated route with explicit stal
   assert.match(contractSource, /export interface CommandSurfaceRecoveryState/, "command-surface-contract.ts must expose explicit recovery load state");
   assert.match(contractSource, /load_recovery_diagnostics/, "command-surface-contract.ts must model recovery loading as an explicit action");
 
-  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "gsd-workspace-store.tsx must expose a recovery diagnostics loader");
-  assert.match(storeSource, /\/api\/recovery/, "gsd-workspace-store.tsx must call the dedicated recovery route");
-  assert.match(storeSource, /markRecoveryStateInvalidated/, "gsd-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
+  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "sdd-workspace-store.tsx must expose a recovery diagnostics loader");
+  assert.match(storeSource, /\/api\/recovery/, "sdd-workspace-store.tsx must call the dedicated recovery route");
+  assert.match(storeSource, /markRecoveryStateInvalidated/, "sdd-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
 
   assert.match(surfaceSource, /data-testid="command-surface-recovery"/, "command-surface.tsx must render a recovery diagnostics panel");
   assert.match(surfaceSource, /data-testid="command-surface-recovery-state"/, "command-surface.tsx must expose a recovery load-state marker");

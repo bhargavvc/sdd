@@ -8,7 +8,7 @@
 import { chmodSync, existsSync, statSync } from "node:fs";
 import { basename, join, dirname } from "node:path";
 import type { IPty } from "node-pty";
-import { resolveGsdCliEntry } from "../../src/web/cli-entry.ts";
+import { resolveSddCliEntry } from "../../src/web/cli-entry.ts";
 
 // Webpack escape hatch — this global exists at runtime in webpack bundles and
 // forwards to Node's native require(), bypassing webpack's module resolution.
@@ -29,8 +29,8 @@ interface LoadedNodePty {
 }
 
 // Use globalThis to persist across Turbopack/HMR module re-evaluations in dev
-const GLOBAL_KEY = "__gsd_pty_sessions__" as const;
-const CLEANUP_GUARD_KEY = "__gsd_pty_cleanup_installed__" as const;
+const GLOBAL_KEY = "__sdd_pty_sessions__" as const;
+const CLEANUP_GUARD_KEY = "__sdd_pty_cleanup_installed__" as const;
 const MAX_SESSION_BUFFER_BYTES = 1024 * 1024;
 
 function getSessions(): Map<string, PtySession> {
@@ -102,7 +102,7 @@ function getDefaultShell(): string {
 }
 
 function getProjectCwd(): string {
-  return process.env.GSD_WEB_PROJECT_CWD || process.cwd();
+  return process.env.SDD_WEB_PROJECT_CWD || process.cwd();
 }
 
 function getShellArgs(): string[] {
@@ -129,13 +129,13 @@ function resolveTerminalSpawnSpec(cwd: string, command?: string, commandArgs: st
     };
   }
 
-  if (command === "gsd") {
+  if (command === "sdd") {
     try {
-      const cliEntry = resolveGsdCliEntry({
-        packageRoot: process.env.GSD_WEB_PACKAGE_ROOT || process.cwd(),
+      const cliEntry = resolveSddCliEntry({
+        packageRoot: process.env.SDD_WEB_PACKAGE_ROOT || process.cwd(),
         cwd,
         execPath: process.execPath,
-        hostKind: process.env.GSD_WEB_HOST_KIND,
+        hostKind: process.env.SDD_WEB_HOST_KIND,
         mode: "interactive",
         messages: commandArgs,
       });
@@ -143,11 +143,11 @@ function resolveTerminalSpawnSpec(cwd: string, command?: string, commandArgs: st
       return {
         executable: cliEntry.command,
         args: cliEntry.args,
-        label: "gsd",
+        label: "sdd",
       };
     } catch (error) {
       console.warn(
-        "[pty] Falling back to PATH-resolved gsd:",
+        "[pty] Falling back to PATH-resolved sdd:",
         error instanceof Error ? error.message : String(error),
       );
     }
@@ -164,7 +164,7 @@ function getNodePtyCandidateRoots(): string[] {
   const roots = new Set<string>();
   roots.add(process.cwd());
 
-  const packageRoot = process.env.GSD_WEB_PACKAGE_ROOT;
+  const packageRoot = process.env.SDD_WEB_PACKAGE_ROOT;
   if (packageRoot) {
     roots.add(packageRoot);
     roots.add(join(packageRoot, "dist", "web", "standalone"));
@@ -269,10 +269,10 @@ export function getOrCreateSession(sessionId: string, projectCwd?: string, comma
   const spawnSpec = resolveTerminalSpawnSpec(cwd, command, commandArgs);
   console.log("[pty] Spawning command:", spawnSpec.label, "cwd:", cwd, "node-pty:", nodePtyRoot);
 
-  // Build a clean env — remove GSD-specific vars that would confuse a shell
+  // Build a clean env — remove SDD-specific vars that would confuse a shell
   const cleanEnv: Record<string, string> = {};
   for (const [key, value] of Object.entries(process.env)) {
-    if (value !== undefined && !key.startsWith("GSD_WEB_")) {
+    if (value !== undefined && !key.startsWith("SDD_WEB_")) {
       cleanEnv[key] = value;
     }
   }
@@ -284,7 +284,7 @@ export function getOrCreateSession(sessionId: string, projectCwd?: string, comma
   cleanEnv.LESSHISTFILE = "/dev/null";
   cleanEnv.NODE_REPL_HISTORY = "/dev/null";
   if (command) {
-    cleanEnv.GSD_WEB_PTY = "1";
+    cleanEnv.SDD_WEB_PTY = "1";
   }
 
   let ptyProcess: IPty;

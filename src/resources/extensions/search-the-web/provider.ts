@@ -9,16 +9,16 @@
  * @see S01-RESEARCH.md for the storage decision rationale (D002).
  */
 
-import { AuthStorage } from '@gsd/pi-coding-agent'
+import { AuthStorage } from '@sdd/pi-coding-agent'
 import { homedir } from 'os'
 import { join } from 'path'
-import { resolveSearchProviderFromPreferences } from '../gsd/preferences.js'
+import { resolveSearchProviderFromPreferences } from '../sdd/preferences.js'
 
 // Compute authFilePath locally instead of importing from app-paths.ts,
-// because extensions are copied to ~/.gsd/agent/extensions/ at runtime
+// because extensions are copied to ~/.sdd/agent/extensions/ at runtime
 // where the relative import '../../../app-paths.ts' doesn't resolve.
-const gsdHome = process.env.GSD_HOME || join(homedir(), '.gsd')
-const authFilePath = join(gsdHome, 'agent', 'auth.json')
+const sddHome = process.env.SDD_HOME || join(homedir(), '.sdd')
+const authFilePath = join(sddHome, 'agent', 'auth.json')
 
 export type SearchProvider = 'tavily' | 'brave' | 'ollama'
 export type SearchProviderPreference = SearchProvider | 'auto'

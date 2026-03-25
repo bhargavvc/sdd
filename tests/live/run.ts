@@ -5,8 +5,8 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-if (process.env.GSD_LIVE_TESTS !== "1") {
-  console.log("Skipping live tests (set GSD_LIVE_TESTS=1 to enable)");
+if (process.env.SDD_LIVE_TESTS !== "1") {
+  console.log("Skipping live tests (set SDD_LIVE_TESTS=1 to enable)");
   process.exit(0);
 }
 

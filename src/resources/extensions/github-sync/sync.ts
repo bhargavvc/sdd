@@ -1,8 +1,8 @@
 /**
  * Core GitHub sync engine.
  *
- * Entry point: `runGitHubSync()` — called from the GSD post-unit pipeline.
- * Routes to per-event sync functions based on the unit type, reads GSD
+ * Entry point: `runGitHubSync()` — called from the SDD post-unit pipeline.
+ * Routes to per-event sync functions based on the unit type, reads SDD
  * files to build GitHub entities, and persists the sync mapping.
  *
  * All errors are caught internally — sync failures never block execution.
@@ -10,14 +10,14 @@
 
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { loadFile, parseRoadmap, parsePlan, parseSummary } from "../gsd/files.js";
+import { loadFile, parseRoadmap, parsePlan, parseSummary } from "../sdd/files.js";
 import {
   resolveMilestoneFile,
   resolveSliceFile,
   resolveTaskFile,
-} from "../gsd/paths.js";
-import { debugLog } from "../gsd/debug-logger.js";
-import { loadEffectiveGSDPreferences } from "../gsd/preferences.js";
+} from "../sdd/paths.js";
+import { debugLog } from "../sdd/debug-logger.js";
+import { loadEffectiveSDDPreferences } from "../sdd/preferences.js";
 
 import type { GitHubSyncConfig, SyncMapping } from "./types.js";
 import {
@@ -57,7 +57,7 @@ import {
 // ─── Entry Point ────────────────────────────────────────────────────────────
 
 /**
- * Main sync entry point — called from GSD post-unit pipeline.
+ * Main sync entry point — called from SDD post-unit pipeline.
  * Routes to the appropriate sync function based on unit type.
  */
 export async function runGitHubSync(
@@ -441,7 +441,7 @@ async function syncMilestoneComplete(
 // ─── Bootstrap ──────────────────────────────────────────────────────────────
 
 /**
- * Walk the `.gsd/milestones/` tree and create GitHub entities for any
+ * Walk the `.sdd/milestones/` tree and create GitHub entities for any
  * that are missing from the sync mapping. Safe to run multiple times.
  */
 export async function bootstrapSync(basePath: string): Promise<{
@@ -461,7 +461,7 @@ export async function bootstrapSync(basePath: string): Promise<{
 
   const taskCountBefore = Object.keys(mapping.tasks).length;
   const counts = { milestones: 0, slices: 0, tasks: 0 };
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".sdd", "milestones");
   if (!existsSync(milestonesDir)) return counts;
 
   const milestoneIds = readdirSync(milestonesDir, { withFileTypes: true })
@@ -504,7 +504,7 @@ let _cachedConfig: GitHubSyncConfig | null | undefined;
 function loadGitHubSyncConfig(_basePath: string): GitHubSyncConfig | null {
   if (_cachedConfig !== undefined) return _cachedConfig;
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveSDDPreferences();
     const github = (prefs?.preferences as Record<string, unknown>)?.github;
     if (!github || typeof github !== "object") {
       _cachedConfig = null;

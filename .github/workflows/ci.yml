@@ -80,10 +80,10 @@ jobs:
       - name: Scan for hardcoded secrets
         run: bash scripts/secret-scan.sh --diff origin/main
 
-      - name: Ensure .gsd/ is not checked in
+      - name: Ensure .sdd/ is not checked in
         run: |
-          if [ -d ".gsd" ]; then
-            echo "::error::.gsd/ directory must not be checked in"
+          if [ -d ".sdd" ]; then
+            echo "::error::.sdd/ directory must not be checked in"
             exit 1
           fi
 

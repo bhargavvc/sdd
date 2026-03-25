@@ -1,11 +1,11 @@
 [package]
-name = "gsd-grep"
+name = "sdd-grep"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Ripgrep-backed search library for GSD native engine"
+description = "Ripgrep-backed search library for SDD native engine"
 
 [dependencies]
 grep-regex = "0.1"

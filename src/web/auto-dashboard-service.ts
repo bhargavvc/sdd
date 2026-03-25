@@ -7,9 +7,9 @@ import type { AutoDashboardData } from "./bridge-service.ts";
 import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 
 const AUTO_DASHBOARD_MAX_BUFFER = 1024 * 1024;
-const TEST_AUTO_DASHBOARD_MODULE_ENV = "GSD_WEB_TEST_AUTO_DASHBOARD_MODULE";
-const TEST_AUTO_DASHBOARD_FALLBACK_ENV = "GSD_WEB_TEST_USE_FALLBACK_AUTO_DASHBOARD";
-const AUTO_DASHBOARD_MODULE_ENV = "GSD_AUTO_DASHBOARD_MODULE";
+const TEST_AUTO_DASHBOARD_MODULE_ENV = "SDD_WEB_TEST_AUTO_DASHBOARD_MODULE";
+const TEST_AUTO_DASHBOARD_FALLBACK_ENV = "SDD_WEB_TEST_USE_FALLBACK_AUTO_DASHBOARD";
+const AUTO_DASHBOARD_MODULE_ENV = "SDD_AUTO_DASHBOARD_MODULE";
 
 export interface AutoDashboardServiceOptions {
   execPath?: string;
@@ -33,11 +33,11 @@ function fallbackAutoDashboardData(): AutoDashboardData {
 }
 
 function resolveAutoDashboardModulePath(packageRoot: string, env: NodeJS.ProcessEnv): string {
-  return env[TEST_AUTO_DASHBOARD_MODULE_ENV] || join(packageRoot, "src", "resources", "extensions", "gsd", "auto.ts");
+  return env[TEST_AUTO_DASHBOARD_MODULE_ENV] || join(packageRoot, "src", "resources", "extensions", "sdd", "auto.ts");
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs");
 }
 
 export function collectTestOnlyFallbackAutoDashboardData(): AutoDashboardData {

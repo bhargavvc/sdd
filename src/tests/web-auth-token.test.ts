@@ -47,7 +47,7 @@ test('auth.ts wraps sessionStorage calls in try/catch for private browsing', () 
 
 // ─── sendBeacon auth token tests ────────────────────────────────────────────
 
-const appShellSource = readFileSync(join(projectRoot, 'web', 'components', 'gsd', 'app-shell.tsx'), 'utf-8')
+const appShellSource = readFileSync(join(projectRoot, 'web', 'components', 'sdd', 'app-shell.tsx'), 'utf-8')
 
 test('app-shell.tsx sendBeacon includes auth token as query parameter', () => {
   // sendBeacon cannot set custom headers, so the token must be passed
@@ -81,7 +81,7 @@ test('proxy.ts validates bearer token from Authorization header', () => {
   assert.match(proxySource, /Bearer/, 'proxy should check Authorization: Bearer header')
 })
 
-test('proxy.ts skips auth when GSD_WEB_AUTH_TOKEN is not set', () => {
-  assert.match(proxySource, /GSD_WEB_AUTH_TOKEN/, 'proxy should read GSD_WEB_AUTH_TOKEN from env')
+test('proxy.ts skips auth when SDD_WEB_AUTH_TOKEN is not set', () => {
+  assert.match(proxySource, /SDD_WEB_AUTH_TOKEN/, 'proxy should read SDD_WEB_AUTH_TOKEN from env')
   assert.match(proxySource, /NextResponse\.next\(\)/, 'proxy should pass through when no token is configured')
 })

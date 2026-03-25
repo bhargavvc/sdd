@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a new capability or improvement for GSD.
+description: Propose a new capability or improvement for SDD.
 title: "[Feature]: "
 labels:
   - enhancement
@@ -32,7 +32,7 @@ body:
     attributes:
       label: Proposed solution
       description: Describe the desired behavior, UX, CLI shape, or API as specifically as you can.
-      placeholder: Add `/gsd queue list` that renders queued milestones with IDs, status, and created timestamps.
+      placeholder: Add `/sdd queue list` that renders queued milestones with IDs, status, and created timestamps.
     validations:
       required: true
 
@@ -41,7 +41,7 @@ body:
     attributes:
       label: Alternatives considered
       description: Other approaches considered and why they are weaker.
-      placeholder: Reading `.gsd/QUEUE.md` manually works, but it is slower and harder to parse during terminal workflows.
+      placeholder: Reading `.sdd/QUEUE.md` manually works, but it is slower and harder to parse during terminal workflows.
 
   - type: textarea
     id: use_cases
@@ -80,4 +80,4 @@ body:
     attributes:
       label: Additional information
       description: Extra constraints, compatibility concerns, implementation hints, or references.
-      placeholder: Must remain compatible with existing `.gsd/QUEUE.md` structure.
+      placeholder: Must remain compatible with existing `.sdd/QUEUE.md` structure.

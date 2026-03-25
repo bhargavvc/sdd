@@ -36,7 +36,7 @@ export interface WebModeLaunchOptions {
   packageRoot?: string
   host?: string
   port?: number
-  /** Additional allowed origins for CORS (forwarded as GSD_WEB_ALLOWED_ORIGINS). */
+  /** Additional allowed origins for CORS (forwarded as SDD_WEB_ALLOWED_ORIGINS). */
   allowedOrigins?: string[]
 }
 
@@ -210,13 +210,13 @@ export function stopWebMode(deps: Pick<WebModeDeps, 'pidFilePath' | 'readPidFile
     for (const [cwd, entry] of entries) {
       const result = killPid(entry.pid)
       if (result === 'killed') {
-        stderr.write(`[gsd] Stopped web server for ${cwd} (pid=${entry.pid})\n`)
+        stderr.write(`[sdd] Stopped web server for ${cwd} (pid=${entry.pid})\n`)
         stopped++
       } else if (result === 'already-dead') {
-        stderr.write(`[gsd] Web server for ${cwd} was already stopped (pid=${entry.pid})\n`)
+        stderr.write(`[sdd] Web server for ${cwd} was already stopped (pid=${entry.pid})\n`)
         stopped++
       } else {
-        stderr.write(`[gsd] Failed to stop web server for ${cwd}: ${result.error}\n`)
+        stderr.write(`[sdd] Failed to stop web server for ${cwd}: ${result.error}\n`)
       }
       unregisterInstance(cwd)
     }
@@ -224,7 +224,7 @@ export function stopWebMode(deps: Pick<WebModeDeps, 'pidFilePath' | 'readPidFile
     const deletePid = deps.deletePidFile ?? deletePidFile
     const pidFilePath = deps.pidFilePath ?? defaultWebPidFilePath
     deletePid(pidFilePath)
-    stderr.write(`[gsd] Stopped ${stopped} instance${stopped === 1 ? '' : 's'}.\n`)
+    stderr.write(`[sdd] Stopped ${stopped} instance${stopped === 1 ? '' : 's'}.\n`)
     return { ok: true, stoppedCount: stopped }
   }
 
@@ -234,19 +234,19 @@ export function stopWebMode(deps: Pick<WebModeDeps, 'pidFilePath' | 'readPidFile
     const registry = readInstanceRegistry()
     const entry = registry[resolvedCwd]
     if (!entry) {
-      stderr.write(`[gsd] No web server running for ${resolvedCwd}\n`)
+      stderr.write(`[sdd] No web server running for ${resolvedCwd}\n`)
       return { ok: false, reason: 'not-found' }
     }
     const result = killPid(entry.pid)
     unregisterInstance(resolvedCwd)
     if (result === 'killed') {
-      stderr.write(`[gsd] Stopped web server for ${resolvedCwd} (pid=${entry.pid})\n`)
+      stderr.write(`[sdd] Stopped web server for ${resolvedCwd} (pid=${entry.pid})\n`)
       return { ok: true, stoppedCount: 1 }
     } else if (result === 'already-dead') {
-      stderr.write(`[gsd] Web server for ${resolvedCwd} was already stopped — cleared stale entry.\n`)
+      stderr.write(`[sdd] Web server for ${resolvedCwd} was already stopped — cleared stale entry.\n`)
       return { ok: true, stoppedCount: 1 }
     } else {
-      stderr.write(`[gsd] Failed to stop web server for ${resolvedCwd}: ${result.error}\n`)
+      stderr.write(`[sdd] Failed to stop web server for ${resolvedCwd}: ${result.error}\n`)
       return { ok: false, reason: result.error }
     }
   }
@@ -263,22 +263,22 @@ function stopLegacyPidFile(deps: Pick<WebModeDeps, 'pidFilePath' | 'readPidFile'
 
   const pid = readPid(pidFilePath)
   if (pid === null) {
-    stderr.write(`[gsd] Web server is not running (no PID file found)\n`)
+    stderr.write(`[sdd] Web server is not running (no PID file found)\n`)
     return { ok: false, reason: 'no-pid-file' }
   }
 
-  stderr.write(`[gsd] Stopping web server (pid=${pid})…\n`)
+  stderr.write(`[sdd] Stopping web server (pid=${pid})…\n`)
 
   const result = killPid(pid)
   deletePid(pidFilePath)
   if (result === 'killed') {
-    stderr.write(`[gsd] Web server stopped.\n`)
+    stderr.write(`[sdd] Web server stopped.\n`)
     return { ok: true }
   } else if (result === 'already-dead') {
-    stderr.write(`[gsd] Web server was already stopped — cleared stale PID file.\n`)
+    stderr.write(`[sdd] Web server was already stopped — cleared stale PID file.\n`)
     return { ok: true }
   } else {
-    stderr.write(`[gsd] Failed to stop web server: ${result.error}\n`)
+    stderr.write(`[sdd] Failed to stop web server: ${result.error}\n`)
     return { ok: false, reason: result.error }
   }
 }
@@ -355,10 +355,10 @@ function getSpawnCommandForSourceHost(platform: NodeJS.Platform): string {
 
 function formatLaunchStatus(status: WebModeLaunchStatus): string {
   if (status.ok) {
-    return `[gsd] Web mode startup: status=started cwd=${status.cwd} port=${status.port} host=${status.hostPath} kind=${status.hostKind} url=${status.url}\n`
+    return `[sdd] Web mode startup: status=started cwd=${status.cwd} port=${status.port} host=${status.hostPath} kind=${status.hostKind} url=${status.url}\n`
   }
 
-  return `[gsd] Web mode startup: status=failed cwd=${status.cwd} port=${status.port ?? 'n/a'} host=${status.hostPath ?? 'unresolved'} kind=${status.hostKind} reason=${status.failureReason}\n`
+  return `[sdd] Web mode startup: status=failed cwd=${status.cwd} port=${status.port ?? 'n/a'} host=${status.hostPath ?? 'unresolved'} kind=${status.hostKind} reason=${status.failureReason}\n`
 }
 
 function emitLaunchStatus(stderr: WritableLike, status: WebModeLaunchStatus): void {
@@ -471,7 +471,7 @@ async function waitForBootReady(url: string, timeoutMs = 180_000, stderr?: Writa
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (!hostUp) {
           hostUp = true
-          stderr?.write(`[gsd] Web host ready.\n`)
+          stderr?.write(`[sdd] Web host ready.\n`)
         }
         consecutive5xx = 0
         // Host responded successfully — it's ready for the browser
@@ -504,9 +504,9 @@ async function waitForBootReady(url: string, timeoutMs = 180_000, stderr?: Writa
     if (now - lastTickAt >= TICKER_INTERVAL_MS) {
       lastTickAt = now
       if (hostUp) {
-        stderr?.write(`[gsd] Still waiting… (${elapsed()})\n`)
+        stderr?.write(`[sdd] Still waiting… (${elapsed()})\n`)
       } else {
-        stderr?.write(`[gsd] Waiting for web host… (${elapsed()})\n`)
+        stderr?.write(`[sdd] Waiting for web host… (${elapsed()})\n`)
       }
     }
 
@@ -519,7 +519,7 @@ async function waitForBootReady(url: string, timeoutMs = 180_000, stderr?: Writa
 /**
  * If a previous web server instance is registered for the same `cwd`, attempt
  * to kill it and remove its registry entry so the new launch can bind the port
- * cleanly.  This handles the "orphan process" scenario where a prior `gsd --web`
+ * cleanly.  This handles the "orphan process" scenario where a prior `sdd --web`
  * was terminated without clean shutdown (e.g. terminal closed).
  */
 function cleanupStaleInstance(cwd: string, stderr: WritableLike, registryPath?: string): void {
@@ -528,14 +528,14 @@ function cleanupStaleInstance(cwd: string, stderr: WritableLike, registryPath?: 
   const stale = registry[key]
   if (!stale) return
 
-  stderr.write(`[gsd] Cleaning up stale web server for ${key} (pid=${stale.pid}, port=${stale.port})…\n`)
+  stderr.write(`[sdd] Cleaning up stale web server for ${key} (pid=${stale.pid}, port=${stale.port})…\n`)
   const result = killPid(stale.pid)
   if (result === 'killed') {
-    stderr.write(`[gsd] Killed stale web server (pid=${stale.pid}).\n`)
+    stderr.write(`[sdd] Killed stale web server (pid=${stale.pid}).\n`)
   } else if (result === 'already-dead') {
-    stderr.write(`[gsd] Stale web server was already stopped (pid=${stale.pid}) — clearing entry.\n`)
+    stderr.write(`[sdd] Stale web server was already stopped (pid=${stale.pid}) — clearing entry.\n`)
   } else {
-    stderr.write(`[gsd] Could not kill stale web server (pid=${stale.pid}): ${result.error}\n`)
+    stderr.write(`[sdd] Could not kill stale web server (pid=${stale.pid}): ${result.error}\n`)
   }
   unregisterInstance(cwd, registryPath)
 }
@@ -570,10 +570,10 @@ export async function launchWebMode(
     return failure
   }
 
-  stderr.write(`[gsd] Starting web mode…\n`)
+  stderr.write(`[sdd] Starting web mode…\n`)
 
   // Kill any stale server instance for this project before reserving a port.
-  // This prevents EADDRINUSE when the previous `gsd --web` was terminated
+  // This prevents EADDRINUSE when the previous `sdd --web` was terminated
   // without a clean shutdown (e.g. terminal closed, crash).
   cleanupStaleInstance(options.cwd, stderr, deps.registryPath)
 
@@ -584,19 +584,19 @@ export async function launchWebMode(
     ...(deps.env ?? process.env),
     HOSTNAME: host,
     PORT: String(port),
-    GSD_WEB_HOST: host,
-    GSD_WEB_PORT: String(port),
-    GSD_WEB_AUTH_TOKEN: authToken,
-    GSD_WEB_PROJECT_CWD: options.cwd,
-    GSD_WEB_PROJECT_SESSIONS_DIR: options.projectSessionsDir,
-    GSD_WEB_PACKAGE_ROOT: resolution.packageRoot,
-    GSD_WEB_HOST_KIND: resolution.kind,
-    ...(resolution.kind === 'source-dev' ? { NEXT_PUBLIC_GSD_DEV: '1' } : {}),
-    ...(options.allowedOrigins?.length ? { GSD_WEB_ALLOWED_ORIGINS: options.allowedOrigins.join(',') } : {}),
+    SDD_WEB_HOST: host,
+    SDD_WEB_PORT: String(port),
+    SDD_WEB_AUTH_TOKEN: authToken,
+    SDD_WEB_PROJECT_CWD: options.cwd,
+    SDD_WEB_PROJECT_SESSIONS_DIR: options.projectSessionsDir,
+    SDD_WEB_PACKAGE_ROOT: resolution.packageRoot,
+    SDD_WEB_HOST_KIND: resolution.kind,
+    ...(resolution.kind === 'source-dev' ? { NEXT_PUBLIC_SDD_DEV: '1' } : {}),
+    ...(options.allowedOrigins?.length ? { SDD_WEB_ALLOWED_ORIGINS: options.allowedOrigins.join(',') } : {}),
   }
 
   try {
-    stderr.write(`[gsd] Initialising resources…\n`)
+    stderr.write(`[sdd] Initialising resources…\n`)
     const bootstrap = deps.initResources ? { initResources: deps.initResources } : await loadResourceBootstrap()
     bootstrap.initResources(options.agentDir)
   } catch (error) {
@@ -625,7 +625,7 @@ export async function launchWebMode(
     deps.execPath ?? process.execPath,
   )
 
-  stderr.write(`[gsd] Launching web host on port ${port}…\n`)
+  stderr.write(`[sdd] Launching web host on port ${port}…\n`)
 
   const spawnResult = await spawnDetachedProcess(
     deps.spawn ?? ((command, args, spawnOptions) => spawn(command, args, spawnOptions)),
@@ -718,7 +718,7 @@ export async function launchWebMode(
     hostPath: resolution.entryPath,
     hostRoot: resolution.hostRoot,
   }
-  stderr.write(`[gsd] Ready → ${url}\n`)
+  stderr.write(`[sdd] Ready → ${url}\n`)
   emitLaunchStatus(stderr, success)
   return success
 }

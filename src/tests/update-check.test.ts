@@ -42,7 +42,7 @@ test('compareSemver handles versions with different segment counts', () => {
 // ---------------------------------------------------------------------------
 
 test('readUpdateCache returns null for nonexistent file', () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-cache-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-cache-'))
   try {
     const result = readUpdateCache(join(tmp, 'nonexistent'))
     assert.equal(result, null)
@@ -52,7 +52,7 @@ test('readUpdateCache returns null for nonexistent file', () => {
 })
 
 test('readUpdateCache returns null for malformed JSON', () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-cache-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-cache-'))
   try {
     const cachePath = join(tmp, '.update-check')
     writeFileSync(cachePath, 'not json')
@@ -64,7 +64,7 @@ test('readUpdateCache returns null for malformed JSON', () => {
 })
 
 test('writeUpdateCache + readUpdateCache round-trips correctly', () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-cache-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-cache-'))
   try {
     const cachePath = join(tmp, '.update-check')
     const cache = { lastCheck: Date.now(), latestVersion: '3.0.0' }
@@ -77,7 +77,7 @@ test('writeUpdateCache + readUpdateCache round-trips correctly', () => {
 })
 
 test('writeUpdateCache creates parent directories', () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-cache-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-cache-'))
   try {
     const cachePath = join(tmp, 'nested', 'dir', '.update-check')
     writeUpdateCache({ lastCheck: Date.now(), latestVersion: '1.0.0' }, cachePath)
@@ -109,7 +109,7 @@ function startMockRegistry(responseBody: object, statusCode = 200): Promise<{ ur
 }
 
 test('checkForUpdates calls onUpdate when newer version is available', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const registry = await startMockRegistry({ version: '99.0.0' })
   try {
     let called = false
@@ -139,7 +139,7 @@ test('checkForUpdates calls onUpdate when newer version is available', async () 
 })
 
 test('checkForUpdates does not call onUpdate when already on latest', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const registry = await startMockRegistry({ version: '1.0.0' })
   try {
     let called = false
@@ -161,7 +161,7 @@ test('checkForUpdates does not call onUpdate when already on latest', async () =
 })
 
 test('checkForUpdates does not call onUpdate when current is ahead', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const registry = await startMockRegistry({ version: '1.0.0' })
   try {
     let called = false
@@ -183,7 +183,7 @@ test('checkForUpdates does not call onUpdate when current is ahead', async () =>
 })
 
 test('checkForUpdates writes cache after successful fetch', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const cachePath = join(tmp, '.update-check')
   const registry = await startMockRegistry({ version: '5.0.0' })
   try {
@@ -207,7 +207,7 @@ test('checkForUpdates writes cache after successful fetch', async () => {
 })
 
 test('checkForUpdates uses cache and skips fetch when checked recently', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const cachePath = join(tmp, '.update-check')
   // Write a fresh cache entry
   writeUpdateCache({ lastCheck: Date.now(), latestVersion: '10.0.0' }, cachePath)
@@ -235,7 +235,7 @@ test('checkForUpdates uses cache and skips fetch when checked recently', async (
 })
 
 test('checkForUpdates skips notification when cache is fresh and versions match', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const cachePath = join(tmp, '.update-check')
   writeUpdateCache({ lastCheck: Date.now(), latestVersion: '1.0.0' }, cachePath)
 
@@ -257,7 +257,7 @@ test('checkForUpdates skips notification when cache is fresh and versions match'
 })
 
 test('checkForUpdates handles server error gracefully', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
   const registry = await startMockRegistry({}, 500)
   try {
     let called = false
@@ -283,7 +283,7 @@ test('checkForUpdates handles network timeout gracefully', async () => {
   const server = createServer(() => { /* intentionally never respond */ })
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
   const addr = server.address() as { port: number }
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
 
   try {
     let called = false
@@ -305,8 +305,8 @@ test('checkForUpdates handles network timeout gracefully', async () => {
 })
 
 test('checkForUpdates handles missing version field in response', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-update-'))
-  const registry = await startMockRegistry({ name: 'gsd-pi' }) // no version field
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-update-'))
+  const registry = await startMockRegistry({ name: 'sdd-pi' }) // no version field
   try {
     let called = false
 

@@ -8,14 +8,14 @@ import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 import type { SkillHealthReport } from "../../web/lib/diagnostics-types.ts"
 
 const SKILL_HEALTH_MAX_BUFFER = 2 * 1024 * 1024
-const SKILL_HEALTH_MODULE_ENV = "GSD_SKILL_HEALTH_MODULE"
+const SKILL_HEALTH_MODULE_ENV = "SDD_SKILL_HEALTH_MODULE"
 
 function resolveSkillHealthModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "skill-health.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "skill-health.ts")
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -38,7 +38,7 @@ export async function collectSkillHealthData(projectCwdOverride?: string): Promi
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${SKILL_HEALTH_MODULE_ENV}).href);`,
-    'const basePath = process.env.GSD_SKILL_HEALTH_BASE;',
+    'const basePath = process.env.SDD_SKILL_HEALTH_BASE;',
     'const report = mod.generateSkillHealthReport(basePath);',
     'process.stdout.write(JSON.stringify(report));',
   ].join(" ")
@@ -59,7 +59,7 @@ export async function collectSkillHealthData(projectCwdOverride?: string): Promi
         env: {
           ...process.env,
           [SKILL_HEALTH_MODULE_ENV]: skillHealthModulePath,
-          GSD_SKILL_HEALTH_BASE: projectCwd,
+          SDD_SKILL_HEALTH_BASE: projectCwd,
         },
         maxBuffer: SKILL_HEALTH_MAX_BUFFER,
       },

@@ -31,7 +31,7 @@
 - [ ] `pi-ai` — AI/LLM layer
 - [ ] `pi-agent-core` — Agent orchestration
 - [ ] `pi-coding-agent` — Coding agent
-- [ ] `gsd extension` — GSD workflow
+- [ ] `sdd extension` — SDD workflow
 - [ ] `native` — Native bindings
 - [ ] `ci/build` — Workflows, scripts, config
 

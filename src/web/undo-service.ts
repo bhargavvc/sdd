@@ -8,19 +8,19 @@ import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 import type { UndoInfo, UndoResult } from "../../web/lib/remaining-command-types.ts"
 
 const UNDO_MAX_BUFFER = 2 * 1024 * 1024
-const UNDO_MODULE_ENV = "GSD_UNDO_MODULE"
-const PATHS_MODULE_ENV = "GSD_PATHS_MODULE"
+const UNDO_MODULE_ENV = "SDD_UNDO_MODULE"
+const PATHS_MODULE_ENV = "SDD_PATHS_MODULE"
 
 function resolveUndoModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "undo.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "undo.ts")
 }
 
 function resolvePathsModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "paths.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "paths.ts")
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -32,8 +32,8 @@ export async function collectUndoInfo(projectCwdOverride?: string): Promise<Undo
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)
   const { projectCwd } = config
 
-  const gsdDir = join(projectCwd, ".gsd")
-  const completedPath = join(gsdDir, "completed-units.json")
+  const sddDir = join(projectCwd, ".sdd")
+  const completedPath = join(sddDir, "completed-units.json")
 
   const empty: UndoInfo = {
     lastUnitType: null,
@@ -60,7 +60,7 @@ export async function collectUndoInfo(projectCwdOverride?: string): Promise<Undo
   const unitKey = last.key ?? (unitType && unitId ? `${unitType}:${unitId}` : null)
 
   // Scan activity log for associated commits
-  const activityDir = join(gsdDir, "activity")
+  const activityDir = join(sddDir, "activity")
   let commits: string[] = []
   if (unitType && unitId && existsSync(activityDir)) {
     try {
@@ -140,9 +140,9 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
     'const { join } = await import("node:path");',
     `const undoMod = await import(pathToFileURL(process.env.${UNDO_MODULE_ENV}).href);`,
     `const pathsMod = await import(pathToFileURL(process.env.${PATHS_MODULE_ENV}).href);`,
-    'const basePath = process.env.GSD_UNDO_BASE;',
-    'const gsdDir = pathsMod.gsdRoot(basePath);',
-    'const completedPath = join(gsdDir, "completed-units.json");',
+    'const basePath = process.env.SDD_UNDO_BASE;',
+    'const sddDir = pathsMod.sddRoot(basePath);',
+    'const completedPath = join(sddDir, "completed-units.json");',
     'if (!existsSync(completedPath)) { process.stdout.write(JSON.stringify({ success: false, message: "No completed units to undo" })); process.exit(0); }',
     'let entries;',
     'try { entries = JSON.parse(readFileSync(completedPath, "utf-8")); } catch { process.stdout.write(JSON.stringify({ success: false, message: "Could not parse completed-units.json" })); process.exit(0); }',
@@ -156,7 +156,7 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
     'if (unitType === "execute-task" && parts.length === 3) { const [mid, sid, tid] = parts; planUpdated = undoMod.uncheckTaskInPlan(basePath, mid, sid, tid); }',
     // Find and revert commits
     'let commitsReverted = 0;',
-    'const activityDir = join(gsdDir, "activity");',
+    'const activityDir = join(sddDir, "activity");',
     'if (existsSync(activityDir)) {',
     '  const commits = undoMod.findCommitsForUnit(activityDir, unitType, unitId);',
     '  if (commits.length > 0) {',
@@ -194,7 +194,7 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
           ...process.env,
           [UNDO_MODULE_ENV]: undoModulePath,
           [PATHS_MODULE_ENV]: pathsModulePath,
-          GSD_UNDO_BASE: projectCwd,
+          SDD_UNDO_BASE: projectCwd,
         },
         maxBuffer: UNDO_MAX_BUFFER,
       },

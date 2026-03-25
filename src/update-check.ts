@@ -5,7 +5,7 @@ import { appRoot } from './app-paths.js'
 import { execSync } from 'node:child_process'
 
 const CACHE_FILE = join(appRoot, '.update-check')
-const NPM_PACKAGE_NAME = 'gsd-pi'
+const NPM_PACKAGE_NAME = 'sdd-pi'
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 hours
 const FETCH_TIMEOUT_MS = 5000
 
@@ -50,7 +50,7 @@ export function writeUpdateCache(cache: UpdateCheckCache, cachePath: string = CA
 function printUpdateBanner(current: string, latest: string): void {
   process.stderr.write(
     `  ${chalk.yellow('Update available:')} ${chalk.dim(`v${current}`)} → ${chalk.bold(`v${latest}`)}\n` +
-    `  ${chalk.dim('Run')} npm update -g gsd-pi ${chalk.dim('or')} /gsd update ${chalk.dim('to upgrade')}\n\n`,
+    `  ${chalk.dim('Run')} npm update -g sdd-pi ${chalk.dim('or')} /sdd update ${chalk.dim('to upgrade')}\n\n`,
   )
 }
 
@@ -68,7 +68,7 @@ export interface UpdateCheckOptions {
  * caches the result, and prints a banner if a newer version is available.
  */
 export async function checkForUpdates(options: UpdateCheckOptions = {}): Promise<void> {
-  const currentVersion = options.currentVersion || process.env.GSD_VERSION || '0.0.0'
+  const currentVersion = options.currentVersion || process.env.SDD_VERSION || '0.0.0'
   const cachePath = options.cachePath || CACHE_FILE
   const registryUrl = options.registryUrl || `https://registry.npmjs.org/${NPM_PACKAGE_NAME}/latest`
   const checkIntervalMs = options.checkIntervalMs ?? CHECK_INTERVAL_MS
@@ -121,7 +121,7 @@ const PROMPT_TIMEOUT_MS = 30_000
  * Returns true if an update was performed, false otherwise.
  */
 export async function checkAndPromptForUpdates(options: UpdateCheckOptions = {}): Promise<boolean> {
-  const currentVersion = options.currentVersion || process.env.GSD_VERSION || '0.0.0'
+  const currentVersion = options.currentVersion || process.env.SDD_VERSION || '0.0.0'
   const cachePath = options.cachePath || CACHE_FILE
   const registryUrl = options.registryUrl || `https://registry.npmjs.org/${NPM_PACKAGE_NAME}/latest`
   const checkIntervalMs = options.checkIntervalMs ?? CHECK_INTERVAL_MS
@@ -213,7 +213,7 @@ export async function checkAndPromptForUpdates(options: UpdateCheckOptions = {})
       process.stderr.write(`\n  ${chalk.yellow(`Update failed. You can run: npm install -g ${NPM_PACKAGE_NAME}@latest`)}\n\n`)
     }
   } else {
-    process.stderr.write(`  ${chalk.dim('Skipped. Run')} gsd update ${chalk.dim('anytime to upgrade.')}\n\n`)
+    process.stderr.write(`  ${chalk.dim('Skipped. Run')} sdd update ${chalk.dim('anytime to upgrade.')}\n\n`)
   }
 
   return false

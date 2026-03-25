@@ -15,8 +15,8 @@ import { loadRules } from '../../src/resources/extensions/ttsr/index.js'
 
 function makeTmpProject(): { cwd: string; globalDir: string; projectDir: string; cleanup: () => void } {
 	const cwd = mkdtempSync(join(tmpdir(), 'ttsr-loader-test-'))
-	const globalDir = join(cwd, '.gsd-global', 'agent', 'rules')
-	const projectDir = join(cwd, '.gsd', 'rules')
+	const globalDir = join(cwd, '.sdd-global', 'agent', 'rules')
+	const projectDir = join(cwd, '.sdd', 'rules')
 	return { cwd, globalDir, projectDir, cleanup: () => rmSync(cwd, { recursive: true, force: true }) }
 }
 
@@ -27,13 +27,13 @@ function writeRule(dir: string, name: string, frontmatter: string, body: string)
 
 // loadRules uses homedir() for global dir — we can't easily override that,
 // so we test the project-local path and the merge logic by testing with
-// a cwd that has .gsd/rules/.
+// a cwd that has .sdd/rules/.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Project-local rule loading
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('loads rule from project .gsd/rules/', () => {
+test('loads rule from project .sdd/rules/', () => {
 	const { cwd, projectDir, cleanup } = makeTmpProject()
 	try {
 		writeRule(projectDir, 'no-console', 'condition:\n  - "console\\.log"', 'Do not use console.log.')
@@ -89,10 +89,10 @@ test('skips rules with no condition', () => {
 	}
 })
 
-test('returns empty array when .gsd/rules/ does not exist', () => {
+test('returns empty array when .sdd/rules/ does not exist', () => {
 	const { cwd, cleanup } = makeTmpProject()
 	try {
-		// cwd exists but no .gsd/rules/ dir
+		// cwd exists but no .sdd/rules/ dir
 		const rules = loadRules(cwd)
 		// May include global rules from homedir — just verify no crash
 		assert.ok(Array.isArray(rules))

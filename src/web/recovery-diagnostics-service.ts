@@ -206,12 +206,12 @@ function buildCommandSuggestions(
     }
   }
 
-  if (phase === "planning") add("/gsd", "Open GSD planning")
-  if (phase === "executing" || phase === "summarizing") add("/gsd auto", "Resume GSD auto mode")
-  if (activeScope) add(`/gsd doctor ${activeScope}`, "Inspect scoped doctor report")
-  if (activeScope) add(`/gsd doctor fix ${activeScope}`, "Apply scoped doctor fixes")
-  if (validationCount > 0 && activeScope) add(`/gsd doctor audit ${activeScope}`, "Audit validation diagnostics")
-  add("/gsd status", "Check current-project status")
+  if (phase === "planning") add("/sdd", "Open SDD planning")
+  if (phase === "executing" || phase === "summarizing") add("/sdd auto", "Resume SDD auto mode")
+  if (activeScope) add(`/sdd doctor ${activeScope}`, "Inspect scoped doctor report")
+  if (activeScope) add(`/sdd doctor fix ${activeScope}`, "Apply scoped doctor fixes")
+  if (validationCount > 0 && activeScope) add(`/sdd doctor audit ${activeScope}`, "Audit validation diagnostics")
+  add("/sdd status", "Check current-project status")
 
   return [...suggestions.values()]
 }
@@ -357,15 +357,15 @@ function resolveSummary(options: {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 function resolveDoctorModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "doctor.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "doctor.ts")
 }
 
 function resolveSessionForensicsModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "session-forensics.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "session-forensics.ts")
 }
 
 async function collectRecoveryDiagnosticsChildPayload(
@@ -390,15 +390,15 @@ async function collectRecoveryDiagnosticsChildPayload(
 
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const doctor = await import(pathToFileURL(process.env.GSD_RECOVERY_DOCTOR_MODULE).href);',
-    'const forensics = await import(pathToFileURL(process.env.GSD_RECOVERY_FORENSICS_MODULE).href);',
-    'const basePath = process.env.GSD_RECOVERY_BASE;',
-    'const scope = process.env.GSD_RECOVERY_SCOPE || undefined;',
-    'const unitType = process.env.GSD_RECOVERY_UNIT_TYPE || "execute-project";',
-    'const unitId = process.env.GSD_RECOVERY_UNIT_ID || "project";',
-    'const sessionFile = process.env.GSD_RECOVERY_SESSION_FILE || undefined;',
-    'const activityDir = process.env.GSD_RECOVERY_ACTIVITY_DIR || undefined;',
-    'const report = await doctor.runGSDDoctor(basePath, { fix: false, scope, fixLevel: "task" });',
+    'const doctor = await import(pathToFileURL(process.env.SDD_RECOVERY_DOCTOR_MODULE).href);',
+    'const forensics = await import(pathToFileURL(process.env.SDD_RECOVERY_FORENSICS_MODULE).href);',
+    'const basePath = process.env.SDD_RECOVERY_BASE;',
+    'const scope = process.env.SDD_RECOVERY_SCOPE || undefined;',
+    'const unitType = process.env.SDD_RECOVERY_UNIT_TYPE || "execute-project";',
+    'const unitId = process.env.SDD_RECOVERY_UNIT_ID || "project";',
+    'const sessionFile = process.env.SDD_RECOVERY_SESSION_FILE || undefined;',
+    'const activityDir = process.env.SDD_RECOVERY_ACTIVITY_DIR || undefined;',
+    'const report = await doctor.runSDDDoctor(basePath, { fix: false, scope, fixLevel: "task" });',
     'const summary = doctor.summarizeDoctorIssues(report.issues);',
     'const briefing = forensics.synthesizeCrashRecovery(basePath, unitType, unitId, sessionFile, activityDir);',
     'const trace = briefing?.trace;',
@@ -483,14 +483,14 @@ async function collectRecoveryDiagnosticsChildPayload(
         cwd: packageRoot,
         env: {
           ...env,
-          GSD_RECOVERY_BASE: basePath,
-          GSD_RECOVERY_SCOPE: scope ?? "",
-          GSD_RECOVERY_UNIT_TYPE: unit?.type ?? "execute-project",
-          GSD_RECOVERY_UNIT_ID: unit?.id ?? "project",
-          GSD_RECOVERY_SESSION_FILE: sessionFile ?? "",
-          GSD_RECOVERY_ACTIVITY_DIR: join(basePath, ".gsd", "activity"),
-          GSD_RECOVERY_DOCTOR_MODULE: doctorModulePath,
-          GSD_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
+          SDD_RECOVERY_BASE: basePath,
+          SDD_RECOVERY_SCOPE: scope ?? "",
+          SDD_RECOVERY_UNIT_TYPE: unit?.type ?? "execute-project",
+          SDD_RECOVERY_UNIT_ID: unit?.id ?? "project",
+          SDD_RECOVERY_SESSION_FILE: sessionFile ?? "",
+          SDD_RECOVERY_ACTIVITY_DIR: join(basePath, ".sdd", "activity"),
+          SDD_RECOVERY_DOCTOR_MODULE: doctorModulePath,
+          SDD_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
         },
         maxBuffer: RECOVERY_DIAGNOSTICS_MAX_BUFFER,
       },

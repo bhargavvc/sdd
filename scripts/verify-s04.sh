@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # S04 verification — npm pack tarball install smoke test
-# Checks: dist integrity, GSD_BUNDLED_EXTENSION_PATHS, prepublishOnly,
+# Checks: dist integrity, SDD_BUNDLED_EXTENSION_PATHS, prepublishOnly,
 #         npm pack dry-run, tarball install, binary exists, launch (no extension
-#         errors, "gsd" branding), ~/.gsd/ untouched, non-TTY warning/no exit 1.
+#         errors, "sdd" branding), ~/.sdd/ untouched, non-TTY warning/no exit 1.
 
 set -uo pipefail
 
@@ -10,11 +10,11 @@ FAIL=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAIL=1; }
 
-SMOKE_PREFIX=/tmp/gsd-smoke-prefix
+SMOKE_PREFIX=/tmp/sdd-smoke-prefix
 TARBALL=""
 
-# Capture ~/.gsd/agent/sessions/ count before any smoke runs (for Check 9)
-PI_SESSIONS_BEFORE=$(ls ~/.gsd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
+# Capture ~/.sdd/agent/sessions/ count before any smoke runs (for Check 9)
+PI_SESSIONS_BEFORE=$(ls ~/.sdd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
 
 cleanup() {
   rm -rf "$SMOKE_PREFIX"
@@ -38,20 +38,20 @@ else
 fi
 
 # ----------------------------------------------------------------
-# Check 2 — GSD_BUNDLED_EXTENSION_PATHS does NOT reference src/resources
+# Check 2 — SDD_BUNDLED_EXTENSION_PATHS does NOT reference src/resources
 # ----------------------------------------------------------------
 # The variable must be present and must use agentDir-based paths only.
-paths_line=$(grep "GSD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep -v "src/resources" | head -1)
+paths_line=$(grep "SDD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep -v "src/resources" | head -1)
 if [ -n "$paths_line" ]; then
   # Double-check: none of the actual join() lines (not comments) reference src/resources.
   # We look only at lines containing join( to avoid matching comment lines like "NOT src/resources".
-  if grep -A 15 "GSD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep "join(" | grep -q "src/resources"; then
-    fail "2 — GSD_BUNDLED_EXTENSION_PATHS still references src/resources path(s)"
+  if grep -A 15 "SDD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep "join(" | grep -q "src/resources"; then
+    fail "2 — SDD_BUNDLED_EXTENSION_PATHS still references src/resources path(s)"
   else
-    pass "2 — GSD_BUNDLED_EXTENSION_PATHS uses agentDir-based paths (no src/resources)"
+    pass "2 — SDD_BUNDLED_EXTENSION_PATHS uses agentDir-based paths (no src/resources)"
   fi
 else
-  fail "2 — GSD_BUNDLED_EXTENSION_PATHS line not found or still references src/resources"
+  fail "2 — SDD_BUNDLED_EXTENSION_PATHS line not found or still references src/resources"
 fi
 
 echo ""
@@ -106,7 +106,7 @@ echo "--- tarball pack ---"
 # ----------------------------------------------------------------
 # Note: prepublishOnly triggers a build here (expected).
 npm pack --silent 2>/dev/null || npm pack 2>&1 | tail -5
-TARBALL=$(ls glittercowboy-gsd-*.tgz 2>/dev/null | head -1 || true)
+TARBALL=$(ls glittercowboy-sdd-*.tgz 2>/dev/null | head -1 || true)
 if [ -n "$TARBALL" ] && [ -f "$TARBALL" ]; then
   pass "5 — tarball produced: $TARBALL"
 else
@@ -134,10 +134,10 @@ fi
 # ----------------------------------------------------------------
 # Check 7 — binary exists at expected path after install
 # ----------------------------------------------------------------
-if [ -f "$SMOKE_PREFIX/bin/gsd" ] || [ -L "$SMOKE_PREFIX/bin/gsd" ]; then
-  pass "7 — $SMOKE_PREFIX/bin/gsd exists after install"
+if [ -f "$SMOKE_PREFIX/bin/sdd" ] || [ -L "$SMOKE_PREFIX/bin/sdd" ]; then
+  pass "7 — $SMOKE_PREFIX/bin/sdd exists after install"
 else
-  fail "7 — $SMOKE_PREFIX/bin/gsd not found after install"
+  fail "7 — $SMOKE_PREFIX/bin/sdd not found after install"
   ls -la "$SMOKE_PREFIX/bin/" 2>/dev/null || echo "    (bin/ dir does not exist)"
 fi
 
@@ -145,14 +145,14 @@ echo ""
 echo "--- launch smoke ---"
 
 # ----------------------------------------------------------------
-# Check 8 — launch: "gsd" branding + zero extension load errors
+# Check 8 — launch: "sdd" branding + zero extension load errors
 # Use background kill pattern (macOS has no GNU timeout).
 # Allow 8s for extensions to load.
 # ----------------------------------------------------------------
 smoke_out=$(mktemp)
 (
   env -i HOME="$HOME" PATH="$PATH" \
-    "$SMOKE_PREFIX/bin/gsd" < /dev/null > "$smoke_out" 2>&1
+    "$SMOKE_PREFIX/bin/sdd" < /dev/null > "$smoke_out" 2>&1
 ) &
 smoke_pid=$!
 sleep 8
@@ -162,7 +162,7 @@ wait "$smoke_pid" 2>/dev/null || true
 ext_errors=$(grep "Extension load error" "$smoke_out" 2>/dev/null | wc -l | tr -d ' ')
 # Strip ANSI escape codes for branding check
 plain_out=$(sed 's/\x1b\[[0-9;]*m//g' "$smoke_out" 2>/dev/null || cat "$smoke_out")
-has_gsd=$(echo "$plain_out" | grep -qi "gsd\|get shit done" && echo "yes" || echo "no")
+has_sdd=$(echo "$plain_out" | grep -qi "sdd\|get shit done" && echo "yes" || echo "no")
 
 if [ "$ext_errors" -eq 0 ]; then
   pass "8a — zero Extension load errors on launch"
@@ -171,32 +171,32 @@ else
   grep "Extension load error" "$smoke_out" | head -5 | sed 's/^/    /'
 fi
 
-if [ "$has_gsd" = "yes" ]; then
-  pass "8b — \"gsd\" / \"get shit done\" branding found in launch output"
+if [ "$has_sdd" = "yes" ]; then
+  pass "8b — \"sdd\" / \"get shit done\" branding found in launch output"
 else
   # Fallback: check if binary self-identifies differently (not "pi")
   has_pi_only=$(echo "$plain_out" | grep -qi "^pi\b" && echo "yes" || echo "no")
   if [ "$has_pi_only" = "no" ]; then
-    pass "8b — output does not show \"pi\" branding (gsd branding likely in ANSI sequences)"
+    pass "8b — output does not show \"pi\" branding (sdd branding likely in ANSI sequences)"
   else
-    fail "8b — output shows \"pi\" branding instead of \"gsd\""
+    fail "8b — output shows \"pi\" branding instead of \"sdd\""
     head -5 "$smoke_out" | sed 's/^/    /'
   fi
 fi
 rm -f "$smoke_out"
 
 echo ""
-echo "--- ~/.gsd/ isolation ---"
+echo "--- ~/.sdd/ isolation ---"
 
 # ----------------------------------------------------------------
-# Check 9 — ~/.gsd/ session count unchanged before/after smoke run
+# Check 9 — ~/.sdd/ session count unchanged before/after smoke run
 # PI_SESSIONS_BEFORE captured at script start (before any binary invocation).
 # ----------------------------------------------------------------
-pi_after=$(ls ~/.gsd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
+pi_after=$(ls ~/.sdd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
 if [ "$PI_SESSIONS_BEFORE" = "$pi_after" ]; then
-  pass "9 — ~/.gsd/agent/sessions/ count unchanged (${pi_after} sessions before and after)"
+  pass "9 — ~/.sdd/agent/sessions/ count unchanged (${pi_after} sessions before and after)"
 else
-  fail "9 — ~/.gsd/agent/sessions/ count changed: was ${PI_SESSIONS_BEFORE}, now ${pi_after}"
+  fail "9 — ~/.sdd/agent/sessions/ count changed: was ${PI_SESSIONS_BEFORE}, now ${pi_after}"
 fi
 
 echo ""
@@ -211,7 +211,7 @@ exit10_tmp=$(mktemp)
 echo "" > "$exit10_tmp"
 (
   env -i HOME="$HOME" PATH="$PATH" \
-    "$SMOKE_PREFIX/bin/gsd" < /dev/null > "$tmp10" 2>&1
+    "$SMOKE_PREFIX/bin/sdd" < /dev/null > "$tmp10" 2>&1
   echo "$?" > "$exit10_tmp"
 ) &
 pid10=$!

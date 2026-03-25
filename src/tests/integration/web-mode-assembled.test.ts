@@ -20,7 +20,7 @@ const {
   dispatchBrowserSlashCommand,
   getBrowserSlashCommandTerminalNotice,
 } = await import("../../../web/lib/browser-slash-command-dispatch.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@sdd/pi-coding-agent");
 
 // ---------------------------------------------------------------------------
 // Test infrastructure (shared with web-mode-onboarding.test.ts)
@@ -64,10 +64,10 @@ function attachJsonLineReader(stream: PassThrough, onLine: (line: string) => voi
 }
 
 function makeWorkspaceFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-assembled-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-assembled-"));
   const projectCwd = join(root, "project");
   const sessionsDir = join(root, "sessions");
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001");
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
 
@@ -136,15 +136,15 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S01",
             title: "Demo",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S01/S01-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S01/tasks",
-            tasks: [{ id: "T01", title: "Work", done: false, planPath: ".gsd/milestones/M001/slices/S01/tasks/T01-PLAN.md" }],
+            planPath: ".sdd/milestones/M001/slices/S01/S01-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S01/tasks",
+            tasks: [{ id: "T01", title: "Work", done: false, planPath: ".sdd/milestones/M001/slices/S01/tasks/T01-PLAN.md" }],
           },
         ],
       },
@@ -235,9 +235,9 @@ test("assembled lifecycle: boot → onboard → prompt → streaming text → to
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -590,9 +590,9 @@ test("assembled settings controls keep retry visibility and daily-use mutations 
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -811,9 +811,9 @@ test("assembled recovery route exposes actionable browser diagnostics without ra
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -893,7 +893,7 @@ test("assembled recovery route exposes actionable browser diagnostics without ra
   }
 });
 
-test("assembled slash-command behavior keeps built-ins safe while preserving GSD prompt commands", async () => {
+test("assembled slash-command behavior keeps built-ins safe while preserving SDD prompt commands", async () => {
   const fixture = makeWorkspaceFixture();
   const sessionPath = createSessionFile(fixture.projectCwd, fixture.sessionsDir, "sess-slash", "Slash Session");
   const bridgeCommands: any[] = [];
@@ -901,9 +901,9 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -1014,17 +1014,17 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
     assert.match(builtInReject.notice ?? "", /blocked instead of falling through to the model/i);
     assert.equal(builtInReject.status, null);
 
-    // /gsd status is now a browser surface (S02), verify that
-    const gsdSurface = await submitBrowserInput("/gsd status");
-    assert.equal(gsdSurface.outcome.kind, "surface");
-    assert.equal(gsdSurface.outcome.surface, "gsd-status");
-    assert.equal(gsdSurface.status, null);
+    // /sdd status is now a browser surface (S02), verify that
+    const sddSurface = await submitBrowserInput("/sdd status");
+    assert.equal(sddSurface.outcome.kind, "surface");
+    assert.equal(sddSurface.outcome.surface, "sdd-status");
+    assert.equal(sddSurface.status, null);
 
-    // /gsd auto is a passthrough subcommand — reaches the bridge as a prompt
-    const gsdPrompt = await submitBrowserInput("/gsd auto");
-    assert.equal(gsdPrompt.outcome.kind, "prompt");
-    assert.equal(gsdPrompt.status, 200);
-    assert.equal(gsdPrompt.body.command, "prompt");
+    // /sdd auto is a passthrough subcommand — reaches the bridge as a prompt
+    const sddPrompt = await submitBrowserInput("/sdd auto");
+    assert.equal(sddPrompt.outcome.kind, "prompt");
+    assert.equal(sddPrompt.status, 200);
+    assert.equal(sddPrompt.body.command, "prompt");
 
     const sentTypes = bridgeCommands.map((command) => command.type);
     assert.deepEqual(
@@ -1033,7 +1033,7 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
       "only browser-executable slash commands should reach the live bridge; built-in surfaces/rejects must stay out of prompt text",
     );
     const promptCommand = bridgeCommands.find((command) => command.type === "prompt");
-    assert.equal(promptCommand?.message, "/gsd auto", "GSD passthrough commands must stay on the extension prompt path");
+    assert.equal(promptCommand?.message, "/sdd auto", "SDD passthrough commands must stay on the extension prompt path");
   } finally {
     await bridge.resetBridgeServiceForTests();
     onboarding.resetOnboardingServiceForTests();

@@ -7,7 +7,7 @@ The workflow visualizer is a full-screen TUI overlay that shows project progress
 ## Opening the Visualizer
 
 ```
-/gsd visualize
+/sdd visualize
 ```
 
 Or configure automatic display after milestone completion:
@@ -59,7 +59,7 @@ Bar charts showing cost and token usage breakdowns:
 - **By slice** — cost per slice with running totals
 - **By model** — which models consumed the most budget
 
-Uses data from `.gsd/metrics.json`.
+Uses data from `.sdd/metrics.json`.
 
 ### 4. Timeline
 
@@ -89,7 +89,7 @@ The visualizer refreshes data from disk every 2 seconds, so it stays current if 
 
 ## HTML Export (v2.26)
 
-For shareable reports outside the terminal, use `/gsd export --html`. This generates a self-contained HTML file in `.gsd/reports/` with the same data as the TUI visualizer — progress tree, dependency graph (SVG DAG), cost/token bar charts, execution timeline, changelog, and knowledge base. All CSS and JS are inlined — no external dependencies. Printable to PDF from any browser.
+For shareable reports outside the terminal, use `/sdd export --html`. This generates a self-contained HTML file in `.sdd/reports/` with the same data as the TUI visualizer — progress tree, dependency graph (SVG DAG), cost/token bar charts, execution timeline, changelog, and knowledge base. All CSS and JS are inlined — no external dependencies. Printable to PDF from any browser.
 
 An auto-generated `index.html` shows all reports with progression metrics across milestones.
 

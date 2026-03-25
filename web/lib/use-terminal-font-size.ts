@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 
-const STORAGE_KEY = "gsd-terminal-font-size"
+const STORAGE_KEY = "sdd-terminal-font-size"
 const DEFAULT_SIZE = 13
 const CHANGE_EVENT = "terminal-font-size-changed"
 
@@ -10,7 +10,7 @@ const CHANGE_EVENT = "terminal-font-size-changed"
  * Persists terminal font size to localStorage and syncs across components/tabs.
  *
  * Observability:
- *   - `localStorage.getItem('gsd-terminal-font-size')` → current persisted value
+ *   - `localStorage.getItem('sdd-terminal-font-size')` → current persisted value
  *   - Window event `terminal-font-size-changed` fires on every local change
  *   - `storage` events sync across tabs
  */

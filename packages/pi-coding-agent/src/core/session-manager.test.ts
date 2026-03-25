@@ -23,7 +23,7 @@ function makeAssistantMessage(input: number, output: number, cacheRead = 0, cach
 
 describe("SessionManager usage totals", () => {
 	it("tracks assistant usage incrementally without rescanning entries", () => {
-		const dir = mkdtempSync(join(tmpdir(), "gsd-session-manager-test-"));
+		const dir = mkdtempSync(join(tmpdir(), "sdd-session-manager-test-"));
 		try {
 			const manager = SessionManager.create(dir, dir);
 
@@ -44,7 +44,7 @@ describe("SessionManager usage totals", () => {
 	});
 
 	it("resets totals when starting a new session", () => {
-		const dir = mkdtempSync(join(tmpdir(), "gsd-session-manager-test-"));
+		const dir = mkdtempSync(join(tmpdir(), "sdd-session-manager-test-"));
 		try {
 			const manager = SessionManager.create(dir, dir);
 			manager.appendMessage(makeAssistantMessage(5, 5, 0, 0, 0.05));

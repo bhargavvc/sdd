@@ -40,10 +40,10 @@ pi --list-models gemini                    # Search by name
 
 ### Custom Providers
 
-Add providers via `~/.gsd/agent/models.json` (simple) or extensions (advanced with OAuth, custom streaming):
+Add providers via `~/.sdd/agent/models.json` (simple) or extensions (advanced with OAuth, custom streaming):
 
 ```json
-// ~/.gsd/agent/models.json
+// ~/.sdd/agent/models.json
 {
   "providers": [{
     "name": "my-proxy",

@@ -1,6 +1,6 @@
 //! Native git operations via libgit2.
 //!
-//! Provides high-performance git operations for GSD, eliminating the need
+//! Provides high-performance git operations for SDD, eliminating the need
 //! to spawn `git` child processes via execSync. Both read and write
 //! operations are implemented natively.
 //!
@@ -417,7 +417,7 @@ pub fn git_diff_stat(
 
 /// Get name-status diff between two refs with optional pathspec filter.
 /// `use_merge_base`: if true, uses three-dot semantics (diff from merge base).
-/// Replaces: `git diff --name-status main...branch -- .gsd/`
+/// Replaces: `git diff --name-status main...branch -- .sdd/`
 #[napi]
 pub fn git_diff_name_status(
     repo_path: String,
@@ -523,8 +523,8 @@ pub fn git_diff_numstat(
 
 /// Get unified diff content between two refs with optional pathspec/exclude.
 /// `use_merge_base`: if true, uses three-dot semantics.
-/// `exclude`: optional pathspec to exclude (e.g., ".gsd/").
-/// Replaces: `git diff main...branch -- .gsd/` and `-- . :(exclude).gsd/`
+/// `exclude`: optional pathspec to exclude (e.g., ".sdd/").
+/// Replaces: `git diff main...branch -- .sdd/` and `-- . :(exclude).sdd/`
 #[napi]
 pub fn git_diff_content(
     repo_path: String,
@@ -685,7 +685,7 @@ pub fn git_worktree_list(repo_path: String) -> Result<Vec<GitWorktreeEntry>> {
 }
 
 /// List branches matching an optional glob pattern.
-/// Replaces: `git branch --list milestone/*`, `git branch --list gsd/*`
+/// Replaces: `git branch --list milestone/*`, `git branch --list sdd/*`
 #[napi]
 pub fn git_branch_list(repo_path: String, pattern: Option<String>) -> Result<Vec<String>> {
     let repo = open_repo(&repo_path)?;
@@ -711,13 +711,13 @@ pub fn git_branch_list(repo_path: String, pattern: Option<String>) -> Result<Vec
     Ok(names)
 }
 
-/// Simple branch pattern matching for patterns like "milestone/*", "gsd/*/*"
+/// Simple branch pattern matching for patterns like "milestone/*", "sdd/*/*"
 fn matches_branch_pattern(name: &str, pattern: &str) -> bool {
     // Handle simple prefix/* patterns
     if let Some(prefix) = pattern.strip_suffix("/*") {
-        // For "gsd/*/*", this becomes "gsd/*" after first strip
+        // For "sdd/*/*", this becomes "sdd/*" after first strip
         if prefix.contains('*') {
-            // Recursive: "gsd/*/*" → name must start with "gsd/" and have at least 2 segments after
+            // Recursive: "sdd/*/*" → name must start with "sdd/" and have at least 2 segments after
             if let Some(inner_prefix) = prefix.strip_suffix("/*") {
                 return name.starts_with(&format!("{inner_prefix}/"))
                     && name[inner_prefix.len() + 1..].contains('/');
@@ -730,7 +730,7 @@ fn matches_branch_pattern(name: &str, pattern: &str) -> bool {
 }
 
 /// List branches that have been merged into the given target branch.
-/// Replaces: `git branch --merged main --list gsd/*`
+/// Replaces: `git branch --merged main --list sdd/*`
 #[napi]
 pub fn git_branch_list_merged(
     repo_path: String,
@@ -792,7 +792,7 @@ pub fn git_ls_files(repo_path: String, pathspec: String) -> Result<Vec<String>> 
 }
 
 /// List references matching a prefix.
-/// Replaces: `git for-each-ref refs/gsd/snapshots/ --format=%(refname)`
+/// Replaces: `git for-each-ref refs/sdd/snapshots/ --format=%(refname)`
 #[napi]
 pub fn git_for_each_ref(repo_path: String, prefix: String) -> Result<Vec<String>> {
     let repo = open_repo(&repo_path)?;

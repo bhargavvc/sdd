@@ -1,5 +1,5 @@
 {
-  "name": "@gsd/pi-ai",
+  "name": "@sdd/pi-ai",
   "version": "0.57.1",
   "description": "Unified LLM API (vendored from pi-mono)",
   "type": "module",

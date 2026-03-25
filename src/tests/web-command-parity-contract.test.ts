@@ -15,7 +15,7 @@ const {
   setCommandSurfacePending,
   surfaceOutcomeToOpenRequest,
 } = await import("../../web/lib/command-surface-contract.ts")
-const gsdExtension = await import("../resources/extensions/gsd/index.ts")
+const sddExtension = await import("../resources/extensions/sdd/index.ts")
 
 const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">([
   ["settings", "surface"],
@@ -45,10 +45,10 @@ const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">(
 const BUILTIN_DESCRIPTIONS = new Map(BUILTIN_SLASH_COMMANDS.map((command) => [command.name, command.description]))
 const DEFERRED_BROWSER_REJECTS = ["share", "copy", "changelog", "hotkeys", "tree", "provider", "reload", "edit-mode", "quit"] as const
 
-async function collectRegisteredGsdCommandRoots(): Promise<string[]> {
+async function collectRegisteredSddCommandRoots(): Promise<string[]> {
   const commands = new Map<string, unknown>()
 
-  await gsdExtension.default({
+  await sddExtension.default({
     registerCommand(name: string, options: unknown) {
       commands.set(name, options)
     },
@@ -139,37 +139,37 @@ test("browser-local aliases and legacy helpers stay explicit", async (t) => {
   })
 })
 
-test("registered GSD command roots stay on the prompt/extension path", async () => {
-  const registeredRoots = await collectRegisteredGsdCommandRoots()
+test("registered SDD command roots stay on the prompt/extension path", async () => {
+  const registeredRoots = await collectRegisteredSddCommandRoots()
   assert.deepEqual(
     registeredRoots,
-    ["exit", "gsd", "kill", "worktree", "wt"],
-    "browser parity contract only expects the current GSD command roots",
+    ["exit", "sdd", "kill", "worktree", "wt"],
+    "browser parity contract only expects the current SDD command roots",
   )
 
-  // Non-gsd roots are extension commands that pass through to the bridge.
+  // Non-sdd roots are extension commands that pass through to the bridge.
   // Derived dynamically so adding a new registration fails this assertion loudly.
-  const nonGsdRoots = registeredRoots.filter((r) => r !== "gsd")
-  assert.equal(nonGsdRoots.length, 4, "expected exactly 4 non-gsd passthrough roots; update this count when adding registrations")
-  for (const root of nonGsdRoots) {
+  const nonSddRoots = registeredRoots.filter((r) => r !== "sdd")
+  assert.equal(nonSddRoots.length, 4, "expected exactly 4 non-sdd passthrough roots; update this count when adding registrations")
+  for (const root of nonSddRoots) {
     assertPromptPassthrough(`/${root}`)
   }
 
-  // Bare /gsd passes through to bridge (equivalent to /gsd next)
-  const bareGsd = dispatchBrowserSlashCommand("/gsd")
-  assert.equal(bareGsd.kind, "prompt", "bare /gsd should pass through to bridge")
-  assert.equal(bareGsd.command.message, "/gsd", "bare /gsd should preserve exact input")
+  // Bare /sdd passes through to bridge (equivalent to /sdd next)
+  const bareSdd = dispatchBrowserSlashCommand("/sdd")
+  assert.equal(bareSdd.kind, "prompt", "bare /sdd should pass through to bridge")
+  assert.equal(bareSdd.command.message, "/sdd", "bare /sdd should preserve exact input")
 })
 
-test("current GSD command family samples dispatch to correct outcomes after S02", async (t) => {
-  await t.test("/gsd (bare) still passes through to bridge", () => {
-    assertPromptPassthrough("/gsd")
+test("current SDD command family samples dispatch to correct outcomes after S02", async (t) => {
+  await t.test("/sdd (bare) still passes through to bridge", () => {
+    assertPromptPassthrough("/sdd")
   })
 
-  await t.test("/gsd status now dispatches to surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd status")
-    assert.equal(outcome.kind, "surface", "/gsd status should dispatch to surface after T01")
-    assert.equal(outcome.surface, "gsd-status")
+  await t.test("/sdd status now dispatches to surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd status")
+    assert.equal(outcome.kind, "surface", "/sdd status should dispatch to surface after T01")
+    assert.equal(outcome.surface, "sdd-status")
   })
 
   await t.test("/worktree list, /wt list, /kill, /exit still pass through", () => {
@@ -179,18 +179,18 @@ test("current GSD command family samples dispatch to correct outcomes after S02"
     assertPromptPassthrough("/exit")
   })
 
-  await t.test("/gsd status dispatches to surface regardless of streaming state", () => {
-    const streaming = dispatchBrowserSlashCommand("/gsd status", { isStreaming: true })
-    assert.equal(streaming.kind, "surface", "/gsd status should be surface even when streaming")
-    assert.equal(streaming.surface, "gsd-status")
+  await t.test("/sdd status dispatches to surface regardless of streaming state", () => {
+    const streaming = dispatchBrowserSlashCommand("/sdd status", { isStreaming: true })
+    assert.equal(streaming.kind, "surface", "/sdd status should be surface even when streaming")
+    assert.equal(streaming.surface, "sdd-status")
 
-    const idle = dispatchBrowserSlashCommand("/gsd status", { isStreaming: false })
+    const idle = dispatchBrowserSlashCommand("/sdd status", { isStreaming: false })
     assert.equal(idle.kind, "surface")
-    assert.equal(idle.surface, "gsd-status")
+    assert.equal(idle.surface, "sdd-status")
   })
 })
 
-const EXPECTED_GSD_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "view-navigate">([
+const EXPECTED_SDD_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "view-navigate">([
   // Surface commands (19)
   ["status", "surface"],
   ["visualize", "view-navigate"],
@@ -226,131 +226,131 @@ const EXPECTED_GSD_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "
   ["help", "local"],
 ])
 
-test("every registered /gsd subcommand has an explicit browser dispatch outcome", async (t) => {
+test("every registered /sdd subcommand has an explicit browser dispatch outcome", async (t) => {
   assert.equal(
-    EXPECTED_GSD_OUTCOMES.size,
+    EXPECTED_SDD_OUTCOMES.size,
     30,
-    "EXPECTED_GSD_OUTCOMES must cover all 30 GSD subcommands (19 surface + 1 view-navigate + 9 passthrough + 1 help)",
+    "EXPECTED_SDD_OUTCOMES must cover all 30 SDD subcommands (19 surface + 1 view-navigate + 9 passthrough + 1 help)",
   )
 
-  for (const [subcommand, expectedKind] of EXPECTED_GSD_OUTCOMES) {
-    await t.test(`/gsd ${subcommand} -> ${expectedKind}`, () => {
-      const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`)
+  for (const [subcommand, expectedKind] of EXPECTED_SDD_OUTCOMES) {
+    await t.test(`/sdd ${subcommand} -> ${expectedKind}`, () => {
+      const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`)
       assert.equal(
         outcome.kind,
         expectedKind,
-        `/gsd ${subcommand} should dispatch to ${expectedKind}, got ${outcome.kind}`,
+        `/sdd ${subcommand} should dispatch to ${expectedKind}, got ${outcome.kind}`,
       )
     })
 
     if (expectedKind === "surface") {
-      await t.test(`/gsd ${subcommand} opens gsd-${subcommand} surface`, () => {
-        const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`) as any
-        assert.equal(outcome.surface, `gsd-${subcommand}`, `/gsd ${subcommand} should open the gsd-${subcommand} surface`)
+      await t.test(`/sdd ${subcommand} opens sdd-${subcommand} surface`, () => {
+        const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`) as any
+        assert.equal(outcome.surface, `sdd-${subcommand}`, `/sdd ${subcommand} should open the sdd-${subcommand} surface`)
       })
     }
 
     if (expectedKind === "prompt") {
-      await t.test(`/gsd ${subcommand} preserves exact input text`, () => {
-        const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`) as any
-        assert.equal(outcome.command.message, `/gsd ${subcommand}`, `/gsd ${subcommand} should preserve exact input text for bridge delivery`)
+      await t.test(`/sdd ${subcommand} preserves exact input text`, () => {
+        const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`) as any
+        assert.equal(outcome.command.message, `/sdd ${subcommand}`, `/sdd ${subcommand} should preserve exact input text for bridge delivery`)
       })
     }
 
     if (expectedKind === "local") {
-      await t.test(`/gsd ${subcommand} dispatches to gsd_help action`, () => {
-        const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`) as any
-        assert.equal(outcome.action, "gsd_help", `/gsd ${subcommand} should dispatch to gsd_help action`)
+      await t.test(`/sdd ${subcommand} dispatches to sdd_help action`, () => {
+        const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`) as any
+        assert.equal(outcome.action, "sdd_help", `/sdd ${subcommand} should dispatch to sdd_help action`)
       })
     }
 
     if (expectedKind === "view-navigate") {
-      await t.test(`/gsd ${subcommand} navigates to the ${subcommand} view`, () => {
-        const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`) as any
-        assert.equal(outcome.view, subcommand, `/gsd ${subcommand} should navigate to the ${subcommand} view`)
+      await t.test(`/sdd ${subcommand} navigates to the ${subcommand} view`, () => {
+        const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`) as any
+        assert.equal(outcome.view, subcommand, `/sdd ${subcommand} should navigate to the ${subcommand} view`)
       })
     }
   }
 })
 
-test("GSD dispatch edge cases", async (t) => {
-  await t.test("/gsd (bare, no subcommand) passes through to bridge", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd")
+test("SDD dispatch edge cases", async (t) => {
+  await t.test("/sdd (bare, no subcommand) passes through to bridge", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd")
     assert.equal(outcome.kind, "prompt")
-    assert.equal(outcome.command.message, "/gsd")
+    assert.equal(outcome.command.message, "/sdd")
   })
 
-  await t.test("/gsd help dispatches to local gsd_help action", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd help")
+  await t.test("/sdd help dispatches to local sdd_help action", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd help")
     assert.equal(outcome.kind, "local")
-    assert.equal(outcome.action, "gsd_help")
+    assert.equal(outcome.action, "sdd_help")
   })
 
-  await t.test("/gsd unknown-xyz passes through to bridge", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd unknown-xyz")
+  await t.test("/sdd unknown-xyz passes through to bridge", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd unknown-xyz")
     assert.equal(outcome.kind, "prompt", "unknown subcommand should pass through to bridge")
-    assert.equal(outcome.command.message, "/gsd unknown-xyz", "unknown subcommand should preserve exact input")
-    assert.equal(outcome.slashCommandName, "gsd", "unknown subcommand should identify as gsd command")
+    assert.equal(outcome.command.message, "/sdd unknown-xyz", "unknown subcommand should preserve exact input")
+    assert.equal(outcome.slashCommandName, "sdd", "unknown subcommand should identify as sdd command")
   })
 
-  await t.test("/export is built-in session export, not gsd-export", () => {
+  await t.test("/export is built-in session export, not sdd-export", () => {
     const outcome = dispatchBrowserSlashCommand("/export")
     assert.equal(outcome.kind, "surface")
     assert.equal(outcome.surface, "export", "/export should be the built-in session export surface")
   })
 
-  await t.test("/gsd export is GSD milestone export, distinct from built-in /export", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd export")
+  await t.test("/sdd export is SDD milestone export, distinct from built-in /export", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd export")
     assert.equal(outcome.kind, "surface")
-    assert.equal(outcome.surface, "gsd-export", "/gsd export should be the GSD milestone export surface")
+    assert.equal(outcome.surface, "sdd-export", "/sdd export should be the SDD milestone export surface")
   })
 
-  await t.test("/gsd forensics detailed preserves sub-args", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd forensics detailed")
+  await t.test("/sdd forensics detailed preserves sub-args", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd forensics detailed")
     assert.equal(outcome.kind, "surface")
-    assert.equal(outcome.surface, "gsd-forensics")
+    assert.equal(outcome.surface, "sdd-forensics")
     assert.equal(outcome.args, "detailed", "sub-args after subcommand should be preserved")
   })
 
-  await t.test("GSD surface commands produce system terminal notice", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd status")
+  await t.test("SDD surface commands produce system terminal notice", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd status")
     const notice = getBrowserSlashCommandTerminalNotice(outcome)
     assert.ok(notice, "surface outcome should produce a terminal notice")
     assert.equal(notice.type, "system")
   })
 
-  await t.test("GSD passthrough commands produce no terminal notice", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd auto")
+  await t.test("SDD passthrough commands produce no terminal notice", () => {
+    const outcome = dispatchBrowserSlashCommand("/sdd auto")
     const notice = getBrowserSlashCommandTerminalNotice(outcome)
     assert.equal(notice, null, "passthrough outcome should produce no terminal notice")
   })
 })
 
-test("every GSD surface dispatches through the contract wiring end-to-end", async (t) => {
-  const gsdSurfaces = [...EXPECTED_GSD_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
+test("every SDD surface dispatches through the contract wiring end-to-end", async (t) => {
+  const sddSurfaces = [...EXPECTED_SDD_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
 
-  assert.equal(gsdSurfaces.length, 19, "should have exactly 19 GSD surface subcommands")
+  assert.equal(sddSurfaces.length, 19, "should have exactly 19 SDD surface subcommands")
 
-  for (const [subcommand] of gsdSurfaces) {
-    await t.test(`/gsd ${subcommand} -> dispatch -> open request -> surface state`, () => {
-      const outcome = dispatchBrowserSlashCommand(`/gsd ${subcommand}`)
+  for (const [subcommand] of sddSurfaces) {
+    await t.test(`/sdd ${subcommand} -> dispatch -> open request -> surface state`, () => {
+      const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`)
       assert.equal(outcome.kind, "surface")
 
       const openRequest = surfaceOutcomeToOpenRequest(outcome, {})
       const state = openCommandSurfaceState(createInitialCommandSurfaceState(), openRequest)
 
-      assert.equal(state.open, true, `surface state should be open for gsd-${subcommand}`)
-      assert.ok(state.section, `surface state should have a non-null section for gsd-${subcommand}`)
-      assert.equal(state.section, `gsd-${subcommand}`, `section should match gsd-${subcommand}`)
-      assert.ok(state.selectedTarget, `surface state should have a non-null selectedTarget for gsd-${subcommand}`)
-      assert.equal(state.selectedTarget.kind, "gsd", `target kind should be "gsd" for gsd-${subcommand}`)
+      assert.equal(state.open, true, `surface state should be open for sdd-${subcommand}`)
+      assert.ok(state.section, `surface state should have a non-null section for sdd-${subcommand}`)
+      assert.equal(state.section, `sdd-${subcommand}`, `section should match sdd-${subcommand}`)
+      assert.ok(state.selectedTarget, `surface state should have a non-null selectedTarget for sdd-${subcommand}`)
+      assert.equal(state.selectedTarget.kind, "sdd", `target kind should be "sdd" for sdd-${subcommand}`)
       assert.equal(state.selectedTarget.subcommand, subcommand, `target subcommand should be "${subcommand}"`)
     })
   }
 })
 
-test("/gsd visualize dispatches as view-navigate to the visualizer view", () => {
-  const outcome = dispatchBrowserSlashCommand("/gsd visualize")
+test("/sdd visualize dispatches as view-navigate to the visualizer view", () => {
+  const outcome = dispatchBrowserSlashCommand("/sdd visualize")
   assert.equal(outcome.kind, "view-navigate")
   assert.equal(outcome.view, "visualize")
 })
@@ -679,7 +679,7 @@ test("surface action state keeps compaction summaries inspectable", () => {
 })
 
 test("command-surface session affordances use the shared store action path", () => {
-  const commandSurfacePath = resolve(import.meta.dirname, "../../web/components/gsd/command-surface.tsx")
+  const commandSurfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx")
   const commandSurfaceSource = readFileSync(commandSurfacePath, "utf-8")
 
   assert.match(

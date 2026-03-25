@@ -1,22 +1,22 @@
 <div align="center">
 
-# GSD 2
+# SDD
 
-**The evolution of [Get Shit Done](https://github.com/gsd-build/get-shit-done) — now a real coding agent.**
+**The evolution of [Spec-Driven Development](https://github.com/bhargavvc/get-shit-done) — now a real coding agent.**
 
-[![npm version](https://img.shields.io/npm/v/gsd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-pi)
-[![npm downloads](https://img.shields.io/npm/dm/gsd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-pi)
-[![GitHub stars](https://img.shields.io/github/stars/gsd-build/GSD-2?style=for-the-badge&logo=github&color=181717)](https://github.com/gsd-build/GSD-2)
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/gsd)
+[![npm version](https://img.shields.io/npm/v/sdd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/sdd-pi)
+[![npm downloads](https://img.shields.io/npm/dm/sdd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/sdd-pi)
+[![GitHub stars](https://img.shields.io/github/stars/bhargavvc/SDD?style=for-the-badge&logo=github&color=181717)](https://github.com/bhargavvc/SDD)
+[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/sdd)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 
-The original GSD went viral as a prompt framework for Claude Code. It worked, but it was fighting the tool — injecting prompts through slash commands, hoping the LLM would follow instructions, with no actual control over context windows, sessions, or execution.
+The original SDD went viral as a prompt framework for Claude Code. It worked, but it was fighting the tool — injecting prompts through slash commands, hoping the LLM would follow instructions, with no actual control over context windows, sessions, or execution.
 
-This version is different. GSD is now a standalone CLI built on the [Pi SDK](https://github.com/badlogic/pi-mono), which gives it direct TypeScript access to the agent harness itself. That means GSD can actually _do_ what v1 could only _ask_ the LLM to do: clear context between tasks, inject exactly the right files at dispatch time, manage git branches, track cost and tokens, detect stuck loops, recover from crashes, and auto-advance through an entire milestone without human intervention.
+This version is different. SDD is now a standalone CLI built on the [Pi SDK](https://github.com/badlogic/pi-mono), which gives it direct TypeScript access to the agent harness itself. That means SDD can actually _do_ what v1 could only _ask_ the LLM to do: clear context between tasks, inject exactly the right files at dispatch time, manage git branches, track cost and tokens, detect stuck loops, recover from crashes, and auto-advance through an entire milestone without human intervention.
 
 One command. Walk away. Come back to a built project with clean git history.
 
-<pre><code>npm install -g gsd-pi@latest</code></pre>
+<pre><code>npm install -g sdd-pi@latest</code></pre>
 
 > **📋 NOTICE: New to Node on Mac?** If you installed Node.js via Homebrew, you may be running a development release instead of LTS. **[Read this guide](./docs/node-lts-macos.md)** to pin Node 24 LTS and avoid compatibility issues.
 
@@ -28,8 +28,8 @@ One command. Walk away. Come back to a built project with clean git history.
 
 ### New Features
 
-- **Browser-based web interface** — run GSD from the browser with `gsd --web`. Full project management, real-time progress, and multi-project support via server-sent events. (#1717)
-- **Doctor: worktree lifecycle checks** — `/gsd doctor` now validates worktree health, detects orphaned worktrees, consolidates cleanup, and enhances `/worktree list` with lifecycle status. (#1814)
+- **Browser-based web interface** — run SDD from the browser with `sdd --web`. Full project management, real-time progress, and multi-project support via server-sent events. (#1717)
+- **Doctor: worktree lifecycle checks** — `/sdd doctor` now validates worktree health, detects orphaned worktrees, consolidates cleanup, and enhances `/worktree list` with lifecycle status. (#1814)
 - **CI: docs-only PR detection** — PRs that only change documentation skip build and test steps, with a new prompt injection scan for security. (#1699)
 - **Custom Models guide** — new documentation for adding custom providers (Ollama, vLLM, LM Studio, proxies) via `models.json`. (#1670)
 
@@ -38,10 +38,10 @@ One command. Walk away. Come back to a built project with clean git history.
 This release includes 7 fixes preventing silent data loss in auto-mode:
 
 - **Hallucination guard** — execute-task agents that complete with zero tool calls are now rejected as hallucinated. Previously, agents could produce detailed but fabricated summaries without writing any code, wasting ~$25/milestone. (#1838)
-- **Merge anchor verification** — before deleting a milestone worktree/branch, GSD now verifies the code is actually on the integration branch. Prevents orphaning commits when squash-merge produces an empty diff. (#1829)
-- **Dirty working tree detection** — `nativeMergeSquash` now distinguishes dirty-tree rejections from content conflicts, preventing silent commit loss when synced `.gsd/` files block the merge. (#1752)
+- **Merge anchor verification** — before deleting a milestone worktree/branch, SDD now verifies the code is actually on the integration branch. Prevents orphaning commits when squash-merge produces an empty diff. (#1829)
+- **Dirty working tree detection** — `nativeMergeSquash` now distinguishes dirty-tree rejections from content conflicts, preventing silent commit loss when synced `.sdd/` files block the merge. (#1752)
 - **Doctor cleanup safety** — the `orphaned_completed_units` check no longer auto-fixes during post-task health checks. Previously, timing races could cause the doctor to remove valid completion keys, reverting users to earlier tasks. (#1825)
-- **Root file reverse-sync** — worktree teardown now syncs root-level `.gsd/` files (PROJECT.md, REQUIREMENTS.md, completed-units.json) back to the project root. Previously these were lost on milestone closeout. (#1831)
+- **Root file reverse-sync** — worktree teardown now syncs root-level `.sdd/` files (PROJECT.md, REQUIREMENTS.md, completed-units.json) back to the project root. Previously these were lost on milestone closeout. (#1831)
 - **Empty merge guard** — milestone branches with unanchored code changes are preserved instead of deleted when squash-merge produces nothing to commit. (#1755)
 - **Crash-safe task closeout** — orphaned checkboxes in PLAN.md are unchecked on retry, preventing phantom task completion. (#1759)
 
@@ -59,14 +59,14 @@ This release includes 7 fixes preventing silent data loss in auto-mode:
 - **Table format support** — roadmaps using markdown tables (`| S01 | Title | Risk | Status |`) are now parsed correctly. (#1741)
 - **Prose header fallback** — when `## Slices` contains H3 headers instead of checkboxes, the prose parser is invoked as a fallback. (#1744)
 - **Completion marker detection** — prose headers with `✓` or `(Complete)` markers are correctly identified as done. (#1816)
-- **Zero-slice stub handling** — stub roadmaps from `/gsd queue` return `pre-planning` instead of `blocked`. (#1826)
+- **Zero-slice stub handling** — stub roadmaps from `/sdd queue` return `pre-planning` instead of `blocked`. (#1826)
 - **Immediate roadmap fix** — roadmap checkbox and UAT stub are fixed immediately after last task instead of deferring to `complete-slice`. (#1819)
 
 ### State & Git Improvements
 
 - **CONTEXT-DRAFT.md fallback** — `depends_on` is read from CONTEXT-DRAFT.md when CONTEXT.md doesn't exist, preventing draft milestones from being promoted past dependency constraints. (#1743)
 - **Unborn branch support** — `nativeBranchExists` handles repos with zero commits, preventing dispatch deadlock on new repos. (#1815)
-- **Ghost milestone detection** — empty `.gsd/milestones/` directories are skipped instead of crashing `deriveState()`. (#1817)
+- **Ghost milestone detection** — empty `.sdd/milestones/` directories are skipped instead of crashing `deriveState()`. (#1817)
 - **Default branch detection** — milestone merge detects `master` vs `main` instead of hardcoding. (#1669)
 - **Milestone title extraction** — titles are pulled from CONTEXT.md headings when no ROADMAP exists. (#1729)
 
@@ -89,7 +89,7 @@ See the full [Changelog](./CHANGELOG.md) for all 70+ fixes in this release.
 - **GitHub sync extension** — auto-sync milestones to GitHub Issues, PRs, and Milestones
 - **Skill tool resolution** — skills auto-activate in dispatched prompts
 - **Health check phase 2** — real-time doctor issues in dashboard and visualizer
-- **Forensics upgrade** — full-access GSD debugger with anomaly detection
+- **Forensics upgrade** — full-access SDD debugger with anomaly detection
 - **Pipeline decomposition** — auto-loop rewritten as linear phase pipeline
 - **Sliding-window stuck detection** — pattern-aware, fewer false positives
 - **Data-loss recovery** — automatic detection and recovery from v2.30–v2.38 migration issues
@@ -119,26 +119,26 @@ Full documentation is available in the [`docs/`](./docs/) directory:
 - **[Remote Questions](./docs/remote-questions.md)** — route decisions to Slack or Discord when human input is needed
 - **[Dynamic Model Routing](./docs/dynamic-model-routing.md)** — complexity-based model selection and budget pressure
 - **[Pipeline Simplification (ADR-003)](./docs/ADR-003-pipeline-simplification.md)** — merged research into planning, mechanical completion
-- **[Migration from v1](./docs/migration.md)** — `.planning` → `.gsd` migration
+- **[Migration from v1](./docs/migration.md)** — `.planning` → `.sdd` migration
 
 ---
 
 ## What Changed From v1
 
-The original GSD was a collection of markdown prompts installed into `~/.claude/commands/`. It relied entirely on the LLM reading those prompts and doing the right thing. That worked surprisingly well — but it had hard limits:
+The original SDD was a collection of markdown prompts installed into `~/.claude/commands/`. It relied entirely on the LLM reading those prompts and doing the right thing. That worked surprisingly well — but it had hard limits:
 
 - **No context control.** The LLM accumulated garbage over a long session. Quality degraded.
 - **No real automation.** "Auto mode" was the LLM calling itself in a loop, burning context on orchestration overhead.
 - **No crash recovery.** If the session died mid-task, you started over.
 - **No observability.** No cost tracking, no progress dashboard, no stuck detection.
 
-GSD v2 solves all of these because it's not a prompt framework anymore — it's a TypeScript application that _controls_ the agent session.
+SDD v2 solves all of these because it's not a prompt framework anymore — it's a TypeScript application that _controls_ the agent session.
 
 |                      | v1 (Prompt Framework)        | v2 (Agent Application)                                  |
 | -------------------- | ---------------------------- | ------------------------------------------------------- |
 | Runtime              | Claude Code slash commands   | Standalone CLI via Pi SDK                               |
 | Context management   | Hope the LLM doesn't fill up | Fresh session per task, programmatic                    |
-| Auto mode            | LLM self-loop                | State machine reading `.gsd/` files                     |
+| Auto mode            | LLM self-loop                | State machine reading `.sdd/` files                     |
 | Crash recovery       | None                         | Lock files + session forensics                          |
 | Git strategy         | LLM writes git commands      | Worktree isolation, sequential commits, squash merge    |
 | Cost tracking        | None                         | Per-unit token/cost ledger with dashboard               |
@@ -155,14 +155,14 @@ GSD v2 solves all of these because it's not a prompt framework anymore — it's 
 
 > **Note:** Migration works best with a `ROADMAP.md` file for milestone structure. Without one, milestones are inferred from the `phases/` directory.
 
-If you have projects with `.planning` directories from the original Get Shit Done, you can migrate them to GSD-2's `.gsd` format:
+If you have projects with `.planning` directories from the original Spec-Driven Development, you can migrate them to SDD's `.sdd` format:
 
 ```bash
 # From within the project directory
-/gsd migrate
+/sdd migrate
 
 # Or specify a path
-/gsd migrate ~/projects/my-old-project
+/sdd migrate ~/projects/my-old-project
 ```
 
 The migration tool:
@@ -180,7 +180,7 @@ Supports format variations including milestone-sectioned roadmaps with `<details
 
 ## How It Works
 
-GSD structures work into a hierarchy:
+SDD structures work into a hierarchy:
 
 ```
 Milestone  →  a shippable version (4-10 slices)
@@ -202,15 +202,15 @@ Plan (with integrated research) → Execute (per task) → Complete → Reassess
 
 **Plan** scouts the codebase, researches relevant docs, and decomposes the slice into tasks with must-haves (mechanically verifiable outcomes). **Execute** runs each task in a fresh context window with only the relevant files pre-loaded — then runs configured verification commands (lint, test, etc.) with auto-fix retries. **Complete** writes the summary, UAT script, marks the roadmap, and commits with meaningful messages derived from task summaries. **Reassess** checks if the roadmap still makes sense given what was learned. **Validate Milestone** runs a reconciliation gate after all slices complete — comparing roadmap success criteria against actual results before sealing the milestone.
 
-### `/gsd auto` — The Main Event
+### `/sdd auto` — The Main Event
 
-This is what makes GSD different. Run it, walk away, come back to built software.
+This is what makes SDD different. Run it, walk away, come back to built software.
 
 ```
-/gsd auto
+/sdd auto
 ```
 
-Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, determines the next unit of work, creates a fresh agent session, injects a focused prompt with all relevant context pre-inlined, and lets the LLM execute. When the LLM finishes, auto mode reads disk state again and dispatches the next unit.
+Auto mode is a state machine driven by files on disk. It reads `.sdd/STATE.md`, determines the next unit of work, creates a fresh agent session, injects a focused prompt with all relevant context pre-inlined, and lets the LLM execute. When the LLM finishes, auto mode reads disk state again and dispatches the next unit.
 
 **What happens under the hood:**
 
@@ -220,7 +220,7 @@ Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, 
 
 3. **Git worktree isolation** — Each milestone runs in its own git worktree with a `milestone/<MID>` branch. All slice work commits sequentially — no branch switching, no merge conflicts. When the milestone completes, it's squash-merged to main as one clean commit.
 
-4. **Crash recovery** — A lock file tracks the current unit. If the session dies, the next `/gsd auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context. Parallel orchestrator state is persisted to disk with PID liveness detection, so multi-worker sessions survive crashes too. In headless mode, crashes trigger automatic restart with exponential backoff (default 3 attempts).
+4. **Crash recovery** — A lock file tracks the current unit. If the session dies, the next `/sdd auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context. Parallel orchestrator state is persisted to disk with PID liveness detection, so multi-worker sessions survive crashes too. In headless mode, crashes trigger automatic restart with exponential backoff (default 3 attempts).
 
 5. **Provider error recovery** — Transient provider errors (rate limits, 500/503 server errors, overloaded) auto-resume after a delay. Permanent errors (auth, billing) pause for manual review. The model fallback chain retries transient network errors before switching models.
 
@@ -236,18 +236,18 @@ Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, 
 
 11. **Milestone validation** — After all slices complete, a `validate-milestone` gate compares roadmap success criteria against actual results before sealing the milestone.
 
-12. **Escape hatch** — Press Escape to pause. The conversation is preserved. Interact with the agent, inspect what happened, or just `/gsd auto` to resume from disk state.
+12. **Escape hatch** — Press Escape to pause. The conversation is preserved. Interact with the agent, inspect what happened, or just `/sdd auto` to resume from disk state.
 
-### `/gsd` and `/gsd next` — Step Mode
+### `/sdd` and `/sdd next` — Step Mode
 
-By default, `/gsd` runs in **step mode**: the same state machine as auto mode, but it pauses between units with a wizard showing what completed and what's next. You advance one step at a time, review the output, and continue when ready.
+By default, `/sdd` runs in **step mode**: the same state machine as auto mode, but it pauses between units with a wizard showing what completed and what's next. You advance one step at a time, review the output, and continue when ready.
 
-- **No `.gsd/` directory** → Start a new project. Discussion flow captures your vision, constraints, and preferences.
+- **No `.sdd/` directory** → Start a new project. Discussion flow captures your vision, constraints, and preferences.
 - **Milestone exists, no roadmap** → Discuss or research the milestone.
 - **Roadmap exists, slices pending** → Plan the next slice, execute one task, or switch to auto.
 - **Mid-task** → Resume from where you left off.
 
-`/gsd next` is an explicit alias for step mode. You can switch from step → auto mid-session via the wizard.
+`/sdd next` is an explicit alias for step mode. You can switch from step → auto mid-session via the wizard.
 
 Step mode is the on-ramp. Auto mode is the highway.
 
@@ -258,7 +258,7 @@ Step mode is the on-ramp. Auto mode is the highway.
 ### Install
 
 ```bash
-npm install -g gsd-pi
+npm install -g sdd-pi
 ```
 
 ### Log in to a provider
@@ -266,13 +266,13 @@ npm install -g gsd-pi
 First, choose your LLM provider:
 
 ```bash
-gsd
+sdd
 /login
 ```
 
 Select from 20+ providers — Anthropic, OpenAI, Google, OpenRouter, GitHub Copilot, and more. If you have a Claude Max or Copilot subscription, the OAuth flow handles everything. Otherwise, paste your API key when prompted.
 
-GSD auto-selects a default model after login. To switch models later:
+SDD auto-selects a default model after login. To switch models later:
 
 ```bash
 /model
@@ -283,14 +283,14 @@ GSD auto-selects a default model after login. To switch models later:
 Open a terminal in your project and run:
 
 ```bash
-gsd
+sdd
 ```
 
-GSD opens an interactive agent session. From there, you have two ways to work:
+SDD opens an interactive agent session. From there, you have two ways to work:
 
-**`/gsd` — step mode.** Type `/gsd` and GSD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next. Same state machine as auto mode, but you stay in the loop. No project yet? It starts the discussion flow. Roadmap exists? It plans or executes the next step.
+**`/sdd` — step mode.** Type `/sdd` and SDD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next. Same state machine as auto mode, but you stay in the loop. No project yet? It starts the discussion flow. Roadmap exists? It plans or executes the next step.
 
-**`/gsd auto` — autonomous mode.** Type `/gsd auto` and walk away. GSD researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete. Fresh context window per task. No babysitting.
+**`/sdd auto` — autonomous mode.** Type `/sdd auto` and walk away. SDD researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete. Fresh context window per task. No babysitting.
 
 ### Two terminals, one project
 
@@ -299,93 +299,93 @@ The real workflow: run auto mode in one terminal, steer from another.
 **Terminal 1 — let it build**
 
 ```bash
-gsd
-/gsd auto
+sdd
+/sdd auto
 ```
 
 **Terminal 2 — steer while it works**
 
 ```bash
-gsd
-/gsd discuss    # talk through architecture decisions
-/gsd status     # check progress
-/gsd queue      # queue the next milestone
+sdd
+/sdd discuss    # talk through architecture decisions
+/sdd status     # check progress
+/sdd queue      # queue the next milestone
 ```
 
-Both terminals read and write the same `.gsd/` files on disk. Your decisions in terminal 2 are picked up automatically at the next phase boundary — no need to stop auto mode.
+Both terminals read and write the same `.sdd/` files on disk. Your decisions in terminal 2 are picked up automatically at the next phase boundary — no need to stop auto mode.
 
 ### Headless mode — CI and scripts
 
-`gsd headless` runs any `/gsd` command without a TUI. Designed for CI pipelines, cron jobs, and scripted automation.
+`sdd headless` runs any `/sdd` command without a TUI. Designed for CI pipelines, cron jobs, and scripted automation.
 
 ```bash
 # Run auto mode in CI
-gsd headless --timeout 600000
+sdd headless --timeout 600000
 
 # Create and execute a milestone end-to-end
-gsd headless new-milestone --context spec.md --auto
+sdd headless new-milestone --context spec.md --auto
 
 # One unit at a time (cron-friendly)
-gsd headless next
+sdd headless next
 
 # Instant JSON snapshot (no LLM, ~50ms)
-gsd headless query
+sdd headless query
 
 # Force a specific pipeline phase
-gsd headless dispatch plan
+sdd headless dispatch plan
 ```
 
-Headless auto-responds to interactive prompts, detects completion, and exits with structured codes: `0` complete, `1` error/timeout, `2` blocked. Auto-restarts on crash with exponential backoff. Use `gsd headless query` for instant, machine-readable state inspection — returns phase, next dispatch preview, and parallel worker costs as a single JSON object without spawning an LLM session. Pair with [remote questions](./docs/remote-questions.md) to route decisions to Slack or Discord when human input is needed.
+Headless auto-responds to interactive prompts, detects completion, and exits with structured codes: `0` complete, `1` error/timeout, `2` blocked. Auto-restarts on crash with exponential backoff. Use `sdd headless query` for instant, machine-readable state inspection — returns phase, next dispatch preview, and parallel worker costs as a single JSON object without spawning an LLM session. Pair with [remote questions](./docs/remote-questions.md) to route decisions to Slack or Discord when human input is needed.
 
-**Multi-session orchestration** — headless mode supports file-based IPC in `.gsd/parallel/` for coordinating multiple GSD workers across milestones. Build orchestrators that spawn, monitor, and budget-cap a fleet of GSD workers.
+**Multi-session orchestration** — headless mode supports file-based IPC in `.sdd/parallel/` for coordinating multiple SDD workers across milestones. Build orchestrators that spawn, monitor, and budget-cap a fleet of SDD workers.
 
 ### First launch
 
-On first run, GSD launches a branded setup wizard that walks you through LLM provider selection (OAuth or API key), then optional tool API keys (Brave Search, Context7, Jina, Slack, Discord). Every step is skippable — press Enter to skip any. If you have an existing Pi installation, your provider credentials (LLM and tool keys) are imported automatically. Run `gsd config` anytime to re-run the wizard.
+On first run, SDD launches a branded setup wizard that walks you through LLM provider selection (OAuth or API key), then optional tool API keys (Brave Search, Context7, Jina, Slack, Discord). Every step is skippable — press Enter to skip any. If you have an existing Pi installation, your provider credentials (LLM and tool keys) are imported automatically. Run `sdd config` anytime to re-run the wizard.
 
 ### Commands
 
 | Command                 | What it does                                                    |
 | ----------------------- | --------------------------------------------------------------- |
-| `/gsd`                  | Step mode — executes one unit at a time, pauses between each    |
-| `/gsd next`             | Explicit step mode (same as bare `/gsd`)                        |
-| `/gsd auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
-| `/gsd quick`            | Execute a quick task with GSD guarantees, skip planning overhead |
-| `/gsd stop`             | Stop auto mode gracefully                                       |
-| `/gsd steer`            | Hard-steer plan documents during execution                      |
-| `/gsd discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
-| `/gsd status`           | Progress dashboard                                              |
-| `/gsd queue`            | Queue future milestones (safe during auto mode)                 |
-| `/gsd prefs`            | Model selection, timeouts, budget ceiling                       |
-| `/gsd migrate`          | Migrate a v1 `.planning` directory to `.gsd` format             |
-| `/gsd help`             | Categorized command reference for all GSD subcommands           |
-| `/gsd mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
-| `/gsd forensics`        | Full-access GSD debugger for auto-mode failure investigation    |
-| `/gsd cleanup`          | Archive phase directories from completed milestones             |
-| `/gsd doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
-| `/gsd keys`             | API key manager — list, add, remove, test, rotate, doctor       |
-| `/gsd logs`             | Browse activity, debug, and metrics logs                        |
-| `/gsd export --html`    | Generate HTML report for current or completed milestone         |
+| `/sdd`                  | Step mode — executes one unit at a time, pauses between each    |
+| `/sdd next`             | Explicit step mode (same as bare `/sdd`)                        |
+| `/sdd auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
+| `/sdd quick`            | Execute a quick task with SDD guarantees, skip planning overhead |
+| `/sdd stop`             | Stop auto mode gracefully                                       |
+| `/sdd steer`            | Hard-steer plan documents during execution                      |
+| `/sdd discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
+| `/sdd status`           | Progress dashboard                                              |
+| `/sdd queue`            | Queue future milestones (safe during auto mode)                 |
+| `/sdd prefs`            | Model selection, timeouts, budget ceiling                       |
+| `/sdd migrate`          | Migrate a v1 `.planning` directory to `.sdd` format             |
+| `/sdd help`             | Categorized command reference for all SDD subcommands           |
+| `/sdd mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
+| `/sdd forensics`        | Full-access SDD debugger for auto-mode failure investigation    |
+| `/sdd cleanup`          | Archive phase directories from completed milestones             |
+| `/sdd doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
+| `/sdd keys`             | API key manager — list, add, remove, test, rotate, doctor       |
+| `/sdd logs`             | Browse activity, debug, and metrics logs                        |
+| `/sdd export --html`    | Generate HTML report for current or completed milestone         |
 | `/worktree` (`/wt`)     | Git worktree lifecycle — create, switch, merge, remove          |
 | `/voice`                | Toggle real-time speech-to-text (macOS, Linux)                  |
 | `/exit`                 | Graceful shutdown — saves session state before exiting          |
-| `/kill`                 | Kill GSD process immediately                                    |
+| `/kill`                 | Kill SDD process immediately                                    |
 | `/clear`                | Start a new session (alias for `/new`)                          |
 | `Ctrl+Alt+G`            | Toggle dashboard overlay                                        |
 | `Ctrl+Alt+V`            | Toggle voice transcription                                      |
 | `Ctrl+Alt+B`            | Show background shell processes                                 |
 | `Alt+V`                 | Paste clipboard image (macOS)                                   |
-| `gsd config`            | Re-run the setup wizard (LLM provider + tool keys)              |
-| `gsd update`            | Update GSD to the latest version                                |
-| `gsd headless [cmd]`    | Run `/gsd` commands without TUI (CI, cron, scripts)             |
-| `gsd headless query`    | Instant JSON snapshot — state, next dispatch, costs (no LLM)    |
-| `gsd --continue` (`-c`) | Resume the most recent session for the current directory        |
-| `gsd --worktree` (`-w`) | Launch an isolated worktree session for the active milestone    |
-| `gsd sessions`          | Interactive session picker — browse and resume any saved session |
+| `sdd config`            | Re-run the setup wizard (LLM provider + tool keys)              |
+| `sdd update`            | Update SDD to the latest version                                |
+| `sdd headless [cmd]`    | Run `/sdd` commands without TUI (CI, cron, scripts)             |
+| `sdd headless query`    | Instant JSON snapshot — state, next dispatch, costs (no LLM)    |
+| `sdd --continue` (`-c`) | Resume the most recent session for the current directory        |
+| `sdd --worktree` (`-w`) | Launch an isolated worktree session for the active milestone    |
+| `sdd sessions`          | Interactive session picker — browse and resume any saved session |
 
 ---
 
-## What GSD Manages For You
+## What SDD Manages For You
 
 ### Context Engineering
 
@@ -417,7 +417,7 @@ main:
   feat(M001/S02): API endpoints and middleware
   feat(M001/S01): data model and type system
 
-gsd/M001/S01 (deleted after merge):
+sdd/M001/S01 (deleted after merge):
   feat(S01/T03): file writer with round-trip fidelity
   feat(S01/T02): markdown parser for plan files
   feat(S01/T01): core types and interfaces
@@ -437,7 +437,7 @@ The verification ladder: static checks → command execution → behavioral test
 
 ### Dashboard
 
-`Ctrl+Alt+G` or `/gsd status` opens a real-time overlay showing:
+`Ctrl+Alt+G` or `/sdd status` opens a real-time overlay showing:
 
 - Current milestone, slice, and task progress
 - Auto mode elapsed time and phase
@@ -447,12 +447,12 @@ The verification ladder: static checks → command execution → behavioral test
 
 ### HTML Reports
 
-After a milestone completes, GSD auto-generates a self-contained HTML report in `.gsd/reports/`. Each report includes project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base sections. No external dependencies — all CSS and JS are inlined, printable to PDF from any browser.
+After a milestone completes, SDD auto-generates a self-contained HTML report in `.sdd/reports/`. Each report includes project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base sections. No external dependencies — all CSS and JS are inlined, printable to PDF from any browser.
 
 An auto-generated `index.html` shows all reports with progression metrics across milestones.
 
 - **Automatic** — generated after milestone completion (configurable via `auto_report` preference)
-- **Manual** — run `/gsd export --html` anytime
+- **Manual** — run `/sdd export --html` anytime
 
 ---
 
@@ -460,7 +460,7 @@ An auto-generated `index.html` shows all reports with progression metrics across
 
 ### Preferences
 
-GSD preferences live in `~/.gsd/preferences.md` (global) or `.gsd/preferences.md` (project). Manage with `/gsd prefs`.
+SDD preferences live in `~/.sdd/preferences.md` (global) or `.sdd/preferences.md` (project). Manage with `/sdd prefs`.
 
 ```yaml
 ---
@@ -493,7 +493,7 @@ auto_report: true
 | Setting                | What it controls                                                                                      |
 | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `models.*`             | Per-phase model selection — string for a single model, or `{model, fallbacks}` for automatic failover |
-| `skill_discovery`      | `auto` / `suggest` / `off` — how GSD finds and applies skills                                         |
+| `skill_discovery`      | `auto` / `suggest` / `off` — how SDD finds and applies skills                                         |
 | `auto_supervisor.*`    | Timeout thresholds for auto mode supervision                                                          |
 | `budget_ceiling`       | USD ceiling — auto mode pauses when reached                                                           |
 | `uat_dispatch`         | Enable automatic UAT runs after slice completion                                                      |
@@ -502,7 +502,7 @@ auto_report: true
 | `skill_staleness_days` | Skills unused for N days get deprioritized (default: 60, 0 = disabled)                                |
 | `unique_milestone_ids` | Uses unique milestone names to avoid clashes when working in teams of people                          |
 | `git.isolation`        | `worktree` (default), `branch`, or `none` — disable worktree isolation for projects that don't need it           |
-| `git.manage_gitignore` | Set `false` to prevent GSD from modifying `.gitignore`                                                           |
+| `git.manage_gitignore` | Set `false` to prevent SDD from modifying `.gitignore`                                                           |
 | `verification_commands`| Array of shell commands to run after task execution (e.g., `["npm run lint", "npm run test"]`)        |
 | `verification_auto_fix`| Auto-retry on verification failures (default: true)                                                   |
 | `verification_max_retries` | Max retries for verification failures (default: 2)                                               |
@@ -514,15 +514,15 @@ auto_report: true
 
 Place an `AGENTS.md` file in any directory to provide persistent behavioral guidance for that scope. Pi core loads `AGENTS.md` automatically (with `CLAUDE.md` as a fallback) at both user and project levels. Use these files for coding standards, architectural decisions, domain terminology, or workflow preferences.
 
-> **Note:** The legacy `agent-instructions.md` format (`~/.gsd/agent-instructions.md` and `.gsd/agent-instructions.md`) is deprecated and no longer loaded. Migrate any existing instructions to `AGENTS.md` or `CLAUDE.md`.
+> **Note:** The legacy `agent-instructions.md` format (`~/.sdd/agent-instructions.md` and `.sdd/agent-instructions.md`) is deprecated and no longer loaded. Migrate any existing instructions to `AGENTS.md` or `CLAUDE.md`.
 
 ### Debug Mode
 
-Start GSD with `gsd --debug` to enable structured JSONL diagnostic logging. Debug logs capture dispatch decisions, state transitions, and timing data for troubleshooting auto-mode issues.
+Start SDD with `sdd --debug` to enable structured JSONL diagnostic logging. Debug logs capture dispatch decisions, state transitions, and timing data for troubleshooting auto-mode issues.
 
 ### Token Optimization
 
-GSD includes a coordinated token optimization system that reduces usage by 40-60% on cost-sensitive workloads. Set a single preference to coordinate model selection, phase skipping, and context compression:
+SDD includes a coordinated token optimization system that reduces usage by 40-60% on cost-sensitive workloads. Set a single preference to coordinate model selection, phase skipping, and context compression:
 
 ```yaml
 token_profile: budget      # or balanced (default), quality
@@ -542,11 +542,11 @@ See the full [Token Optimization Guide](./docs/token-optimization.md) for detail
 
 ### Bundled Tools
 
-GSD ships with 19 extensions, all loaded automatically:
+SDD ships with 19 extensions, all loaded automatically:
 
 | Extension              | What it provides                                                                                                       |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **GSD**                | Core workflow engine, auto mode, commands, dashboard                                                                   |
+| **SDD**                | Core workflow engine, auto mode, commands, dashboard                                                                   |
 | **Browser Tools**      | Playwright-based browser with form intelligence, intent-ranked element finding, semantic actions, PDF export, session state persistence, network mocking, device emulation, structured extraction, visual diffing, region zoom, test code generation, and prompt injection detection |
 | **Search the Web**     | Brave Search, Tavily, or Jina page extraction                                                                          |
 | **Google Search**      | Gemini-powered web search with AI-synthesized answers                                                                  |
@@ -580,38 +580,38 @@ Three specialized subagents for delegated work:
 
 ## Working in teams
 
-The best practice for working in teams is to ensure unique milestone names across all branches (by using `unique_milestone_ids`) and checking in the right `.gsd/` artifacts to share valuable context between teammates.
+The best practice for working in teams is to ensure unique milestone names across all branches (by using `unique_milestone_ids`) and checking in the right `.sdd/` artifacts to share valuable context between teammates.
 
 ### Suggested .gitignore setup
 
 ```bash
-# ── GSD: Runtime / Ephemeral (per-developer, per-session) ──────────────────
+# ── SDD: Runtime / Ephemeral (per-developer, per-session) ──────────────────
 # Crash detection sentinel — PID lock, written per auto-mode session
-.gsd/auto.lock
+.sdd/auto.lock
 # Auto-mode dispatch tracker — prevents re-running completed units
-.gsd/completed-units.json
+.sdd/completed-units.json
 # Derived state cache — regenerated from plan/roadmap files on disk
-.gsd/STATE.md
+.sdd/STATE.md
 # Per-developer token/cost accumulator
-.gsd/metrics.json
+.sdd/metrics.json
 # Raw JSONL session dumps — crash recovery forensics, auto-pruned
-.gsd/activity/
+.sdd/activity/
 # Unit execution records — dispatch phase, timeouts, recovery tracking
-.gsd/runtime/
+.sdd/runtime/
 # Git worktree working copies
-.gsd/worktrees/
+.sdd/worktrees/
 # Parallel orchestration IPC and worker status
-.gsd/parallel/
-# Generated HTML reports (regenerable via /gsd export --html)
-.gsd/reports/
+.sdd/parallel/
+# Generated HTML reports (regenerable via /sdd export --html)
+.sdd/reports/
 # Session-specific interrupted-work markers
-.gsd/milestones/**/continue.md
-.gsd/milestones/**/*-CONTINUE.md
+.sdd/milestones/**/continue.md
+.sdd/milestones/**/*-CONTINUE.md
 ```
 
 ### Unique Milestone Names
 
-Create or amend your `.gsd/preferences.md` file within the repo to include `unique_milestone_ids: true` e.g.
+Create or amend your `.sdd/preferences.md` file within the repo to include `unique_milestone_ids: true` e.g.
 
 ```markdown
 ---
@@ -620,47 +620,47 @@ unique_milestone_ids: true
 ---
 ```
 
-With the above `.gitignore` set up, the `.gsd/preferences.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
+With the above `.gitignore` set up, the `.sdd/preferences.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
 
 Milestone names will now be generated with a 6 char random string appended e.g. instead of `M001` you'll get something like `M001-ush8s3`
 
-### Migrating an existing git ignored `.gsd/` folder
+### Migrating an existing git ignored `.sdd/` folder
 
 1. Ensure you are not in the middle of any milestones (clean state)
-2. Update the `.gsd/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.gsd/` directory)
-3. Update your `.gsd/preferences.md` file within the repo as per section `Unique Milestone Names`
-4. If you want to update all your existing milestones use this prompt in GSD: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .gsd file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
+2. Update the `.sdd/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.sdd/` directory)
+3. Update your `.sdd/preferences.md` file within the repo as per section `Unique Milestone Names`
+4. If you want to update all your existing milestones use this prompt in SDD: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .sdd file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
 5. Commit to git
 
 ---
 
 ## Architecture
 
-GSD is a TypeScript application that embeds the Pi coding agent SDK.
+SDD is a TypeScript application that embeds the Pi coding agent SDK.
 
 ```
-gsd (CLI binary)
-  └─ loader.ts          Sets PI_PACKAGE_DIR, GSD env vars, dynamic-imports cli.ts
+sdd (CLI binary)
+  └─ loader.ts          Sets PI_PACKAGE_DIR, SDD env vars, dynamic-imports cli.ts
       └─ cli.ts         Wires SDK managers, loads extensions, starts InteractiveMode
           ├─ headless.ts     Headless orchestrator (spawns RPC child, auto-responds, detects completion)
           ├─ onboarding.ts   First-run setup wizard (LLM provider + tool keys)
           ├─ wizard.ts       Env hydration from stored auth.json credentials
-          ├─ app-paths.ts    ~/.gsd/agent/, ~/.gsd/sessions/, auth.json
-          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.gsd/agent/
+          ├─ app-paths.ts    ~/.sdd/agent/, ~/.sdd/sessions/, auth.json
+          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.sdd/agent/
           └─ src/resources/
-              ├─ extensions/gsd/    Core GSD extension (auto, state, commands, ...)
+              ├─ extensions/sdd/    Core SDD extension (auto, state, commands, ...)
               ├─ extensions/...     18 supporting extensions
               ├─ agents/            scout, researcher, worker
               ├─ AGENTS.md          Agent routing instructions
-              └─ GSD-WORKFLOW.md    Manual bootstrap protocol
+              └─ SDD-WORKFLOW.md    Manual bootstrap protocol
 ```
 
 **Key design decisions:**
 
 - **`pkg/` shim directory** — `PI_PACKAGE_DIR` points here (not project root) to avoid Pi's theme resolution collision with our `src/` directory. Contains only `piConfig` and theme assets.
 - **Two-file loader pattern** — `loader.ts` sets all env vars with zero SDK imports, then dynamic-imports `cli.ts` which does static SDK imports. This ensures `PI_PACKAGE_DIR` is set before any SDK code evaluates.
-- **Always-overwrite sync** — `npm update -g` takes effect immediately. Bundled extensions and agents are synced to `~/.gsd/agent/` on every launch, not just first run.
-- **State lives on disk** — `.gsd/` is the source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions.
+- **Always-overwrite sync** — `npm update -g` takes effect immediately. Bundled extensions and agents are synced to `~/.sdd/agent/` on every launch, not just first run.
+- **State lives on disk** — `.sdd/` is the source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions.
 
 ---
 
@@ -682,7 +682,7 @@ Optional:
 
 ## Use Any Model
 
-GSD isn't locked to one provider. It runs on the [Pi SDK](https://github.com/badlogic/pi-mono), which supports **20+ model providers** out of the box. Use different models for different phases — Opus for planning, Sonnet for execution, a fast model for research.
+SDD isn't locked to one provider. It runs on the [Pi SDK](https://github.com/badlogic/pi-mono), which supports **20+ model providers** out of the box. Use different models for different phases — Opus for planning, Sonnet for execution, a fast model for research.
 
 ### Built-in Providers
 
@@ -698,15 +698,15 @@ If you have a **Claude Max**, **Codex**, or **GitHub Copilot** subscription, you
 > - **Claude Max** — Anthropic's ToS may not explicitly permit OAuth use outside Claude's own applications.
 > - **GitHub Copilot** — Usage outside GitHub's own tools may be restricted by your subscription terms.
 >
-> GSD supports API key authentication for all providers as the safe alternative. **We strongly recommend using API keys over OAuth for Google Gemini.**
+> SDD supports API key authentication for all providers as the safe alternative. **We strongly recommend using API keys over OAuth for Google Gemini.**
 
 ### OpenRouter
 
-[OpenRouter](https://openrouter.ai) gives you access to hundreds of models through a single API key. Use it to run GSD with Llama, DeepSeek, Qwen, or anything else OpenRouter supports.
+[OpenRouter](https://openrouter.ai) gives you access to hundreds of models through a single API key. Use it to run SDD with Llama, DeepSeek, Qwen, or anything else OpenRouter supports.
 
 ### Per-Phase Model Selection
 
-In your preferences (`/gsd prefs`), assign different models to different phases:
+In your preferences (`/sdd prefs`), assign different models to different phases:
 
 ```yaml
 models:
@@ -719,14 +719,14 @@ models:
   completion: claude-sonnet-4-6
 ```
 
-Use expensive models where quality matters (planning, complex execution) and cheaper/faster models where speed matters (research, simple completions). Each phase accepts a simple model string or an object with `model` and `fallbacks` — if the primary model fails (provider outage, rate limit, credit exhaustion), GSD automatically tries the next fallback. GSD tracks cost per-model so you can see exactly where your budget goes.
+Use expensive models where quality matters (planning, complex execution) and cheaper/faster models where speed matters (research, simple completions). Each phase accepts a simple model string or an object with `model` and `fallbacks` — if the primary model fails (provider outage, rate limit, credit exhaustion), SDD automatically tries the next fallback. SDD tracks cost per-model so you can see exactly where your budget goes.
 
 ---
 
 ## Star History
 
-<a href="https://star-history.com/#gsd-build/gsd-2&Date">
-  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=gsd-build/gsd-2&type=Date" />
+<a href="https://star-history.com/#bhargavvc/sdd&Date">
+  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bhargavvc/sdd&type=Date" />
 </a>
 
 ---
@@ -739,8 +739,8 @@ Use expensive models where quality matters (planning, complex execution) and che
 
 <div align="center">
 
-**The original GSD showed what was possible. This version delivers it.**
+**The original SDD showed what was possible. This version delivers it.**
 
-**`npm install -g gsd-pi && gsd`**
+**`npm install -g sdd-pi && sdd`**
 
 </div>

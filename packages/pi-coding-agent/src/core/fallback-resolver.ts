@@ -1,4 +1,4 @@
-// GSD Provider Fallback Resolver
+// SDD Provider Fallback Resolver
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 /**
@@ -9,7 +9,7 @@
  * restoration: checking if a higher-priority provider has recovered before each request.
  */
 
-import type { Api, Model } from "@gsd/pi-ai";
+import type { Api, Model } from "@sdd/pi-ai";
 import type { AuthStorage, UsageLimitErrorType } from "./auth-storage.js";
 import type { ModelRegistry } from "./model-registry.js";
 import type { FallbackChainEntry, SettingsManager } from "./settings-manager.js";

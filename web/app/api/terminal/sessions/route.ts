@@ -18,9 +18,9 @@ export const dynamic = "force-dynamic";
 
 // Persist counter across HMR re-evaluations in dev
 const g = globalThis as Record<string, unknown>;
-if (!g.__gsd_pty_next_index__) g.__gsd_pty_next_index__ = 1;
+if (!g.__sdd_pty_next_index__) g.__sdd_pty_next_index__ = 1;
 function getNextIndex(): number {
-  return (g.__gsd_pty_next_index__ as number)++;
+  return (g.__sdd_pty_next_index__ as number)++;
 }
 
 export async function GET(): Promise<Response> {
@@ -33,7 +33,7 @@ export async function GET(): Promise<Response> {
  * if the auth layer is ever bypassed.
  */
 const ALLOWED_COMMANDS = new Set([
-  "gsd",
+  "sdd",
   process.env.SHELL || "/bin/zsh",
   "/bin/bash",
   "/bin/zsh",

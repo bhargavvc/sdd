@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 
 test("initResources creates node_modules symlink in agent dir", async () => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-"));
   const fakeAgentDir = join(tmp, "agent");
 
   try {
@@ -29,7 +29,7 @@ test("initResources creates node_modules symlink in agent dir", async () => {
 
 test("initResources replaces a real directory blocking node_modules with a symlink", async () => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-realdir-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-realdir-"));
   const fakeAgentDir = join(tmp, "agent");
 
   try {
@@ -58,7 +58,7 @@ test("initResources replaces a real directory blocking node_modules with a symli
 
 test("initResources replaces a stale symlink with a correct one", async () => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-stale-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-stale-"));
   const fakeAgentDir = join(tmp, "agent");
 
   try {
@@ -70,7 +70,7 @@ test("initResources replaces a stale symlink with a correct one", async () => {
 
     // Remove and replace with a stale symlink pointing to a non-existent path
     unlinkSync(nodeModulesPath);
-    symlinkSync("/tmp/nonexistent-gsd-node-modules-" + Date.now(), nodeModulesPath);
+    symlinkSync("/tmp/nonexistent-sdd-node-modules-" + Date.now(), nodeModulesPath);
 
     const staleTarget = readlinkSync(nodeModulesPath);
     assert.notEqual(staleTarget, correctTarget, "stale symlink should point elsewhere");
@@ -87,7 +87,7 @@ test("initResources replaces a stale symlink with a correct one", async () => {
 
 test("initResources replaces symlink whose target was deleted", async () => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-missing-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-missing-"));
   const fakeAgentDir = join(tmp, "agent");
 
   try {

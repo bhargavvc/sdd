@@ -44,19 +44,19 @@ test("getExtensionKey normalizes top-level .ts and .js entry names to the same k
     "ask-user-questions",
   );
   assert.equal(
-    getExtensionKey("/tmp/extensions/gsd/index.js", extensionsDir),
-    "gsd",
+    getExtensionKey("/tmp/extensions/sdd/index.js", extensionsDir),
+    "sdd",
   );
 });
 
 test("hasStaleCompiledExtensionSiblings only flags top-level .ts/.js sibling pairs", async () => {
   const { hasStaleCompiledExtensionSiblings } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-resource-loader-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-resource-loader-"));
   const extensionsDir = join(tmp, "extensions");
 
   try {
-    mkdirSync(join(extensionsDir, "gsd"), { recursive: true });
-    writeFileSync(join(extensionsDir, "gsd", "index.ts"), "export {};\n");
+    mkdirSync(join(extensionsDir, "sdd"), { recursive: true });
+    writeFileSync(join(extensionsDir, "sdd", "index.ts"), "export {};\n");
     assert.equal(hasStaleCompiledExtensionSiblings(extensionsDir), false);
 
     writeFileSync(join(extensionsDir, "ask-user-questions.js"), "export {};\n");
@@ -70,9 +70,9 @@ test("hasStaleCompiledExtensionSiblings only flags top-level .ts/.js sibling pai
 });
 
 test("buildResourceLoader excludes duplicate top-level pi extensions when bundled resources use .js", async () => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-resource-loader-home-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-resource-loader-home-"));
   const piExtensionsDir = join(tmp, ".pi", "agent", "extensions");
-  const fakeAgentDir = join(tmp, ".gsd", "agent");
+  const fakeAgentDir = join(tmp, ".sdd", "agent");
   const restoreHomeEnv = overrideHomeEnv(tmp);
 
   try {
@@ -102,7 +102,7 @@ test("buildResourceLoader excludes duplicate top-level pi extensions when bundle
 
 test("initResources prunes stale top-level extension siblings next to bundled compiled extensions", async () => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-resource-loader-sync-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-resource-loader-sync-"));
   const fakeAgentDir = join(tmp, "agent");
   const bundledTsPath = join(fakeAgentDir, "extensions", "ask-user-questions.ts");
   const bundledJsPath = join(fakeAgentDir, "extensions", "ask-user-questions.js");

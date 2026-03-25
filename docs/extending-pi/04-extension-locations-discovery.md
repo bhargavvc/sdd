@@ -5,10 +5,10 @@
 
 | Location | Scope |
 |----------|-------|
-| `~/.gsd/agent/extensions/*.ts` | Global (all projects) |
-| `~/.gsd/agent/extensions/*/index.ts` | Global (subdirectory) |
-| `.gsd/extensions/*.ts` | Project-local |
-| `.gsd/extensions/*/index.ts` | Project-local (subdirectory) |
+| `~/.sdd/agent/extensions/*.ts` | Global (all projects) |
+| `~/.sdd/agent/extensions/*/index.ts` | Global (subdirectory) |
+| `.sdd/extensions/*.ts` | Project-local |
+| `.sdd/extensions/*/index.ts` | Project-local (subdirectory) |
 
 ### Additional Paths (via settings.json)
 

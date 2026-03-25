@@ -1,4 +1,4 @@
-import type { AgentTool } from "@gsd/pi-agent-core";
+import type { AgentTool } from "@sdd/pi-agent-core";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile, writeFile as fsWriteFile } from "fs/promises";

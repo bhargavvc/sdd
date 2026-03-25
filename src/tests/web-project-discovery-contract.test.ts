@@ -10,7 +10,7 @@ import { discoverProjects } from "../web/project-discovery-service.ts";
 // Fixture setup
 // ---------------------------------------------------------------------------
 
-const tempRoot = mkdtempSync(join(tmpdir(), "gsd-project-discovery-"));
+const tempRoot = mkdtempSync(join(tmpdir(), "sdd-project-discovery-"));
 
 // project-a: brownfield (package.json + .git)
 const projectA = join(tempRoot, "project-a");
@@ -18,10 +18,10 @@ mkdirSync(projectA);
 mkdirSync(join(projectA, ".git"));
 writeFileSync(join(projectA, "package.json"), "{}");
 
-// project-b: empty-gsd (.gsd folder, no milestones)
+// project-b: empty-sdd (.sdd folder, no milestones)
 const projectB = join(tempRoot, "project-b");
 mkdirSync(projectB);
-mkdirSync(join(projectB, ".gsd"));
+mkdirSync(join(projectB, ".sdd"));
 
 // project-c: brownfield (Cargo.toml)
 const projectC = join(tempRoot, "project-c");
@@ -71,12 +71,12 @@ describe("project-discovery", () => {
     assert.equal(a.signals.hasGitRepo, true);
   });
 
-  test("project-b is detected as empty-gsd", () => {
+  test("project-b is detected as empty-sdd", () => {
     const results = discoverProjects(tempRoot);
     const b = results.find(r => r.name === "project-b");
     assert.ok(b, "project-b not found");
-    assert.equal(b.kind, "empty-gsd");
-    assert.equal(b.signals.hasGsdFolder, true);
+    assert.equal(b.kind, "empty-sdd");
+    assert.equal(b.signals.hasSddFolder, true);
   });
 
   test("project-c is detected as brownfield with hasCargo signal", () => {

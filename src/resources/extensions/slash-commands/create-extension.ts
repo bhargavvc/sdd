@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { showInterviewRound, type Question, type RoundResult } from "../shared/tui.js";
 
 export default function createExtension(pi: ExtensionAPI) {
@@ -19,7 +19,7 @@ export default function createExtension(pi: ExtensionAPI) {
 								options: [
 									{
 										label: "Add a custom tool",
-										description: "Register a new tool the LLM can call (like gsd_plan, plan_clarify).",
+										description: "Register a new tool the LLM can call (like sdd_plan, plan_clarify).",
 									},
 									{
 										label: "Add a slash command",
@@ -221,41 +221,41 @@ function sendPrompt(description: string, result: RoundResult, pi: ExtensionAPI):
 		: "";
 
 	const docHints: string[] = [
-		"- `~/.gsd/agent/docs/extending-pi/01-what-are-extensions.md` — capabilities overview",
-		"- `~/.gsd/agent/docs/extending-pi/03-getting-started.md` — minimal extension, hot reload",
-		"- `~/.gsd/agent/docs/extending-pi/08-extensioncontext-what-you-can-access.md` — ExtensionContext API",
-		"- `~/.gsd/agent/docs/extending-pi/09-extensionapi-what-you-can-do.md` — ExtensionAPI: registration, messaging",
-		"- `~/.gsd/agent/docs/extending-pi/22-key-rules-gotchas.md` — must-read rules before shipping",
+		"- `~/.sdd/agent/docs/extending-pi/01-what-are-extensions.md` — capabilities overview",
+		"- `~/.sdd/agent/docs/extending-pi/03-getting-started.md` — minimal extension, hot reload",
+		"- `~/.sdd/agent/docs/extending-pi/08-extensioncontext-what-you-can-access.md` — ExtensionContext API",
+		"- `~/.sdd/agent/docs/extending-pi/09-extensionapi-what-you-can-do.md` — ExtensionAPI: registration, messaging",
+		"- `~/.sdd/agent/docs/extending-pi/22-key-rules-gotchas.md` — must-read rules before shipping",
 	];
 
 	if (uiSelected.includes("custom component")) {
-		docHints.push("- `~/.gsd/agent/docs/extending-pi/12-custom-ui-visual-components.md` — dialogs, widgets, overlays");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/06-ctx-ui-custom-full-custom-components.md` — ctx.ui.custom() API");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/07-built-in-components-the-building-blocks.md` — Text, Box, SelectList");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/09-keyboard-input-how-to-handle-keys.md` — Key, matchesKey");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/10-line-width-the-cardinal-rule.md` — truncation, width rules");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/19-building-a-complete-component-step-by-step.md` — step-by-step guide");
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/21-common-mistakes-and-how-to-avoid-them.md` — pitfalls");
+		docHints.push("- `~/.sdd/agent/docs/extending-pi/12-custom-ui-visual-components.md` — dialogs, widgets, overlays");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/06-ctx-ui-custom-full-custom-components.md` — ctx.ui.custom() API");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/07-built-in-components-the-building-blocks.md` — Text, Box, SelectList");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/09-keyboard-input-how-to-handle-keys.md` — Key, matchesKey");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/10-line-width-the-cardinal-rule.md` — truncation, width rules");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/19-building-a-complete-component-step-by-step.md` — step-by-step guide");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/21-common-mistakes-and-how-to-avoid-them.md` — pitfalls");
 	} else if (uiSelected.includes("Dialogs")) {
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/04-built-in-dialog-methods.md` — select, confirm, input, editor");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/04-built-in-dialog-methods.md` — select, confirm, input, editor");
 	} else if (uiSelected.includes("Status")) {
-		docHints.push("- `~/.gsd/agent/docs/pi-ui-tui/05-persistent-ui-elements.md` — status, widgets, footer, header");
+		docHints.push("- `~/.sdd/agent/docs/pi-ui-tui/05-persistent-ui-elements.md` — status, widgets, footer, header");
 	}
 
 	if (uiSelected.includes("tool") || result.answers["purpose"]) {
-		docHints.push("- `~/.gsd/agent/docs/extending-pi/14-custom-rendering-controlling-what-the-user-sees.md` — renderCall / renderResult");
+		docHints.push("- `~/.sdd/agent/docs/extending-pi/14-custom-rendering-controlling-what-the-user-sees.md` — renderCall / renderResult");
 	}
 
 	if (eventsSelected && !eventsSelected.includes("standalone")) {
-		docHints.push("- `~/.gsd/agent/docs/extending-pi/07-events-the-nervous-system.md` — all events reference");
+		docHints.push("- `~/.sdd/agent/docs/extending-pi/07-events-the-nervous-system.md` — all events reference");
 	}
 
 	if (eventsSelected.includes("context / prompt")) {
-		docHints.push("- `~/.gsd/agent/docs/extending-pi/15-system-prompt-modification.md` — system prompt hooks");
+		docHints.push("- `~/.sdd/agent/docs/extending-pi/15-system-prompt-modification.md` — system prompt hooks");
 	}
 
 	if (persistenceSelected.includes("session")) {
-		docHints.push("- `~/.gsd/agent/docs/extending-pi/13-state-management-persistence.md` — pi.appendEntry, session state");
+		docHints.push("- `~/.sdd/agent/docs/extending-pi/13-state-management-persistence.md` — pi.appendEntry, session state");
 	}
 
 	const prompt = `Create a new pi extension based on this description:
@@ -272,16 +272,16 @@ ${docHints.join("\n")}
 
 Write the complete implementation as a single self-contained extension file:
 
-\`~/.gsd/agent/extensions/<kebab-case-name>.ts\`
+\`~/.sdd/agent/extensions/<kebab-case-name>.ts\`
 
 Then register it in the main extensions index:
 
-\`~/.gsd/agent/extensions/index.ts\` — import and call the new extension's default export alongside existing ones
+\`~/.sdd/agent/extensions/index.ts\` — import and call the new extension's default export alongside existing ones
 
 ## Rules you must follow exactly
 
 - Extension entry point: \`export default function <camelCaseName>(pi: ExtensionAPI): void { ... }\`
-- Import type: \`import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@gsd/pi-coding-agent";\`
+- Import type: \`import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@sdd/pi-coding-agent";\`
 - \`pi\` is the registration surface — call \`pi.registerCommand\`, \`pi.registerTool\`, \`pi.on\`, \`pi.registerShortcut\` inside the default export
 - \`ctx\` (ExtensionCommandContext or ExtensionContext) is passed to handlers and event callbacks — never stored, never assumed available globally
 - To send a message to the agent: \`pi.sendUserMessage("...")\` or \`pi.sendMessage({ content, display }, { triggerTurn })\`

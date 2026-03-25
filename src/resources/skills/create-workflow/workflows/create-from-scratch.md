@@ -88,16 +88,16 @@ Apply any requested changes.
 </phase>
 
 <phase name="write">
-Write the file to `.gsd/workflow-defs/<name>.yaml`.
+Write the file to `.sdd/workflow-defs/<name>.yaml`.
 
 Tell the user:
-- "Definition saved to `.gsd/workflow-defs/<name>.yaml`."
-- "Run `/gsd workflow validate <name>` to check it against the schema."
-- "Run `/gsd workflow run <name>` to execute it."
+- "Definition saved to `.sdd/workflow-defs/<name>.yaml`."
+- "Run `/sdd workflow validate <name>` to check it against the schema."
+- "Run `/sdd workflow run <name>` to execute it."
 </phase>
 
 <success_criteria>
-- A valid YAML file exists at `.gsd/workflow-defs/<name>.yaml`
+- A valid YAML file exists at `.sdd/workflow-defs/<name>.yaml`
 - The definition passes `validateDefinition()` from `definition-loader.ts`
 - The user has reviewed and approved the definition
 </success_criteria>

@@ -40,7 +40,7 @@ export class DiscordAdapter implements ChannelAdapter {
   async sendPrompt(prompt: RemotePrompt): Promise<RemoteDispatchResult> {
     const { embeds, reactionEmojis } = formatForDiscord(prompt);
     const res = await this.discordApi("POST", `/channels/${this.channelId}/messages`, {
-      content: "**GSD needs your input** — reply to this message with your answer",
+      content: "**SDD needs your input** — reply to this message with your answer",
       embeds,
     });
 

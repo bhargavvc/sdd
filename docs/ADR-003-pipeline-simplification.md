@@ -8,7 +8,7 @@
 
 ## Context
 
-GSD auto-mode orchestrates a multi-session pipeline where each "unit" of work runs in a fresh LLM session. The pipeline for a single milestone with N slices and M tasks per slice runs through:
+SDD auto-mode orchestrates a multi-session pipeline where each "unit" of work runs in a fresh LLM session. The pipeline for a single milestone with N slices and M tasks per slice runs through:
 
 ```
 research-milestone → plan-milestone →
@@ -144,7 +144,7 @@ For the same 4-slice, 3-task milestone:
 - The plan-milestone prompt drops "Trust the research" — there is no research document to trust.
 - The RESEARCH.md artifact becomes optional. If the planner wants to capture notes for downstream reference, it can write one. But it's not required, and downstream units don't depend on it.
 - Skill discovery instructions move into the plan-milestone prompt.
-- The research-milestone template (`prompts/research-milestone.md`) is retained but only used when explicitly dispatched via `/gsd dispatch research`.
+- The research-milestone template (`prompts/research-milestone.md`) is retained but only used when explicitly dispatched via `/sdd dispatch research`.
 
 **Token savings:** ~1 full session (12–37K tokens of prompt context) + the RESEARCH.md document no longer re-inlined into plan-milestone (~5–15K tokens).
 
@@ -231,7 +231,7 @@ The aggregator reads `T##-VERIFY.json` as the primary source of truth, supplemen
 - A new `aggregateMilestoneVerification()` function collects `T##-VERIFY.json` files and `S##-UAT-RESULT.md` files across all slices.
 - The function produces a VALIDATION.md with per-task and per-slice pass/fail status, UAT evidence, and an overall verdict.
 - The LLM-driven validate-milestone session is removed from the default pipeline.
-- The validate-milestone template is retained for explicit dispatch (users who want LLM-driven validation can run `/gsd dispatch validate`).
+- The validate-milestone template is retained for explicit dispatch (users who want LLM-driven validation can run `/sdd dispatch validate`).
 - The `skip_milestone_validation` preference (which writes a pass-through VALIDATION.md) becomes the default behavior, with the mechanical aggregation replacing it.
 
 ```typescript
@@ -571,7 +571,7 @@ At current Opus pricing ($15/MTok input, $75/MTok output — as of March 2026), 
 - The **crash recovery**, **idempotency**, and **stuck detection** systems (fewer sessions means these fire less often, but the safety nets remain)
 - The **metrics** and **cost tracking** systems
 - The **parallel orchestrator** for independent milestones
-- All prompt templates are **retained** — for fallback, recovery, and explicit dispatch via `/gsd dispatch <unit-type>`
+- All prompt templates are **retained** — for fallback, recovery, and explicit dispatch via `/sdd dispatch <unit-type>`
 
 ### What Gets Simpler Downstream
 
@@ -683,7 +683,7 @@ The mechanical summary quality might be insufficient for complex slices.
 4. Remove dispatch rule "planning (no research, not S01) → research-slice"
 5. Update `plan-milestone.md` and `plan-slice.md` prompt templates
 6. Make `skip_research` and `skip_slice_research` preferences default to true (backwards compat)
-7. Retain research templates for explicit `/gsd dispatch research` use
+7. Retain research templates for explicit `/sdd dispatch research` use
 8. **Targeted inlining reduction for planning sessions:** Move DECISIONS, REQUIREMENTS, PROJECT to path references in plan-milestone and plan-slice prompts. Keep ROADMAP and CONTEXT inlined. This prevents context pressure from the added exploration work.
 
 ### Phase 2: Mechanical slice completion

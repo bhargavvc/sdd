@@ -1,13 +1,13 @@
 /**
- * Remote Questions — /gsd remote command
+ * Remote Questions — /sdd remote command
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { AuthStorage } from "@gsd/pi-coding-agent";
-import { Editor, type EditorTheme, Key, matchesKey, truncateToWidth } from "@gsd/pi-tui";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
+import { AuthStorage } from "@sdd/pi-coding-agent";
+import { Editor, type EditorTheme, Key, matchesKey, truncateToWidth } from "@sdd/pi-tui";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { getGlobalGSDPreferencesPath, loadEffectiveGSDPreferences } from "../gsd/preferences.js";
+import { getGlobalSDDPreferencesPath, loadEffectiveSDDPreferences } from "../sdd/preferences.js";
 import { getRemoteConfigStatus, isValidChannelId, resolveRemoteConfig } from "./config.js";
 import { maskEditorLine, sanitizeError } from "../shared/mod.js";
 import { getLatestPromptSummary } from "./status.js";
@@ -63,7 +63,7 @@ async function handleSetupSlack(ctx: ExtensionCommandContext): Promise<void> {
   const send = await fetchJson("https://slack.com/api/chat.postMessage", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({ channel: channelId, text: "GSD remote questions connected." }),
+    body: JSON.stringify({ channel: channelId, text: "SDD remote questions connected." }),
   });
   if (!send?.ok) return void ctx.ui.notify(`Could not send to channel: ${send?.error ?? "unknown error"}`, "error");
 
@@ -142,7 +142,7 @@ async function handleSetupDiscord(ctx: ExtensionCommandContext): Promise<void> {
   const sendResponse = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
     method: "POST",
     headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify({ content: "GSD remote questions connected." }),
+    body: JSON.stringify({ content: "SDD remote questions connected." }),
     signal: AbortSignal.timeout(15_000),
   });
   if (!sendResponse.ok) {
@@ -172,7 +172,7 @@ async function handleSetupTelegram(ctx: ExtensionCommandContext): Promise<void> 
   const send = await fetchJson(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: "GSD remote questions connected." }),
+    body: JSON.stringify({ chat_id: chatId, text: "SDD remote questions connected." }),
   });
   if (!send?.ok) return void ctx.ui.notify(`Could not send to chat: ${send?.description ?? "unknown error"}`, "error");
 
@@ -202,7 +202,7 @@ async function handleRemoteStatus(ctx: ExtensionCommandContext): Promise<void> {
 }
 
 async function handleDisconnect(ctx: ExtensionCommandContext): Promise<void> {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveSDDPreferences();
   const channel = prefs?.preferences.remote_questions?.channel;
   if (!channel) return void ctx.ui.notify("No remote channel configured — nothing to disconnect.", "info");
 
@@ -225,20 +225,20 @@ async function handleRemoteMenu(ctx: ExtensionCommandContext): Promise<void> {
         latestPrompt ? `  Last prompt: ${latestPrompt.id} (${latestPrompt.status})` : "  No remote prompts recorded yet",
         "",
         "Commands:",
-        "  /gsd remote status",
-        "  /gsd remote disconnect",
-        "  /gsd remote slack",
-        "  /gsd remote discord",
-        "  /gsd remote telegram",
+        "  /sdd remote status",
+        "  /sdd remote disconnect",
+        "  /sdd remote slack",
+        "  /sdd remote discord",
+        "  /sdd remote telegram",
       ]
     : [
         "No remote question channel configured.",
         "",
         "Commands:",
-        "  /gsd remote slack",
-        "  /gsd remote discord",
-        "  /gsd remote telegram",
-        "  /gsd remote status",
+        "  /sdd remote slack",
+        "  /sdd remote discord",
+        "  /sdd remote telegram",
+        "  /sdd remote status",
       ];
 
   ctx.ui.notify(lines.join("\n"), "info");
@@ -300,7 +300,7 @@ async function promptSlackChannelId(ctx: ExtensionCommandContext): Promise<strin
 }
 
 function getAuthStorage(): AuthStorage {
-  const authPath = join(process.env.HOME ?? "", ".gsd", "agent", "auth.json");
+  const authPath = join(process.env.HOME ?? "", ".sdd", "agent", "auth.json");
   mkdirSync(dirname(authPath), { recursive: true });
   return AuthStorage.create(authPath);
 }
@@ -316,7 +316,7 @@ function removeProviderToken(provider: string): void {
 }
 
 export function saveRemoteQuestionsConfig(channel: "slack" | "discord" | "telegram", channelId: string): void {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalSDDPreferencesPath();
   const block = [
     "remote_questions:",
     `  channel: ${channel}`,
@@ -343,7 +343,7 @@ export function saveRemoteQuestionsConfig(channel: "slack" | "discord" | "telegr
 }
 
 function removeRemoteQuestionsConfig(): void {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalSDDPreferencesPath();
   if (!existsSync(prefsPath)) return;
   const content = readFileSync(prefsPath, "utf-8");
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);

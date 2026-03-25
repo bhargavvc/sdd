@@ -1,6 +1,6 @@
 # ──────────────────────────────────────────────
 # Stage 1: CI Builder
-# Image: ghcr.io/gsd-build/gsd-ci-builder
+# Image: ghcr.io/sdd-build/sdd-ci-builder
 # Used by: pipeline.yml Dev stage
 # ──────────────────────────────────────────────
 FROM node:24-bookworm AS builder
@@ -21,22 +21,22 @@ RUN node --version && rustc --version && cargo --version
 
 # ──────────────────────────────────────────────
 # Stage 2: Runtime
-# Image: ghcr.io/gsd-build/gsd-pi
+# Image: ghcr.io/sdd-build/sdd-pi
 # Used by: end users via docker run
 # ──────────────────────────────────────────────
 FROM node:24-slim AS runtime
 
-# Git is required for GSD's git operations
+# Git is required for SDD's git operations
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install GSD globally — version is controlled by the build arg
-ARG GSD_VERSION=latest
-RUN npm install -g gsd-pi@${GSD_VERSION}
+# Install SDD globally — version is controlled by the build arg
+ARG SDD_VERSION=latest
+RUN npm install -g sdd-pi@${SDD_VERSION}
 
 # Default working directory for user projects
 WORKDIR /workspace
 
-ENTRYPOINT ["gsd"]
+ENTRYPOINT ["sdd"]
 CMD ["--help"]

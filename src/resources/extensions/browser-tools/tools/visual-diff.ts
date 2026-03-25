@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import type { ToolDeps } from "../state.js";
 
@@ -6,7 +6,7 @@ import type { ToolDeps } from "../state.js";
  * Visual regression diffing — compare current page screenshot against a stored baseline.
  */
 
-const BASELINE_DIR = ".gsd/browser-baselines";
+const BASELINE_DIR = ".sdd/browser-baselines";
 
 export function registerVisualDiffTools(pi: ExtensionAPI, deps: ToolDeps): void {
 	pi.registerTool({
@@ -16,7 +16,7 @@ export function registerVisualDiffTools(pi: ExtensionAPI, deps: ToolDeps): void 
 			"Compare current page screenshot against a stored baseline pixel-by-pixel. " +
 			"Returns similarity score (0–1), diff pixel count, and optionally generates a diff image highlighting changes. " +
 			"On first run with no baseline, saves the current screenshot as the baseline. " +
-			"Baselines are stored in .gsd/browser-baselines/ (gitignored, environment-specific).",
+			"Baselines are stored in .sdd/browser-baselines/ (gitignored, environment-specific).",
 		parameters: Type.Object({
 			name: Type.Optional(
 				Type.String({

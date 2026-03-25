@@ -23,7 +23,7 @@ const onboarding = await import("../../web/onboarding-service.ts");
 const bootRoute = await import("../../../web/app/api/boot/route.ts");
 const onboardingRoute = await import("../../../web/app/api/onboarding/route.ts");
 const commandRoute = await import("../../../web/app/api/session/command/route.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@sdd/pi-coding-agent");
 
 class FakeRpcChild extends EventEmitter {
   stdin = new PassThrough();
@@ -63,10 +63,10 @@ function attachJsonLineReader(stream: PassThrough, onLine: (line: string) => voi
 }
 
 function makeWorkspaceFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-onboarding-integration-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-onboarding-integration-"));
   const projectCwd = join(root, "project");
   const sessionsDir = join(root, "sessions");
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001");
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S02");
   const tasksDir = join(sliceDir, "tasks");
 
@@ -138,20 +138,20 @@ function fakeWorkspaceIndex() {
       {
         id: "M001",
         title: "Demo Milestone",
-        roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+        roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
         slices: [
           {
             id: "S02",
             title: "First-run setup wizard",
             done: false,
-            planPath: ".gsd/milestones/M001/slices/S02/S02-PLAN.md",
-            tasksDir: ".gsd/milestones/M001/slices/S02/tasks",
+            planPath: ".sdd/milestones/M001/slices/S02/S02-PLAN.md",
+            tasksDir: ".sdd/milestones/M001/slices/S02/tasks",
             tasks: [
               {
                 id: "T02",
                 title: "Enforce the gate and refresh bridge auth after successful setup",
                 done: false,
-                planPath: ".gsd/milestones/M001/slices/S02/tasks/T02-PLAN.md",
+                planPath: ".sdd/milestones/M001/slices/S02/tasks/T02-PLAN.md",
               },
             ],
           },
@@ -193,9 +193,9 @@ function configureBridgeRuntime(
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], optionsArg: Record<string, unknown>) {
       void command;
@@ -423,13 +423,13 @@ test("refresh failures keep the workspace locked and expose the failed bridge-re
   }
 });
 
-test("fresh gsd --web browser onboarding stays locked on failed validation and unlocks after a successful retry", async (t) => {
+test("fresh sdd --web browser onboarding stays locked on failed validation and unlocks after a successful retry", async (t) => {
   if (process.platform === "win32") {
     t.skip("runtime launch test uses POSIX browser-open stubs")
     return
   }
 
-  const tempRoot = mkdtempSync(join(tmpdir(), "gsd-web-onboarding-runtime-"))
+  const tempRoot = mkdtempSync(join(tmpdir(), "sdd-web-onboarding-runtime-"))
   const tempHome = join(tempRoot, "home")
   const browserLogPath = join(tempRoot, "browser-open.log")
   let port: number | null = null
@@ -440,7 +440,7 @@ test("fresh gsd --web browser onboarding stays locked on failed validation and u
       tempHome,
       browserLogPath,
       env: {
-        GSD_WEB_TEST_FAKE_API_KEY_VALIDATION: "1",
+        SDD_WEB_TEST_FAKE_API_KEY_VALIDATION: "1",
         ANTHROPIC_API_KEY: "",
         OPENAI_API_KEY: "",
         GOOGLE_API_KEY: "",

@@ -7,7 +7,7 @@ Sessions are pi's memory system. They're more sophisticated than simple conversa
 Sessions are **JSONL files** (one JSON object per line). Each line is an "entry" with a `type`, `id`, and `parentId`:
 
 ```
-~/.gsd/agent/sessions/--path--to--project--/<timestamp>_<uuid>.jsonl
+~/.sdd/agent/sessions/--path--to--project--/<timestamp>_<uuid>.jsonl
 ```
 
 ### The Entry Tree

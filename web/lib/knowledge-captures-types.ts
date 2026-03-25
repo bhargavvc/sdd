@@ -1,5 +1,5 @@
 // Browser-safe TypeScript interfaces for knowledge and captures panels.
-// Mirrors upstream types from src/resources/extensions/gsd/captures.ts
+// Mirrors upstream types from src/resources/extensions/sdd/captures.ts
 // and defines the parsed shape of KNOWLEDGE.md entries.
 // Do NOT import from those modules directly — they use Node.js APIs
 // unavailable in the browser.

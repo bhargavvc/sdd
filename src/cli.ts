@@ -8,7 +8,7 @@ import {
   InteractiveMode,
   runPrintMode,
   runRpcMode,
-} from '@gsd/pi-coding-agent'
+} from '@sdd/pi-coding-agent'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { agentDir, sessionsDir, authFilePath } from './app-paths.js'
@@ -47,21 +47,21 @@ interface CliFlags {
   web?: boolean
   webPath?: string
 
-  /** Set by `gsd sessions` when the user picks a specific session to resume */
+  /** Set by `sdd sessions` when the user picks a specific session to resume */
   _selectedSessionPath?: string
 }
 
 function exitIfManagedResourcesAreNewer(currentAgentDir: string): void {
-  const currentVersion = process.env.GSD_VERSION || '0.0.0'
+  const currentVersion = process.env.SDD_VERSION || '0.0.0'
   const managedVersion = getNewerManagedResourceVersion(currentAgentDir, currentVersion)
   if (!managedVersion) {
     return
   }
 
   process.stderr.write(
-    `[gsd] ${chalk.yellow('Version mismatch detected')}\n` +
-    `[gsd] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`gsd\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
-    `[gsd] Run ${chalk.bold('npm install -g gsd-pi@latest')} or ${chalk.bold('gsd update')}, then try again.\n`,
+    `[sdd] ${chalk.yellow('Version mismatch detected')}\n` +
+    `[sdd] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`sdd\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
+    `[sdd] Run ${chalk.bold('npm install -g sdd-pi@latest')} or ${chalk.bold('sdd update')}, then try again.\n`,
   )
   process.exit(1)
 }
@@ -91,7 +91,7 @@ function parseCliArgs(argv: string[]): CliFlags {
     } else if (arg === '--list-models') {
       flags.listModels = (i + 1 < args.length && !args[i + 1].startsWith('-')) ? args[++i] : true
     } else if (arg === '--version' || arg === '-v') {
-      process.stdout.write((process.env.GSD_VERSION || '0.0.0') + '\n')
+      process.stdout.write((process.env.SDD_VERSION || '0.0.0') + '\n')
       process.exit(0)
     } else if (arg === '--worktree' || arg === '-w') {
       // -w with no value → auto-generate name; -w <name> → use that name
@@ -101,7 +101,7 @@ function parseCliArgs(argv: string[]): CliFlags {
         flags.worktree = true
       }
     } else if (arg === '--help' || arg === '-h') {
-      printHelp(process.env.GSD_VERSION || '0.0.0')
+      printHelp(process.env.SDD_VERSION || '0.0.0')
       process.exit(0)
     } else if (arg === '--web') {
       flags.web = true
@@ -127,24 +127,24 @@ exitIfManagedResourcesAreNewer(agentDir)
 // handles that prevent process.exit() from completing promptly.
 const hasSubcommand = cliFlags.messages.length > 0
 if (!process.stdin.isTTY && !isPrintMode && !hasSubcommand && !cliFlags.listModels && !cliFlags.web) {
-  process.stderr.write('[gsd] Error: Interactive mode requires a terminal (TTY).\n')
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
+  process.stderr.write('[sdd] Error: Interactive mode requires a terminal (TTY).\n')
+  process.stderr.write('[sdd] Non-interactive alternatives:\n')
+  process.stderr.write('[sdd]   sdd --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[sdd]   sdd --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode text "message"      Text output mode\n')
   process.exit(1)
 }
 
-// `gsd <subcommand> --help` — show subcommand-specific help
+// `sdd <subcommand> --help` — show subcommand-specific help
 const subcommand = cliFlags.messages[0]
 if (subcommand && process.argv.includes('--help')) {
-  if (printSubcommandHelp(subcommand, process.env.GSD_VERSION || '0.0.0')) {
+  if (printSubcommandHelp(subcommand, process.env.SDD_VERSION || '0.0.0')) {
     process.exit(0)
   }
 }
 
-// `gsd config` — replay the setup wizard and exit
+// `sdd config` — replay the setup wizard and exit
 if (cliFlags.messages[0] === 'config') {
   const authStorage = AuthStorage.create(authFilePath)
   loadStoredEnvKeys(authStorage)
@@ -152,14 +152,14 @@ if (cliFlags.messages[0] === 'config') {
   process.exit(0)
 }
 
-// `gsd update` — update to the latest version via npm
+// `sdd update` — update to the latest version via npm
 if (cliFlags.messages[0] === 'update') {
   const { runUpdate } = await import('./update-cmd.js')
   await runUpdate()
   process.exit(0)
 }
 
-// `gsd web stop [path|all]` — stop web server before anything else
+// `sdd web stop [path|all]` — stop web server before anything else
 if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   const webFlags = parseWebCliArgs(process.argv)
   const webBranch = await runWebCliBranch(webFlags, {
@@ -173,7 +173,7 @@ if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   }
 }
 
-// `gsd --web [path]` or `gsd web [start] [path]` — launch browser-only web mode
+// `sdd --web [path]` or `sdd web [start] [path]` — launch browser-only web mode
 if (cliFlags.web || (cliFlags.messages[0] === 'web' && cliFlags.messages[1] !== 'stop')) {
   const webFlags = parseWebCliArgs(process.argv)
   const webBranch = await runWebCliBranch(webFlags, {
@@ -187,7 +187,7 @@ if (cliFlags.web || (cliFlags.messages[0] === 'web' && cliFlags.messages[1] !== 
 }
 
 
-// `gsd sessions` — list past sessions and pick one to resume
+// `sdd sessions` — list past sessions and pick one to resume
 if (cliFlags.messages[0] === 'sessions') {
   const cwd = process.cwd()
   const safePath = `--${cwd.replace(/^[/\\]/, '').replace(/[/\\:]/g, '-')}--`
@@ -244,7 +244,7 @@ if (cliFlags.messages[0] === 'sessions') {
   cliFlags._selectedSessionPath = selected.path
 }
 
-// `gsd headless` — run auto-mode without TUI
+// `sdd headless` — run auto-mode without TUI
 if (cliFlags.messages[0] === 'headless') {
   const { runHeadless, parseHeadlessArgs } = await import('./headless.js')
   await runHeadless(parseHeadlessArgs(process.argv))
@@ -295,7 +295,7 @@ if (!isPrintMode) {
 // Warn if terminal is too narrow for readable output
 if (!isPrintMode && process.stdout.columns && process.stdout.columns < 40) {
   process.stderr.write(
-    chalk.yellow(`[gsd] Terminal width is ${process.stdout.columns} columns (minimum recommended: 40). Output may be unreadable.\n`),
+    chalk.yellow(`[sdd] Terminal width is ${process.stdout.columns} columns (minimum recommended: 40). Output may be unreadable.\n`),
   )
 }
 
@@ -378,7 +378,7 @@ if (settingsManager.getDefaultThinkingLevel() !== 'off' && !configuredExists) {
   settingsManager.setDefaultThinkingLevel('off')
 }
 
-// GSD always uses quiet startup — the gsd extension renders its own branded header
+// SDD always uses quiet startup — the sdd extension renders its own branded header
 if (!settingsManager.getQuietStartup()) {
   settingsManager.setQuietStartup(true)
 }
@@ -432,7 +432,7 @@ if (isPrintMode) {
       // Downgrade conflicts with built-in tools to warnings (#1347)
       const isSuperseded = err.error.includes("supersedes");
       const prefix = isSuperseded ? "Extension conflict" : "Extension load error";
-      process.stderr.write(`[gsd] ${prefix}: ${err.error}\n`)
+      process.stderr.write(`[sdd] ${prefix}: ${err.error}\n`)
     }
   }
 
@@ -460,7 +460,7 @@ if (isPrintMode) {
     const { startMcpServer } = await import('./mcp-server.js')
     await startMcpServer({
       tools: session.agent.state.tools ?? [],
-      version: process.env.GSD_VERSION || '0.0.0',
+      version: process.env.SDD_VERSION || '0.0.0',
     })
     // MCP server runs until the transport closes; keep alive
     await new Promise(() => {})
@@ -475,7 +475,7 @@ if (isPrintMode) {
 }
 
 // ---------------------------------------------------------------------------
-// Worktree subcommand — `gsd worktree <list|merge|clean|remove>`
+// Worktree subcommand — `sdd worktree <list|merge|clean|remove>`
 // ---------------------------------------------------------------------------
 if (cliFlags.messages[0] === 'worktree' || cliFlags.messages[0] === 'wt') {
   const { handleList, handleMerge, handleClean, handleRemove } = await import('./worktree-cli.js')
@@ -525,7 +525,7 @@ const cwd = process.cwd()
 const projectSessionsDir = getProjectSessionsDir(cwd)
 
 // Migrate legacy flat sessions: before per-directory scoping, all .jsonl session
-// files lived directly in ~/.gsd/sessions/. Move them into the correct per-cwd
+// files lived directly in ~/.sdd/sessions/. Move them into the correct per-cwd
 // subdirectory so /resume can find them.
 migrateLegacyFlatSessions(sessionsDir, projectSessionsDir)
 
@@ -555,7 +555,7 @@ if (extensionsResult.errors.length > 0) {
   for (const err of extensionsResult.errors) {
     const isSuperseded = err.error.includes("supersedes");
     const prefix = isSuperseded ? "Extension conflict" : "Extension load error";
-    process.stderr.write(`[gsd] ${prefix}: ${err.error}\n`)
+    process.stderr.write(`[sdd] ${prefix}: ${err.error}\n`)
   }
 }
 
@@ -603,13 +603,13 @@ if (enabledModelPatterns && enabledModelPatterns.length > 0) {
 }
 
 if (!process.stdin.isTTY) {
-  process.stderr.write('[gsd] Error: Interactive mode requires a terminal (TTY).\n')
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --web [path]               Browser-only web mode\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
+  process.stderr.write('[sdd] Error: Interactive mode requires a terminal (TTY).\n')
+  process.stderr.write('[sdd] Non-interactive alternatives:\n')
+  process.stderr.write('[sdd]   sdd --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[sdd]   sdd --web [path]               Browser-only web mode\n')
+  process.stderr.write('[sdd]   sdd --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode text "message"      Text output mode\n')
   process.exit(1)
 }
 
@@ -617,7 +617,7 @@ if (!process.stdin.isTTY) {
 {
   const { printWelcomeScreen } = await import('./welcome-screen.js')
   printWelcomeScreen({
-    version: process.env.GSD_VERSION || '0.0.0',
+    version: process.env.SDD_VERSION || '0.0.0',
     modelName: settingsManager.getDefaultModel() || undefined,
     provider: settingsManager.getDefaultProvider() || undefined,
   })

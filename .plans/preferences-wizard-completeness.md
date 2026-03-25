@@ -1,7 +1,7 @@
 # Preferences Wizard Completeness
 
 ## Problem
-The `/gsd prefs wizard` currently only configures 6 of 18+ preference fields. Users must hand-edit YAML for the rest.
+The `/sdd prefs wizard` currently only configures 6 of 18+ preference fields. Users must hand-edit YAML for the rest.
 
 ## Current Wizard Coverage
 1. Models (per phase) ✓

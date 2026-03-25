@@ -2,25 +2,25 @@
 
 ## Problem Statement
 
-GSD has solid API key infrastructure (AuthStorage, OAuth flows, rate-limit backoff, multi-key rotation) but lacks a user-facing CLI for day-to-day key management. Users currently must either:
+SDD has solid API key infrastructure (AuthStorage, OAuth flows, rate-limit backoff, multi-key rotation) but lacks a user-facing CLI for day-to-day key management. Users currently must either:
 - Run the full onboarding wizard to add keys
-- Manually edit `~/.gsd/agent/auth.json`
-- Use the limited `/gsd setup keys` flow (only covers 5 tool keys, no LLM keys)
+- Manually edit `~/.sdd/agent/auth.json`
+- Use the limited `/sdd setup keys` flow (only covers 5 tool keys, no LLM keys)
 
 There's no way to list, test, remove, or inspect key health from the CLI.
 
 ## Scope
 
-Build `/gsd keys` — a comprehensive API key management command with subcommands:
+Build `/sdd keys` — a comprehensive API key management command with subcommands:
 
 ```
-/gsd keys                    → Show key status dashboard
-/gsd keys list               → List all configured keys with status
-/gsd keys add <provider>     → Add/replace a key for a provider
-/gsd keys remove <provider>  → Remove a key for a provider
-/gsd keys test [provider]    → Validate key(s) by making a lightweight API call
-/gsd keys rotate <provider>  → Remove old key and prompt for new one
-/gsd keys doctor             → Health check all keys (expired OAuth, empty keys, backoff state)
+/sdd keys                    → Show key status dashboard
+/sdd keys list               → List all configured keys with status
+/sdd keys add <provider>     → Add/replace a key for a provider
+/sdd keys remove <provider>  → Remove a key for a provider
+/sdd keys test [provider]    → Validate key(s) by making a lightweight API call
+/sdd keys rotate <provider>  → Remove old key and prompt for new one
+/sdd keys doctor             → Health check all keys (expired OAuth, empty keys, backoff state)
 ```
 
 ## Architecture
@@ -29,27 +29,27 @@ Build `/gsd keys` — a comprehensive API key management command with subcommand
 
 | File | Purpose |
 |------|---------|
-| `src/resources/extensions/gsd/key-manager.ts` | Core key manager logic (list, add, remove, test, rotate, doctor) |
-| `src/resources/extensions/gsd/tests/key-manager.test.ts` | Unit tests |
+| `src/resources/extensions/sdd/key-manager.ts` | Core key manager logic (list, add, remove, test, rotate, doctor) |
+| `src/resources/extensions/sdd/tests/key-manager.test.ts` | Unit tests |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `src/resources/extensions/gsd/commands.ts` | Add `/gsd keys` subcommand routing + completions |
+| `src/resources/extensions/sdd/commands.ts` | Add `/sdd keys` subcommand routing + completions |
 
 ### No changes to core packages
 
-All work stays in the GSD extension layer. We use `AuthStorage` as-is — no modifications to `pi-coding-agent` or `pi-ai`.
+All work stays in the SDD extension layer. We use `AuthStorage` as-is — no modifications to `pi-coding-agent` or `pi-ai`.
 
 ---
 
-## Phase 1: Key Status Dashboard (`/gsd keys` and `/gsd keys list`)
+## Phase 1: Key Status Dashboard (`/sdd keys` and `/sdd keys list`)
 
 ### What it shows
 
 ```
-GSD API Key Manager
+SDD API Key Manager
 
   LLM Providers
   ✓ anthropic        — OAuth (expires in 23h 41m)
@@ -71,7 +71,7 @@ GSD API Key Manager
   Search Providers
   ✓ tavily           — API key (tvly-...x92k)
 
-  Source: ~/.gsd/agent/auth.json
+  Source: ~/.sdd/agent/auth.json
   3 keys configured | 2 from env vars | 1 OAuth token
 ```
 
@@ -87,7 +87,7 @@ GSD API Key Manager
 
 ---
 
-## Phase 2: Add Key (`/gsd keys add <provider>`)
+## Phase 2: Add Key (`/sdd keys add <provider>`)
 
 ### Flow
 
@@ -120,7 +120,7 @@ interface ProviderInfo {
 
 ---
 
-## Phase 3: Remove Key (`/gsd keys remove <provider>`)
+## Phase 3: Remove Key (`/sdd keys remove <provider>`)
 
 ### Flow
 
@@ -143,7 +143,7 @@ Remove: all | specific index?
 
 ---
 
-## Phase 4: Test Key (`/gsd keys test [provider]`)
+## Phase 4: Test Key (`/sdd keys test [provider]`)
 
 ### Validation Strategy
 
@@ -188,21 +188,21 @@ Testing API keys...
 
 ---
 
-## Phase 5: Rotate Key (`/gsd keys rotate <provider>`)
+## Phase 5: Rotate Key (`/sdd keys rotate <provider>`)
 
 ### Flow
 
 1. Show current key (masked)
 2. Prompt for new key
 3. Validate prefix format
-4. Optionally test the new key before saving (`/gsd keys test` logic)
+4. Optionally test the new key before saving (`/sdd keys test` logic)
 5. Replace in auth.json
 6. Update process.env
 7. Confirm
 
 ---
 
-## Phase 6: Key Doctor (`/gsd keys doctor`)
+## Phase 6: Key Doctor (`/sdd keys doctor`)
 
 ### Checks
 
@@ -220,7 +220,7 @@ Testing API keys...
 API Key Health Check
 
   ⚠ anthropic: OAuth token expires in 4m — will auto-refresh
-  ✗ groq: empty key stored (from skipped setup) — run /gsd keys add groq
+  ✗ groq: empty key stored (from skipped setup) — run /sdd keys add groq
   ⚠ openai: env var OPENAI_API_KEY differs from auth.json — env takes priority
   ✗ auth.json permissions: 0644 (should be 0600) — fixing...
   ✓ No duplicate keys found
@@ -235,7 +235,7 @@ API Key Health Check
 
 ### Command Registration (commands.ts)
 
-Add to the `/gsd` subcommand router:
+Add to the `/sdd` subcommand router:
 ```typescript
 if (trimmed === "keys" || trimmed.startsWith("keys ")) {
   const keysArgs = trimmed.replace(/^keys\s*/, "").trim();
@@ -251,7 +251,7 @@ if (parts[0] === "keys" && parts.length <= 2) {
 }
 ```
 
-### Redirect `/gsd setup keys`
+### Redirect `/sdd setup keys`
 
 Update `handleSetup` to route `keys` to the new handler instead of `handleConfig`.
 

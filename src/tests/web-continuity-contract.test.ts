@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-// ─── Constants mirrored from gsd-workspace-store.tsx ─────────────────
+// ─── Constants mirrored from sdd-workspace-store.tsx ─────────────────
 // These MUST match the exported values in the store. The final test
 // case verifies the store's actual exported values if the runtime
 // supports .tsx imports; otherwise we trust these mirrors.
@@ -10,7 +10,7 @@ const COMMAND_TIMEOUT_MS = 90_000;
 const VISIBILITY_REFRESH_THRESHOLD_MS = 30_000;
 
 // ---------------------------------------------------------------------------
-// Inline routing harness — mirrors GSDWorkspaceStore logic for the
+// Inline routing harness — mirrors SDDWorkspaceStore logic for the
 // four continuity/safety mechanisms under test.
 // ---------------------------------------------------------------------------
 

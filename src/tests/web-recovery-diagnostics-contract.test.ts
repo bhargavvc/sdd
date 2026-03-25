@@ -102,10 +102,10 @@ function readyOnboardingState(overrides: Record<string, unknown> = {}) {
 }
 
 function makeRecoveryFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-recovery-contract-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-recovery-contract-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001")
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001")
   const sliceDir = join(milestoneDir, "slices", "S01")
   const tasksDir = join(sliceDir, "tasks")
 
@@ -150,7 +150,7 @@ function makeRecoveryFixture(): { projectCwd: string; sessionsDir: string; clean
 }
 
 function makeEmptyProjectFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-recovery-empty-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-recovery-empty-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
   mkdirSync(projectCwd, { recursive: true })
@@ -229,9 +229,9 @@ test("/api/recovery returns structured recovery diagnostics and redacts secrets"
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState({
@@ -268,7 +268,7 @@ test("/api/recovery returns structured recovery diagnostics and redacts secrets"
       payload.actions.browser.map((action: { id: string }) => action.id),
       ["refresh_diagnostics", "refresh_workspace", "open_retry_controls", "open_resume_controls", "open_auth_controls"],
     )
-    assert.ok(payload.actions.commands.some((entry: { command: string }) => entry.command.includes("/gsd doctor")))
+    assert.ok(payload.actions.commands.some((entry: { command: string }) => entry.command.includes("/sdd doctor")))
 
     const serialized = JSON.stringify(payload)
     assert.doesNotMatch(serialized, /sk-test-recovery-secret-9999|sk-onboarding-secret-1234/)
@@ -300,9 +300,9 @@ test("/api/recovery prefers the current-project resumable session when the live 
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState(),
@@ -351,9 +351,9 @@ test("/api/recovery returns a structured empty-project payload without leaking r
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState(),

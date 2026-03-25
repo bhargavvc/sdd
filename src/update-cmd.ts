@@ -1,10 +1,10 @@
 import { execSync } from 'node:child_process'
 import { compareSemver } from './update-check.js'
 
-const NPM_PACKAGE = 'gsd-pi'
+const NPM_PACKAGE = 'sdd-pi'
 
 export async function runUpdate(): Promise<void> {
-  const current = process.env.GSD_VERSION || '0.0.0'
+  const current = process.env.SDD_VERSION || '0.0.0'
   const bold = '\x1b[1m'
   const dim = '\x1b[2m'
   const green = '\x1b[32m'

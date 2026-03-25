@@ -15,7 +15,7 @@
  * appended as a `?_token=` query parameter instead.
  */
 
-const SESSION_STORAGE_KEY = "gsd-auth-token"
+const SESSION_STORAGE_KEY = "sdd-auth-token"
 
 let cachedToken: string | null = null
 
@@ -30,7 +30,7 @@ export function getAuthToken(): string | null {
 
   if (typeof window === "undefined") return null
 
-  // 1. Try the URL fragment (initial page load from gsd --web)
+  // 1. Try the URL fragment (initial page load from sdd --web)
   const hash = window.location.hash
   if (hash) {
     const match = hash.match(/token=([a-fA-F0-9]+)/)

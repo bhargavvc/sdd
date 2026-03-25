@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic"
 
-const GSDAppShell = dynamic(
-  () => import("@/components/gsd/app-shell").then((mod) => mod.GSDAppShell),
+const SDDAppShell = dynamic(
+  () => import("@/components/sdd/app-shell").then((mod) => mod.SDDAppShell),
   {
     ssr: false,
     loading: () => (
@@ -15,5 +15,5 @@ const GSDAppShell = dynamic(
 )
 
 export default function Page() {
-  return <GSDAppShell />
+  return <SDDAppShell />
 }

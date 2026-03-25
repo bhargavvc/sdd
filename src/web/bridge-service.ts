@@ -37,7 +37,7 @@ import {
   collectAuthoritativeAutoDashboardData,
   collectTestOnlyFallbackAutoDashboardData,
 } from "./auto-dashboard-service.ts";
-import { resolveGsdCliEntry } from "./cli-entry.ts";
+import { resolveSddCliEntry } from "./cli-entry.ts";
 
 const DEFAULT_PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const RESPONSE_TIMEOUT_MS = 30_000;
@@ -427,7 +427,7 @@ export interface BootResumableSession {
   isActive: boolean;
 }
 
-export interface GSDWorkspaceTaskTarget {
+export interface SDDWorkspaceTaskTarget {
   id: string;
   title: string;
   done: boolean;
@@ -435,7 +435,7 @@ export interface GSDWorkspaceTaskTarget {
   summaryPath?: string;
 }
 
-export interface GSDWorkspaceSliceTarget {
+export interface SDDWorkspaceSliceTarget {
   id: string;
   title: string;
   done: boolean;
@@ -444,45 +444,45 @@ export interface GSDWorkspaceSliceTarget {
   uatPath?: string;
   tasksDir?: string;
   branch?: string;
-  tasks: GSDWorkspaceTaskTarget[];
+  tasks: SDDWorkspaceTaskTarget[];
 }
 
-export interface GSDWorkspaceMilestoneTarget {
+export interface SDDWorkspaceMilestoneTarget {
   id: string;
   title: string;
   roadmapPath?: string;
-  slices: GSDWorkspaceSliceTarget[];
+  slices: SDDWorkspaceSliceTarget[];
 }
 
-export interface GSDWorkspaceScopeTarget {
+export interface SDDWorkspaceScopeTarget {
   scope: string;
   label: string;
   kind: "project" | "milestone" | "slice" | "task";
 }
 
-export interface GSDWorkspaceIndex {
-  milestones: GSDWorkspaceMilestoneTarget[];
+export interface SDDWorkspaceIndex {
+  milestones: SDDWorkspaceMilestoneTarget[];
   active: {
     milestoneId?: string;
     sliceId?: string;
     taskId?: string;
     phase: string;
   };
-  scopes: GSDWorkspaceScopeTarget[];
+  scopes: SDDWorkspaceScopeTarget[];
   validationIssues: Array<Record<string, unknown>>;
 }
 
 // ─── Project Detection ──────────────────────────────────────────────────────
 
 export type ProjectDetectionKind =
-  | "active-gsd"    // .gsd with milestones — normal operation
-  | "empty-gsd"     // .gsd exists but no milestones (freshly bootstrapped)
-  | "v1-legacy"     // .planning/ exists, no .gsd
-  | "brownfield"    // existing code (git, package.json, files) but no .gsd
+  | "active-sdd"    // .sdd with milestones — normal operation
+  | "empty-sdd"     // .sdd exists but no milestones (freshly bootstrapped)
+  | "v1-legacy"     // .planning/ exists, no .sdd
+  | "brownfield"    // existing code (git, package.json, files) but no .sdd
   | "blank";        // empty/near-empty folder
 
 export interface ProjectDetectionSignals {
-  hasGsdFolder: boolean;
+  hasSddFolder: boolean;
   hasPlanningFolder: boolean;
   hasGitRepo: boolean;
   hasPackageJson: boolean;
@@ -500,7 +500,7 @@ export interface ProjectDetection {
 export function detectProjectKind(projectCwd: string): ProjectDetection {
   const checkExists = getBridgeDeps().existsSync ?? existsSync;
 
-  const hasGsdFolder = checkExists(join(projectCwd, ".gsd"));
+  const hasSddFolder = checkExists(join(projectCwd, ".sdd"));
   const hasPlanningFolder = checkExists(join(projectCwd, ".planning"));
   const hasGitRepo = checkExists(join(projectCwd, ".git"));
   const hasPackageJson = checkExists(join(projectCwd, "package.json"));
@@ -518,7 +518,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
   }
 
   const signals: ProjectDetectionSignals = {
-    hasGsdFolder,
+    hasSddFolder,
     hasPlanningFolder,
     hasGitRepo,
     hasPackageJson,
@@ -530,9 +530,9 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
 
   let kind: ProjectDetectionKind;
 
-  if (hasGsdFolder) {
+  if (hasSddFolder) {
     // Check if milestones exist
-    const milestonesDir = join(projectCwd, ".gsd", "milestones");
+    const milestonesDir = join(projectCwd, ".sdd", "milestones");
     let hasMilestones = false;
     try {
       const dirs = readdirSync(milestonesDir, { withFileTypes: true });
@@ -540,7 +540,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
     } catch {
       // No milestones dir or can't read it
     }
-    kind = hasMilestones ? "active-gsd" : "empty-gsd";
+    kind = hasMilestones ? "active-sdd" : "empty-sdd";
   } else if (hasPlanningFolder) {
     kind = "v1-legacy";
   } else if (hasPackageJson || hasCargo || hasGoMod || hasPyproject || fileCount > 2 || (hasGitRepo && fileCount > 0)) {
@@ -560,7 +560,7 @@ export interface BridgeBootPayload {
     sessionsDir: string;
     packageRoot: string;
   };
-  workspace: GSDWorkspaceIndex;
+  workspace: SDDWorkspaceIndex;
   auto: AutoDashboardData;
   onboarding: OnboardingState;
   onboardingNeeded: boolean;
@@ -626,7 +626,7 @@ interface BridgeServiceDeps {
   existsSync?: (path: string) => boolean;
   execPath?: string;
   env?: NodeJS.ProcessEnv;
-  indexWorkspace?: (basePath: string) => Promise<GSDWorkspaceIndex>;
+  indexWorkspace?: (basePath: string) => Promise<SDDWorkspaceIndex>;
   getAutoDashboardData?: () => AutoDashboardData | Promise<AutoDashboardData>;
   listSessions?: (projectSessionsDir: string) => Promise<LocalSessionInfo[]>;
   getOnboardingState?: () => OnboardingState | Promise<OnboardingState>;
@@ -634,9 +634,9 @@ interface BridgeServiceDeps {
 }
 
 type WorkspaceIndexCacheEntry = {
-  value: GSDWorkspaceIndex | null;
+  value: SDDWorkspaceIndex | null;
   expiresAt: number;
-  promise: Promise<GSDWorkspaceIndex> | null;
+  promise: Promise<SDDWorkspaceIndex> | null;
 };
 
 const defaultBridgeServiceDeps: BridgeServiceDeps = {
@@ -672,8 +672,8 @@ async function loadSessionBrowserSessionsViaChildProcess(config: BridgeRuntimeCo
 
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const mod = await import(pathToFileURL(process.env.GSD_SESSION_MANAGER_MODULE).href);',
-    'const sessions = await mod.SessionManager.list(process.env.GSD_SESSION_BROWSER_CWD, process.env.GSD_SESSION_BROWSER_DIR);',
+    'const mod = await import(pathToFileURL(process.env.SDD_SESSION_MANAGER_MODULE).href);',
+    'const sessions = await mod.SessionManager.list(process.env.SDD_SESSION_BROWSER_CWD, process.env.SDD_SESSION_BROWSER_DIR);',
     'process.stdout.write(JSON.stringify(sessions.map((session) => ({ ...session, created: session.created.toISOString(), modified: session.modified.toISOString() }))));',
   ].join(" ");
 
@@ -685,9 +685,9 @@ async function loadSessionBrowserSessionsViaChildProcess(config: BridgeRuntimeCo
         cwd: config.packageRoot,
         env: {
           ...(deps.env ?? process.env),
-          GSD_SESSION_MANAGER_MODULE: sessionManagerModulePath,
-          GSD_SESSION_BROWSER_CWD: config.projectCwd,
-          GSD_SESSION_BROWSER_DIR: config.projectSessionsDir,
+          SDD_SESSION_MANAGER_MODULE: sessionManagerModulePath,
+          SDD_SESSION_BROWSER_CWD: config.projectCwd,
+          SDD_SESSION_BROWSER_DIR: config.projectSessionsDir,
         },
         maxBuffer: 1024 * 1024,
       },
@@ -732,9 +732,9 @@ async function appendSessionInfoViaChildProcess(
 
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const mod = await import(pathToFileURL(process.env.GSD_SESSION_MANAGER_MODULE).href);',
-    'const manager = mod.SessionManager.open(process.env.GSD_TARGET_SESSION_PATH, process.env.GSD_SESSION_BROWSER_DIR);',
-    'manager.appendSessionInfo(process.env.GSD_TARGET_SESSION_NAME);',
+    'const mod = await import(pathToFileURL(process.env.SDD_SESSION_MANAGER_MODULE).href);',
+    'const manager = mod.SessionManager.open(process.env.SDD_TARGET_SESSION_PATH, process.env.SDD_SESSION_BROWSER_DIR);',
+    'manager.appendSessionInfo(process.env.SDD_TARGET_SESSION_NAME);',
   ].join(" ");
 
   await new Promise<void>((resolveResult, reject) => {
@@ -745,10 +745,10 @@ async function appendSessionInfoViaChildProcess(
         cwd: config.packageRoot,
         env: {
           ...(deps.env ?? process.env),
-          GSD_SESSION_MANAGER_MODULE: sessionManagerModulePath,
-          GSD_SESSION_BROWSER_DIR: config.projectSessionsDir,
-          GSD_TARGET_SESSION_PATH: sessionPath,
-          GSD_TARGET_SESSION_NAME: name,
+          SDD_SESSION_MANAGER_MODULE: sessionManagerModulePath,
+          SDD_SESSION_BROWSER_DIR: config.projectSessionsDir,
+          SDD_TARGET_SESSION_PATH: sessionPath,
+          SDD_TARGET_SESSION_NAME: name,
         },
         maxBuffer: 1024 * 1024,
       },
@@ -852,7 +852,7 @@ function getBridgeDeps(): BridgeServiceDeps {
   return { ...defaultBridgeServiceDeps, ...(bridgeServiceOverrides ?? {}) };
 }
 
-function cloneWorkspaceIndex(index: GSDWorkspaceIndex): GSDWorkspaceIndex {
+function cloneWorkspaceIndex(index: SDDWorkspaceIndex): SDDWorkspaceIndex {
   return structuredClone(index);
 }
 
@@ -867,8 +867,8 @@ function invalidateWorkspaceIndexCache(basePath?: string): void {
 
 async function loadCachedWorkspaceIndex(
   basePath: string,
-  loader: () => Promise<GSDWorkspaceIndex>,
-): Promise<GSDWorkspaceIndex> {
+  loader: () => Promise<SDDWorkspaceIndex>,
+): Promise<SDDWorkspaceIndex> {
   const cached = workspaceIndexCache.get(basePath);
   const now = Date.now();
 
@@ -903,10 +903,10 @@ async function loadCachedWorkspaceIndex(
   return cloneWorkspaceIndex(await promise);
 }
 
-async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: string): Promise<GSDWorkspaceIndex> {
+async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: string): Promise<SDDWorkspaceIndex> {
   const deps = getBridgeDeps();
-  const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
-  const workspaceModulePath = join(packageRoot, "src", "resources", "extensions", "gsd", "workspace-index.ts");
+  const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs");
+  const workspaceModulePath = join(packageRoot, "src", "resources", "extensions", "sdd", "workspace-index.ts");
   const checkExists = deps.existsSync ?? existsSync;
   if (!checkExists(resolveTsLoader) || !checkExists(workspaceModulePath)) {
     throw new Error(`workspace index loader not found; checked=${resolveTsLoader},${workspaceModulePath}`);
@@ -914,12 +914,12 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
 
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const mod = await import(pathToFileURL(process.env.GSD_WORKSPACE_MODULE).href);',
-    'const result = await mod.indexWorkspace(process.env.GSD_WORKSPACE_BASE);',
+    'const mod = await import(pathToFileURL(process.env.SDD_WORKSPACE_MODULE).href);',
+    'const result = await mod.indexWorkspace(process.env.SDD_WORKSPACE_BASE);',
     'process.stdout.write(JSON.stringify(result));',
   ].join(' ');
 
-  return await new Promise<GSDWorkspaceIndex>((resolveResult, reject) => {
+  return await new Promise<SDDWorkspaceIndex>((resolveResult, reject) => {
     execFile(
       deps.execPath ?? process.execPath,
       [
@@ -934,8 +934,8 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
         cwd: packageRoot,
         env: {
           ...(deps.env ?? process.env),
-          GSD_WORKSPACE_MODULE: workspaceModulePath,
-          GSD_WORKSPACE_BASE: basePath,
+          SDD_WORKSPACE_MODULE: workspaceModulePath,
+          SDD_WORKSPACE_BASE: basePath,
         },
         maxBuffer: 1024 * 1024,
       },
@@ -946,7 +946,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
         }
 
         try {
-          resolveResult(JSON.parse(stdout) as GSDWorkspaceIndex);
+          resolveResult(JSON.parse(stdout) as SDDWorkspaceIndex);
         } catch (parseError) {
           reject(new Error(`workspace index subprocess returned invalid JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`));
         }
@@ -1039,24 +1039,24 @@ function listProjectSessions(projectSessionsDir: string): LocalSessionInfo[] {
   return sessions;
 }
 
-async function fallbackWorkspaceIndex(basePath: string): Promise<GSDWorkspaceIndex> {
+async function fallbackWorkspaceIndex(basePath: string): Promise<SDDWorkspaceIndex> {
   const packageRoot = resolveBridgeRuntimeConfig().packageRoot;
   return await loadWorkspaceIndexViaChildProcess(basePath, packageRoot);
 }
 
 export function resolveBridgeRuntimeConfig(env: NodeJS.ProcessEnv = getBridgeDeps().env ?? process.env, projectCwdOverride?: string): BridgeRuntimeConfig {
-  const projectCwd = projectCwdOverride || env.GSD_WEB_PROJECT_CWD || process.cwd();
-  const projectSessionsDir = env.GSD_WEB_PROJECT_SESSIONS_DIR || getProjectSessionsDir(projectCwd);
-  const packageRoot = env.GSD_WEB_PACKAGE_ROOT || DEFAULT_PACKAGE_ROOT;
+  const projectCwd = projectCwdOverride || env.SDD_WEB_PROJECT_CWD || process.cwd();
+  const projectSessionsDir = env.SDD_WEB_PROJECT_SESSIONS_DIR || getProjectSessionsDir(projectCwd);
+  const packageRoot = env.SDD_WEB_PACKAGE_ROOT || DEFAULT_PACKAGE_ROOT;
   return { projectCwd, projectSessionsDir, packageRoot };
 }
 
 function resolveBridgeCliEntry(config: BridgeRuntimeConfig, deps: BridgeServiceDeps): BridgeCliEntry {
-  return resolveGsdCliEntry({
+  return resolveSddCliEntry({
     packageRoot: config.packageRoot,
     cwd: config.projectCwd,
     execPath: deps.execPath ?? process.execPath,
-    hostKind: (deps.env ?? process.env).GSD_WEB_HOST_KIND,
+    hostKind: (deps.env ?? process.env).SDD_WEB_HOST_KIND,
     mode: "rpc",
     sessionDir: config.projectSessionsDir,
     existsSync: deps.existsSync ?? existsSync,
@@ -1517,8 +1517,8 @@ export class BridgeService {
 
     const spawnChild = this.deps.spawn ?? ((command, args, options) => spawn(command, args, options));
     const childEnv = { ...(this.deps.env ?? process.env) };
-    delete childEnv.GSD_CODING_AGENT_DIR;
-    childEnv.GSD_WEB_BRIDGE_TUI = "1";
+    delete childEnv.SDD_CODING_AGENT_DIR;
+    childEnv.SDD_WEB_BRIDGE_TUI = "1";
 
     const child = spawnChild(cliEntry.command, cliEntry.args, {
       cwd: cliEntry.cwd,
@@ -1768,7 +1768,7 @@ export function resolveProjectCwd(request: Request): string | null {
   } catch {
     // Malformed URL — fall through to env-based default.
   }
-  return (getBridgeDeps().env ?? process.env).GSD_WEB_PROJECT_CWD || null;
+  return (getBridgeDeps().env ?? process.env).SDD_WEB_PROJECT_CWD || null;
 }
 
 /**
@@ -2085,7 +2085,7 @@ export type BridgeSelectiveLiveStateDomain = "auto" | "workspace" | "resumable_s
 
 export interface BridgeSelectiveLiveStatePayload {
   auto?: AutoDashboardData;
-  workspace?: GSDWorkspaceIndex;
+  workspace?: SDDWorkspaceIndex;
   resumableSessions?: BootResumableSession[];
   bridge: BridgeRuntimeSnapshot;
 }
@@ -2141,7 +2141,7 @@ export async function collectBootPayload(projectCwd?: string): Promise<BridgeBoo
 
   const onboarding = await resolveBootOnboardingState(deps, env);
 
-  if (onboarding.locked && env.GSD_WEB_HOST_KIND === "packaged-standalone") {
+  if (onboarding.locked && env.SDD_WEB_HOST_KIND === "packaged-standalone") {
     return {
       project: {
         cwd: config.projectCwd,

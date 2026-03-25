@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process"
 import { compareSemver } from "../update-check.ts"
 
-const NPM_PACKAGE_NAME = "gsd-pi"
+const NPM_PACKAGE_NAME = "sdd-pi"
 const REGISTRY_URL = `https://registry.npmjs.org/${NPM_PACKAGE_NAME}/latest`
 const FETCH_TIMEOUT_MS = 5000
 
@@ -14,7 +14,7 @@ interface UpdateCheckResult {
 }
 
 export async function checkForUpdate(): Promise<UpdateCheckResult> {
-  const currentVersion = process.env.GSD_VERSION || "0.0.0"
+  const currentVersion = process.env.SDD_VERSION || "0.0.0"
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
@@ -58,7 +58,7 @@ export function getUpdateStatus(): UpdateState {
 }
 
 /**
- * Triggers an async global npm install of gsd-pi@latest.
+ * Triggers an async global npm install of sdd-pi@latest.
  * Returns `true` if the update was started, `false` if one is already running.
  * The child process runs in the background; poll `getUpdateStatus()` for progress.
  */
@@ -69,7 +69,7 @@ export function triggerUpdate(targetVersion?: string): boolean {
 
   updateState = { status: "running", targetVersion }
 
-  const child = spawn("npm", ["install", "-g", "gsd-pi@latest"], {
+  const child = spawn("npm", ["install", "-g", "sdd-pi@latest"], {
     stdio: ["ignore", "ignore", "pipe"],
     // Detach so the child process is not killed if the parent exits
     detached: false,

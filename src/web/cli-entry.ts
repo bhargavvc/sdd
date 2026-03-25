@@ -3,13 +3,13 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts";
 
-export interface GsdCliEntry {
+export interface SddCliEntry {
   command: string;
   args: string[];
   cwd: string;
 }
 
-export interface ResolveGsdCliEntryOptions {
+export interface ResolveSddCliEntryOptions {
   packageRoot: string;
   cwd: string;
   execPath?: string;
@@ -20,7 +20,7 @@ export interface ResolveGsdCliEntryOptions {
   existsSync?: (path: string) => boolean;
 }
 
-function buildExtraArgs(options: ResolveGsdCliEntryOptions): string[] {
+function buildExtraArgs(options: ResolveSddCliEntryOptions): string[] {
   if (options.mode !== "rpc") return [];
 
   if (!options.sessionDir) {
@@ -30,14 +30,14 @@ function buildExtraArgs(options: ResolveGsdCliEntryOptions): string[] {
   return ["--mode", "rpc", "--continue", "--session-dir", options.sessionDir];
 }
 
-export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEntry {
+export function resolveSddCliEntry(options: ResolveSddCliEntryOptions): SddCliEntry {
   const checkExists = options.existsSync ?? existsSync;
   const execPath = options.execPath ?? process.execPath;
   const extraArgs = buildExtraArgs(options);
   const messageArgs = options.mode === "interactive" ? options.messages ?? [] : [];
 
   const sourceEntry = join(options.packageRoot, "src", "loader.ts");
-  const resolveTsLoader = join(options.packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  const resolveTsLoader = join(options.packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs");
   const builtEntry = join(options.packageRoot, "dist", "loader.js");
 
   const sourceCliEntry =
@@ -53,7 +53,7 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
             ...messageArgs,
           ],
           cwd: options.cwd,
-        } satisfies GsdCliEntry
+        } satisfies SddCliEntry
       : null;
 
   const builtCliEntry = checkExists(builtEntry)
@@ -61,7 +61,7 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
         command: execPath,
         args: [builtEntry, ...extraArgs, ...messageArgs],
         cwd: options.cwd,
-      } satisfies GsdCliEntry
+      } satisfies SddCliEntry
     : null;
 
   if (options.hostKind === "packaged-standalone") {
@@ -72,5 +72,5 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
     if (builtCliEntry) return builtCliEntry;
   }
 
-  throw new Error(`GSD CLI entry not found; checked=${sourceEntry},${builtEntry}`);
+  throw new Error(`SDD CLI entry not found; checked=${sourceEntry},${builtEntry}`);
 }

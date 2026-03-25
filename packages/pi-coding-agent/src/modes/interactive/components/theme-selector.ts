@@ -1,4 +1,4 @@
-import { Container, type SelectItem, SelectList } from "@gsd/pi-tui";
+import { Container, type SelectItem, SelectList } from "@sdd/pi-tui";
 import { getAvailableThemes, getSelectListTheme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 

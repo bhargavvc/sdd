@@ -2,14 +2,14 @@
 /**
  * link-workspace-packages.cjs
  *
- * Creates node_modules/@gsd/* symlinks pointing to packages/* directories.
+ * Creates node_modules/@sdd/* symlinks pointing to packages/* directories.
  *
  * During development, npm workspaces creates these automatically. But in the
  * published tarball, workspace packages are shipped under packages/ (via the
- * "files" field) and the @gsd/* imports in compiled code need node_modules/@gsd/*
+ * "files" field) and the @sdd/* imports in compiled code need node_modules/@sdd/*
  * to resolve. This script bridges the gap.
  *
- * Runs as part of postinstall (before any ESM code that imports @gsd/*).
+ * Runs as part of postinstall (before any ESM code that imports @sdd/*).
  *
  * On Windows without Developer Mode or administrator rights, creating symlinks
  * (even NTFS junctions) can fail with EPERM. In that case we fall back to
@@ -20,7 +20,7 @@ const { resolve, join } = require('path')
 
 const root = resolve(__dirname, '..')
 const packagesDir = join(root, 'packages')
-const nodeModulesGsd = join(root, 'node_modules', '@gsd')
+const nodeModulesSdd = join(root, 'node_modules', '@sdd')
 
 // Map directory names to package names
 const packageMap = {
@@ -31,16 +31,16 @@ const packageMap = {
   'pi-tui': 'pi-tui',
 }
 
-// Ensure @gsd scope directory exists
-if (!existsSync(nodeModulesGsd)) {
-  mkdirSync(nodeModulesGsd, { recursive: true })
+// Ensure @sdd scope directory exists
+if (!existsSync(nodeModulesSdd)) {
+  mkdirSync(nodeModulesSdd, { recursive: true })
 }
 
 let linked = 0
 let copied = 0
 for (const [dir, name] of Object.entries(packageMap)) {
   const source = join(packagesDir, dir)
-  const target = join(nodeModulesGsd, name)
+  const target = join(nodeModulesSdd, name)
 
   if (!existsSync(source)) continue
 
@@ -50,7 +50,7 @@ for (const [dir, name] of Object.entries(packageMap)) {
       const stat = lstatSync(target)
       if (stat.isSymbolicLink()) {
         const linkTarget = readlinkSync(target)
-        if (resolve(join(nodeModulesGsd, linkTarget)) === source || linkTarget === source) {
+        if (resolve(join(nodeModulesSdd, linkTarget)) === source || linkTarget === source) {
           continue // Already correct
         }
         unlinkSync(target) // Wrong target, relink

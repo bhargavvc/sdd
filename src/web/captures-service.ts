@@ -8,14 +8,14 @@ import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts"
 import type { CapturesData, CaptureResolveRequest, CaptureResolveResult } from "../../web/lib/knowledge-captures-types.ts"
 
 const CAPTURES_MAX_BUFFER = 2 * 1024 * 1024
-const CAPTURES_MODULE_ENV = "GSD_CAPTURES_MODULE"
+const CAPTURES_MODULE_ENV = "SDD_CAPTURES_MODULE"
 
 function resolveCapturesModulePath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "captures.ts")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "captures.ts")
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -39,9 +39,9 @@ export async function collectCapturesData(projectCwdOverride?: string): Promise<
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${CAPTURES_MODULE_ENV}).href);`,
-    `const all = mod.loadAllCaptures(process.env.GSD_CAPTURES_BASE);`,
+    `const all = mod.loadAllCaptures(process.env.SDD_CAPTURES_BASE);`,
     'const pending = all.filter(c => c.status === "pending");',
-    `const actionable = mod.loadActionableCaptures(process.env.GSD_CAPTURES_BASE);`,
+    `const actionable = mod.loadActionableCaptures(process.env.SDD_CAPTURES_BASE);`,
     'const result = { entries: all, pendingCount: pending.length, actionableCount: actionable.length };',
     'process.stdout.write(JSON.stringify(result));',
   ].join(" ")
@@ -62,7 +62,7 @@ export async function collectCapturesData(projectCwdOverride?: string): Promise<
         env: {
           ...process.env,
           [CAPTURES_MODULE_ENV]: capturesModulePath,
-          GSD_CAPTURES_BASE: projectCwd,
+          SDD_CAPTURES_BASE: projectCwd,
         },
         maxBuffer: CAPTURES_MAX_BUFFER,
       },
@@ -111,7 +111,7 @@ export async function resolveCaptureAction(request: CaptureResolveRequest, proje
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${CAPTURES_MODULE_ENV}).href);`,
-    `mod.markCaptureResolved(process.env.GSD_CAPTURES_BASE, ${safeId}, ${safeClassification}, ${safeResolution}, ${safeRationale});`,
+    `mod.markCaptureResolved(process.env.SDD_CAPTURES_BASE, ${safeId}, ${safeClassification}, ${safeResolution}, ${safeRationale});`,
     `process.stdout.write(JSON.stringify({ ok: true, captureId: ${safeId} }));`,
   ].join(" ")
 
@@ -131,7 +131,7 @@ export async function resolveCaptureAction(request: CaptureResolveRequest, proje
         env: {
           ...process.env,
           [CAPTURES_MODULE_ENV]: capturesModulePath,
-          GSD_CAPTURES_BASE: projectCwd,
+          SDD_CAPTURES_BASE: projectCwd,
         },
         maxBuffer: CAPTURES_MAX_BUFFER,
       },
