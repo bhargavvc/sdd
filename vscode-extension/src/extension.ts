@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { SddClient, ThinkingLevel } from "./sdd-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
-import { GsdSidebarProvider } from "./sidebar.js";
+import { SddSidebarProvider } from "./sidebar.js";
 
 let client: SddClient | undefined;
-let sidebarProvider: GsdSidebarProvider | undefined;
+let sidebarProvider: SddSidebarProvider | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
@@ -20,15 +20,15 @@ function handleError(err: unknown, context: string): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-	const config = vscode.workspace.getConfiguration("gsd");
-	const binaryPath = config.get<string>("binaryPath", "gsd");
+	const config = vscode.workspace.getConfiguration("sdd");
+	const binaryPath = config.get<string>("binaryPath", "sdd");
 	const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
 	client = new SddClient(binaryPath, cwd);
 	context.subscriptions.push(client);
 
 	// Log stderr to an output channel
-	const outputChannel = vscode.window.createOutputChannel("GSD-2 Agent");
+	const outputChannel = vscode.window.createOutputChannel("SDD Agent");
 	context.subscriptions.push(outputChannel);
 
 	client.onError((msg) => {
@@ -37,18 +37,18 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	client.onConnectionChange((connected) => {
 		if (connected) {
-			vscode.window.setStatusBarMessage("$(hubot) GSD connected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) SDD connected", 3000);
 		} else {
-			vscode.window.setStatusBarMessage("$(hubot) GSD disconnected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) SDD disconnected", 3000);
 		}
 	});
 
 	// -- Sidebar -----------------------------------------------------------
 
-	sidebarProvider = new GsdSidebarProvider(context.extensionUri, client);
+	sidebarProvider = new SddSidebarProvider(context.extensionUri, client);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
-			GsdSidebarProvider.viewId,
+			SddSidebarProvider.viewId,
 			sidebarProvider,
 		),
 	);
@@ -65,7 +65,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			try {
 				await client!.start();
 				// Apply auto-compaction setting
-				const autoCompaction = vscode.workspace.getConfiguration("gsd").get<boolean>("autoCompaction", true);
+				const autoCompaction = vscode.workspace.getConfiguration("sdd").get<boolean>("autoCompaction", true);
 				await client!.setAutoCompaction(autoCompaction).catch(() => {});
 				sidebarProvider?.refresh();
 				vscode.window.showInformationMessage("SDD agent started.");
@@ -91,7 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			try {
 				await client!.newSession();
 				sidebarProvider?.refresh();
-				vscode.window.showInformationMessage("New GSD session started.");
+				vscode.window.showInformationMessage("New SDD session started.");
 			} catch (err) {
 				handleError(err, "Failed to start new session");
 			}
@@ -103,7 +103,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand("sdd.sendMessage", async () => {
 			if (!requireConnected()) return;
 			const message = await vscode.window.showInputBox({
-				prompt: "Enter message for GSD",
+				prompt: "Enter message for SDD",
 				placeHolder: "What should I do?",
 			});
 			if (!message) return;
@@ -234,7 +234,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				const saveUri = await vscode.window.showSaveDialog({
-					defaultUri: vscode.Uri.file("gsd-conversation.html"),
+					defaultUri: vscode.Uri.file("sdd-conversation.html"),
 					filters: { "HTML Files": ["html"] },
 				});
 				const outputPath = saveUri?.fsPath;

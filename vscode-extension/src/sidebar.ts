@@ -5,7 +5,7 @@ import type { SddClient, SessionStats, ThinkingLevel } from "./sdd-client.js";
  * WebviewViewProvider that renders a sidebar panel showing connection status,
  * model info, thinking level, token usage, cost, and quick action controls.
  */
-export class GsdSidebarProvider implements vscode.WebviewViewProvider {
+export class SddSidebarProvider implements vscode.WebviewViewProvider {
 	public static readonly viewId = "sdd-sidebar";
 
 	private view?: vscode.WebviewView;

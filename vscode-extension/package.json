@@ -3,7 +3,7 @@
   "displayName": "SDD",
   "description": "VS Code integration for the SDD coding agent — sidebar dashboard, @sdd chat participant, and 15 commands",
   "publisher": "bhargavvc",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "icon": "logo.png",
   "license": "MIT",
   "repository": {
