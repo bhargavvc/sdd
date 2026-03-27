@@ -4,8 +4,10 @@
 
 import {
 	type Api,
+	applyCapabilityPatches,
 	type AssistantMessageEventStream,
 	type Context,
+	getApiProvider,
 	getModels,
 	getProviders,
 	type KnownProvider,
@@ -233,7 +235,7 @@ export class ModelRegistry {
 
 	constructor(
 		readonly authStorage: AuthStorage,
-		private modelsJsonPath: string | undefined = join(getAgentDir(), "models.json"),
+		readonly modelsJsonPath: string | undefined = join(getAgentDir(), "models.json"),
 	) {
 		this.discoveryCache = new ModelDiscoveryCache();
 
@@ -303,7 +305,10 @@ export class ModelRegistry {
 			}
 		}
 
-		this.models = combined;
+		// Apply capability patches so custom/discovered/extension models get
+		// capabilities (supportsXhigh, supportsServiceTier, etc.) that the
+		// static pi-ai registry applies at module load for built-in models.
+		this.models = applyCapabilityPatches(combined);
 	}
 
 	/** Load built-in models and apply provider/model overrides */
@@ -635,11 +640,37 @@ export class ModelRegistry {
 					})
 				: rawStreamSimple;
 
+			// Guard: if there's already a handler registered for this API, wrap
+			// the new one so it only fires for models from this provider and
+			// delegates to the previous handler for all other providers. Without
+			// this, a custom provider using api:"anthropic-messages" would clobber
+			// the built-in Anthropic stream handler (#2536).
+			const existingProvider = getApiProvider(config.api as Api);
+			const scopedStream = existingProvider
+				? (model: Model<Api>, context: Context, options?: SimpleStreamOptions): AssistantMessageEventStream => {
+						if (model.provider === providerName) {
+							return streamSimple(model, context, options);
+						}
+						return existingProvider.streamSimple(model, context, options);
+					}
+				: streamSimple;
+
+			const newFullStream = (model: Model<Api>, context: Context, options?: SimpleStreamOptions) =>
+				scopedStream(model, context, options as SimpleStreamOptions);
+			const scopedFullStream = existingProvider
+				? (model: Model<Api>, context: Context, options?: Record<string, unknown>) => {
+						if (model.provider === providerName) {
+							return newFullStream(model, context, options as SimpleStreamOptions);
+						}
+						return existingProvider.stream(model, context, options);
+					}
+				: newFullStream;
+
 			registerApiProvider(
 				{
 					api: config.api,
-					stream: (model, context, options) => streamSimple(model, context, options as SimpleStreamOptions),
-					streamSimple,
+					stream: scopedFullStream as any,
+					streamSimple: scopedStream,
 				},
 				`provider:${providerName}`,
 			);
@@ -721,6 +752,9 @@ export class ModelRegistry {
 					this.models = config.oauth.modifyModels(this.models, cred);
 				}
 			}
+
+			// Ensure newly added extension models get capability patches
+			this.models = applyCapabilityPatches(this.models);
 		} else if (config.baseUrl) {
 			// Override-only: update baseUrl/headers for existing models
 			const resolvedHeaders = resolveHeaders(config.headers);
@@ -781,8 +815,8 @@ export class ModelRegistry {
 			}
 		}
 
-		// Convert and merge discovered models
-		this.discoveredModels = this.convertDiscoveredModels(results);
+		// Convert and merge discovered models, then apply capability patches
+		this.discoveredModels = applyCapabilityPatches(this.convertDiscoveredModels(results));
 		return results;
 	}
 

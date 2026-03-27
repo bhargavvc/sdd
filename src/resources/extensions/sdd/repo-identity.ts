@@ -127,8 +127,11 @@ export function isInheritedRepo(basePath: string): boolean {
     // (i.e. the parent project was initialised with GSD).
     if (isProjectGsd(join(root, ".gsd"))) return false;
 
-    // Also walk up from basePath to the git root checking for .gsd
-    let dir = normalizedBase;
+    // Walk up from basePath's parent to the git root checking for .gsd.
+    // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
+    // .gsd at basePath means GSD state is set up for THIS project, which
+    // says nothing about whether the git repo is inherited from an ancestor.
+    let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
       if (isProjectGsd(join(dir, ".gsd"))) return false;
       dir = dirname(dir);
@@ -373,6 +376,34 @@ export function ensureGsdSymlink(projectPath: string): string {
   const gsdHomePath = gsdHome.replaceAll("\\", "/");
   if (localGsdNormalized === gsdHomePath) {
     return localGsd;
+  }
+
+  // Guard: If projectPath is a plain subdirectory (not a worktree) of a git
+  // repo that already has a .gsd at the git root, do not create a duplicate
+  // symlink in the subdirectory — that causes `.gsd 2` collision variants on
+  // macOS (#2380). Worktrees are excluded because they legitimately need their
+  // own .gsd symlink pointing at the shared external state dir.
+  if (!inWorktree) {
+    try {
+      const gitRoot = resolveGitRoot(projectPath);
+      const normalizedProject = canonicalizeExistingPath(projectPath);
+      const normalizedRoot = canonicalizeExistingPath(gitRoot);
+      if (normalizedProject !== normalizedRoot) {
+        const rootGsd = join(gitRoot, ".gsd");
+        if (existsSync(rootGsd)) {
+          try {
+            const rootStat = lstatSync(rootGsd);
+            if (rootStat.isSymbolicLink() || rootStat.isDirectory()) {
+              return rootStat.isSymbolicLink() ? realpathSync(rootGsd) : rootGsd;
+            }
+          } catch {
+            // Fall through to normal logic if we can't stat root .gsd
+          }
+        }
+      }
+    } catch {
+      // If git root detection fails, fall through to normal logic
+    }
   }
 
   // Clean up macOS numbered collision variants (.gsd 2, .gsd 3, etc.) before

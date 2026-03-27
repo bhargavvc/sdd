@@ -53,7 +53,7 @@ git rebase origin/main
 SDD uses worktree-based isolation for multi-developer work. If you're contributing with GSD running, enable team mode in your project preferences:
 
 ```yaml
-# .sdd/preferences.md
+# .gsd/PREFERENCES.md
 ---
 version: 1
 mode: team

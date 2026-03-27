@@ -52,13 +52,13 @@ import {
   setActiveMilestoneId,
 } from "./worktree.js";
 import { getAutoWorktreePath, isInAutoWorktree } from "./auto-worktree.js";
-import { readResourceVersion } from "./auto-worktree-sync.js";
+import { readResourceVersion, cleanStaleRuntimeUnits } from "./auto-worktree.js";
 import { initMetrics } from "./metrics.js";
 import { initRoutingHistory } from "./routing-history.js";
 import { restoreHookState, resetHookState } from "./post-unit-hooks.js";
 import { resetProactiveHealing, setLevelChangeCallback } from "./doctor-proactive.js";
 import { snapshotSkills } from "./skill-discovery.js";
-import { isDbAvailable } from "./gsd-db.js";
+import { isDbAvailable, getMilestone } from "./gsd-db.js";
 import { hideFooter } from "./auto-dashboard.js";
 import {
   debugLog,
@@ -66,6 +66,8 @@ import {
   isDebugEnabled,
   getDebugLogPath,
 } from "./debug-logger.js";
+import { parseUnitId } from "./unit-id.js";
+import { setLogBasePath } from "./workflow-logger.js";
 import type { AutoSession } from "./auto/session.js";
 import {
   existsSync,
@@ -140,13 +142,14 @@ export async function bootstrapAutoSession(
       return releaseLockAndReturn();
     }
 
-    // Ensure git repo exists.
-    // Guard against inherited repos: if `base` is a subdirectory of another
-    // git repo that has no .gsd (i.e. the parent project was never initialised
-    // with GSD), create a fresh git repo at `base` so it gets its own identity
-    // hash. Without this, repoIdentity() resolves to the parent repo's hash
-    // and loads milestones from an unrelated project (#1639).
-    if (!nativeIsRepo(base) || isInheritedRepo(base)) {
+    // Ensure git repo exists *locally* at base.
+    // nativeIsRepo() uses `git rev-parse` which traverses up to parent dirs,
+    // so a parent repo can make it return true even when base has no .git of
+    // its own. Check for a local .git instead (defense-in-depth for the case
+    // where isInheritedRepo() returns a false negative, e.g. stale .gsd at
+    // the parent git root). See #2393 and related issue.
+    const hasLocalGit = existsSync(join(base, ".git"));
+    if (!hasLocalGit || isInheritedRepo(base)) {
       const mainBranch =
         loadEffectiveSDDPreferences()?.preferences?.git?.main_branch || "main";
       nativeInit(base, mainBranch);
@@ -199,7 +202,7 @@ export async function bootstrapAutoSession(
         );
         return releaseLockAndReturn();
       }
-      const recoveredMid = crashLock.unitId.split("/")[0];
+      const recoveredMid = parseUnitId(crashLock.unitId).milestone;
       const milestoneAlreadyComplete = recoveredMid
         ? !!resolveMilestoneFile(base, recoveredMid, "SUMMARY")
         : false;
@@ -257,31 +260,10 @@ export async function bootstrapAutoSession(
     invalidateAllCaches();
 
     // Clean stale runtime unit files for completed milestones (#887)
-    try {
-      const runtimeUnitsDir = join(gsdRoot(base), "runtime", "units");
-      if (existsSync(runtimeUnitsDir)) {
-        for (const file of readdirSync(runtimeUnitsDir)) {
-          if (!file.endsWith(".json")) continue;
-          const midMatch = file.match(/(M\d+(?:-[a-z0-9]{6})?)/);
-          if (!midMatch) continue;
-          const mid = midMatch[1];
-          if (resolveMilestoneFile(base, mid, "SUMMARY")) {
-            try {
-              unlinkSync(join(runtimeUnitsDir, file));
-            } catch (e) {
-              debugLog("stale-unit-cleanup-failed", {
-                file,
-                error: e instanceof Error ? e.message : String(e),
-              });
-            }
-          }
-        }
-      }
-    } catch (e) {
-      debugLog("stale-unit-dir-cleanup-failed", {
-        error: e instanceof Error ? e.message : String(e),
-      });
-    }
+    cleanStaleRuntimeUnits(
+      gsdRoot(base),
+      (mid) => !!resolveMilestoneFile(base, mid, "SUMMARY"),
+    );
 
     let state = await deriveState(base);
 
@@ -480,6 +462,7 @@ export async function bootstrapAutoSession(
     s.verbose = verboseMode;
     s.cmdCtx = ctx;
     s.basePath = base;
+    setLogBasePath(base);
     s.unitDispatchCount.clear();
     s.unitRecoveryCount.clear();
     s.lastBudgetAlertLevel = 0;
@@ -682,6 +665,12 @@ export async function bootstrapAutoSession(
         if (milestoneIds.length > 1) {
           const issues: string[] = [];
           for (const id of milestoneIds) {
+            // Skip completed/parked milestones — a leftover CONTEXT-DRAFT.md
+            // on a finished milestone is harmless residue, not an actionable warning.
+            if (isDbAvailable()) {
+              const ms = getMilestone(id);
+              if (ms?.status === "complete" || ms?.status === "parked") continue;
+            }
             const draft = resolveMilestoneFile(base, id, "CONTEXT-DRAFT");
             if (draft)
               issues.push(

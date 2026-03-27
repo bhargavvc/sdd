@@ -70,6 +70,8 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
     '  unitTraces,',
     '  completedKeyCount: (report.completedKeys || []).length,',
     '  metrics,',
+    '  journalSummary: report.journalSummary || null,',
+    '  activityLogMeta: report.activityLogMeta || null,',
     '};',
     'process.stdout.write(JSON.stringify(result));',
   ].join(" ")

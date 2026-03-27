@@ -37,6 +37,15 @@ import { writeUnitRuntimeRecord } from "../unit-runtime.js";
 // ─── generateMilestoneReport ──────────────────────────────────────────────────
 
 /**
+ * Resolve the base path for milestone reports.
+ * Prefers originalBasePath (project root) over basePath (which may be a worktree).
+ * Exported for testing as _resolveReportBasePath.
+ */
+export function _resolveReportBasePath(s: Pick<AutoSession, "originalBasePath" | "basePath">): string {
+  return s.originalBasePath || s.basePath;
+}
+
+/**
  * Generate and write an HTML milestone report snapshot.
  * Extracted from the milestone-transition block in autoLoop.
  */
@@ -50,13 +59,15 @@ async function generateMilestoneReport(
   const { writeReportSnapshot } = await importExtensionModule<typeof import("../reports.js")>(import.meta.url, "../reports.js");
   const { basename } = await import("node:path");
 
-  const snapData = await loadVisualizerData(s.basePath);
+  const reportBasePath = _resolveReportBasePath(s);
+
+  const snapData = await loadVisualizerData(reportBasePath);
   const completedMs = snapData.milestones.find(
     (m: { id: string }) => m.id === milestoneId,
   );
   const msTitle = completedMs?.title ?? milestoneId;
   const gsdVersion = process.env.GSD_VERSION ?? "0.0.0";
-  const projName = basename(s.basePath);
+  const projName = basename(reportBasePath);
   const doneSlices = snapData.milestones.reduce(
     (acc: number, m: { slices: { done: boolean }[] }) =>
       acc + m.slices.filter((sl: { done: boolean }) => sl.done).length,
@@ -67,10 +78,10 @@ async function generateMilestoneReport(
     0,
   );
   const outPath = writeReportSnapshot({
-    basePath: s.basePath,
+    basePath: reportBasePath,
     html: generateHtmlReport(snapData, {
       projectName: projName,
-      projectPath: s.basePath,
+      projectPath: reportBasePath,
       gsdVersion,
       milestoneId,
       indexRelPath: "index.html",
@@ -79,7 +90,7 @@ async function generateMilestoneReport(
     milestoneTitle: msTitle,
     kind: "milestone",
     projectName: projName,
-    projectPath: s.basePath,
+    projectPath: reportBasePath,
     gsdVersion,
     totalCost: snapData.totals?.cost ?? 0,
     totalTokens: snapData.totals?.tokens.total ?? 0,
@@ -250,8 +261,14 @@ export async function runPreDispatch(
         await deps.stopAuto(ctx, pi, `Merge conflict on milestone ${s.currentMilestoneId}`);
         return { action: "break", reason: "merge-conflict" };
       }
-      // Non-conflict merge errors — log and continue
-      logWarning("engine", "Milestone merge failed with non-conflict error", { milestone: s.currentMilestoneId!, error: String(mergeErr) });
+      // Non-conflict merge errors — stop auto to avoid advancing with unmerged work
+      logError("engine", "Milestone merge failed with non-conflict error", { milestone: s.currentMilestoneId!, error: String(mergeErr) });
+      ctx.ui.notify(
+        `Merge failed: ${mergeErr instanceof Error ? mergeErr.message : String(mergeErr)}. Resolve and run /gsd auto to resume.`,
+        "error",
+      );
+      await deps.stopAuto(ctx, pi, `Merge error on milestone ${s.currentMilestoneId}: ${String(mergeErr)}`);
+      return { action: "break", reason: "merge-failed" };
     }
 
     // PR creation (auto_pr) is handled inside mergeMilestoneToMain (#2302)
@@ -333,6 +350,8 @@ export async function runPreDispatch(
       if (s.currentMilestoneId) {
         try {
           deps.resolver.mergeAndExit(s.currentMilestoneId, ctx.ui);
+          // Prevent stopAuto from attempting the same merge (#2645)
+          s.milestoneMergedInPhases = true;
         } catch (mergeErr) {
           if (mergeErr instanceof MergeConflictError) {
             ctx.ui.notify(
@@ -342,6 +361,13 @@ export async function runPreDispatch(
             await deps.stopAuto(ctx, pi, `Merge conflict on milestone ${s.currentMilestoneId}`);
             return { action: "break", reason: "merge-conflict" };
           }
+          logError("engine", "Milestone merge failed with non-conflict error", { milestone: s.currentMilestoneId!, error: String(mergeErr) });
+          ctx.ui.notify(
+            `Merge failed: ${mergeErr instanceof Error ? mergeErr.message : String(mergeErr)}. Resolve and run /gsd auto to resume.`,
+            "error",
+          );
+          await deps.stopAuto(ctx, pi, `Merge error on milestone ${s.currentMilestoneId}: ${String(mergeErr)}`);
+          return { action: "break", reason: "merge-failed" };
         }
 
         // PR creation (auto_pr) is handled inside mergeMilestoneToMain (#2302)
@@ -428,6 +454,8 @@ export async function runPreDispatch(
     if (s.currentMilestoneId) {
       try {
         deps.resolver.mergeAndExit(s.currentMilestoneId, ctx.ui);
+        // Prevent stopAuto from attempting the same merge (#2645)
+        s.milestoneMergedInPhases = true;
       } catch (mergeErr) {
         if (mergeErr instanceof MergeConflictError) {
           ctx.ui.notify(
@@ -437,6 +465,13 @@ export async function runPreDispatch(
           await deps.stopAuto(ctx, pi, `Merge conflict on milestone ${s.currentMilestoneId}`);
           return { action: "break", reason: "merge-conflict" };
         }
+        logError("engine", "Milestone merge failed with non-conflict error", { milestone: s.currentMilestoneId!, error: String(mergeErr) });
+        ctx.ui.notify(
+          `Merge failed: ${mergeErr instanceof Error ? mergeErr.message : String(mergeErr)}. Resolve and run /gsd auto to resume.`,
+          "error",
+        );
+        await deps.stopAuto(ctx, pi, `Merge error on milestone ${s.currentMilestoneId}: ${String(mergeErr)}`);
+        return { action: "break", reason: "merge-failed" };
       }
 
       // PR creation (auto_pr) is handled inside mergeMilestoneToMain (#2302)
@@ -500,7 +535,17 @@ export async function runDispatch(
 
   if (dispatchResult.action === "stop") {
     deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "dispatch-stop", rule: dispatchResult.matchedRule, data: { reason: dispatchResult.reason } });
-    await closeoutAndStop(ctx, pi, s, deps, dispatchResult.reason);
+    // Warning-level stops are recoverable human checkpoints (e.g. UAT verdict
+    // gate) — pause instead of hard-stopping so the session is resumable with
+    // `/gsd auto`. Error/info-level stops remain hard stops for infrastructure
+    // failures and terminal conditions respectively.
+    // See: https://github.com/gsd-build/gsd-2/issues/2474
+    if (dispatchResult.level === "warning") {
+      ctx.ui.notify(dispatchResult.reason, "warning");
+      await deps.pauseAuto(ctx, pi);
+    } else {
+      await closeoutAndStop(ctx, pi, s, deps, dispatchResult.reason);
+    }
     debugLog("autoLoop", { phase: "exit", reason: "dispatch-stop" });
     return { action: "break", reason: "dispatch-stop" };
   }
@@ -1039,23 +1084,28 @@ export async function runUnitPhase(
   );
 
   // Tag the most recent window entry with error info for stuck detection
-  if (unitResult.status === "error" || unitResult.status === "cancelled") {
-    const lastEntry = loopState.recentUnits[loopState.recentUnits.length - 1];
-    if (lastEntry) {
+  const lastEntry = loopState.recentUnits[loopState.recentUnits.length - 1];
+  if (lastEntry) {
+    if (unitResult.errorContext) {
+      lastEntry.error = `${unitResult.errorContext.category}:${unitResult.errorContext.message}`.slice(0, 200);
+    } else if (unitResult.status === "error" || unitResult.status === "cancelled") {
       lastEntry.error = `${unitResult.status}:${unitType}/${unitId}`;
-    }
-  } else if (unitResult.event?.messages?.length) {
-    const lastMsg = unitResult.event.messages[unitResult.event.messages.length - 1];
-    const msgStr = typeof lastMsg === "string" ? lastMsg : JSON.stringify(lastMsg);
-    if (/error|fail|exception/i.test(msgStr)) {
-      const lastEntry = loopState.recentUnits[loopState.recentUnits.length - 1];
-      if (lastEntry) {
+    } else if (unitResult.event?.messages?.length) {
+      const lastMsg = unitResult.event.messages[unitResult.event.messages.length - 1];
+      const msgStr = typeof lastMsg === "string" ? lastMsg : JSON.stringify(lastMsg);
+      if (/error|fail|exception/i.test(msgStr)) {
         lastEntry.error = msgStr.slice(0, 200);
       }
     }
   }
 
   if (unitResult.status === "cancelled") {
+    // Provider-error pause: pauseAuto already handled cleanup and scheduled
+    // recovery. Don't hard-stop — just break out of the loop (#2762).
+    if (unitResult.errorContext?.category === "provider") {
+      debugLog("autoLoop", { phase: "exit", reason: "provider-pause", isTransient: unitResult.errorContext.isTransient });
+      return { action: "break", reason: "provider-pause" };
+    }
     ctx.ui.notify(
       `Session creation timed out or was cancelled for ${unitType} ${unitId}. Will retry.`,
       "warning",
@@ -1122,7 +1172,7 @@ export async function runUnitPhase(
     s.unitRecoveryCount.delete(`${unitType}/${unitId}`);
   }
 
-  deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
+  deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified, ...(unitResult.errorContext ? { errorContext: unitResult.errorContext } : {}) }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
 
   return { action: "next", data: { unitStartedAt: s.currentUnit.startedAt } };
 }

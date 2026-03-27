@@ -6,7 +6,8 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
 import { deriveState, isValidationTerminal } from "../state.ts";
-import { resolveExpectedArtifactPath, verifyExpectedArtifact, diagnoseExpectedArtifact, buildLoopRemediationSteps } from "../auto-recovery.ts";
+import { resolveExpectedArtifactPath, diagnoseExpectedArtifact } from "../auto-artifact-paths.ts";
+import { verifyExpectedArtifact, buildLoopRemediationSteps } from "../auto-recovery.ts";
 import { resolveDispatch, type DispatchContext } from "../auto-dispatch.ts";
 import type { SDDState } from "../types.ts";
 import { clearPathCache } from "../paths.ts";
@@ -106,6 +107,16 @@ test("isValidationTerminal returns true for verdict: needs-remediation (#832)", 
 
 test("isValidationTerminal returns true for verdict: passed (#1429)", () => {
   const content = "---\nverdict: passed\nremediation_round: 0\n---\n\n# Validation";
+  assert.equal(isValidationTerminal(content), true);
+});
+
+test("isValidationTerminal returns true for verdict: fail (#2769)", () => {
+  const content = "---\nverdict: fail\nremediation_round: 1\n---\n\n# Validation";
+  assert.equal(isValidationTerminal(content), true);
+});
+
+test("isValidationTerminal returns true for any arbitrary verdict string (#2769)", () => {
+  const content = "---\nverdict: custom-verdict\nremediation_round: 0\n---\n\n# Validation";
   assert.equal(isValidationTerminal(content), true);
 });
 
@@ -326,14 +337,14 @@ test("verifyExpectedArtifact rejects VALIDATION with missing verdict field", () 
   }
 });
 
-test("verifyExpectedArtifact rejects VALIDATION with unrecognized verdict", () => {
+test("verifyExpectedArtifact accepts VALIDATION with any extracted verdict", () => {
   const base = makeTmpBase();
   try {
     writeValidation(base, "M001", "---\nverdict: unknown-value\nremediation_round: 0\n---\n\n# Validation");
     clearPathCache();
     clearParseCache();
     const result = verifyExpectedArtifact("validate-milestone", "M001", base);
-    assert.equal(result, false, "VALIDATION with unrecognized verdict should fail verification");
+    assert.equal(result, true, "VALIDATION with any extracted verdict should pass verification");
   } finally {
     cleanup(base);
   }

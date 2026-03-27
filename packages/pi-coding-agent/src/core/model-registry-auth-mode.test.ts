@@ -572,3 +572,73 @@ describe("ModelRegistry authMode — streamSimple apiKey boundary", () => {
 		assert.equal((captured as Record<string, unknown>).reasoning, "high", "reasoning must pass through");
 	});
 });
+
+// ─── Provider-scoped stream routing (#2533) ───────────────────────────────────
+
+describe("ModelRegistry authMode — provider-scoped stream routing", () => {
+	it("does not clobber built-in stream handler when custom provider uses same api", () => {
+		const registry = createRegistry(() => true);
+		const customSpy = createStreamSpy();
+
+		// Register a custom provider with the same API type as a built-in (anthropic-messages).
+		// This simulates the claude-code-cli extension registering with api: "anthropic-messages".
+		registry.registerProvider("custom-cli", {
+			authMode: "externalCli",
+			baseUrl: "local://custom",
+			api: "anthropic-messages",
+			streamSimple: customSpy.streamSimple,
+			models: [createProviderModel("custom-model", "anthropic-messages")],
+		});
+
+		// The built-in anthropic-messages provider should still be accessible
+		// when calling streamSimple with a model from the built-in provider.
+		const provider = getApiProvider("anthropic-messages" as Api);
+		assert.ok(provider, "anthropic-messages provider must still be registered");
+
+		// Call with a built-in anthropic model — should NOT hit the custom spy.
+		// The built-in handler will throw (no API key), which proves the routing
+		// correctly delegates to the built-in instead of the custom handler.
+		assert.throws(
+			() => provider.streamSimple(
+				makeModel("anthropic", "claude-sonnet-4-6", "anthropic-messages"),
+				makeContext(),
+				{ maxTokens: 4096 } as SimpleStreamOptions,
+			),
+			(err: Error) => err.message.includes("API key"),
+			"built-in Anthropic handler must be invoked (throws because no API key in tests)",
+		);
+
+		assert.equal(
+			customSpy.getCapturedOptions(),
+			undefined,
+			"custom provider's streamSimple must NOT be called for anthropic provider models",
+		);
+	});
+
+	it("routes to custom provider when model.provider matches", () => {
+		const registry = createRegistry(() => true);
+		const customSpy = createStreamSpy();
+
+		registry.registerProvider("custom-cli", {
+			authMode: "externalCli",
+			baseUrl: "local://custom",
+			api: "anthropic-messages",
+			streamSimple: customSpy.streamSimple,
+			models: [createProviderModel("custom-model", "anthropic-messages")],
+		});
+
+		const provider = getApiProvider("anthropic-messages" as Api);
+		assert.ok(provider);
+
+		// Call with the custom provider's model — should hit the custom spy
+		provider.streamSimple(
+			makeModel("custom-cli", "custom-model", "anthropic-messages"),
+			makeContext(),
+			{ maxTokens: 2048 } as SimpleStreamOptions,
+		);
+
+		const captured = customSpy.getCapturedOptions();
+		assert.ok(captured, "custom provider's streamSimple must be called for its own models");
+		assert.equal(captured.maxTokens, 2048);
+	});
+});

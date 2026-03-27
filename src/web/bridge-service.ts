@@ -39,7 +39,30 @@ import {
 } from "./auto-dashboard-service.ts";
 import { resolveGsdCliEntry } from "./cli-entry.ts";
 
-const DEFAULT_PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+// Lazily computed fallback — import.meta.url is baked in at build time by
+// webpack, so when the standalone bundle built on Linux CI runs on Windows the
+// literal file:// URL contains a Unix path that fileURLToPath() rejects.
+// Deferring the computation means it only fires when GSD_WEB_PACKAGE_ROOT is
+// absent, and if it does fire we handle the cross-platform failure gracefully.
+let _defaultPackageRoot: string | undefined;
+function getDefaultPackageRoot(): string {
+  if (_defaultPackageRoot !== undefined) return _defaultPackageRoot;
+  try {
+    _defaultPackageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+  } catch {
+    // Standalone bundle running on a different OS than the builder — the
+    // baked-in import.meta.url is not a valid local file URL.  Fall back to
+    // cwd which is the best available approximation; callers that need the
+    // real package root should set GSD_WEB_PACKAGE_ROOT.
+    _defaultPackageRoot = process.cwd();
+  }
+  return _defaultPackageRoot;
+}
+
+/** @internal — test-only: reset the memoized default package root */
+export function resetDefaultPackageRootForTests(): void {
+  _defaultPackageRoot = undefined;
+}
 const RESPONSE_TIMEOUT_MS = 30_000;
 const START_TIMEOUT_MS = 150_000;
 const MAX_STDERR_BUFFER = 8_000;
@@ -374,6 +397,17 @@ function filterAndSortSessions(
   return scored.map((entry) => entry.session);
 }
 
+export interface RtkSessionSavings {
+  commands: number;
+  inputTokens: number;
+  outputTokens: number;
+  savedTokens: number;
+  savingsPct: number;
+  totalTimeMs: number;
+  avgTimeMs: number;
+  updatedAt: string;
+}
+
 export interface AutoDashboardData {
   active: boolean;
   paused: boolean;
@@ -385,6 +419,9 @@ export interface AutoDashboardData {
   basePath: string;
   totalCost: number;
   totalTokens: number;
+  rtkSavings?: RtkSessionSavings | null;
+  /** Whether RTK is enabled via experimental.rtk preference. False when not opted in. */
+  rtkEnabled?: boolean;
 }
 
 export interface BridgeLastError {
@@ -489,12 +526,54 @@ export interface ProjectDetectionSignals {
   hasCargo?: boolean;
   hasGoMod?: boolean;
   hasPyproject?: boolean;
+  /** True when the directory looks like a monorepo root (workspaces, lerna, pnpm-workspace, etc.) */
+  isMonorepo?: boolean;
   fileCount: number;
 }
 
 export interface ProjectDetection {
   kind: ProjectDetectionKind;
   signals: ProjectDetectionSignals;
+}
+
+/**
+ * Detect whether a directory looks like a monorepo root.
+ *
+ * Checks for common monorepo indicators:
+ * - `pnpm-workspace.yaml` (pnpm workspaces)
+ * - `lerna.json` (Lerna)
+ * - `package.json` with a `workspaces` field (npm/yarn workspaces)
+ * - `rush.json` (Rush)
+ * - `nx.json` (Nx)
+ * - `turbo.json` (Turborepo)
+ *
+ * This is intentionally cheap — file existence checks only, with a single
+ * JSON parse for `package.json` workspaces (which we're already reading
+ * in many code paths). No deep directory scanning.
+ */
+export function detectMonorepo(dirPath: string, checkExists?: (path: string) => boolean): boolean {
+  const exists = checkExists ?? (getBridgeDeps().existsSync ?? existsSync);
+
+  // Fast checks — file existence only
+  if (exists(join(dirPath, "pnpm-workspace.yaml"))) return true;
+  if (exists(join(dirPath, "lerna.json"))) return true;
+  if (exists(join(dirPath, "rush.json"))) return true;
+  if (exists(join(dirPath, "nx.json"))) return true;
+  if (exists(join(dirPath, "turbo.json"))) return true;
+
+  // Check package.json for workspaces field (npm/yarn workspaces)
+  const packageJsonPath = join(dirPath, "package.json");
+  if (exists(packageJsonPath)) {
+    try {
+      const raw = readFileSync(packageJsonPath, "utf-8");
+      const pkg = JSON.parse(raw) as Record<string, unknown>;
+      if (pkg.workspaces != null) return true;
+    } catch {
+      // Malformed JSON or unreadable — not a monorepo indicator
+    }
+  }
+
+  return false;
 }
 
 export function detectProjectKind(projectCwd: string): ProjectDetection {
@@ -507,6 +586,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
   const hasCargo = checkExists(join(projectCwd, "Cargo.toml"));
   const hasGoMod = checkExists(join(projectCwd, "go.mod"));
   const hasPyproject = checkExists(join(projectCwd, "pyproject.toml"));
+  const isMonorepo = detectMonorepo(projectCwd, checkExists);
 
   // Count top-level non-dot entries (cheap heuristic for "has code")
   let fileCount = 0;
@@ -525,6 +605,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
     hasCargo,
     hasGoMod,
     hasPyproject,
+    isMonorepo,
     fileCount,
   };
 
@@ -1058,7 +1139,7 @@ async function fallbackWorkspaceIndex(basePath: string): Promise<GSDWorkspaceInd
 export function resolveBridgeRuntimeConfig(env: NodeJS.ProcessEnv = getBridgeDeps().env ?? process.env, projectCwdOverride?: string): BridgeRuntimeConfig {
   const projectCwd = projectCwdOverride || env.GSD_WEB_PROJECT_CWD || process.cwd();
   const projectSessionsDir = env.GSD_WEB_PROJECT_SESSIONS_DIR || getProjectSessionsDir(projectCwd);
-  const packageRoot = env.GSD_WEB_PACKAGE_ROOT || DEFAULT_PACKAGE_ROOT;
+  const packageRoot = env.GSD_WEB_PACKAGE_ROOT || getDefaultPackageRoot();
   return { projectCwd, projectSessionsDir, packageRoot };
 }
 

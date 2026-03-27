@@ -17,7 +17,8 @@ import type {
 } from "@gsd/pi-coding-agent";
 
 import { deriveState } from "./state.js";
-import type { SDDState } from "./types.js";
+import { parseUnitId } from "./unit-id.js";
+import type { GSDState } from "./types.js";
 import { getManifestStatus } from "./files.js";
 export { inlinePriorMilestoneSummary } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
@@ -38,6 +39,7 @@ import { clearActivityLogState } from "./activity-log.js";
 import {
   synthesizeCrashRecovery,
   getDeepDiagnostic,
+  readActiveMilestoneId,
 } from "./session-forensics.js";
 import {
   writeLock,
@@ -71,18 +73,12 @@ import {
   getOldestInFlightToolAgeMs as _getOldestInFlightToolAgeMs,
   getInFlightToolCount,
   getOldestInFlightToolStart,
+  hasInteractiveToolInFlight,
   clearInFlightTools,
 } from "./auto-tool-tracking.js";
 import { closeoutUnit } from "./auto-unit-closeout.js";
 import { recoverTimedOutUnit } from "./auto-timeout-recovery.js";
 import { selectAndApplyModel, resolveModelId } from "./auto-model-selection.js";
-import {
-  syncProjectRootToWorktree,
-  syncStateToProjectRoot,
-  readResourceVersion,
-  checkResourcesStale,
-  escapeStaleWorktree,
-} from "./auto-worktree-sync.js";
 import { resetRoutingHistory, recordOutcome } from "./routing-history.js";
 import {
   checkPostUnitHooks,
@@ -110,6 +106,7 @@ import {
   captureAvailableSkills,
   resetSkillTelemetry,
 } from "./skill-telemetry.js";
+import { getRtkSessionSavings } from "../shared/rtk-session-stats.js";
 import {
   initMetrics,
   resetMetrics,
@@ -118,6 +115,7 @@ import {
   formatCost,
   formatTokenCount,
 } from "./metrics.js";
+import { setLogBasePath } from "./workflow-logger.js";
 import { join } from "node:path";
 import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import { atomicWriteSync } from "./atomic-write.js";
@@ -143,6 +141,11 @@ import {
   mergeMilestoneToMain,
   autoWorktreeBranch,
   syncWorktreeStateBack,
+  syncProjectRootToWorktree,
+  syncStateToProjectRoot,
+  readResourceVersion,
+  checkResourcesStale,
+  escapeStaleWorktree,
 } from "./auto-worktree.js";
 import { pruneQueueOrder } from "./queue-order.js";
 
@@ -183,14 +186,12 @@ import {
   postUnitPostVerification,
 } from "./auto-post-unit.js";
 import { bootstrapAutoSession, type BootstrapDeps } from "./auto-start.js";
-import { autoLoop, resolveAgentEnd, resolveAgentEndCancelled, _resetPendingResolve, isSessionSwitchInFlight, type LoopDeps } from "./auto-loop.js";
+import { autoLoop, resolveAgentEnd, resolveAgentEndCancelled, _resetPendingResolve, isSessionSwitchInFlight, type LoopDeps, type ErrorContext } from "./auto-loop.js";
 import {
   WorktreeResolver,
   type WorktreeResolverDeps,
 } from "./worktree-resolver.js";
 import { reorderForCaching } from "./prompt-ordering.js";
-
-// Worktree sync, resource staleness, stale worktree escape → auto-worktree-sync.ts
 
 // ─── Session State ─────────────────────────────────────────────────────────
 
@@ -304,6 +305,11 @@ export { type AutoDashboardData } from "./auto-dashboard.js";
 export function getAutoDashboardData(): AutoDashboardData {
   const ledger = getLedger();
   const totals = ledger ? getProjectTotals(ledger.units) : null;
+  const sessionId = s.cmdCtx?.sessionManager?.getSessionId?.() ?? null;
+  const rtkSavings = sessionId && s.basePath
+    ? getRtkSessionSavings(s.basePath, sessionId)
+    : null;
+  const rtkEnabled = loadEffectiveGSDPreferences()?.preferences.experimental?.rtk === true;
   // Pending capture count — lazy check, non-fatal
   let pendingCaptureCount = 0;
   try {
@@ -326,6 +332,8 @@ export function getAutoDashboardData(): AutoDashboardData {
     totalCost: totals?.cost ?? 0,
     totalTokens: totals?.tokens.total ?? 0,
     pendingCaptureCount,
+    rtkSavings,
+    rtkEnabled,
   };
 }
 
@@ -368,8 +376,8 @@ export function getAutoModeStartModel(): {
 }
 
 // Tool tracking — delegates to auto-tool-tracking.ts
-export function markToolStart(toolCallId: string): void {
-  _markToolStart(toolCallId, s.active);
+export function markToolStart(toolCallId: string, toolName?: string): void {
+  _markToolStart(toolCallId, s.active, toolName);
 }
 
 export function markToolEnd(toolCallId: string): void {
@@ -406,6 +414,13 @@ export function stopAutoRemote(projectRoot: string): {
   const lock = readCrashLock(projectRoot);
   if (!lock) return { found: false };
 
+  // Never SIGTERM ourselves — a stale lock with our own PID is not a remote
+  // session, it is leftover from a prior loop exit in this process. (#2730)
+  if (lock.pid === process.pid) {
+    clearLock(projectRoot);
+    return { found: false };
+  }
+
   if (!isLockProcessAlive(lock)) {
     // Stale lock — clean it up
     clearLock(projectRoot);
@@ -436,6 +451,10 @@ export function checkRemoteAutoSession(projectRoot: string): {
 } {
   const lock = readCrashLock(projectRoot);
   if (!lock) return { running: false };
+
+  // Our own PID is not a "remote" session — it is a stale lock left by this
+  // process (e.g. after step-mode exit without full cleanup). (#2730)
+  if (lock.pid === process.pid) return { running: false };
 
   if (!isLockProcessAlive(lock)) {
     // Stale lock from a dead process — not a live remote session
@@ -540,6 +559,16 @@ function cleanupAfterLoopExit(ctx: ExtensionContext): void {
   s.active = false;
   clearUnitTimeout();
 
+  // Clear crash lock and release session lock so the next `/gsd next` does
+  // not see a stale lock with the current PID and treat it as a "remote"
+  // session (which would cause it to SIGTERM itself). (#2730)
+  try {
+    if (lockBase()) clearLock(lockBase());
+    if (lockBase()) releaseSessionLock(lockBase());
+  } catch {
+    /* best-effort — mirror stopAuto cleanup */
+  }
+
   ctx.ui.setStatus("gsd-auto", undefined);
   ctx.ui.setWidget("gsd-progress", undefined);
   ctx.ui.setFooter(undefined);
@@ -593,8 +622,11 @@ export async function stopAuto(
     // When the milestone is complete (has a SUMMARY), merge the worktree branch
     // back to main so code isn't stranded on the worktree branch (#2317).
     // For incomplete milestones, preserve the branch for later resumption.
+    //
+    // Skip if phases.ts already merged this milestone — avoids the double
+    // mergeAndExit that fails because the branch was already deleted (#2645).
     try {
-      if (s.currentMilestoneId) {
+      if (s.currentMilestoneId && !s.milestoneMergedInPhases) {
         const notifyCtx = ctx
           ? { notify: ctx.ui.notify.bind(ctx.ui) }
           : { notify: () => {} };
@@ -789,11 +821,14 @@ export async function stopAuto(
 export async function pauseAuto(
   ctx?: ExtensionContext,
   _pi?: ExtensionAPI,
+  _errorContext?: ErrorContext,
 ): Promise<void> {
   if (!s.active) return;
   clearUnitTimeout();
   // Unblock any pending unit promise so the auto-loop is not orphaned.
-  resolveAgentEndCancelled();
+  // Pass errorContext so runUnitPhase can distinguish user-initiated pause
+  // from provider-error pause and avoid hard-stopping (#2762).
+  resolveAgentEndCancelled(_errorContext);
 
   s.pausedSessionFile = ctx?.sessionManager?.getSessionFile() ?? null;
 
@@ -980,7 +1015,11 @@ function buildLoopDeps(): LoopDeps {
     startUnitSupervision,
 
     // Prompt helpers
-    getDeepDiagnostic,
+    getDeepDiagnostic: (basePath: string) => {
+      const mid = readActiveMilestoneId(basePath);
+      const wtPath = mid ? getAutoWorktreePath(basePath, mid) : undefined;
+      return getDeepDiagnostic(basePath, wtPath ?? undefined);
+    },
     isDbAvailable,
     reorderForCaching,
 
@@ -1089,6 +1128,7 @@ export async function startAuto(
     s.stepMode = requestedStepMode;
     s.cmdCtx = ctx;
     s.basePath = base;
+    setLogBasePath(base);
     s.unitDispatchCount.clear();
     s.unitLifetimeDispatches.clear();
     if (!getLedger()) initMetrics(base);
@@ -1276,8 +1316,7 @@ function ensurePreconditions(
   base: string,
   state: SDDState,
 ): void {
-  const parts = unitId.split("/");
-  const mid = parts[0]!;
+  const { milestone: mid, slice: sid } = parseUnitId(unitId);
 
   const mDir = resolveMilestonePath(base, mid);
   if (!mDir) {
@@ -1285,8 +1324,7 @@ function ensurePreconditions(
     mkdirSync(join(newDir, "slices"), { recursive: true });
   }
 
-  if (parts.length >= 2) {
-    const sid = parts[1]!;
+  if (sid !== undefined) {
 
     const mDirResolved = resolveMilestonePath(base, mid);
     if (mDirResolved) {

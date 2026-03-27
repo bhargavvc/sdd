@@ -79,6 +79,22 @@ It checks file structure, referential integrity, completion state consistency, g
 
     **Fix:** Re-run the operation. Close tools holding files open if the error persists. Run `/gsd doctor` to verify repo health.
   </Accordion>
+
+  <Accordion title="Worktree isolation stopped working after upgrade to v2.45+">
+    **Cause:** The default `git.isolation` mode changed from `worktree` to `none` in v2.45.0.
+
+    **Fix:** Set `git.isolation: worktree` explicitly in your preferences:
+    ```yaml
+    git:
+      isolation: worktree
+    ```
+  </Accordion>
+
+  <Accordion title="Node.js version or git not found at startup">
+    **Cause:** GSD v2.45+ checks for Node.js >= 22 and git availability at startup.
+
+    **Fix:** Install Node.js 22+ (24 LTS recommended) and ensure `git` is in your PATH.
+  </Accordion>
 </AccordionGroup>
 
 ## `/gsd forensics`
@@ -92,6 +108,8 @@ Full-access debugger for post-mortem analysis:
 Provides anomaly detection, unit traces, metrics analysis, doctor integration, and LLM-guided investigation.
 
 ## MCP client issues
+
+Use `/gsd mcp` to check MCP server status and connectivity at a glance.
 
 <AccordionGroup>
   <Accordion title="No configured servers">

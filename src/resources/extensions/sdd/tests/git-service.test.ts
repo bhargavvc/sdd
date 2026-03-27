@@ -215,10 +215,12 @@ describe('git-service', async () => {
       oneLiner: "Added JWT-based auth with refresh token rotation",
       keyFiles: ["src/auth.ts", "src/middleware/jwt.ts"],
     });
-    assert.ok(msg.startsWith("feat(S01/T02):"), "message starts with type(scope)");
+    assert.ok(msg.startsWith("feat:"), "message starts with type: (no scope)");
+    assert.ok(!msg.includes("(S01/T02)"), "no GSD ID in subject line");
     assert.ok(msg.includes("JWT-based auth"), "message includes one-liner content");
     assert.ok(msg.includes("- src/auth.ts"), "message body includes key files");
     assert.ok(msg.includes("- src/middleware/jwt.ts"), "message body includes second key file");
+    assert.ok(msg.includes("GSD-Task: S01/T02"), "GSD-Task trailer in body");
   });
 
   {
@@ -226,9 +228,9 @@ describe('git-service', async () => {
       taskId: "S02/T01",
       taskTitle: "fix login redirect bug",
     });
-    assert.ok(msg.startsWith("fix(S02/T01):"), "infers fix type from title");
+    assert.ok(msg.startsWith("fix:"), "infers fix type from title");
     assert.ok(msg.includes("fix login redirect bug"), "uses task title when no one-liner");
-    assert.ok(!msg.includes("\n"), "no body when no key files");
+    assert.ok(msg.includes("GSD-Task: S02/T01"), "GSD-Task trailer present");
   }
 
   {
@@ -237,7 +239,8 @@ describe('git-service', async () => {
       taskTitle: "add tests",
       oneLiner: "Unit tests for auth module with coverage",
     });
-    assert.ok(msg.startsWith("test(S01/T03):"), "infers test type");
+    assert.ok(msg.startsWith("test:"), "infers test type");
+    assert.ok(msg.includes("GSD-Task: S01/T03"), "GSD-Task trailer present");
   }
 
   // ─── RUNTIME_EXCLUSION_PATHS ───────────────────────────────────────────
@@ -284,9 +287,9 @@ describe('git-service', async () => {
 
 
   const tempDir = mkdtempSync(join(tmpdir(), "gsd-git-service-test-"));
-  run("git init -b main", tempDir);
-  run('git config user.name "Pi Test"', tempDir);
-  run('git config user.email "pi@example.com"', tempDir);
+  runGit(tempDir, ["init", "-b", "main"]);
+  runGit(tempDir, ["config", "user.name", "Pi Test"]);
+  runGit(tempDir, ["config", "user.email", "pi@example.com"]);
 
   // runGit should work on a valid repo
   const branch = runGit(tempDir, ["branch", "--show-current"]);
@@ -331,13 +334,13 @@ describe('git-service', async () => {
 
   function initTempRepo(): string {
     const dir = mkdtempSync(join(tmpdir(), "gsd-git-t02-"));
-    run("git init -b main", dir);
-    run('git config user.name "Pi Test"', dir);
-    run('git config user.email "pi@example.com"', dir);
+    runGit(dir, ["init", "-b", "main"]);
+    runGit(dir, ["config", "user.name", "Pi Test"]);
+    runGit(dir, ["config", "user.email", "pi@example.com"]);
     // Need an initial commit so HEAD exists
     createFile(dir, ".gitkeep", "");
-    run("git add -A", dir);
-    run('git commit -m "init"', dir);
+    runGit(dir, ["add", "-A"]);
+    runGit(dir, ["commit", "-m", "init"]);
     return dir;
   }
 
@@ -478,10 +481,10 @@ describe('git-service', async () => {
 
     // Without task context, autoCommit uses generic chore message
     const msg = svc.autoCommit("task", "T01");
-    assert.deepStrictEqual(msg, "chore(T01): auto-commit after task", "autoCommit returns generic format without task context");
+    assert.deepStrictEqual(msg, "chore: auto-commit after task\n\nGSD-Unit: T01", "autoCommit returns generic format with trailer");
 
     const log = run("git log --oneline -1", repo);
-    assert.ok(log.includes("chore(T01): auto-commit after task"), "generic commit message is in git log");
+    assert.ok(log.includes("chore: auto-commit after task"), "generic commit message is in git log");
 
     // With task context, autoCommit uses meaningful message
     createFile(repo, "src/auth.ts", "export function login() {}");
@@ -492,8 +495,9 @@ describe('git-service', async () => {
       keyFiles: ["src/auth.ts"],
     });
     assert.ok(msg2 !== null, "autoCommit with task context returns a message");
-    assert.ok(msg2!.startsWith("feat(S01/T02):"), "meaningful commit uses feat type and scope");
+    assert.ok(msg2!.startsWith("feat:"), "meaningful commit uses feat type without scope");
     assert.ok(msg2!.includes("JWT-based auth"), "meaningful commit includes one-liner content");
+    assert.ok(msg2!.includes("GSD-Task: S01/T02"), "meaningful commit has GSD-Task trailer");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -527,9 +531,9 @@ describe('git-service', async () => {
     createFile(repo, ".sdd/milestones/M001/M001-ROADMAP.md", "- [x] S01");
     createFile(repo, "src/feature.ts", "export const y = 2;");
 
-    // Auto-commit with .sdd/ excluded (simulates pre-switch)
-    const msg = svc.autoCommit("pre-switch", "main", [".sdd/"]);
-    assert.deepStrictEqual(msg, "chore(main): auto-commit after pre-switch", "pre-switch autoCommit with .sdd/ exclusion commits");
+    // Auto-commit with .gsd/ excluded (simulates pre-switch)
+    const msg = svc.autoCommit("pre-switch", "main", [".gsd/"]);
+    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nGSD-Unit: main", "pre-switch autoCommit with .gsd/ exclusion commits");
 
     // Verify .sdd/ file was NOT committed
     const show = run("git show --stat HEAD", repo);
@@ -573,12 +577,12 @@ describe('git-service', async () => {
 
   function initBranchTestRepo(): string {
     const dir = mkdtempSync(join(tmpdir(), "gsd-git-t03-"));
-    run("git init -b main", dir);
-    run('git config user.name "Pi Test"', dir);
-    run('git config user.email "pi@example.com"', dir);
+    runGit(dir, ["init", "-b", "main"]);
+    runGit(dir, ["config", "user.name", "Pi Test"]);
+    runGit(dir, ["config", "user.email", "pi@example.com"]);
     createFile(dir, ".gitkeep", "");
-    run("git add -A", dir);
-    run('git commit -m "init"', dir);
+    runGit(dir, ["add", "-A"]);
+    runGit(dir, ["commit", "-m", "init"]);
     return dir;
   }
 
@@ -614,12 +618,12 @@ describe('git-service', async () => {
   {
     // master-only repo
     const repo = mkdtempSync(join(tmpdir(), "gsd-git-t03-master-"));
-    run("git init -b master", repo);
-    run('git config user.name "Pi Test"', repo);
-    run('git config user.email "pi@example.com"', repo);
+    runGit(repo, ["init", "-b", "master"]);
+    runGit(repo, ["config", "user.name", "Pi Test"]);
+    runGit(repo, ["config", "user.email", "pi@example.com"]);
     createFile(repo, ".gitkeep", "");
-    run("git add -A", repo);
-    run('git commit -m "init"', repo);
+    runGit(repo, ["add", "-A"]);
+    runGit(repo, ["commit", "-m", "init"]);
 
     const svc = new GitServiceImpl(repo);
     assert.deepStrictEqual(svc.getMainBranch(), "master", "getMainBranch returns master when only master exists");
@@ -631,11 +635,11 @@ describe('git-service', async () => {
   // S05: Enhanced features — snapshots, pre-merge checks
   // ═══════════════════════════════════════════════════════════════════════
 
-  // ─── createSnapshot: prefs enabled ─────────────────────────────────────
+  // ─── createSnapshot: default (enabled) ─────────────────────────────────
 
-  test('createSnapshot: enabled', () => {
+  test('createSnapshot: enabled by default when prefs omitted', () => {
     const repo = initBranchTestRepo();
-    const svc = new GitServiceImpl(repo, { snapshots: true });
+    const svc = new GitServiceImpl(repo);
 
     // Create a branch with a commit
     run("git checkout -b gsd/M001/S01", repo);
@@ -667,6 +671,39 @@ describe('git-service', async () => {
 
     const refs = run("git for-each-ref refs/sdd/snapshots/", repo);
     assert.deepStrictEqual(refs, "", "no snapshot ref created when prefs.snapshots is false");
+
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  // ─── runPreMergeCheck: default (auto-detect) ──────────────────────────
+
+  test('runPreMergeCheck: auto-detects when prefs omitted', () => {
+    const repo = initBranchTestRepo();
+    createFile(repo, "package.json", JSON.stringify({
+      name: "test-default",
+      scripts: { test: 'node -e "process.exit(0)"' },
+    }));
+    run("git add -A", repo);
+    run('git commit -m "add package.json"', repo);
+
+    // No pre_merge_check pref set — should auto-detect and run
+    const svc = new GitServiceImpl(repo);
+    const result: PreMergeCheckResult = svc.runPreMergeCheck();
+
+    assert.deepStrictEqual(result.passed, true, "runPreMergeCheck auto-detects and passes when prefs omitted");
+    assert.ok(!result.skipped, "runPreMergeCheck is not skipped when prefs omitted and package.json exists");
+
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  test('runPreMergeCheck: gracefully skips when prefs omitted and no package.json', () => {
+    const repo = initBranchTestRepo();
+    // No package.json — auto-detect should skip gracefully
+    const svc = new GitServiceImpl(repo);
+    const result: PreMergeCheckResult = svc.runPreMergeCheck();
+
+    assert.deepStrictEqual(result.passed, true, "runPreMergeCheck passes when no package.json (skip)");
+    assert.deepStrictEqual(result.skipped, true, "runPreMergeCheck skips when no test runner detected");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -864,6 +901,55 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
+  // ─── writeIntegrationBranch: rejects workflow-template branches (#2498) ─
+
+  test('Integration branch: rejects workflow-template branches', () => {
+    const repo = initBranchTestRepo();
+
+    // All 8 registered workflow templates should be rejected
+    writeIntegrationBranch(repo, "M001", "gsd/hotfix/fix-login");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "hotfix branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/bugfix/null-pointer");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "bugfix branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/small-feature/add-button");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "small-feature branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/refactor/rename-module");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "refactor branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/spike/evaluate-lib");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "spike branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/security-audit/owasp-scan");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "security-audit branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/dep-upgrade/bump-react");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "dep-upgrade branch is not recorded");
+
+    writeIntegrationBranch(repo, "M001", "gsd/full-project/new-app");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "full-project branch is not recorded");
+
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  // ─── writeIntegrationBranch: still records legitimate branches ────────
+
+  test('Integration branch: records non-ephemeral gsd branches', () => {
+    const repo = initBranchTestRepo();
+
+    // A normal feature branch should still be recorded
+    writeIntegrationBranch(repo, "M001", "feature/new-thing");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), "feature/new-thing", "normal branches are recorded");
+
+    // The main branch should be recorded
+    writeIntegrationBranch(repo, "M002", "main");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M002"), "main", "main branch is recorded");
+
+    rmSync(repo, { recursive: true, force: true });
+  });
+
   // ─── writeIntegrationBranch: rejects invalid branch names ─────────────
 
   test('Integration branch: rejects invalid names', () => {
@@ -1029,9 +1115,9 @@ describe('git-service', async () => {
   test('untrackRuntimeFiles', async () => {
     const { untrackRuntimeFiles } = await import("../gitignore.ts");
     const repo = mkdtempSync(join(tmpdir(), "gsd-untrack-"));
-    run("git init -b main", repo);
-    run("git config user.email test@test.com", repo);
-    run("git config user.name Test", repo);
+    runGit(repo, ["init", "-b", "main"]);
+    runGit(repo, ["config", "user.email", "test@test.com"]);
+    runGit(repo, ["config", "user.name", "Test"]);
 
     // Create and track runtime files (simulates pre-.gitignore state)
     mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
@@ -1042,8 +1128,8 @@ describe('git-service', async () => {
     writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
     writeFileSync(join(repo, ".gsd", "runtime", "data.json"), "{}");
     writeFileSync(join(repo, "src.ts"), "code");
-    run("git add -A", repo);
-    run("git commit -m init", repo);
+    runGit(repo, ["add", "-A"]);
+    runGit(repo, ["commit", "-m", "init"]);
 
     // Precondition: runtime files are tracked
     const trackedBefore = run("git ls-files .sdd/", repo);
@@ -1078,18 +1164,19 @@ describe('git-service', async () => {
 
   test('smartStage excludes runtime files, allows milestone artifacts', () => {
     const repo = mkdtempSync(join(tmpdir(), "gsd-smart-stage-excludes-"));
-    run("git init -b main", repo);
-    run("git config user.email test@test.com", repo);
-    run("git config user.name Test", repo);
+    runGit(repo, ["init", "-b", "main"]);
+    runGit(repo, ["config", "user.email", "test@test.com"]);
+    runGit(repo, ["config", "user.name", "Test"]);
     writeFileSync(join(repo, "README.md"), "init");
-    run("git add -A && git commit -m init", repo);
+    runGit(repo, ["add", "-A"]);
+    runGit(repo, ["commit", "-m", "init"]);
 
     // Create .sdd/ runtime files + milestone artifacts + a normal source file
     mkdirSync(join(repo, ".gsd", "milestones", "M001"), { recursive: true });
     mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
     mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
     writeFileSync(join(repo, ".gsd", "milestones", "M001", "ROADMAP.md"), "# Roadmap");
-    writeFileSync(join(repo, ".gsd", "preferences.md"), "---\nversion: 1\n---");
+    writeFileSync(join(repo, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---");
     writeFileSync(join(repo, ".gsd", "STATE.md"), "# State");
     writeFileSync(join(repo, ".gsd", "runtime", "units.json"), "{}");
     writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
@@ -1295,7 +1382,12 @@ describe('git-service', async () => {
       issueNumber: 42,
     });
     assert.ok(msg.includes("Resolves #42"), "buildTaskCommitMessage includes Resolves #N trailer when issueNumber is set");
-    assert.ok(msg.startsWith("fix(S01/T03):"), "buildTaskCommitMessage infers fix type");
+    assert.ok(msg.startsWith("fix:"), "buildTaskCommitMessage infers fix type");
+    assert.ok(msg.includes("GSD-Task: S01/T03"), "GSD-Task trailer present");
+    // GSD-Task should come before Resolves
+    const taskIdx = msg.indexOf("GSD-Task: S01/T03");
+    const resolvesIdx = msg.indexOf("Resolves #42");
+    assert.ok(taskIdx < resolvesIdx, "GSD-Task trailer before Resolves trailer");
   });
 
   {
@@ -1305,6 +1397,7 @@ describe('git-service', async () => {
       taskTitle: "add dashboard widget",
     });
     assert.ok(!msg.includes("Resolves"), "buildTaskCommitMessage omits Resolves trailer when issueNumber is absent");
+    assert.ok(msg.includes("GSD-Task: S01/T04"), "GSD-Task trailer still present");
   }
 
   // ─── runPreMergeCheck: skips when no package.json ────────────────────────

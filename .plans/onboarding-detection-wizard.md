@@ -134,7 +134,7 @@ Quick filesystem scan (no heavy reads):
 
 ### Task 1.4: `isFirstEverLaunch(): boolean`
 
-Returns `true` if `~/.sdd/` doesn't exist or has no `preferences.md`.
+Returns `true` if `~/.gsd/` doesn't exist or has no `PREFERENCES.md`.
 
 ---
 
@@ -296,9 +296,9 @@ Step 8: Advanced (collapsed by default, expandable)
      Skip research?     [no] / yes
      Auto-push on merge? [yes] / no
 
-Step 9: Bootstrap .sdd/ structure
-   - Creates .sdd/milestones/
-   - Creates .sdd/preferences.md (from wizard answers)
+Step 9: Bootstrap .gsd/ structure
+   - Creates .gsd/milestones/
+   - Creates .gsd/PREFERENCES.md (from wizard answers)
    - Creates .gitignore entries
    - Seeds CONTEXT.md with detected project signals
    - Commits "chore: init gsd" (if commit_docs enabled)

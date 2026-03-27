@@ -35,7 +35,7 @@ import { showProjectInit, offerMigration } from "./init-wizard.js";
 import { validateDirectory } from "./validate-directory.js";
 import { showConfirm } from "../shared/tui.js";
 import { debugLog } from "./debug-logger.js";
-import { findMilestoneIds, nextMilestoneId, reserveMilestoneId, getReservedMilestoneIds } from "./milestone-ids.js";
+import { findMilestoneIds, nextMilestoneId, reserveMilestoneId, getReservedMilestoneIds, clearReservedMilestoneIds } from "./milestone-ids.js";
 import { parkMilestone, discardMilestone } from "./milestone-actions.js";
 import { resolveModelWithFallbacksForUnit } from "./preferences-models.js";
 
@@ -373,7 +373,10 @@ export async function showHeadlessMilestoneCreation(
   basePath: string,
   seedContext: string,
 ): Promise<void> {
-  // Ensure .sdd/ is bootstrapped
+  // Clear stale reservations from previous cancelled sessions (#2488)
+  clearReservedMilestoneIds();
+
+  // Ensure .gsd/ is bootstrapped
   bootstrapGsdProject(basePath);
 
   // Generate next milestone ID
@@ -447,7 +450,10 @@ async function buildDiscussSlicePrompt(
   }
 
   // Completed slice summaries — what was already built that this slice builds on
+  // Ensure DB is open so getMilestoneSlices returns real data (#2560).
   {
+    const { ensureDbOpen } = await import("./bootstrap/dynamic-tools.js");
+    await ensureDbOpen();
     type NormSlice = { id: string; done: boolean };
     let normSlices: NormSlice[] = [];
     if (isDbAvailable()) {
@@ -511,9 +517,15 @@ export async function showDiscuss(
 
   const state = await deriveState(basePath);
 
-  // Guard: no active milestone
-  if (!state.activeMilestone) {
-    ctx.ui.notify("No active milestone. Run /gsd to create one first.", "warning");
+  // No active milestone (or corrupted milestone with undefined id) —
+  // check for pending milestones to discuss instead
+  if (!state.activeMilestone?.id) {
+    const pendingMilestones = state.registry.filter(m => m.status === "pending");
+    if (pendingMilestones.length === 0) {
+      ctx.ui.notify("No active milestone. Run /gsd to create one first.", "warning");
+      return;
+    }
+    await showDiscussQueuedMilestone(ctx, pi, basePath, pendingMilestones);
     return;
   }
 
@@ -579,6 +591,14 @@ export async function showDiscuss(
     }
     return;
   }
+
+  // Ensure DB is open before querying slices (#2560).
+  // showDiscuss() is a command handler — unlike tool handlers, it has no
+  // automatic ensureDbOpen() call. Without this, isDbAvailable() returns
+  // false on cold-start sessions and normSlices falls to [] → false
+  // "All slices complete" exit.
+  const { ensureDbOpen } = await import("./bootstrap/dynamic-tools.js");
+  await ensureDbOpen();
 
   // Guard: no roadmap yet (unless DB has slices)
   const roadmapFile = resolveMilestoneFile(basePath, mid, "ROADMAP");
@@ -648,6 +668,17 @@ export async function showDiscuss(
       };
     });
 
+    // Offer access to queued milestones when any exist
+    const pendingMilestones = state.registry.filter(m => m.status === "pending");
+    if (pendingMilestones.length > 0) {
+      actions.push({
+        id: "discuss_queued_milestone",
+        label: "Discuss a queued milestone",
+        description: `Refine context for ${pendingMilestones.length} queued milestone(s). Does not affect current execution.`,
+        recommended: false,
+      });
+    }
+
     const choice = await showNextAction(ctx, {
       title: "GSD — Discuss a slice",
       summary: [
@@ -659,6 +690,11 @@ export async function showDiscuss(
     });
 
     if (choice === "not_yet") return;
+
+    if (choice === "discuss_queued_milestone") {
+      await showDiscussQueuedMilestone(ctx, pi, basePath, pendingMilestones);
+      return;
+    }
 
     const chosen = pendingSlices.find(s => s.id === choice);
     if (!chosen) return;
@@ -687,6 +723,79 @@ export async function showDiscuss(
     await ctx.waitForIdle();
     invalidateAllCaches();
   }
+}
+
+// ─── Queued Milestone Discussion ─────────────────────────────────────────────
+
+/**
+ * Show a picker of queued (pending) milestones and dispatch a discuss flow for
+ * the chosen one. Discussing a queued milestone does NOT activate it — it only
+ * refines the CONTEXT.md artifact so it is better prepared when auto-mode
+ * eventually reaches it.
+ */
+async function showDiscussQueuedMilestone(
+  ctx: ExtensionCommandContext,
+  pi: ExtensionAPI,
+  basePath: string,
+  pendingMilestones: Array<{ id: string; title: string; status: string }>,
+): Promise<void> {
+  const actions = pendingMilestones.map((m, i) => {
+    const hasContext = !!resolveMilestoneFile(basePath, m.id, "CONTEXT");
+    const hasDraft = !hasContext && !!resolveMilestoneFile(basePath, m.id, "CONTEXT-DRAFT");
+    const contextStatus = hasContext ? "context ✓" : hasDraft ? "draft context" : "no context yet";
+    return {
+      id: m.id,
+      label: `${m.id}: ${m.title}`,
+      description: `[queued] · ${contextStatus}`,
+      recommended: i === 0,
+    };
+  });
+
+  const choice = await showNextAction(ctx, {
+    title: "GSD — Discuss a queued milestone",
+    summary: [
+      "Select a queued milestone to discuss.",
+      "Discussing will update its context file. It will not be activated.",
+    ],
+    actions,
+    notYetMessage: "Run /gsd discuss when ready.",
+  });
+
+  if (choice === "not_yet") return;
+
+  const chosen = pendingMilestones.find(m => m.id === choice);
+  if (!chosen) return;
+
+  await dispatchDiscussForMilestone(ctx, pi, basePath, chosen.id, chosen.title);
+}
+
+/**
+ * Dispatch the guided-discuss-milestone prompt for a milestone without
+ * setting pendingAutoStart — so discussing a queued milestone does not
+ * implicitly activate it when the session ends.
+ */
+async function dispatchDiscussForMilestone(
+  ctx: ExtensionCommandContext,
+  pi: ExtensionAPI,
+  basePath: string,
+  mid: string,
+  milestoneTitle: string,
+): Promise<void> {
+  const draftFile = resolveMilestoneFile(basePath, mid, "CONTEXT-DRAFT");
+  const draftContent = draftFile ? await loadFile(draftFile) : null;
+  const discussMilestoneTemplates = inlineTemplate("context", "Context");
+  const structuredQuestionsAvailable = pi.getActiveTools().includes("ask_user_questions") ? "true" : "false";
+  const basePrompt = loadPrompt("guided-discuss-milestone", {
+    milestoneId: mid,
+    milestoneTitle,
+    inlinedTemplates: discussMilestoneTemplates,
+    structuredQuestionsAvailable,
+    commitInstruction: buildDocsCommitInstruction(`docs(${mid}): milestone context from discuss`),
+  });
+  const prompt = draftContent
+    ? `${basePrompt}\n\n## Prior Discussion (Draft Seed)\n\n${draftContent}`
+    : basePrompt;
+  await dispatchWorkflow(pi, prompt, "gsd-discuss", ctx, "plan-milestone");
 }
 
 // ─── Smart Entry Point ────────────────────────────────────────────────────────
@@ -842,6 +951,11 @@ export async function showSmartEntry(
 ): Promise<void> {
   const stepMode = options?.step;
 
+  // ── Clear stale milestone ID reservations from previous cancelled sessions ──
+  // Reservations only need to survive within a single /gsd interaction.
+  // Without this, each cancelled session permanently bumps the next ID. (#2488)
+  clearReservedMilestoneIds();
+
   // ── Directory safety check — refuse to operate in system/home dirs ───
   const dirCheck = validateDirectory(basePath);
   if (dirCheck.severity === "blocked") {
@@ -930,7 +1044,7 @@ export async function showSmartEntry(
 
   const state = await deriveState(basePath);
 
-  if (!state.activeMilestone) {
+  if (!state.activeMilestone?.id) {
     // Guard: if a discuss session is already in flight, don't re-inject the prompt.
     // Both /gsd and /gsd auto reach this branch when no milestone exists yet.
     // Without this guard, every subsequent /gsd call overwrites pendingAutoStart

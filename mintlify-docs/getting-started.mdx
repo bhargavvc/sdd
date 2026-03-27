@@ -40,7 +40,11 @@ For non-Anthropic models, you may need a search API key. Run `/gsd config` to se
 
 ### Set up MCP servers
 
-To connect GSD to local or external MCP servers, add project-local config in `.mcp.json` or `.gsd/mcp.json`. See [configuration](/guides/configuration) for examples.
+To connect GSD to local or external MCP servers, add project-local config in `.mcp.json` or `.gsd/mcp.json`. See [configuration](/guides/configuration) for examples. Use `/gsd mcp` to verify connectivity.
+
+### Offline mode
+
+GSD works fully offline with local models (Ollama, vLLM, LM Studio). Configure a [custom model](/guides/custom-models) and GSD handles the rest — no internet connection required.
 
 ## Choose a model
 

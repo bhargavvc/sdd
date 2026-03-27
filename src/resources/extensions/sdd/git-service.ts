@@ -18,8 +18,8 @@ import { loadEffectiveSDDPreferences } from "./preferences.js";
 
 import {
   detectWorktreeName,
-  SLICE_BRANCH_RE,
 } from "./worktree.js";
+import { SLICE_BRANCH_RE, QUICK_BRANCH_RE, WORKFLOW_BRANCH_RE } from "./branch-patterns.js";
 import {
   nativeGetCurrentBranch,
   nativeDetectMainBranch,
@@ -102,23 +102,25 @@ export interface TaskCommitContext {
 
 /**
  * Build a meaningful conventional commit message from task execution context.
- * Format: `{type}({sliceId}/{taskId}): {description}`
+ * Format: `{type}: {description}` (clean conventional commit — no GSD IDs in subject).
+ *
+ * GSD metadata is placed in a `GSD-Task:` git trailer at the end of the body,
+ * following the same convention as `Signed-off-by:` or `Co-Authored-By:`.
  *
  * The description is the task summary one-liner if available (it describes
  * what was actually built), falling back to the task title (what was planned).
  */
 export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
-  const scope = ctx.taskId; // e.g. "S01/T02" or just "T02"
   const description = ctx.oneLiner || ctx.taskTitle;
   const type = inferCommitType(ctx.taskTitle, ctx.oneLiner);
 
-  // Truncate description to ~72 chars for subject line
-  const maxDescLen = 68 - type.length - scope.length;
+  // Truncate description to ~72 chars for subject line (full budget without scope)
+  const maxDescLen = 70 - type.length;
   const truncated = description.length > maxDescLen
     ? description.slice(0, maxDescLen - 1).trimEnd() + "…"
     : description;
 
-  const subject = `${type}(${scope}): ${truncated}`;
+  const subject = `${type}: ${truncated}`;
 
   // Build body with key files if available
   const bodyParts: string[] = [];
@@ -131,15 +133,14 @@ export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
     bodyParts.push(fileLines);
   }
 
+  // Trailers: GSD-Task first, then Resolves
+  bodyParts.push(`GSD-Task: ${ctx.taskId}`);
+
   if (ctx.issueNumber) {
     bodyParts.push(`Resolves #${ctx.issueNumber}`);
   }
 
-  if (bodyParts.length > 0) {
-    return `${subject}\n\n${bodyParts.join("\n\n")}`;
-  }
-
-  return subject;
+  return `${subject}\n\n${bodyParts.join("\n\n")}`;
 }
 
 /**
@@ -242,8 +243,8 @@ export function readIntegrationBranch(basePath: string, milestoneId: string): st
  *
  * The file is committed immediately so the metadata is persisted in git.
  */
-/** Regex matching GSD quick-task branches: gsd/quick/<num>-<slug> */
-export const QUICK_BRANCH_RE = /^gsd\/quick\//;
+/** Re-export for backward compatibility — canonical definitions in branch-patterns.ts */
+export { QUICK_BRANCH_RE, WORKFLOW_BRANCH_RE } from "./branch-patterns.js";
 
 export function writeIntegrationBranch(
   basePath: string,
@@ -256,6 +257,10 @@ export function writeIntegrationBranch(
   // to their origin branch on completion. Recording one as the integration
   // target causes milestone merges to land on the wrong branch (#1293).
   if (QUICK_BRANCH_RE.test(branch)) return;
+  // Don't record workflow-template branches (hotfix, bugfix, spike, etc.) —
+  // same root cause as quick-task branches (#2498). All templates create
+  // gsd/<templateId>/<slug> branches that are ephemeral.
+  if (WORKFLOW_BRANCH_RE.test(branch)) return;
   // Validate
   if (!VALID_BRANCH_NAME.test(branch)) return;
   // Skip if already recorded with the same branch (idempotent across restarts).
@@ -440,11 +445,6 @@ export class GitServiceImpl {
     this._milestoneId = milestoneId;
   }
 
-  /** Convenience wrapper: run git in this repo's basePath. */
-  private git(args: string[], options: { allowFailure?: boolean; input?: string } = {}): string {
-    return runGit(this.basePath, args, options);
-  }
-
   /**
    * Smart staging: `git add -A` excluding GSD runtime paths via pathspec.
    * Falls back to plain `git add -A` if the exclusion pathspec fails.
@@ -538,7 +538,7 @@ export class GitServiceImpl {
 
     const message = taskContext
       ? buildTaskCommitMessage(taskContext)
-      : `chore(${unitId}): auto-commit after ${unitType}`;
+      : `chore: auto-commit after ${unitType}\n\nGSD-Unit: ${unitId}`;
     nativeCommit(this.basePath, message, { allowEmpty: false });
     return message;
   }
@@ -603,18 +603,14 @@ export class GitServiceImpl {
     return nativeGetCurrentBranch(this.basePath);
   }
 
-  /** True if currently on a GSD slice branch. */
-  // ─── Branch Lifecycle ──────────────────────────────────────────────────
-
-  // ─── S05 Features ─────────────────────────────────────────────────────
-
   /**
    * Create a snapshot ref for the given label (typically a slice branch name).
-   * Gated on prefs.snapshots === true. Ref path: refs/sdd/snapshots/<label>/<timestamp>
+   * Enabled by default; opt out with prefs.snapshots === false.
+   * Ref path: refs/gsd/snapshots/<label>/<timestamp>
    * The ref points at HEAD, capturing the current commit before destructive operations.
    */
   createSnapshot(label: string): void {
-    if (this.prefs.snapshots !== true) return;
+    if (this.prefs.snapshots === false) return;
 
     const now = new Date();
     const ts = now.getFullYear().toString()
@@ -636,7 +632,7 @@ export class GitServiceImpl {
    * Stub: to be implemented in T03.
    */
   runPreMergeCheck(): PreMergeCheckResult {
-    if (this.prefs.pre_merge_check === false || this.prefs.pre_merge_check === undefined) {
+    if (this.prefs.pre_merge_check === false) {
       return { passed: true, skipped: true };
     }
 
@@ -667,8 +663,6 @@ export class GitServiceImpl {
       return { passed: false, skipped: false, command, error: msg };
     }
   }
-
-  // ─── Merge ─────────────────────────────────────────────────────────────
 
 }
 

@@ -11,11 +11,15 @@ Configure via the `git.isolation` preference:
 
 | Mode | Working directory | Branch | Best for |
 |------|-------------------|--------|----------|
-| `worktree` (default) | `.gsd/worktrees/<MID>/` | `milestone/<MID>` | Most projects — full file isolation |
+| `none` (default) | Project root | Current branch | Most projects — no isolation overhead |
+| `worktree` | `.gsd/worktrees/<MID>/` | `milestone/<MID>` | Full file isolation |
 | `branch` | Project root | `milestone/<MID>` | Submodule-heavy repos |
-| `none` | Project root | Current branch | Hot-reload workflows |
 
-### `worktree` mode (default)
+### `none` mode (default)
+
+Work happens directly on your current branch. No worktree, no milestone branch. GSD still commits sequentially with conventional commit messages, but there's no branch isolation. This is the simplest mode and works well for most projects.
+
+### `worktree` mode
 
 Each milestone gets its own git worktree on a `milestone/<MID>` branch. All execution happens inside the worktree. On completion, the worktree is squash-merged to main as one clean commit. The worktree and branch are cleaned up.
 
@@ -23,9 +27,9 @@ Each milestone gets its own git worktree on a `milestone/<MID>` branch. All exec
 
 Work happens in the project root on a `milestone/<MID>` branch. No worktree is created. On completion, the branch is merged to main.
 
-### `none` mode
-
-Work happens directly on your current branch. No worktree, no milestone branch. GSD still commits sequentially with conventional commit messages, but there's no branch isolation.
+<Note>
+**Changed in v2.45.0:** The default isolation mode changed from `worktree` to `none`. If your workflow relies on worktree isolation, set `git.isolation: worktree` explicitly in your preferences.
+</Note>
 
 ## Branching model
 
@@ -33,9 +37,9 @@ Work happens directly on your current branch. No worktree, no milestone branch. 
 main ─────────────────────────────────────────────────────────
   │                                                     ↑
   └── milestone/M001 (worktree) ────────────────────────┘
-       commit: feat(S01/T01): core types
-       commit: feat(S01/T02): markdown parser
-       commit: feat(S01/T03): file writer
+       commit: feat: core types
+       commit: feat: markdown parser
+       commit: feat: file writer
        → squash-merged to main as single commit
 ```
 
@@ -57,13 +61,16 @@ Merges happen sequentially to avoid conflicts.
 
 ### Commit format
 
-Conventional commit format with scope:
+Conventional commit format with GSD metadata in trailers:
 
 ```
-feat(S01/T01): core type definitions
-feat(S01/T02): markdown parser for plan files
-fix(M001/S03): bug fixes and doc corrections
-docs(M001/S04): workflow documentation
+feat: core type definitions
+
+GSD-Task: M001/S01/T01
+
+feat: markdown parser for plan files
+
+GSD-Task: M001/S01/T02
 ```
 
 ## Workflow modes
@@ -97,7 +104,7 @@ git:
   commit_type: feat
   main_branch: main
   merge_strategy: squash    # "squash" or "merge"
-  isolation: worktree       # "worktree", "branch", or "none"
+  isolation: none           # "none" (default), "worktree", or "branch"
   commit_docs: true
   auto_pr: false
   pr_target_branch: develop
