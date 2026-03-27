@@ -78,7 +78,7 @@ export function buildDesktopNotificationCommand(
     // so it gets a proper permission entry in System Settings → Notifications.
     // osascript notifications are silently swallowed when the calling terminal
     // (Ghostty, iTerm2, etc.) lacks notification permissions — exits 0, no error.
-    // See: https://github.com/sdd-build/sdd-2/issues/2632
+    // See: https://github.com/gsd-build/gsd-2/issues/2632
     const tnPath = findExecutable("terminal-notifier");
     if (tnPath) {
       const sound = level === "error" ? "Basso" : "Glass";

@@ -70,7 +70,7 @@ const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 /**
  * Root-level .sdd/ state files synced between worktree and project root.
- * Single source of truth — used by syncGsdStateToWorktree, syncWorktreeStateBack,
+ * Single source of truth — used by syncSddStateToWorktree, syncWorktreeStateBack,
  * and the dispatch-level sync functions.
  */
 const ROOT_STATE_FILES = [
@@ -83,7 +83,7 @@ const ROOT_STATE_FILES = [
   "completed-units.json",
   "metrics.json",
   // NOTE: preferences.md is intentionally NOT in ROOT_STATE_FILES.
-  // Forward-sync (main → worktree) is handled explicitly in syncGsdStateToWorktree().
+  // Forward-sync (main → worktree) is handled explicitly in syncSddStateToWorktree().
   // Back-sync (worktree → main) must NEVER overwrite the project root's copy
   // because the project root is authoritative for preferences (#2684).
 ] as const;
@@ -193,8 +193,8 @@ export function syncProjectRootToWorktree(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const prGsd = join(projectRoot, ".sdd");
-  const wtGsd = join(worktreePath_, ".sdd");
+  const prSdd = join(projectRoot, ".sdd");
+  const wtSdd = join(worktreePath_, ".sdd");
 
   // Copy milestone directory from project root to worktree — additive only.
   // force:false prevents cpSync from overwriting existing worktree files.
@@ -202,8 +202,8 @@ export function syncProjectRootToWorktree(
   // by validate-milestone) get clobbered by stale project root copies,
   // causing an infinite re-validation loop (#1886).
   safeCopyRecursive(
-    join(prGsd, "milestones", milestoneId),
-    join(wtGsd, "milestones", milestoneId),
+    join(prSdd, "milestones", milestoneId),
+    join(wtSdd, "milestones", milestoneId),
     { force: false },
   );
 
@@ -211,15 +211,15 @@ export function syncProjectRootToWorktree(
   // Project root is authoritative for completion state after crash recovery;
   // without this, the worktree re-dispatches already-completed units (#1886).
   safeCopy(
-    join(prGsd, "completed-units.json"),
-    join(wtGsd, "completed-units.json"),
+    join(prSdd, "completed-units.json"),
+    join(wtSdd, "completed-units.json"),
     { force: true },
   );
 
   // Delete worktree sdd.db so it rebuilds from the freshly synced files.
   // Stale DB rows are the root cause of the infinite skip loop (#853).
   try {
-    const wtDb = join(wtGsd, "sdd.db");
+    const wtDb = join(wtSdd, "sdd.db");
     if (existsSync(wtDb)) {
       unlinkSync(wtDb);
     }
@@ -242,32 +242,32 @@ export function syncStateToProjectRoot(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const wtGsd = join(worktreePath_, ".sdd");
-  const prGsd = join(projectRoot, ".sdd");
+  const wtSdd = join(worktreePath_, ".sdd");
+  const prSdd = join(projectRoot, ".sdd");
 
   // 1. STATE.md — the quick-glance status used by initial deriveState()
-  safeCopy(join(wtGsd, "STATE.md"), join(prGsd, "STATE.md"), { force: true });
+  safeCopy(join(wtSdd, "STATE.md"), join(prSdd, "STATE.md"), { force: true });
 
   // 2. Milestone directory — ROADMAP, slice PLANs, task summaries
   // Copy the entire milestone .sdd subtree so deriveState reads current checkboxes
   safeCopyRecursive(
-    join(wtGsd, "milestones", milestoneId),
-    join(prGsd, "milestones", milestoneId),
+    join(wtSdd, "milestones", milestoneId),
+    join(prSdd, "milestones", milestoneId),
     { force: true },
   );
 
   // 3. metrics.json — session cost/token tracking (#2313).
   // Without this, metrics accumulated in the worktree are invisible from the
   // project root and never appear in the dashboard or skill-health reports.
-  safeCopy(join(wtGsd, "metrics.json"), join(prGsd, "metrics.json"), { force: true });
+  safeCopy(join(wtSdd, "metrics.json"), join(prSdd, "metrics.json"), { force: true });
 
   // 4. Runtime records — unit dispatch state used by selfHealRuntimeRecords().
   // Without this, a crash during a unit leaves the runtime record only in the
   // worktree. If the next session resolves basePath before worktree re-entry,
   // selfHeal can't find or clear the stale record (#769).
   safeCopyRecursive(
-    join(wtGsd, "runtime", "units"),
-    join(prGsd, "runtime", "units"),
+    join(wtSdd, "runtime", "units"),
+    join(prSdd, "runtime", "units"),
     { force: true },
   );
 }
@@ -343,9 +343,9 @@ export function escapeStaleWorktree(base: string): string {
   // the string-slice heuristic matched the wrong /.sdd/ boundary. This happens
   // when .sdd is a symlink into ~/.sdd/projects/<hash> and process.cwd()
   // resolved through the symlink. Returning ~ would be catastrophic (#1676).
-  const candidateGsd = join(projectRoot, ".sdd").replaceAll("\\", "/");
+  const candidateSdd = join(projectRoot, ".sdd").replaceAll("\\", "/");
   const gsdHomePath = gsdHome.replaceAll("\\", "/");
-  if (candidateGsd === gsdHomePath || candidateGsd.startsWith(gsdHomePath + "/")) {
+  if (candidateSdd === gsdHomePath || candidateSdd.startsWith(gsdHomePath + "/")) {
     // Don't chdir to home — return base unchanged.
     // resolveProjectRoot() in worktree.ts has the full git-file-based recovery
     // and will be called by the caller (startAuto → projectRoot()).
@@ -416,19 +416,19 @@ export function syncSddStateToWorktree(
   mainBasePath: string,
   worktreePath_: string,
 ): { synced: string[] } {
-  const mainGsd = sddRoot(mainBasePath);
-  const wtGsd = sddRoot(worktreePath_);
+  const mainSdd = sddRoot(mainBasePath);
+  const wtSdd = sddRoot(worktreePath_);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
-  if (isSamePath(mainGsd, wtGsd)) return { synced };
+  if (isSamePath(mainSdd, wtSdd)) return { synced };
 
-  if (!existsSync(mainGsd) || !existsSync(wtGsd)) return { synced };
+  if (!existsSync(mainSdd) || !existsSync(wtSdd)) return { synced };
 
   // Sync root-level .sdd/ files (DECISIONS, REQUIREMENTS, PROJECT, KNOWLEDGE, etc.)
   for (const f of ROOT_STATE_FILES) {
-    const src = join(mainGsd, f);
-    const dst = join(wtGsd, f);
+    const src = join(mainSdd, f);
+    const dst = join(wtSdd, f);
     if (existsSync(src) && !existsSync(dst)) {
       try {
         cpSync(src, dst);
@@ -443,8 +443,8 @@ export function syncSddStateToWorktree(
   // NOT in ROOT_STATE_FILES because syncWorktreeStateBack() must never overwrite
   // the project root's preferences — the project root is authoritative (#2684).
   {
-    const src = join(mainGsd, "preferences.md");
-    const dst = join(wtGsd, "preferences.md");
+    const src = join(mainSdd, "preferences.md");
+    const dst = join(wtSdd, "preferences.md");
     if (existsSync(src) && !existsSync(dst)) {
       try {
         cpSync(src, dst);
@@ -456,8 +456,8 @@ export function syncSddStateToWorktree(
   }
 
   // Sync milestones: copy entire milestone directories that are missing
-  const mainMilestonesDir = join(mainGsd, "milestones");
-  const wtMilestonesDir = join(wtGsd, "milestones");
+  const mainMilestonesDir = join(mainSdd, "milestones");
+  const wtMilestonesDir = join(wtSdd, "milestones");
   if (existsSync(mainMilestonesDir)) {
     try {
       mkdirSync(wtMilestonesDir, { recursive: true });
@@ -570,22 +570,22 @@ export function syncWorktreeStateBack(
   worktreePath: string,
   milestoneId: string,
 ): { synced: string[] } {
-  const mainGsd = sddRoot(mainBasePath);
-  const wtGsd = sddRoot(worktreePath);
+  const mainSdd = sddRoot(mainBasePath);
+  const wtSdd = sddRoot(worktreePath);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
-  if (isSamePath(mainGsd, wtGsd)) return { synced };
+  if (isSamePath(mainSdd, wtSdd)) return { synced };
 
-  if (!existsSync(wtGsd) || !existsSync(mainGsd)) return { synced };
+  if (!existsSync(wtSdd) || !existsSync(mainSdd)) return { synced };
 
   // ── 0. Pre-upgrade worktree DB reconciliation ────────────────────────
   // If the worktree has its own sdd.db (copied before the WAL transition),
   // reconcile its hierarchy data into the project root DB before syncing
   // files. This handles in-flight worktrees that were created before the
   // upgrade to shared WAL mode.
-  const wtLocalDb = join(wtGsd, "sdd.db");
-  const mainDb = join(mainGsd, "sdd.db");
+  const wtLocalDb = join(wtSdd, "sdd.db");
+  const mainDb = join(mainSdd, "sdd.db");
   if (existsSync(wtLocalDb) && existsSync(mainDb)) {
     try {
       reconcileWorktreeDb(mainDb, wtLocalDb);
@@ -602,8 +602,8 @@ export function syncWorktreeStateBack(
   // written during milestone closeout and lost on teardown without explicit sync
   // (#1787, #2313).
   for (const f of ROOT_STATE_FILES) {
-    const src = join(wtGsd, f);
-    const dst = join(mainGsd, f);
+    const src = join(wtSdd, f);
+    const dst = join(mainSdd, f);
     if (existsSync(src)) {
       try {
         cpSync(src, dst, { force: true });
@@ -618,7 +618,7 @@ export function syncWorktreeStateBack(
   // The complete-milestone unit may create next-milestone artifacts (e.g.
   // M007 setup while closing M006). We must sync every milestone directory
   // in the worktree, not just the current one.
-  const wtMilestonesDir = join(wtGsd, "milestones");
+  const wtMilestonesDir = join(wtSdd, "milestones");
   if (!existsSync(wtMilestonesDir)) return { synced };
 
   try {
@@ -627,7 +627,7 @@ export function syncWorktreeStateBack(
       .map((d) => d.name);
 
     for (const mid of wtMilestones) {
-      syncMilestoneDir(wtGsd, mainGsd, mid, synced);
+      syncMilestoneDir(wtSdd, mainSdd, mid, synced);
     }
   } catch {
     /* non-fatal */
@@ -664,13 +664,13 @@ function syncDirFiles(
 }
 
 function syncMilestoneDir(
-  wtGsd: string,
-  mainGsd: string,
+  wtSdd: string,
+  mainSdd: string,
   mid: string,
   synced: string[],
 ): void {
-  const wtMilestoneDir = join(wtGsd, "milestones", mid);
-  const mainMilestoneDir = join(mainGsd, "milestones", mid);
+  const wtMilestoneDir = join(wtSdd, "milestones", mid);
+  const mainMilestoneDir = join(mainSdd, "milestones", mid);
 
   if (!existsSync(wtMilestoneDir)) return;
   mkdirSync(mainMilestoneDir, { recursive: true });
@@ -966,12 +966,12 @@ export function createAutoWorktree(
  * Best-effort — failures are non-fatal since auto-mode can recreate artifacts.
  */
 function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
-  const srcGsd = join(srcBase, ".sdd");
-  const dstGsd = join(wtPath, ".sdd");
-  if (!existsSync(srcGsd)) return;
+  const srcSdd = join(srcBase, ".sdd");
+  const dstSdd = join(wtPath, ".sdd");
+  if (!existsSync(srcSdd)) return;
 
   // Copy milestones/ directory (planning files, roadmaps, plans, research)
-  safeCopyRecursive(join(srcGsd, "milestones"), join(dstGsd, "milestones"), {
+  safeCopyRecursive(join(srcSdd, "milestones"), join(dstSdd, "milestones"), {
     force: true,
     filter: (src) => !src.endsWith("-META.json"),
   });
@@ -987,7 +987,7 @@ function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
     "OVERRIDES.md",
     "preferences.md",
   ]) {
-    safeCopy(join(srcGsd, file), join(dstGsd, file), { force: true });
+    safeCopy(join(srcSdd, file), join(dstSdd, file), { force: true });
   }
 
   // Shared WAL (R012): worktrees use the project root's DB directly.
@@ -1506,7 +1506,7 @@ export function mergeMilestoneToMain(
       // version) and drop the now-applied stash.
       const uu = nativeConflictFiles(originalBasePath_);
       const gsdUU = uu.filter((f) => f.startsWith(".sdd/"));
-      const nonGsdUU = uu.filter((f) => !f.startsWith(".sdd/"));
+      const nonSddUU = uu.filter((f) => !f.startsWith(".sdd/"));
 
       if (gsdUU.length > 0) {
         for (const f of gsdUU) {
@@ -1525,7 +1525,7 @@ export function mergeMilestoneToMain(
         }
       }
 
-      if (nonGsdUU.length === 0) {
+      if (nonSddUU.length === 0) {
         // All conflicts were .sdd/ files — safe to drop the stash
         try {
           execFileSync("git", ["stash", "drop"], {
@@ -1537,7 +1537,7 @@ export function mergeMilestoneToMain(
       } else {
         // Non-.sdd conflicts remain — leave stash for manual resolution
         logWarning("reconcile", "Stash pop conflict on non-.sdd files after merge", {
-          files: nonGsdUU.join(", "),
+          files: nonSddUU.join(", "),
         });
       }
     }

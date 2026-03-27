@@ -39,7 +39,7 @@ function installEpipeGuard(): void {
   }
 }
 
-export function registerGsdExtension(pi: ExtensionAPI): void {
+export function registerSddExtension(pi: ExtensionAPI): void {
   registerSDDCommand(pi);
   registerWorktreeCommand(pi);
   registerExitCommand(pi);

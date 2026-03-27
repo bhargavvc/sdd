@@ -52,7 +52,7 @@ export async function loadContext(options: ContextOptions): Promise<string> {
  * Bootstrap .sdd/ directory structure for headless new-milestone.
  * Mirrors the bootstrap logic from guided-flow.ts showSmartEntry().
  */
-export function bootstrapGsdProject(basePath: string): void {
+export function bootstrapSddProject(basePath: string): void {
   const sddDir = join(basePath, '.sdd')
   mkdirSync(join(sddDir, 'milestones'), { recursive: true })
   mkdirSync(join(sddDir, 'runtime'), { recursive: true })

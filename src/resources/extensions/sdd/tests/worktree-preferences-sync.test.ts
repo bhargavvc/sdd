@@ -4,7 +4,7 @@
  * Verifies that preferences.md is seeded into auto-mode worktrees:
  *
  *   1. copyPlanningArtifacts() copies preferences.md on initial worktree creation
- *   2. syncGsdStateToWorktree() forward-syncs preferences.md (additive only)
+ *   2. syncSddStateToWorktree() forward-syncs preferences.md (additive only)
  *   3. syncWorktreeStateBack() does NOT overwrite project root preferences.md
  */
 
@@ -22,7 +22,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 import {
-  syncGsdStateToWorktree,
+  syncSddStateToWorktree,
   syncWorktreeStateBack,
 } from "../auto-worktree.ts";
 
@@ -56,7 +56,7 @@ const PREFS_CONTENT = [
   '  - use: "frontend-design"',
 ].join("\n");
 
-test("#2684: syncGsdStateToWorktree forward-syncs preferences.md when missing from worktree", (t) => {
+test("#2684: syncSddStateToWorktree forward-syncs preferences.md when missing from worktree", (t) => {
   const mainBase = makeTempDir("main");
   const wtBase = makeTempDir("wt");
   t.after(() => cleanup(mainBase, wtBase));
@@ -67,7 +67,7 @@ test("#2684: syncGsdStateToWorktree forward-syncs preferences.md when missing fr
   // Worktree has .sdd/ but no preferences.md
   mkdirSync(join(wtBase, ".sdd"), { recursive: true });
 
-  const result = syncGsdStateToWorktree(mainBase, wtBase);
+  const result = syncSddStateToWorktree(mainBase, wtBase);
 
   assert.ok(
     existsSync(join(wtBase, ".sdd", "preferences.md")),
@@ -84,7 +84,7 @@ test("#2684: syncGsdStateToWorktree forward-syncs preferences.md when missing fr
   );
 });
 
-test("#2684: syncGsdStateToWorktree does NOT overwrite existing worktree preferences.md", (t) => {
+test("#2684: syncSddStateToWorktree does NOT overwrite existing worktree preferences.md", (t) => {
   const mainBase = makeTempDir("main");
   const wtBase = makeTempDir("wt");
   t.after(() => cleanup(mainBase, wtBase));
@@ -95,7 +95,7 @@ test("#2684: syncGsdStateToWorktree does NOT overwrite existing worktree prefere
   writeFile(mainBase, ".sdd/preferences.md", rootPrefs);
   writeFile(wtBase, ".sdd/preferences.md", wtPrefs);
 
-  syncGsdStateToWorktree(mainBase, wtBase);
+  syncSddStateToWorktree(mainBase, wtBase);
 
   assert.equal(
     readFileSync(join(wtBase, ".sdd", "preferences.md"), "utf-8"),

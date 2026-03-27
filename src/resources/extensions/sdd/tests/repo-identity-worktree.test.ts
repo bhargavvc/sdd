@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 
-import { repoIdentity, externalGsdRoot, ensureGsdSymlink, validateProjectId, readRepoMeta, isInheritedRepo } from "../repo-identity.ts";
+import { repoIdentity, externalSddRoot, ensureSddSymlink, validateProjectId, readRepoMeta, isInheritedRepo } from "../repo-identity.ts";
 /**
  * Normalize a path for reliable comparison on Windows CI runners.
  * `os.tmpdir()` may return the 8.3 short-path form (e.g. `C:\Users\RUNNER~1`)
@@ -43,7 +43,7 @@ describe('repo-identity-worktree', () => {
     worktreePath = join(base, ".sdd", "worktrees", "M001");
     run(`git worktree add -b milestone/M001 ${worktreePath}`, base);
 
-    expectedExternalState = externalGsdRoot(base);
+    expectedExternalState = externalSddRoot(base);
   });
 
   after(() => {
@@ -53,31 +53,31 @@ describe('repo-identity-worktree', () => {
     rmSync(stateDir, { recursive: true, force: true });
   });
 
-test('ensureGsdSymlink points worktree at main repo external state dir', () => {
-    const mainState = ensureGsdSymlink(base);
-    assert.deepStrictEqual(mainState, realpathSync(join(base, ".sdd")), "ensureGsdSymlink(base) returns the current main repo .sdd target");
-    const worktreeState = ensureGsdSymlink(worktreePath);
+test('ensureSddSymlink points worktree at main repo external state dir', () => {
+    const mainState = ensureSddSymlink(base);
+    assert.deepStrictEqual(mainState, realpathSync(join(base, ".sdd")), "ensureSddSymlink(base) returns the current main repo .sdd target");
+    const worktreeState = ensureSddSymlink(worktreePath);
     assert.deepStrictEqual(worktreeState, expectedExternalState, "worktree symlink target matches main repo external state dir");
     assert.ok(existsSync(join(worktreePath, ".sdd")), "worktree .sdd exists");
     assert.ok(lstatSync(join(worktreePath, ".sdd")).isSymbolicLink(), "worktree .sdd is a symlink");
     assert.deepStrictEqual(realpathSync(join(worktreePath, ".sdd")), realpathSync(expectedExternalState), "worktree .sdd symlink resolves to main repo external state dir");
 });
 
-test('ensureGsdSymlink heals stale worktree symlinks', () => {
+test('ensureSddSymlink heals stale worktree symlinks', () => {
     const staleState = join(stateDir, "projects", "stale-worktree-state");
     mkdirSync(staleState, { recursive: true });
     rmSync(join(worktreePath, ".sdd"), { recursive: true, force: true });
     symlinkSync(staleState, join(worktreePath, ".sdd"), "junction");
-    const healedState = ensureGsdSymlink(worktreePath);
+    const healedState = ensureSddSymlink(worktreePath);
     assert.deepStrictEqual(healedState, expectedExternalState, "stale worktree symlink is repaired to canonical external state dir");
     assert.deepStrictEqual(realpathSync(join(worktreePath, ".sdd")), realpathSync(expectedExternalState), "healed worktree symlink resolves to canonical external state dir");
 });
 
-test('ensureGsdSymlink preserves worktree .sdd directories', () => {
+test('ensureSddSymlink preserves worktree .sdd directories', () => {
     rmSync(join(worktreePath, ".sdd"), { recursive: true, force: true });
     mkdirSync(join(worktreePath, ".sdd", "milestones"), { recursive: true });
     writeFileSync(join(worktreePath, ".sdd", "milestones", "stale.txt"), "stale\n", "utf-8");
-    const preservedDirState = ensureGsdSymlink(worktreePath);
+    const preservedDirState = ensureSddSymlink(worktreePath);
     assert.deepStrictEqual(preservedDirState, join(worktreePath, ".sdd"), "worktree .sdd directory is left in place for sync-based refresh");
     assert.ok(lstatSync(join(worktreePath, ".sdd")).isDirectory(), "worktree .sdd directory remains a directory");
     assert.ok(existsSync(join(worktreePath, ".sdd", "milestones", "stale.txt")), "existing worktree .sdd directory contents remain available for sync logic");
@@ -86,7 +86,7 @@ test('ensureGsdSymlink preserves worktree .sdd directories', () => {
 test('SDD_PROJECT_ID overrides computed repo hash', () => {
     process.env.SDD_PROJECT_ID = "my-project";
     assert.deepStrictEqual(repoIdentity(base), "my-project", "repoIdentity returns SDD_PROJECT_ID when set");
-    assert.deepStrictEqual(externalGsdRoot(base), join(stateDir, "projects", "my-project"), "externalGsdRoot uses SDD_PROJECT_ID");
+    assert.deepStrictEqual(externalSddRoot(base), join(stateDir, "projects", "my-project"), "externalSddRoot uses SDD_PROJECT_ID");
     delete process.env.SDD_PROJECT_ID;
 });
 
@@ -102,7 +102,7 @@ test('readRepoMeta returns null for malformed metadata', () => {
       assert.deepStrictEqual(readRepoMeta(malformedPath), null, "malformed repo-meta.json is treated as unknown metadata");
 });
 
-test('ensureGsdSymlink refreshes repo-meta gitRoot after repo move with fixed project id', () => {
+test('ensureSddSymlink refreshes repo-meta gitRoot after repo move with fixed project id', () => {
       const moveRepo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-repo-identity-move-")));
       run("git init -b main", moveRepo);
       run('git config user.name "Pi Test"', moveRepo);
@@ -112,7 +112,7 @@ test('ensureGsdSymlink refreshes repo-meta gitRoot after repo move with fixed pr
       run('git commit -m "chore: init move repo"', moveRepo);
 
       process.env.SDD_PROJECT_ID = "fixed-project";
-      const fixedExternal = ensureGsdSymlink(moveRepo);
+      const fixedExternal = ensureSddSymlink(moveRepo);
       const before = readRepoMeta(fixedExternal);
       assert.ok(before !== null, "repo metadata exists before repo move");
       assert.deepStrictEqual(normalizePath(before!.gitRoot), normalizePath(moveRepo), "repo metadata tracks current git root before move");
@@ -120,7 +120,7 @@ test('ensureGsdSymlink refreshes repo-meta gitRoot after repo move with fixed pr
       const movedBaseRaw = join(tmpdir(), `sdd-repo-identity-moved-${Date.now()}-${Math.random().toString(36).slice(2)}`);
       renameSync(moveRepo, movedBaseRaw);
       const movedBase = realpathSync(movedBaseRaw);
-      const movedExternal = ensureGsdSymlink(movedBase);
+      const movedExternal = ensureSddSymlink(movedBase);
       assert.deepStrictEqual(realpathSync(movedExternal), realpathSync(fixedExternal), "fixed project id keeps the same external state dir");
 
       const after = readRepoMeta(movedExternal);
@@ -184,7 +184,7 @@ test('subdirectory of parent repo gets unique identity after git init (#1639)', 
       rmSync(parentRepo, { recursive: true, force: true });
 });
 
-test('ensureGsdSymlink from subdirectory does not create .sdd in subdir when git-root .sdd exists (#2380)', () => {
+test('ensureSddSymlink from subdirectory does not create .sdd in subdir when git-root .sdd exists (#2380)', () => {
     const repo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-subdir-symlink-")));
     run("git init -b main", repo);
     run('git config user.name "Pi Test"', repo);
@@ -195,16 +195,16 @@ test('ensureGsdSymlink from subdirectory does not create .sdd in subdir when git
     run('git commit -m "init"', repo);
 
     // Set up .sdd symlink at the git root (normal project initialisation)
-    ensureGsdSymlink(repo);
-    assert.ok(existsSync(join(repo, ".sdd")), "root .sdd exists after ensureGsdSymlink");
+    ensureSddSymlink(repo);
+    assert.ok(existsSync(join(repo, ".sdd")), "root .sdd exists after ensureSddSymlink");
     assert.ok(lstatSync(join(repo, ".sdd")).isSymbolicLink(), "root .sdd is a symlink");
 
-    // Create a subdirectory and call ensureGsdSymlink from there
+    // Create a subdirectory and call ensureSddSymlink from there
     const subdir = join(repo, "src", "lib");
     mkdirSync(subdir, { recursive: true });
-    ensureGsdSymlink(subdir);
+    ensureSddSymlink(subdir);
 
-    // ensureGsdSymlink should NOT create a .sdd in the subdirectory
+    // ensureSddSymlink should NOT create a .sdd in the subdirectory
     // because the git root already has a valid .sdd symlink.
     assert.ok(!existsSync(join(subdir, ".sdd")), "no .sdd created in subdirectory when git-root .sdd exists (#2380)");
     assert.ok(!existsSync(join(repo, "src", ".sdd")), "no .sdd created in intermediate directory");

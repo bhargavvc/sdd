@@ -23,7 +23,7 @@ test("#2684: preferences.md is NOT in ROOT_STATE_FILES (forward-only sync)", () 
   const block = src.slice(arrayStart, arrayEnd);
 
   // preferences.md must NOT be in ROOT_STATE_FILES — it is handled separately
-  // in syncGsdStateToWorktree() (forward-only, additive). Including it in
+  // in syncSddStateToWorktree() (forward-only, additive). Including it in
   // ROOT_STATE_FILES would cause syncWorktreeStateBack() to overwrite the
   // authoritative project root copy (#2684).
   const entries = block.split("\n")
@@ -53,7 +53,7 @@ test("#2684: copyPlanningArtifacts file list includes preferences.md", () => {
   );
 });
 
-test("#2684: syncGsdStateToWorktree copies preferences.md", async () => {
+test("#2684: syncSddStateToWorktree copies preferences.md", async () => {
   // Functional test: create a mock source and destination, call the sync
   const srcBase = mkdtempSync(join(tmpdir(), "sdd-wt-prefs-src-"));
   const dstBase = mkdtempSync(join(tmpdir(), "sdd-wt-prefs-dst-"));
@@ -69,9 +69,9 @@ test("#2684: syncGsdStateToWorktree copies preferences.md", async () => {
       "---\nversion: 1\n---\n\npost_unit_hooks:\n  - name: notify\n    command: echo done\n",
     );
 
-    // Import and call syncGsdStateToWorktree
-    const { syncGsdStateToWorktree } = await import("../auto-worktree.ts");
-    syncGsdStateToWorktree(srcBase, dstBase);
+    // Import and call syncSddStateToWorktree
+    const { syncSddStateToWorktree } = await import("../auto-worktree.ts");
+    syncSddStateToWorktree(srcBase, dstBase);
 
     // Verify preferences.md was copied
     assert.ok(

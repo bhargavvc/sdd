@@ -539,7 +539,7 @@ export async function runDispatch(
     // gate) — pause instead of hard-stopping so the session is resumable with
     // `/sdd auto`. Error/info-level stops remain hard stops for infrastructure
     // failures and terminal conditions respectively.
-    // See: https://github.com/sdd-build/sdd-2/issues/2474
+    // See: https://github.com/gsd-build/gsd-2/issues/2474
     if (dispatchResult.level === "warning") {
       ctx.ui.notify(dispatchResult.reason, "warning");
       await deps.pauseAuto(ctx, pi);
@@ -955,12 +955,12 @@ export async function runUnitPhase(
   s.lastBaselineCharCount = undefined;
   if (deps.isDbAvailable()) {
     try {
-      const { inlineGsdRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
+      const { inlineSddRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
       const [decisionsContent, requirementsContent, projectContent] =
         await Promise.all([
-          inlineGsdRootFile(s.basePath, "decisions.md", "Decisions"),
-          inlineGsdRootFile(s.basePath, "requirements.md", "Requirements"),
-          inlineGsdRootFile(s.basePath, "project.md", "Project"),
+          inlineSddRootFile(s.basePath, "decisions.md", "Decisions"),
+          inlineSddRootFile(s.basePath, "requirements.md", "Requirements"),
+          inlineSddRootFile(s.basePath, "project.md", "Project"),
         ]);
       s.lastBaselineCharCount =
         (decisionsContent?.length ?? 0) +

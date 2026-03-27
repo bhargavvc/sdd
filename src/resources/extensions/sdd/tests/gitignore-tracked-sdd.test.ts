@@ -22,7 +22,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { ensureGitignore, hasGitTrackedGsdFiles } from "../gitignore.ts";
+import { ensureGitignore, hasGitTrackedSddFiles } from "../gitignore.ts";
 import { migrateToExternalState } from "../migrate-external.ts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -51,16 +51,16 @@ function cleanup(dir: string): void {
   }
 }
 
-// ─── hasGitTrackedGsdFiles ───────────────────────────────────────────
+// ─── hasGitTrackedSddFiles ───────────────────────────────────────────
 
-test("hasGitTrackedGsdFiles returns false when .sdd/ does not exist", (t) => {
+test("hasGitTrackedSddFiles returns false when .sdd/ does not exist", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
-  assert.equal(hasGitTrackedGsdFiles(dir), false);
+  assert.equal(hasGitTrackedSddFiles(dir), false);
 });
 
-test("hasGitTrackedGsdFiles returns true when .sdd/ has tracked files", (t) => {
+test("hasGitTrackedSddFiles returns true when .sdd/ has tracked files", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
@@ -68,17 +68,17 @@ test("hasGitTrackedGsdFiles returns true when .sdd/ has tracked files", (t) => {
   writeFileSync(join(dir, ".sdd", "PROJECT.md"), "# Test Project\n");
   git(dir, "add", ".sdd/PROJECT.md");
   git(dir, "commit", "-m", "add sdd");
-  assert.equal(hasGitTrackedGsdFiles(dir), true);
+  assert.equal(hasGitTrackedSddFiles(dir), true);
 });
 
-test("hasGitTrackedGsdFiles returns false when .sdd/ exists but is untracked", (t) => {
+test("hasGitTrackedSddFiles returns false when .sdd/ exists but is untracked", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
   mkdirSync(join(dir, ".sdd"), { recursive: true });
   writeFileSync(join(dir, ".sdd", "STATE.md"), "state\n");
   // Not git-added — should return false
-  assert.equal(hasGitTrackedGsdFiles(dir), false);
+  assert.equal(hasGitTrackedSddFiles(dir), false);
 });
 
 // ─── ensureGitignore — tracked .sdd/ protection ─────────────────────
@@ -175,7 +175,7 @@ test("ensureGitignore with tracked .sdd/ does not cause git to see files as dele
   }
 });
 
-test("hasGitTrackedGsdFiles returns true (fail-safe) when git is not available", (t) => {
+test("hasGitTrackedSddFiles returns true (fail-safe) when git is not available", (t) => {
   const dir = makeTempRepo();
   try {
     // Create and track .sdd/ files
@@ -190,7 +190,7 @@ test("hasGitTrackedGsdFiles returns true (fail-safe) when git is not available",
 
     // Should fail safe — assume tracked rather than silently returning false
     // (The index lock causes git ls-files to fail; rev-parse also fails → true)
-    const result = hasGitTrackedGsdFiles(dir);
+    const result = hasGitTrackedSddFiles(dir);
     assert.equal(result, true, "Should return true (fail-safe) when git is unavailable");
   } finally {
     cleanup(dir);

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { filterInitialGsdHeader } = await import("../../web/lib/initial-sdd-header-filter.ts");
+const { filterInitialSddHeader } = await import("../../web/lib/initial-sdd-header-filter.ts");
 
 const SDD_LOGO_LINES = [
   "   ██████╗ ███████╗██████╗ ",
@@ -12,17 +12,17 @@ const SDD_LOGO_LINES = [
   "   ╚═════╝ ╚══════╝╚═════╝ ",
 ] as const;
 
-test("filterInitialGsdHeader strips a plain startup banner and keeps real terminal content", () => {
+test("filterInitialSddHeader strips a plain startup banner and keeps real terminal content", () => {
   const warning = "Warning: Google Search is not configured.";
   const raw = [...SDD_LOGO_LINES, "  Spec-Driven Development v2.33.1", "", warning].join("\n");
 
-  const result = filterInitialGsdHeader(raw);
+  const result = filterInitialSddHeader(raw);
 
   assert.equal(result.status, "matched");
   assert.equal(result.text, warning);
 });
 
-test("filterInitialGsdHeader strips ANSI-colored startup banner output", () => {
+test("filterInitialSddHeader strips ANSI-colored startup banner output", () => {
   const cyan = "\u001b[36m";
   const reset = "\u001b[39m";
   const bold = "\u001b[1m";
@@ -36,24 +36,24 @@ test("filterInitialGsdHeader strips ANSI-colored startup banner output", () => {
     `  ${bold}Spec-Driven Development${boldReset} ${dim}v2.33.1${dimReset}\r\n\r\n` +
     warning;
 
-  const result = filterInitialGsdHeader(raw);
+  const result = filterInitialSddHeader(raw);
 
   assert.equal(result.status, "matched");
   assert.equal(result.text, warning);
 });
 
-test("filterInitialGsdHeader waits for more data when the startup banner is incomplete", () => {
+test("filterInitialSddHeader waits for more data when the startup banner is incomplete", () => {
   const partial = `${SDD_LOGO_LINES[0]}\n${SDD_LOGO_LINES[1]}\n${SDD_LOGO_LINES[2]}`;
 
-  const result = filterInitialGsdHeader(partial);
+  const result = filterInitialSddHeader(partial);
 
   assert.deepEqual(result, { status: "needs-more", text: "" });
 });
 
-test("filterInitialGsdHeader passes normal terminal output through untouched", () => {
+test("filterInitialSddHeader passes normal terminal output through untouched", () => {
   const raw = "Warning: already in the shell\r\n$ ";
 
-  const result = filterInitialGsdHeader(raw);
+  const result = filterInitialSddHeader(raw);
 
   assert.equal(result.status, "passthrough");
   assert.equal(result.text, raw);

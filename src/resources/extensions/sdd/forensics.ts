@@ -114,17 +114,17 @@ Before offering to create a GitHub issue, you MUST search for existing issues an
 
 1. **Search closed issues** for similar keywords from your diagnosis:
    \`\`\`
-   gh issue list --repo sdd-build/sdd-2 --state closed --search "<keywords from root cause>" --limit 20
+   gh issue list --repo gsd-build/gsd-2 --state closed --search "<keywords from root cause>" --limit 20
    \`\`\`
 
 2. **Search open PRs** that might contain the fix:
    \`\`\`
-   gh pr list --repo sdd-build/sdd-2 --state open --search "<keywords>" --limit 10
+   gh pr list --repo gsd-build/gsd-2 --state open --search "<keywords>" --limit 10
    \`\`\`
 
 3. **Search merged PRs** that may have already fixed this:
    \`\`\`
-   gh pr list --repo sdd-build/sdd-2 --state merged --search "<keywords>" --limit 10
+   gh pr list --repo gsd-build/gsd-2 --state merged --search "<keywords>" --limit 10
    \`\`\`
 
 ### Analysis
@@ -139,7 +139,7 @@ For each result, compare it against your root-cause diagnosis:
 If you find potential matches, present them to the user:
 
 1. **"Already fixed by PR #X — skip issue creation"** — when a merged PR or closed issue clearly addresses the same root cause. Explain why you believe it matches.
-2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo sdd-build/sdd-2\` to add forensic evidence.
+2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo gsd-build/gsd-2\` to add forensic evidence.
 3. **"Create new issue anyway"** — when existing results do not cover this specific failure.
 
 Only proceed to issue creation if no matches were found OR the user explicitly chooses "Create new issue anyway".

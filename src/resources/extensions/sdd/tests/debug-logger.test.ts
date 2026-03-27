@@ -18,7 +18,7 @@ import {
   writeDebugSummary,
 } from '../debug-logger.ts';
 
-function createTempGsdDir(): string {
+function createTempSddDir(): string {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-debug-test-'));
   mkdirSync(join(tmp, '.sdd'), { recursive: true });
   return tmp;
@@ -31,7 +31,7 @@ function readLogLines(logPath: string): Record<string, unknown>[] {
 }
 
 test('enableDebug creates log file and sets enabled', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   assert.strictEqual(isDebugEnabled(), true);
@@ -47,7 +47,7 @@ test('enableDebug creates log file and sets enabled', () => {
 });
 
 test('debugLog writes JSONL events', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   debugLog('test-event', { foo: 'bar', num: 42 });
@@ -73,7 +73,7 @@ test('debugLog is no-op when disabled', () => {
 });
 
 test('debugTime measures elapsed time', async () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   const stop = debugTime('timed-op');
@@ -99,7 +99,7 @@ test('debugTime returns no-op when disabled', () => {
 });
 
 test('debugCount increments counters', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   debugCount('dispatches');
@@ -116,7 +116,7 @@ test('debugCount increments counters', () => {
 });
 
 test('debugPeak tracks max values', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   debugPeak('ttsrPeakBuffer', 100);
@@ -131,7 +131,7 @@ test('debugPeak tracks max values', () => {
 });
 
 test('writeDebugSummary includes all counters and disables debug', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   debugCount('deriveStateCalls', 10);
@@ -155,7 +155,7 @@ test('writeDebugSummary includes all counters and disables debug', () => {
 });
 
 test('auto-prunes old debug logs', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   const debugDir = join(tmp, '.sdd', 'debug');
   mkdirSync(debugDir, { recursive: true });
 
@@ -175,7 +175,7 @@ test('auto-prunes old debug logs', () => {
 });
 
 test('disableDebug returns log path', () => {
-  const tmp = createTempGsdDir();
+  const tmp = createTempSddDir();
   enableDebug(tmp);
 
   const logPath = getDebugLogPath();

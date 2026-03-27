@@ -11,7 +11,7 @@
 import { join, resolve } from 'node:path';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import type { Decision, Requirement } from './types.js';
-import { resolveGsdRootFile } from './paths.js';
+import { resolveSddRootFile } from './paths.js';
 import { saveFile } from './files.js';
 import { SDDError, SDD_STALE_STATE, SDD_IO_ERROR } from './errors.js';
 import { logWarning, logError } from './workflow-logger.js';
@@ -284,7 +284,7 @@ export async function saveDecisionToDb(
       }));
     }
 
-    const filePath = resolveGsdRootFile(basePath, 'DECISIONS');
+    const filePath = resolveSddRootFile(basePath, 'DECISIONS');
 
     // Check if existing DECISIONS.md has freeform (non-table) content.
     // If so, preserve that content and append/update the decisions table
@@ -383,7 +383,7 @@ export async function updateRequirementInDb(
     const nonSuperseded = allRequirements.filter(r => r.superseded_by == null);
 
     const md = generateRequirementsMd(nonSuperseded);
-    const filePath = resolveGsdRootFile(basePath, 'REQUIREMENTS');
+    const filePath = resolveSddRootFile(basePath, 'REQUIREMENTS');
     try {
       await saveFile(filePath, md);
     } catch (diskErr) {

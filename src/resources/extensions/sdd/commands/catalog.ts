@@ -7,17 +7,17 @@ import { resolveProjectRoot } from "../worktree.js";
 
 const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
-export interface GsdCommandDefinition {
+export interface SddCommandDefinition {
   cmd: string;
   desc: string;
 }
 
-type CompletionMap = Record<string, readonly GsdCommandDefinition[]>;
+type CompletionMap = Record<string, readonly SddCommandDefinition[]>;
 
 export const SDD_COMMAND_DESCRIPTION =
   "SDD — Spec-Driven Development: /sdd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
 
-export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
+export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
   { cmd: "next", desc: "Explicit step mode (same as /sdd)" },
   { cmd: "auto", desc: "Autonomous mode — research, plan, execute, commit, repeat" },
@@ -228,7 +228,7 @@ const NESTED_COMPLETIONS: CompletionMap = {
 
 function filterOptions(
   partial: string,
-  options: readonly GsdCommandDefinition[],
+  options: readonly SddCommandDefinition[],
   prefix = "",
 ) {
   const normalizedPrefix = prefix ? `${prefix} ` : "";
@@ -270,7 +270,7 @@ function getExtensionCompletions(prefix: string, action: string) {
   }
 }
 
-export function getGsdArgumentCompletions(prefix: string) {
+export function getSddArgumentCompletions(prefix: string) {
   const hasTrailingSpace = prefix.endsWith(" ");
   const parts = prefix.trim().split(/\s+/);
   if (hasTrailingSpace && parts.length >= 1) {

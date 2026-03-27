@@ -9,9 +9,9 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync, cpSync, rmSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import { externalGsdRoot } from "./repo-identity.js";
+import { externalSddRoot } from "./repo-identity.js";
 import { getErrorMessage } from "./error-utils.js";
-import { hasGitTrackedGsdFiles } from "./gitignore.js";
+import { hasGitTrackedSddFiles } from "./gitignore.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 export interface MigrationResult {
@@ -34,16 +34,16 @@ export interface MigrationResult {
  * 3. On failure: rename `.sdd.migrating` back to `.sdd` (rollback)
  */
 export function migrateToExternalState(basePath: string): MigrationResult {
-  const localGsd = join(basePath, ".sdd");
+  const localSdd = join(basePath, ".sdd");
 
   // Skip if doesn't exist
-  if (!existsSync(localGsd)) {
+  if (!existsSync(localSdd)) {
     return { migrated: false };
   }
 
   // Skip if already a symlink
   try {
-    const stat = lstatSync(localGsd);
+    const stat = lstatSync(localSdd);
     if (stat.isSymbolicLink()) {
       return { migrated: false };
     }
@@ -56,14 +56,14 @@ export function migrateToExternalState(basePath: string): MigrationResult {
 
   // Skip if .sdd/ contains git-tracked files — the project intentionally
   // keeps .sdd/ in version control and migration would destroy that.
-  if (hasGitTrackedGsdFiles(basePath)) {
+  if (hasGitTrackedSddFiles(basePath)) {
     return { migrated: false };
   }
 
   // Skip if .sdd/worktrees/ has active worktree directories (#1337).
   // On Windows, active git worktrees hold OS-level directory handles that
   // prevent rename/delete. Attempting migration causes EBUSY and data loss.
-  const worktreesDir = join(localGsd, "worktrees");
+  const worktreesDir = join(localSdd, "worktrees");
   if (existsSync(worktreesDir)) {
     try {
       const entries = readdirSync(worktreesDir, { withFileTypes: true });
@@ -76,7 +76,7 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     }
   }
 
-  const externalPath = externalGsdRoot(basePath);
+  const externalPath = externalSddRoot(basePath);
   const migratingPath = join(basePath, ".sdd.migrating");
 
   try {
@@ -88,12 +88,12 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     // open (VS Code watchers, antivirus on-access scan). Fall back to
     // copy+delete (#1292).
     try {
-      renameSync(localGsd, migratingPath);
+      renameSync(localSdd, migratingPath);
     } catch (renameErr: any) {
       if (renameErr?.code === "EPERM" || renameErr?.code === "EBUSY") {
         try {
-          cpSync(localGsd, migratingPath, { recursive: true, force: true });
-          rmSync(localGsd, { recursive: true, force: true });
+          cpSync(localSdd, migratingPath, { recursive: true, force: true });
+          rmSync(localSdd, { recursive: true, force: true });
         } catch (copyErr) {
           return { migrated: false, error: `Migration rename/copy failed: ${copyErr instanceof Error ? copyErr.message : String(copyErr)}` };
         }
@@ -122,27 +122,27 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     }
 
     // Create symlink .sdd -> external path
-    symlinkSync(externalPath, localGsd, "junction");
+    symlinkSync(externalPath, localSdd, "junction");
 
     // Verify the symlink resolves correctly before removing the backup (#1377).
     // On Windows, junction creation can silently succeed but resolve to the wrong
     // target, or the external dir may not be accessible. If verification fails,
     // restore from the backup.
     try {
-      const resolved = realpathSync(localGsd);
+      const resolved = realpathSync(localSdd);
       const resolvedExternal = realpathSync(externalPath);
       if (resolved !== resolvedExternal) {
         // Symlink points to wrong target — restore backup
-        try { rmSync(localGsd, { force: true }); } catch { /* may not exist */ }
-        renameSync(migratingPath, localGsd);
+        try { rmSync(localSdd, { force: true }); } catch { /* may not exist */ }
+        renameSync(migratingPath, localSdd);
         return { migrated: false, error: `Migration verification failed: symlink resolves to ${resolved}, expected ${resolvedExternal}` };
       }
       // Verify we can read through the symlink
-      readdirSync(localGsd);
+      readdirSync(localSdd);
     } catch (verifyErr) {
       // Symlink broken or unreadable — restore backup
-      try { rmSync(localGsd, { force: true }); } catch { /* may not exist */ }
-      try { renameSync(migratingPath, localGsd); } catch { /* best-effort restore */ }
+      try { rmSync(localSdd, { force: true }); } catch { /* may not exist */ }
+      try { renameSync(migratingPath, localSdd); } catch { /* best-effort restore */ }
       return { migrated: false, error: `Migration verification failed: ${getErrorMessage(verifyErr)}` };
     }
 
@@ -168,8 +168,8 @@ export function migrateToExternalState(basePath: string): MigrationResult {
   } catch (err) {
     // Rollback: rename .sdd.migrating back to .sdd
     try {
-      if (existsSync(migratingPath) && !existsSync(localGsd)) {
-        renameSync(migratingPath, localGsd);
+      if (existsSync(migratingPath) && !existsSync(localSdd)) {
+        renameSync(migratingPath, localSdd);
       }
     } catch {
       // Rollback failed -- leave .sdd.migrating for doctor to detect
@@ -187,14 +187,14 @@ export function migrateToExternalState(basePath: string): MigrationResult {
  * Moves `.sdd.migrating` back to `.sdd` if `.sdd` doesn't exist.
  */
 export function recoverFailedMigration(basePath: string): boolean {
-  const localGsd = join(basePath, ".sdd");
+  const localSdd = join(basePath, ".sdd");
   const migratingPath = join(basePath, ".sdd.migrating");
 
   if (!existsSync(migratingPath)) return false;
-  if (existsSync(localGsd)) return false; // both exist -- ambiguous, don't touch
+  if (existsSync(localSdd)) return false; // both exist -- ambiguous, don't touch
 
   try {
-    renameSync(migratingPath, localGsd);
+    renameSync(migratingPath, localSdd);
     return true;
   } catch {
     return false;

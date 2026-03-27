@@ -232,7 +232,7 @@ export async function showProjectInit(
   }
 
   // ── Step 9: Bootstrap .sdd/ ────────────────────────────────────────────────
-  bootstrapGsdDirectory(basePath, prefs, signals);
+  bootstrapSddDirectory(basePath, prefs, signals);
 
   // Ensure .gitignore
   ensureGitignore(basePath);
@@ -411,7 +411,7 @@ async function customizeAdvancedPrefs(
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────────
 
-function bootstrapGsdDirectory(
+function bootstrapSddDirectory(
   basePath: string,
   prefs: ProjectPreferences,
   signals: ProjectSignals,

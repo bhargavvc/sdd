@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { loadFile, parseSummary, saveFile, parseTaskPlanMustHaves, countMustHavesMentionedInSummary } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap, parsePlan as parseLegacyPlan } from "./parsers-legacy.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
-import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, sddRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relGsdRootFile, resolveGsdRootFile, relMilestonePath } from "./paths.js";
+import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, sddRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relSddRootFile, resolveSddRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import { loadEffectiveSDDPreferences, type SDDPreferences } from "./preferences.js";
@@ -138,7 +138,7 @@ function buildStateMarkdown(state: Awaited<ReturnType<typeof deriveState>>): str
 
 async function updateStateFile(basePath: string, fixesApplied: string[]): Promise<void> {
   const state = await deriveState(basePath);
-  const path = resolveGsdRootFile(basePath, "STATE");
+  const path = resolveSddRootFile(basePath, "STATE");
   await saveFile(path, buildStateMarkdown(state));
   fixesApplied.push(`updated ${path}`);
 }
@@ -147,7 +147,7 @@ async function updateStateFile(basePath: string, fixesApplied: string[]): Promis
 export async function rebuildState(basePath: string): Promise<void> {
   invalidateAllCaches();
   const state = await deriveState(basePath);
-  const path = resolveGsdRootFile(basePath, "STATE");
+  const path = resolveSddRootFile(basePath, "STATE");
   await saveFile(path, buildStateMarkdown(state));
 }
 
@@ -176,7 +176,7 @@ function auditRequirements(content: string | null): DoctorIssue[] {
         scope: "project",
         unitId: requirementId,
         message: `${requirementId} is Active but has no primary owning slice`,
-        file: relGsdRootFile("REQUIREMENTS"),
+        file: relSddRootFile("REQUIREMENTS"),
         fixable: false,
       });
     }
@@ -188,7 +188,7 @@ function auditRequirements(content: string | null): DoctorIssue[] {
         scope: "project",
         unitId: requirementId,
         message: `${requirementId} is Blocked but has no reason in Notes`,
-        file: relGsdRootFile("REQUIREMENTS"),
+        file: relSddRootFile("REQUIREMENTS"),
         fixable: false,
       });
     }
@@ -392,7 +392,7 @@ export async function runSDDDoctor(basePath: string, options?: { fix?: boolean; 
     return report;
   }
 
-  const requirementsPath = resolveGsdRootFile(basePath, "REQUIREMENTS");
+  const requirementsPath = resolveSddRootFile(basePath, "REQUIREMENTS");
   const requirementsContent = await loadFile(requirementsPath);
   issues.push(...auditRequirements(requirementsContent));
 

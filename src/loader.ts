@@ -210,7 +210,7 @@ if (missingPackages.length > 0) {
     `Fix it by reinstalling:\n\n` +
     `  npm install -g sdd-pi@latest\n\n` +
     `If the issue persists, please open an issue at:\n` +
-    `  https://github.com/sdd-build/sdd-2/issues\n`
+    `  https://github.com/gsd-build/gsd-2/issues\n`
   )
   process.exit(1)
 }

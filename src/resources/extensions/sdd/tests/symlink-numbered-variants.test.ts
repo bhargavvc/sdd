@@ -2,7 +2,7 @@
  * Tests for macOS numbered symlink variant cleanup (#2205).
  *
  * macOS can rename `.sdd` to `.sdd 2`, `.sdd 3`, etc. when a directory
- * already exists at the target path. ensureGsdSymlink() must detect and
+ * already exists at the target path. ensureSddSymlink() must detect and
  * remove these numbered variants so the real `.sdd` symlink is always
  * the one in use.
  */
@@ -22,7 +22,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 
-import { ensureGsdSymlink, externalGsdRoot } from "../repo-identity.ts";
+import { ensureSddSymlink, externalSddRoot } from "../repo-identity.ts";
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -47,19 +47,19 @@ describe('symlink-numbered-variants', async () => {
     run("git add README.md", base);
     run('git commit -m "chore: init"', base);
 
-    const externalPath = externalGsdRoot(base);
+    const externalPath = externalSddRoot(base);
 
     // ── Test: numbered variant directories are cleaned up ──────────────
-    console.log("\n=== ensureGsdSymlink removes numbered .sdd variants (#2205) ===");
+    console.log("\n=== ensureSddSymlink removes numbered .sdd variants (#2205) ===");
     {
       // Simulate macOS creating numbered variants: ".sdd 2", ".sdd 3"
       mkdirSync(join(base, ".sdd 2"), { recursive: true });
       mkdirSync(join(base, ".sdd 3"), { recursive: true });
       mkdirSync(join(base, ".sdd 4"), { recursive: true });
 
-      const result = ensureGsdSymlink(base);
-      assert.deepStrictEqual(result, externalPath, "ensureGsdSymlink returns external path");
-      assert.ok(existsSync(join(base, ".sdd")), ".sdd exists after ensureGsdSymlink");
+      const result = ensureSddSymlink(base);
+      assert.deepStrictEqual(result, externalPath, "ensureSddSymlink returns external path");
+      assert.ok(existsSync(join(base, ".sdd")), ".sdd exists after ensureSddSymlink");
       assert.ok(lstatSync(join(base, ".sdd")).isSymbolicLink(), ".sdd is a symlink");
 
       // The numbered variants must have been removed
@@ -69,7 +69,7 @@ describe('symlink-numbered-variants', async () => {
     }
 
     // ── Test: numbered variant symlinks are cleaned up ─────────────────
-    console.log("\n=== ensureGsdSymlink removes numbered symlink variants ===");
+    console.log("\n=== ensureSddSymlink removes numbered symlink variants ===");
     {
       // Clean slate
       rmSync(join(base, ".sdd"), { recursive: true, force: true });
@@ -81,8 +81,8 @@ describe('symlink-numbered-variants', async () => {
       symlinkSync(externalPath, join(base, ".sdd 2"), "junction");
       symlinkSync(staleTarget, join(base, ".sdd 3"), "junction");
 
-      const result = ensureGsdSymlink(base);
-      assert.deepStrictEqual(result, externalPath, "ensureGsdSymlink returns external path when variants exist");
+      const result = ensureSddSymlink(base);
+      assert.deepStrictEqual(result, externalPath, "ensureSddSymlink returns external path when variants exist");
       assert.ok(existsSync(join(base, ".sdd")), ".sdd exists");
       assert.ok(lstatSync(join(base, ".sdd")).isSymbolicLink(), ".sdd is a symlink");
 
@@ -91,7 +91,7 @@ describe('symlink-numbered-variants', async () => {
     }
 
     // ── Test: real .sdd directory blocks symlink, but variants still cleaned ──
-    console.log("\n=== ensureGsdSymlink cleans variants even when .sdd is a real directory ===");
+    console.log("\n=== ensureSddSymlink cleans variants even when .sdd is a real directory ===");
     {
       // Clean slate
       rmSync(join(base, ".sdd"), { recursive: true, force: true });
@@ -102,8 +102,8 @@ describe('symlink-numbered-variants', async () => {
       mkdirSync(join(base, ".sdd 2"), { recursive: true });
       mkdirSync(join(base, ".sdd 3"), { recursive: true });
 
-      const result = ensureGsdSymlink(base);
-      // When .sdd is a real directory, ensureGsdSymlink preserves it
+      const result = ensureSddSymlink(base);
+      // When .sdd is a real directory, ensureSddSymlink preserves it
       assert.deepStrictEqual(result, join(base, ".sdd"), "real .sdd directory preserved");
       assert.ok(lstatSync(join(base, ".sdd")).isDirectory(), ".sdd remains a directory");
 
@@ -113,7 +113,7 @@ describe('symlink-numbered-variants', async () => {
     }
 
     // ── Test: only numeric-suffixed variants are removed ───────────────
-    console.log("\n=== ensureGsdSymlink only removes .sdd + space + digit variants ===");
+    console.log("\n=== ensureSddSymlink only removes .sdd + space + digit variants ===");
     {
       rmSync(join(base, ".sdd"), { recursive: true, force: true });
 
@@ -125,7 +125,7 @@ describe('symlink-numbered-variants', async () => {
       mkdirSync(join(base, ".sdd 2"), { recursive: true });
       mkdirSync(join(base, ".sdd 10"), { recursive: true });
 
-      ensureGsdSymlink(base);
+      ensureSddSymlink(base);
 
       assert.ok(existsSync(join(base, ".sdd-backup")), ".sdd-backup is NOT removed");
       assert.ok(existsSync(join(base, ".sdd_old")), ".sdd_old is NOT removed");

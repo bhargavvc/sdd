@@ -46,7 +46,7 @@ const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">(
 const BUILTIN_DESCRIPTIONS = new Map(BUILTIN_SLASH_COMMANDS.map((command) => [command.name, command.description]))
 const DEFERRED_BROWSER_REJECTS = ["share", "copy", "changelog", "hotkeys", "tree", "provider", "reload", "edit-mode", "terminal", "quit"] as const
 
-async function collectRegisteredGsdCommandRoots(): Promise<string[]> {
+async function collectRegisteredSddCommandRoots(): Promise<string[]> {
   const commands = new Map<string, unknown>()
 
   await gsdExtension.default({
@@ -141,7 +141,7 @@ test("browser-local aliases and legacy helpers stay explicit", async (t) => {
 })
 
 test("registered SDD command roots stay on the prompt/extension path", async () => {
-  const registeredRoots = await collectRegisteredGsdCommandRoots()
+  const registeredRoots = await collectRegisteredSddCommandRoots()
   assert.deepEqual(
     registeredRoots,
     ["exit", "sdd", "kill", "worktree", "wt"],
@@ -150,16 +150,16 @@ test("registered SDD command roots stay on the prompt/extension path", async () 
 
   // Non-sdd roots are extension commands that pass through to the bridge.
   // Derived dynamically so adding a new registration fails this assertion loudly.
-  const nonGsdRoots = registeredRoots.filter((r) => r !== "sdd")
-  assert.equal(nonGsdRoots.length, 4, "expected exactly 4 non-sdd passthrough roots; update this count when adding registrations")
-  for (const root of nonGsdRoots) {
+  const nonSddRoots = registeredRoots.filter((r) => r !== "sdd")
+  assert.equal(nonSddRoots.length, 4, "expected exactly 4 non-sdd passthrough roots; update this count when adding registrations")
+  for (const root of nonSddRoots) {
     assertPromptPassthrough(`/${root}`)
   }
 
   // Bare /sdd passes through to bridge (equivalent to /sdd next)
-  const bareGsd = dispatchBrowserSlashCommand("/sdd")
-  assert.equal(bareGsd.kind, "prompt", "bare /sdd should pass through to bridge")
-  assert.equal(bareGsd.command.message, "/sdd", "bare /sdd should preserve exact input")
+  const bareSdd = dispatchBrowserSlashCommand("/sdd")
+  assert.equal(bareSdd.kind, "prompt", "bare /sdd should pass through to bridge")
+  assert.equal(bareSdd.command.message, "/sdd", "bare /sdd should preserve exact input")
 })
 
 test("current SDD command family samples dispatch to correct outcomes after S02", async (t) => {

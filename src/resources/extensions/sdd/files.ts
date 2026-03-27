@@ -6,7 +6,7 @@
 import { promises as fs } from 'node:fs';
 import { resolve } from 'node:path';
 import { atomicWriteAsync } from './atomic-write.js';
-import { resolveMilestoneFile, relMilestoneFile, resolveGsdRootFile } from './paths.js';
+import { resolveMilestoneFile, relMilestoneFile, resolveSddRootFile } from './paths.js';
 import { milestoneIdSort, findMilestoneIds } from './milestone-ids.js';
 
 import type {
@@ -758,7 +758,7 @@ export interface Override {
 }
 
 export async function appendOverride(basePath: string, change: string, appliedAt: string): Promise<void> {
-  const overridesPath = resolveGsdRootFile(basePath, "OVERRIDES");
+  const overridesPath = resolveSddRootFile(basePath, "OVERRIDES");
   const timestamp = new Date().toISOString();
   const entry = [
     `## Override: ${timestamp}`,
@@ -793,7 +793,7 @@ export async function appendKnowledge(
   entry: string,
   scope: string,
 ): Promise<void> {
-  const knowledgePath = resolveGsdRootFile(basePath, "KNOWLEDGE");
+  const knowledgePath = resolveSddRootFile(basePath, "KNOWLEDGE");
   const existing = await loadFile(knowledgePath);
 
   if (existing) {
@@ -910,7 +910,7 @@ export async function appendKnowledge(
 }
 
 export async function loadActiveOverrides(basePath: string): Promise<Override[]> {
-  const overridesPath = resolveGsdRootFile(basePath, "OVERRIDES");
+  const overridesPath = resolveSddRootFile(basePath, "OVERRIDES");
   const content = await loadFile(overridesPath);
   if (!content) return [];
   return parseOverrides(content).filter(o => o.scope === "active");
@@ -963,7 +963,7 @@ export function formatOverridesSection(overrides: Override[]): string {
 }
 
 export async function resolveAllOverrides(basePath: string): Promise<void> {
-  const overridesPath = resolveGsdRootFile(basePath, "OVERRIDES");
+  const overridesPath = resolveSddRootFile(basePath, "OVERRIDES");
   const content = await loadFile(overridesPath);
   if (!content) return;
   const updated = content.replace(/\*\*Scope:\*\* active/g, "**Scope:** resolved");

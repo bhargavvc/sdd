@@ -15,7 +15,7 @@ import { deriveState } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import {
   sddRoot, resolveMilestoneFile, resolveSliceFile,
-  resolveGsdRootFile, relGsdRootFile, relSliceFile,
+  resolveSddRootFile, relSddRootFile, relSliceFile,
 } from "./paths.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { nativeAddPaths, nativeCommit } from "./native-git-bridge.js";
@@ -227,20 +227,20 @@ export async function buildExistingMilestonesContext(
   const sections: string[] = [];
 
   // Include PROJECT.md if it exists — it has the milestone sequence and project description
-  const projectPath = resolveGsdRootFile(basePath, "PROJECT");
+  const projectPath = resolveSddRootFile(basePath, "PROJECT");
   if (existsSync(projectPath)) {
     const projectContent = await loadFile(projectPath);
     if (projectContent) {
-      sections.push(`### Project Overview\nSource: \`${relGsdRootFile("PROJECT")}\`\n\n${projectContent.trim()}`);
+      sections.push(`### Project Overview\nSource: \`${relSddRootFile("PROJECT")}\`\n\n${projectContent.trim()}`);
     }
   }
 
   // Include DECISIONS.md if it exists — architectural decisions inform new milestone scoping
-  const decisionsPath = resolveGsdRootFile(basePath, "DECISIONS");
+  const decisionsPath = resolveSddRootFile(basePath, "DECISIONS");
   if (existsSync(decisionsPath)) {
     const decisionsContent = await loadFile(decisionsPath);
     if (decisionsContent) {
-      sections.push(`### Decisions Register\nSource: \`${relGsdRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
+      sections.push(`### Decisions Register\nSource: \`${relSddRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
     }
   }
 
@@ -297,11 +297,11 @@ export async function buildExistingMilestonesContext(
   }
 
   // Include queue log if it exists — shows what's been queued before
-  const queuePath = resolveGsdRootFile(basePath, "QUEUE");
+  const queuePath = resolveSddRootFile(basePath, "QUEUE");
   if (existsSync(queuePath)) {
     const queueContent = await loadFile(queuePath);
     if (queueContent) {
-      sections.push(`### Previous Queue Entries\nSource: \`${relGsdRootFile("QUEUE")}\`\n\n${queueContent.trim()}`);
+      sections.push(`### Previous Queue Entries\nSource: \`${relSddRootFile("QUEUE")}\`\n\n${queueContent.trim()}`);
     }
   }
 
@@ -396,7 +396,7 @@ function syncProjectMdSequence(
   registry: Array<{ id: string; title: string; status: string }>,
   newOrder: string[],
 ): void {
-  const projectPath = resolveGsdRootFile(basePath, "PROJECT");
+  const projectPath = resolveSddRootFile(basePath, "PROJECT");
   if (!projectPath || !existsSync(projectPath)) return;
 
   const content = readFileSync(projectPath, "utf-8");

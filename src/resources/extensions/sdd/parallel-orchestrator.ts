@@ -527,7 +527,7 @@ export function spawnWorker(
   if (worker.process) return true; // already spawned
 
   // Resolve the SDD CLI binary path
-  const binPath = resolveGsdBin();
+  const binPath = resolveSddBin();
   if (!binPath) return false;
 
   let child: ChildProcess;
@@ -665,7 +665,7 @@ export function spawnWorker(
  * Uses SDD_BIN_PATH env var (set by loader.ts) or falls back to
  * finding the binary relative to the current module.
  */
-function resolveGsdBin(): string | null {
+function resolveSddBin(): string | null {
   // SDD_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
   if (process.env.SDD_BIN_PATH && existsSync(process.env.SDD_BIN_PATH)) {
     return process.env.SDD_BIN_PATH;

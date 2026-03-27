@@ -173,7 +173,7 @@ test("tarball installs and sdd binary resolves", async (t) => {
   }
 
   // Verify bundled resources are present
-  const installedGsdExt = join(
+  const installedSddExt = join(
     sandbox.installPrefix,
     "node_modules",
     "sdd-pi",
@@ -183,7 +183,7 @@ test("tarball installs and sdd binary resolves", async (t) => {
     "sdd",
     "index.ts",
   );
-  assert.ok(existsSync(installedGsdExt), "bundled sdd extension present in installed package");
+  assert.ok(existsSync(installedSddExt), "bundled sdd extension present in installed package");
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

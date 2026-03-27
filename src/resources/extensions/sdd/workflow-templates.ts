@@ -10,16 +10,16 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
-const __extensionDir = resolveGsdExtensionDir();
+const __extensionDir = resolveSddExtensionDir();
 const registryPath = join(__extensionDir, "workflow-templates", "registry.json");
 
 /** Resolve the SDD extension dir with fallback to ~/.sdd/agent/extensions/sdd/. */
-function resolveGsdExtensionDir(): string {
+function resolveSddExtensionDir(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
   if (existsSync(join(moduleDir, "workflow-templates"))) return moduleDir;
   const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
-  const agentGsdDir = join(gsdHome, "agent", "extensions", "sdd");
-  if (existsSync(join(agentGsdDir, "workflow-templates"))) return agentGsdDir;
+  const agentSddDir = join(gsdHome, "agent", "extensions", "sdd");
+  if (existsSync(join(agentSddDir, "workflow-templates"))) return agentSddDir;
   return moduleDir;
 }
 

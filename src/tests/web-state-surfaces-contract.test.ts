@@ -14,7 +14,7 @@ const filesRoute = await import("../../web/app/api/files/route.ts");
 const workspaceStatus = await import("../../web/lib/workspace-status.ts");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-function makeGsdFixture(): { root: string; sddDir: string; cleanup: () => void } {
+function makeSddFixture(): { root: string; sddDir: string; cleanup: () => void } {
   const root = mkdtempSync(join(tmpdir(), "sdd-state-surfaces-"));
   const sddDir = join(root, ".sdd");
   mkdirSync(sddDir, { recursive: true });
@@ -27,7 +27,7 @@ function makeGsdFixture(): { root: string; sddDir: string; cleanup: () => void }
 
 // ─── Group 1: Workspace index — risk/depends/demo fields ─────────────
 test("indexWorkspace extracts risk, depends, and demo from roadmap", async (t) => {
-  const { root, sddDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
 
   t.after(() => { cleanup(); });
 
@@ -80,7 +80,7 @@ test("indexWorkspace extracts risk, depends, and demo from roadmap", async (t) =
 });
 
 test("indexWorkspace handles slices without risk/depends/demo", async (t) => {
-  const { root, sddDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
 
   t.after(() => { cleanup(); });
 
@@ -192,7 +192,7 @@ test("getTaskStatus returns correct statuses", () => {
 
 // ─── Group 3: Files API — tree listing ───────────────────────────────
 test("files API returns tree listing of .sdd/ directory", async (t) => {
-  const { root, sddDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -232,7 +232,7 @@ test("files API returns tree listing of .sdd/ directory", async (t) => {
 
 // ─── Group 4: Files API — file content ───────────────────────────────
 test("files API returns file content for valid path", async (t) => {
-  const { root, sddDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -254,7 +254,7 @@ test("files API returns file content for valid path", async (t) => {
 });
 
 test("files API returns content for nested files", async (t) => {
-  const { root, sddDir, cleanup } = makeGsdFixture();
+  const { root, sddDir, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -280,7 +280,7 @@ test("files API returns content for nested files", async (t) => {
 
 // ─── Group 5: Files API — security: path traversal rejection ─────────
 test("files API rejects path traversal with ../", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -301,7 +301,7 @@ test("files API rejects path traversal with ../", async (t) => {
 });
 
 test("files API rejects absolute paths", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -322,7 +322,7 @@ test("files API rejects absolute paths", async (t) => {
 });
 
 test("files API returns 404 for missing files", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeSddFixture();
   const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {

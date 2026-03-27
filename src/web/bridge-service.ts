@@ -37,7 +37,7 @@ import {
   collectAuthoritativeAutoDashboardData,
   collectTestOnlyFallbackAutoDashboardData,
 } from "./auto-dashboard-service.ts";
-import { resolveGsdCliEntry } from "./cli-entry.ts";
+import { resolveSddCliEntry } from "./cli-entry.ts";
 
 // Lazily computed fallback — import.meta.url is baked in at build time by
 // webpack, so when the standalone bundle built on Linux CI runs on Windows the
@@ -519,7 +519,7 @@ export type ProjectDetectionKind =
   | "blank";        // empty/near-empty folder
 
 export interface ProjectDetectionSignals {
-  hasGsdFolder: boolean;
+  hasSddFolder: boolean;
   hasPlanningFolder: boolean;
   hasGitRepo: boolean;
   hasPackageJson: boolean;
@@ -579,7 +579,7 @@ export function detectMonorepo(dirPath: string, checkExists?: (path: string) => 
 export function detectProjectKind(projectCwd: string): ProjectDetection {
   const checkExists = getBridgeDeps().existsSync ?? existsSync;
 
-  const hasGsdFolder = checkExists(join(projectCwd, ".sdd"));
+  const hasSddFolder = checkExists(join(projectCwd, ".sdd"));
   const hasPlanningFolder = checkExists(join(projectCwd, ".planning"));
   const hasGitRepo = checkExists(join(projectCwd, ".git"));
   const hasPackageJson = checkExists(join(projectCwd, "package.json"));
@@ -598,7 +598,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
   }
 
   const signals: ProjectDetectionSignals = {
-    hasGsdFolder,
+    hasSddFolder,
     hasPlanningFolder,
     hasGitRepo,
     hasPackageJson,
@@ -611,7 +611,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
 
   let kind: ProjectDetectionKind;
 
-  if (hasGsdFolder) {
+  if (hasSddFolder) {
     // Check if milestones exist
     const milestonesDir = join(projectCwd, ".sdd", "milestones");
     let hasMilestones = false;
@@ -1144,7 +1144,7 @@ export function resolveBridgeRuntimeConfig(env: NodeJS.ProcessEnv = getBridgeDep
 }
 
 function resolveBridgeCliEntry(config: BridgeRuntimeConfig, deps: BridgeServiceDeps): BridgeCliEntry {
-  return resolveGsdCliEntry({
+  return resolveSddCliEntry({
     packageRoot: config.packageRoot,
     cwd: config.projectCwd,
     execPath: deps.execPath ?? process.execPath,

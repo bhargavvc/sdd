@@ -2,8 +2,8 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync,
 import { basename, dirname, join } from "node:path";
 
 import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
-import { cleanNumberedGsdVariants } from "./repo-identity.js";
-import { milestonesDir, sddRoot, resolveGsdRootFile } from "./paths.js";
+import { cleanNumberedSddVariants } from "./repo-identity.js";
+import { milestonesDir, sddRoot, resolveSddRootFile } from "./paths.js";
 import { deriveState } from "./state.js";
 import { saveFile } from "./files.js";
 import { nativeIsRepo, nativeForEachRef, nativeUpdateRef } from "./native-git-bridge.js";
@@ -233,7 +233,7 @@ export async function checkRuntimeHealth(
 
   // ── STATE.md health ───────────────────────────────────────────────────
   try {
-    const stateFilePath = resolveGsdRootFile(basePath, "STATE");
+    const stateFilePath = resolveSddRootFile(basePath, "STATE");
     const milestonesPath = milestonesDir(basePath);
 
     if (existsSync(milestonesPath)) {
@@ -340,9 +340,9 @@ export async function checkRuntimeHealth(
 
   // ── External state symlink health ──────────────────────────────────────
   try {
-    const localGsd = join(basePath, ".sdd");
-    if (existsSync(localGsd)) {
-      const stat = lstatSync(localGsd);
+    const localSdd = join(basePath, ".sdd");
+    if (existsSync(localSdd)) {
+      const stat = lstatSync(localSdd);
 
       // Check for .sdd.migrating (failed migration)
       const migratingPath = join(basePath, ".sdd.migrating");
@@ -367,7 +367,7 @@ export async function checkRuntimeHealth(
       // Check symlink target exists
       if (stat.isSymbolicLink()) {
         try {
-          realpathSync(localGsd);
+          realpathSync(localSdd);
         } catch {
           issues.push({
             severity: "error",
@@ -406,7 +406,7 @@ export async function checkRuntimeHealth(
       }
 
       if (shouldFix("numbered_sdd_variant")) {
-        const removed = cleanNumberedGsdVariants(basePath);
+        const removed = cleanNumberedSddVariants(basePath);
         for (const name of removed) {
           fixesApplied.push(`removed numbered .sdd variant: ${name}`);
         }

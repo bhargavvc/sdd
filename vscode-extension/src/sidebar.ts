@@ -237,7 +237,8 @@ export class SddSidebarProvider implements vscode.WebviewViewProvider {
 	private handleAgentEvent(evt: AgentEvent): void {
 		if (!this.view) return;
 
-		this.outputChannel.appendLine(`[event] ${evt.type}`);
+		this.outputChannel.appendLine(`[event] ${evt.type}: ${JSON.stringify(evt).slice(0, 300)}`);
+		try { fs.appendFileSync(path.join(process.env.USERPROFILE ?? "", "sdd-events.log"), `${evt.type}: ${JSON.stringify(evt).slice(0, 500)}\n`); } catch {}
 
 		switch (evt.type) {
 			case "agent_start":

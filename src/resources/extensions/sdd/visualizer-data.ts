@@ -7,7 +7,7 @@ import { parseSummary, loadFile } from './files.js';
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from './sdd-db.js';
 import { parseRoadmap, parsePlan } from './parsers-legacy.js';
 import { findMilestoneIds } from './milestone-ids.js';
-import { resolveMilestoneFile, resolveSliceFile, resolveGsdRootFile, sddRoot } from './paths.js';
+import { resolveMilestoneFile, resolveSliceFile, resolveSddRootFile, sddRoot } from './paths.js';
 import {
   getLedger,
   getProjectTotals,
@@ -547,7 +547,7 @@ async function loadChangelogAndVerifications(basePath: string, milestones: Visua
 // ─── Knowledge Loader ─────────────────────────────────────────────────────────
 
 function loadKnowledge(basePath: string): KnowledgeInfo {
-  const knowledgePath = resolveGsdRootFile(basePath, 'KNOWLEDGE');
+  const knowledgePath = resolveSddRootFile(basePath, 'KNOWLEDGE');
   if (!existsSync(knowledgePath)) {
     return { rules: [], patterns: [], lessons: [], exists: false };
   }

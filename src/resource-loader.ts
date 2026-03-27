@@ -59,7 +59,7 @@ function getManagedResourceManifestPath(agentDir: string): string {
   return join(agentDir, resourceVersionManifestName)
 }
 
-function getBundledGsdVersion(): string {
+function getBundledSddVersion(): string {
   // Prefer SDD_VERSION env var (set once by loader.ts) to avoid re-reading package.json
   if (process.env.SDD_VERSION && process.env.SDD_VERSION !== '0.0.0') {
     return process.env.SDD_VERSION
@@ -96,7 +96,7 @@ function writeManagedResourceManifest(agentDir: string): void {
   } catch { /* non-fatal */ }
 
   const manifest: ManagedResourceManifest = {
-    sddVersion: getBundledGsdVersion(),
+    sddVersion: getBundledSddVersion(),
     syncedAt: Date.now(),
     contentHash: computeResourceFingerprint(),
     installedExtensionRootFiles,
@@ -397,7 +397,7 @@ function pruneRemovedBundledExtensions(
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
 
-  const currentVersion = getBundledGsdVersion()
+  const currentVersion = getBundledSddVersion()
   const manifest = readManagedResourceManifest(agentDir)
 
   // Always prune root-level extension files that were removed from the bundle.

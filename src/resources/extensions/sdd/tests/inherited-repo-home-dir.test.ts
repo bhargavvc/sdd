@@ -37,7 +37,7 @@ function run(cmd: string, args: string[], cwd: string): string {
 describe("isInheritedRepo when git root is HOME (#2393)", () => {
   let fakeHome: string;
   let stateDir: string;
-  let origGsdHome: string | undefined;
+  let origSddHome: string | undefined;
   let origSddStateDir: string | undefined;
 
   beforeEach(() => {
@@ -56,7 +56,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
 
     // Save and override env. Point SDD_HOME at fakeHome/.sdd so the
     // function recognizes it as the global state directory.
-    origGsdHome = process.env.SDD_HOME;
+    origSddHome = process.env.SDD_HOME;
     origSddStateDir = process.env.SDD_STATE_DIR;
     process.env.SDD_HOME = join(fakeHome, ".sdd");
     stateDir = mkdtempSync(join(tmpdir(), "sdd-state-"));
@@ -64,7 +64,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
   });
 
   afterEach(() => {
-    if (origGsdHome !== undefined) process.env.SDD_HOME = origGsdHome;
+    if (origSddHome !== undefined) process.env.SDD_HOME = origSddHome;
     else delete process.env.SDD_HOME;
     if (origSddStateDir !== undefined) process.env.SDD_STATE_DIR = origSddStateDir;
     else delete process.env.SDD_STATE_DIR;
@@ -146,12 +146,12 @@ describe("isInheritedRepo with stale .sdd at parent git root", () => {
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    // Without fix: isProjectGsd(join(root, ".sdd")) returns true because
+    // Without fix: isProjectSdd(join(root, ".sdd")) returns true because
     // the stale .sdd is a real directory that isn't the global SDD home,
     // causing isInheritedRepo to return false (false negative).
     //
     // The stale .sdd at parent is still treated as a "project .sdd" by
-    // isProjectGsd(), so the git root check at line 128 returns false.
+    // isProjectSdd(), so the git root check at line 128 returns false.
     // This is the expected behavior for that check — the defense-in-depth
     // fix in auto-start.ts handles this case by checking for local .git.
     //

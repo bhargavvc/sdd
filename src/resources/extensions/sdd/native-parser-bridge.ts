@@ -14,7 +14,7 @@ let nativeModule: {
   parseFrontmatter: (content: string) => { metadata: string; body: string };
   extractSection: (content: string, heading: string, level?: number) => { content: string; found: boolean };
   extractAllSections: (content: string, level?: number) => string;
-  batchParseGsdFiles: (directory: string) => { files: Array<{ path: string; metadata: string; body: string; sections: string; rawContent: string }>; count: number };
+  batchParseSddFiles: (directory: string) => { files: Array<{ path: string; metadata: string; body: string; sections: string; rawContent: string }>; count: number };
   parseRoadmapFile: (content: string) => {
     title: string;
     vision: string;
@@ -22,7 +22,7 @@ let nativeModule: {
     slices: Array<{ id: string; title: string; risk: string; depends: string[]; done: boolean; demo: string }>;
     boundaryMap: Array<{ fromSlice: string; toSlice: string; produces: string; consumes: string }>;
   };
-  scanGsdTree: (directory: string) => Array<{ path: string; name: string; isDir: boolean }>;
+  scanSddTree: (directory: string) => Array<{ path: string; name: string; isDir: boolean }>;
   parseJsonlTail: (filePath: string, maxBytes?: number, maxEntries?: number) => { entries: string; count: number; truncated: boolean };
   parsePlanFile: (content: string) => NativePlanResult;
   parseSummaryFile: (content: string) => NativeSummaryResult;
@@ -39,7 +39,7 @@ function loadNative(): typeof nativeModule {
     // Dynamic import to avoid hard dependency - fails gracefully if native module not built
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('@sdd/native');
-    if (mod.parseFrontmatter && mod.extractSection && mod.batchParseGsdFiles) {
+    if (mod.parseFrontmatter && mod.extractSection && mod.batchParseSddFiles) {
       nativeModule = mod;
     }
   } catch {
@@ -124,11 +124,11 @@ export interface BatchParsedFile {
  * Batch-parse all .md files in a .sdd/ directory tree using the native parser.
  * Returns null if native module unavailable.
  */
-export function nativeBatchParseGsdFiles(directory: string): BatchParsedFile[] | null {
+export function nativeBatchParseSddFiles(directory: string): BatchParsedFile[] | null {
   const native = loadNative();
   if (!native) return null;
 
-  const result = native.batchParseGsdFiles(directory);
+  const result = native.batchParseSddFiles(directory);
   return result.files.map(f => ({
     path: f.path,
     metadata: JSON.parse(f.metadata) as Record<string, unknown>,
@@ -147,7 +147,7 @@ export function isNativeParserAvailable(): boolean {
 
 // ─── Tree Scanning ────────────────────────────────────────────────────────────
 
-export interface GsdTreeEntry {
+export interface SddTreeEntry {
   path: string;
   name: string;
   isDir: boolean;
@@ -157,10 +157,10 @@ export interface GsdTreeEntry {
  * Native-backed directory tree scan of a .sdd/ directory.
  * Returns a flat list of all entries, or null if native module unavailable.
  */
-export function nativeScanGsdTree(directory: string): GsdTreeEntry[] | null {
+export function nativeScanSddTree(directory: string): SddTreeEntry[] | null {
   const native = loadNative();
   if (!native) return null;
-  return native.scanGsdTree(directory);
+  return native.scanSddTree(directory);
 }
 
 // ─── JSONL Parsing ────────────────────────────────────────────────────────────

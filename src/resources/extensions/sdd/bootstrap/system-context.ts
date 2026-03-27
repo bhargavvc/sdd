@@ -7,7 +7,7 @@ import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";
 import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveSDDPreferences } from "../preferences.js";
-import { resolveGsdRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
+import { resolveSddRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
 import { hasSkillSnapshot, detectNewSkills, formatSkillsXml } from "../skill-discovery.js";
 import { getActiveAutoWorktreeContext } from "../auto-worktree.js";
 import { getActiveWorktreeName, getWorktreeOriginalCwd } from "../worktree-command.js";
@@ -28,7 +28,7 @@ function warnDeprecatedAgentInstructions(): void {
       console.warn(
         `[SDD] DEPRECATED: ${path} is no longer loaded. ` +
         `Migrate your instructions to AGENTS.md (or CLAUDE.md) in the same directory. ` +
-        `See https://github.com/sdd-build/SDD-2/issues/1492`,
+        `See https://github.com/gsd-build/SDD-2/issues/1492`,
       );
     }
   }
@@ -140,7 +140,7 @@ export function loadKnowledgeBlock(gsdHomeDir: string, cwd: string): { block: st
 
   // 2. Project knowledge (.sdd/KNOWLEDGE.md) — project-specific
   let projectKnowledge = "";
-  const knowledgePath = resolveGsdRootFile(cwd, "KNOWLEDGE");
+  const knowledgePath = resolveSddRootFile(cwd, "KNOWLEDGE");
   if (existsSync(knowledgePath)) {
     try {
       const content = readFileSync(knowledgePath, "utf-8").trim();

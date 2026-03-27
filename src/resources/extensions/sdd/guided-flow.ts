@@ -20,7 +20,7 @@ import { listUnitRuntimeRecords, clearUnitRuntimeRecord } from "./unit-runtime.j
 import { resolveExpectedArtifactPath } from "./auto.js";
 import {
   sddRoot, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
-  resolveSliceFile, resolveSlicePath, resolveGsdRootFile, relGsdRootFile,
+  resolveSliceFile, resolveSlicePath, resolveSddRootFile, relSddRootFile,
   relMilestoneFile, relSliceFile,
 } from "./paths.js";
 import { join } from "node:path";
@@ -106,13 +106,13 @@ export function checkAutoStartAfterDiscuss(): boolean {
   // (sequential readiness gates for remaining milestones) in multi-milestone
   // discussions, where M001-CONTEXT.md exists but M002/M003 haven't been
   // processed yet.
-  const stateFile = resolveGsdRootFile(basePath, "STATE");
+  const stateFile = resolveSddRootFile(basePath, "STATE");
   if (!stateFile) return false; // discussion not finalized yet
 
   // Gate 3: Multi-milestone completeness warning
   // Parse PROJECT.md for milestone sequence, warn if any are missing context.
   // Don't block — milestones can be intentionally queued without context.
-  const projectFile = resolveGsdRootFile(basePath, "PROJECT");
+  const projectFile = resolveSddRootFile(basePath, "PROJECT");
   if (projectFile) {
     try {
       const projectContent = readFileSync(projectFile, "utf-8");
@@ -347,7 +347,7 @@ function buildHeadlessDiscussPrompt(nextId: string, seedContext: string, _basePa
  * Bootstrap a .sdd/ project from scratch for headless use.
  * Ensures git repo, .sdd/ structure, gitignore, and preferences all exist.
  */
-function bootstrapGsdProject(basePath: string): void {
+function bootstrapSddProject(basePath: string): void {
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
     const mainBranch = loadEffectiveSDDPreferences()?.preferences?.git?.main_branch || "main";
     nativeInit(basePath, mainBranch);
@@ -377,7 +377,7 @@ export async function showHeadlessMilestoneCreation(
   clearReservedMilestoneIds();
 
   // Ensure .sdd/ is bootstrapped
-  bootstrapGsdProject(basePath);
+  bootstrapSddProject(basePath);
 
   // Generate next milestone ID
   const existingIds = findMilestoneIds(basePath);
@@ -441,11 +441,11 @@ async function buildDiscussSlicePrompt(
   }
 
   // Decisions — architectural context that constrains this slice
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
+  const decisionsPath = resolveSddRootFile(base, "DECISIONS");
   if (existsSync(decisionsPath)) {
     const decisionsContent = await loadFile(decisionsPath);
     if (decisionsContent) {
-      inlined.push(`### Decisions Register\nSource: \`${relGsdRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
+      inlined.push(`### Decisions Register\nSource: \`${relSddRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
     }
   }
 

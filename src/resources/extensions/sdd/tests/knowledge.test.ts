@@ -3,8 +3,8 @@
  *
  * Tests:
  * - KNOWLEDGE is registered in SDD_ROOT_FILES
- * - resolveGsdRootFile resolves KNOWLEDGE paths correctly
- * - inlineGsdRootFile works with the KNOWLEDGE key
+ * - resolveSddRootFile resolves KNOWLEDGE paths correctly
+ * - inlineSddRootFile works with the KNOWLEDGE key
  * - before_agent_start hook includes/omits knowledge block appropriately
  * - loadKnowledgeBlock merges global and project knowledge correctly
  */
@@ -14,8 +14,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { SDD_ROOT_FILES, resolveGsdRootFile } from '../paths.ts';
-import { inlineGsdRootFile } from '../auto-prompts.ts';
+import { SDD_ROOT_FILES, resolveSddRootFile } from '../paths.ts';
+import { inlineSddRootFile } from '../auto-prompts.ts';
 import { appendKnowledge } from '../files.ts';
 import { loadKnowledgeBlock } from '../bootstrap/system-context.ts';
 
@@ -26,27 +26,27 @@ test('knowledge: KNOWLEDGE key exists in SDD_ROOT_FILES', () => {
   assert.strictEqual(SDD_ROOT_FILES.KNOWLEDGE, 'KNOWLEDGE.md');
 });
 
-// ─── resolveGsdRootFile resolves KNOWLEDGE.md ───────────────────────────────
+// ─── resolveSddRootFile resolves KNOWLEDGE.md ───────────────────────────────
 
-test('knowledge: resolveGsdRootFile returns canonical path when KNOWLEDGE.md exists', () => {
+test('knowledge: resolveSddRootFile returns canonical path when KNOWLEDGE.md exists', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
   const sddDir = join(tmp, '.sdd');
   mkdirSync(sddDir, { recursive: true });
   writeFileSync(join(sddDir, 'KNOWLEDGE.md'), '# Project Knowledge\n');
 
-  const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
+  const resolved = resolveSddRootFile(tmp, 'KNOWLEDGE');
   assert.strictEqual(resolved, join(sddDir, 'KNOWLEDGE.md'));
 
   rmSync(tmp, { recursive: true, force: true });
 });
 
-test('knowledge: resolveGsdRootFile resolves when legacy knowledge.md exists', () => {
+test('knowledge: resolveSddRootFile resolves when legacy knowledge.md exists', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
   const sddDir = join(tmp, '.sdd');
   mkdirSync(sddDir, { recursive: true });
   writeFileSync(join(sddDir, 'knowledge.md'), '# Project Knowledge\n');
 
-  const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
+  const resolved = resolveSddRootFile(tmp, 'KNOWLEDGE');
   // On case-insensitive filesystems (macOS), canonical path matches;
   // on case-sensitive (Linux), legacy path matches. Either is valid.
   const canonical = join(sddDir, 'KNOWLEDGE.md');
@@ -59,26 +59,26 @@ test('knowledge: resolveGsdRootFile resolves when legacy knowledge.md exists', (
   rmSync(tmp, { recursive: true, force: true });
 });
 
-test('knowledge: resolveGsdRootFile returns canonical path when file does not exist', () => {
+test('knowledge: resolveSddRootFile returns canonical path when file does not exist', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
   const sddDir = join(tmp, '.sdd');
   mkdirSync(sddDir, { recursive: true });
 
-  const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
+  const resolved = resolveSddRootFile(tmp, 'KNOWLEDGE');
   assert.strictEqual(resolved, join(sddDir, 'KNOWLEDGE.md'));
 
   rmSync(tmp, { recursive: true, force: true });
 });
 
-// ─── inlineGsdRootFile works with knowledge.md ─────────────────────────────
+// ─── inlineSddRootFile works with knowledge.md ─────────────────────────────
 
-test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', async () => {
+test('knowledge: inlineSddRootFile returns content when KNOWLEDGE.md exists', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
   const sddDir = join(tmp, '.sdd');
   mkdirSync(sddDir, { recursive: true });
   writeFileSync(join(sddDir, 'KNOWLEDGE.md'), '# Project Knowledge\n\n## Rules\n\nK001: Use real DB');
 
-  const result = await inlineGsdRootFile(tmp, 'knowledge.md', 'Project Knowledge');
+  const result = await inlineSddRootFile(tmp, 'knowledge.md', 'Project Knowledge');
   assert.ok(result !== null, 'should return content');
   assert.ok(result!.includes('Project Knowledge'), 'should include label');
   assert.ok(result!.includes('K001'), 'should include knowledge content');
@@ -86,12 +86,12 @@ test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', as
   rmSync(tmp, { recursive: true, force: true });
 });
 
-test('knowledge: inlineGsdRootFile returns null when KNOWLEDGE.md does not exist', async () => {
+test('knowledge: inlineSddRootFile returns null when KNOWLEDGE.md does not exist', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
   const sddDir = join(tmp, '.sdd');
   mkdirSync(sddDir, { recursive: true });
 
-  const result = await inlineGsdRootFile(tmp, 'knowledge.md', 'Project Knowledge');
+  const result = await inlineSddRootFile(tmp, 'knowledge.md', 'Project Knowledge');
   assert.strictEqual(result, null, 'should return null when file does not exist');
 
   rmSync(tmp, { recursive: true, force: true });

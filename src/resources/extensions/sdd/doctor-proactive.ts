@@ -16,7 +16,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { sddRoot, resolveGsdRootFile } from "./paths.js";
+import { sddRoot, resolveSddRootFile } from "./paths.js";
 import { readCrashLock, isLockProcessAlive, clearLock } from "./crash-recovery.js";
 import { abortAndReset } from "./git-self-heal.js";
 import { rebuildState } from "./doctor.js";
@@ -255,7 +255,7 @@ export async function preDispatchHealthGate(basePath: string): Promise<PreDispat
   // If STATE.md is missing, attempt to rebuild it for the next unit's context.
   // Non-blocking — fresh worktrees won't have it until the first unit completes (#889).
   try {
-    const stateFile = resolveGsdRootFile(basePath, "STATE");
+    const stateFile = resolveSddRootFile(basePath, "STATE");
     const milestonesDir = join(sddRoot(basePath), "milestones");
     if (existsSync(milestonesDir) && !existsSync(stateFile)) {
       try {

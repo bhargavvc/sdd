@@ -96,13 +96,13 @@ const BASELINE_PATTERNS = [
  *   - `.sdd/` doesn't exist
  *   - No tracked files found under `.sdd/`
  */
-export function hasGitTrackedGsdFiles(basePath: string): boolean {
-  const localGsd = join(basePath, ".sdd");
+export function hasGitTrackedSddFiles(basePath: string): boolean {
+  const localSdd = join(basePath, ".sdd");
 
   // If .sdd doesn't exist or is already a symlink, no tracked files concern
-  if (!existsSync(localGsd)) return false;
+  if (!existsSync(localSdd)) return false;
   try {
-    if (lstatSync(localGsd).isSymbolicLink()) return false;
+    if (lstatSync(localSdd).isSymbolicLink()) return false;
   } catch {
     return false;
   }
@@ -163,7 +163,7 @@ export function ensureGitignore(
 
   // Determine which patterns to apply. If .sdd/ has tracked files,
   // exclude the ".sdd" pattern to prevent deleting tracked state.
-  const gsdIsTracked = hasGitTrackedGsdFiles(basePath);
+  const gsdIsTracked = hasGitTrackedSddFiles(basePath);
   const patternsToApply = gsdIsTracked
     ? BASELINE_PATTERNS.filter((p) => p !== ".sdd")
     : BASELINE_PATTERNS;

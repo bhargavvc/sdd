@@ -1,7 +1,7 @@
 /**
  * Regression tests for the default package root fallback in bridge-service.
  *
- * Issue: sdd-build/sdd-2#1881
+ * Issue: gsd-build/gsd-2#1881
  * The standalone Next.js bundle bakes import.meta.url at build time with the
  * CI runner's absolute path.  On Windows, fileURLToPath() rejects the Unix
  * file:// URL at module load time, 500-ing all API routes.

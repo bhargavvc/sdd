@@ -39,8 +39,8 @@ function resolveExtensionDir(): string {
 
   // Fallback: user-local agent directory
   const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
-  const agentGsdDir = join(gsdHome, "agent", "extensions", "sdd");
-  if (existsSync(join(agentGsdDir, "prompts"))) return agentGsdDir;
+  const agentSddDir = join(gsdHome, "agent", "extensions", "sdd");
+  if (existsSync(join(agentSddDir, "prompts"))) return agentSddDir;
 
   // Last resort: return the module dir (warmCache will silently handle the miss)
   return moduleDir;

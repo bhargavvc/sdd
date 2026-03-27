@@ -109,7 +109,7 @@ const MAX_REWRITE_ATTEMPTS = 3;
 // ─── Disk-persisted rewrite attempt counter ──────────────────────────────────
 // The counter must survive session restarts (crash recovery, pause/resume,
 // step-mode). Storing it on the in-memory session object caused the circuit
-// breaker to never trip — see https://github.com/sdd-build/sdd-2/issues/2203
+// breaker to never trip — see https://github.com/gsd-build/gsd-2/issues/2203
 function rewriteCountPath(basePath: string): string {
   return join(sddRoot(basePath), "runtime", "rewrite-count.json");
 }

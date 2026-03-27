@@ -25,9 +25,9 @@ describe("forensics dedup (#2096)", () => {
   it("DEDUP_PROMPT_SECTION contains required search commands", async () => {
     const source = readFileSync(join(sddDir, "forensics.ts"), "utf-8");
     assert.ok(source.includes("DEDUP_PROMPT_SECTION"), "forensics.ts must define DEDUP_PROMPT_SECTION");
-    assert.ok(source.includes("gh issue list --repo sdd-build/sdd-2 --state closed"));
-    assert.ok(source.includes("gh pr list --repo sdd-build/sdd-2 --state open"));
-    assert.ok(source.includes("gh pr list --repo sdd-build/sdd-2 --state merged"));
+    assert.ok(source.includes("gh issue list --repo gsd-build/gsd-2 --state closed"));
+    assert.ok(source.includes("gh pr list --repo gsd-build/gsd-2 --state open"));
+    assert.ok(source.includes("gh pr list --repo gsd-build/gsd-2 --state merged"));
   });
 
   it("handleForensics checks forensics_dedup preference", () => {

@@ -14,7 +14,7 @@ import {
   resolveMilestoneFile, resolveSliceFile, resolveSlicePath,
   resolveTasksDir, resolveTaskFiles, resolveTaskFile,
   relMilestoneFile, relSliceFile, relSlicePath, relMilestonePath,
-  resolveGsdRootFile, relGsdRootFile, resolveRuntimeFile,
+  resolveSddRootFile, relSddRootFile, resolveRuntimeFile,
 } from "./paths.js";
 import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveSDDPreferences, resolveAllSkillReferences } from "./preferences.js";
 import { parseRoadmap } from "./parsers-legacy.js";
@@ -72,24 +72,24 @@ function buildSourceFilePaths(
 ): string {
   const paths: string[] = [];
 
-  const projectPath = resolveGsdRootFile(base, "PROJECT");
+  const projectPath = resolveSddRootFile(base, "PROJECT");
   if (existsSync(projectPath)) {
-    paths.push(`- **Project**: \`${relGsdRootFile("PROJECT")}\``);
+    paths.push(`- **Project**: \`${relSddRootFile("PROJECT")}\``);
   }
 
-  const requirementsPath = resolveGsdRootFile(base, "REQUIREMENTS");
+  const requirementsPath = resolveSddRootFile(base, "REQUIREMENTS");
   if (existsSync(requirementsPath)) {
-    paths.push(`- **Requirements**: \`${relGsdRootFile("REQUIREMENTS")}\``);
+    paths.push(`- **Requirements**: \`${relSddRootFile("REQUIREMENTS")}\``);
   }
 
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
+  const decisionsPath = resolveSddRootFile(base, "DECISIONS");
   if (existsSync(decisionsPath)) {
-    paths.push(`- **Decisions**: \`${relGsdRootFile("DECISIONS")}\``);
+    paths.push(`- **Decisions**: \`${relSddRootFile("DECISIONS")}\``);
   }
 
-  const queuePath = resolveGsdRootFile(base, "QUEUE");
+  const queuePath = resolveSddRootFile(base, "QUEUE");
   if (existsSync(queuePath)) {
-    paths.push(`- **Queue**: \`${relGsdRootFile("QUEUE")}\``);
+    paths.push(`- **Queue**: \`${relSddRootFile("QUEUE")}\``);
   }
 
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -243,20 +243,20 @@ export async function inlineDependencySummaries(
  * Load a well-known .sdd/ root file for optional inlining.
  * Handles the existsSync check internally.
  */
-export async function inlineGsdRootFile(
+export async function inlineSddRootFile(
   base: string, filename: string, label: string,
 ): Promise<string | null> {
   const key = filename.replace(/\.md$/i, "").toUpperCase() as "PROJECT" | "DECISIONS" | "QUEUE" | "STATE" | "REQUIREMENTS" | "KNOWLEDGE";
-  const absPath = resolveGsdRootFile(base, key);
+  const absPath = resolveSddRootFile(base, key);
   if (!existsSync(absPath)) return null;
-  return inlineFileOptional(absPath, relGsdRootFile(key), label);
+  return inlineFileOptional(absPath, relSddRootFile(key), label);
 }
 
 // ─── DB-Aware Inline Helpers ──────────────────────────────────────────────
 
 /**
  * Inline decisions with optional milestone scoping from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineSddRootFile when DB unavailable or empty.
  */
 export async function inlineDecisionsFromDb(
   base: string, milestoneId?: string, scope?: string, level?: InlineLevel,
@@ -278,12 +278,12 @@ export async function inlineDecisionsFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "decisions.md", "Decisions");
+  return inlineSddRootFile(base, "decisions.md", "Decisions");
 }
 
 /**
  * Inline requirements with optional slice scoping from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineSddRootFile when DB unavailable or empty.
  */
 export async function inlineRequirementsFromDb(
   base: string, sliceId?: string, level?: InlineLevel,
@@ -305,12 +305,12 @@ export async function inlineRequirementsFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "requirements.md", "Requirements");
+  return inlineSddRootFile(base, "requirements.md", "Requirements");
 }
 
 /**
  * Inline project context from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineSddRootFile when DB unavailable or empty.
  */
 export async function inlineProjectFromDb(
   base: string,
@@ -327,7 +327,7 @@ export async function inlineProjectFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "project.md", "Project");
+  return inlineSddRootFile(base, "project.md", "Project");
 }
 
 // ─── Skill Activation & Discovery ─────────────────────────────────────────
@@ -874,7 +874,7 @@ export async function buildResearchMilestonePrompt(mid: string, midTitle: string
   if (requirementsInline) inlined.push(requirementsInline);
   const decisionsInline = await inlineDecisionsFromDb(base, mid);
   if (decisionsInline) inlined.push(decisionsInline);
-  const knowledgeInlineRM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRM = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRM) inlined.push(knowledgeInlineRM);
   inlined.push(inlineTemplate("research", "Research"));
 
@@ -920,17 +920,17 @@ export async function buildPlanMilestonePrompt(mid: string, midTitle: string, ba
     const decisionsInline = await inlineDecisionsFromDb(base, mid, undefined, inlineLevel);
     if (decisionsInline) inlined.push(decisionsInline);
   }
-  const queuePath = resolveGsdRootFile(base, "QUEUE");
+  const queuePath = resolveSddRootFile(base, "QUEUE");
   if (existsSync(queuePath)) {
     const queueInline = await inlineFileSmart(
       queuePath,
-      relGsdRootFile("QUEUE"),
+      relSddRootFile("QUEUE"),
       "Project Queue",
       `${mid} ${midTitle}`,
     );
     inlined.push(queueInline);
   }
-  const knowledgeInlinePM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlinePM = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlinePM) inlined.push(knowledgeInlinePM);
   inlined.push(inlineTemplate("roadmap", "Roadmap"));
   if (inlineLevel === "full") {
@@ -990,7 +990,7 @@ export async function buildResearchSlicePrompt(
   if (decisionsInline) inlined.push(decisionsInline);
   const requirementsInline = await inlineRequirementsFromDb(base, sid);
   if (requirementsInline) inlined.push(requirementsInline);
-  const knowledgeInlineRS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRS = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRS) inlined.push(knowledgeInlineRS);
   inlined.push(inlineTemplate("research", "Research"));
 
@@ -1042,7 +1042,7 @@ export async function buildPlanSlicePrompt(
     const requirementsInline = await inlineRequirementsFromDb(base, sid, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
   }
-  const knowledgeInlinePS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlinePS = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlinePS) inlined.push(knowledgeInlinePS);
   inlined.push(inlineTemplate("plan", "Slice Plan"));
   if (inlineLevel === "full") {
@@ -1145,11 +1145,11 @@ export async function buildExecuteTaskPrompt(
   const carryForwardSection = await buildCarryForwardSection(effectivePriorSummaries, base);
 
   // Inline project knowledge if available (smart-chunked for relevance)
-  const knowledgeAbsPath = resolveGsdRootFile(base, "KNOWLEDGE");
+  const knowledgeAbsPath = resolveSddRootFile(base, "KNOWLEDGE");
   const knowledgeInlineET = existsSync(knowledgeAbsPath)
     ? await inlineFileSmart(
         knowledgeAbsPath,
-        relGsdRootFile("KNOWLEDGE"),
+        relSddRootFile("KNOWLEDGE"),
         "Project Knowledge",
         `${tTitle} ${sTitle}`,  // use task + slice title as relevance query
       )
@@ -1236,7 +1236,7 @@ export async function buildCompleteSlicePrompt(
     const requirementsInline = await inlineRequirementsFromDb(base, sid, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
   }
-  const knowledgeInlineCS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineCS = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCS) inlined.push(knowledgeInlineCS);
 
   // Inline all task summaries for this slice
@@ -1321,7 +1321,7 @@ export async function buildCompleteMilestonePrompt(
     const projectInline = await inlineProjectFromDb(base);
     if (projectInline) inlined.push(projectInline);
   }
-  const knowledgeInlineCM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineCM = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCM) inlined.push(knowledgeInlineCM);
   // Inline milestone context file (milestone-level, not SDD root)
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -1442,7 +1442,7 @@ export async function buildValidateMilestonePrompt(
     const projectInline = await inlineProjectFromDb(base);
     if (projectInline) inlined.push(projectInline);
   }
-  const knowledgeInline = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInline = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInline) inlined.push(knowledgeInline);
   // Inline milestone context file
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -1608,7 +1608,7 @@ export async function buildReassessRoadmapPrompt(
     const decisionsInline = await inlineDecisionsFromDb(base, mid, undefined, inlineLevel);
     if (decisionsInline) inlined.push(decisionsInline);
   }
-  const knowledgeInlineRA = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRA = await inlineSddRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRA) inlined.push(knowledgeInlineRA);
 
   const inlinedContext = capPreamble(`## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`);
@@ -1862,12 +1862,12 @@ export async function buildRewriteDocsPrompt(
     }
   }
 
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
-  if (existsSync(decisionsPath)) docList.push(`- Decisions: \`${relGsdRootFile("DECISIONS")}\``);
-  const requirementsPath = resolveGsdRootFile(base, "REQUIREMENTS");
-  if (existsSync(requirementsPath)) docList.push(`- Requirements: \`${relGsdRootFile("REQUIREMENTS")}\``);
-  const projectPath = resolveGsdRootFile(base, "PROJECT");
-  if (existsSync(projectPath)) docList.push(`- Project: \`${relGsdRootFile("PROJECT")}\``);
+  const decisionsPath = resolveSddRootFile(base, "DECISIONS");
+  if (existsSync(decisionsPath)) docList.push(`- Decisions: \`${relSddRootFile("DECISIONS")}\``);
+  const requirementsPath = resolveSddRootFile(base, "REQUIREMENTS");
+  if (existsSync(requirementsPath)) docList.push(`- Requirements: \`${relSddRootFile("REQUIREMENTS")}\``);
+  const projectPath = resolveSddRootFile(base, "PROJECT");
+  if (existsSync(projectPath)) docList.push(`- Project: \`${relSddRootFile("PROJECT")}\``);
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
   const contextRel = relMilestoneFile(base, mid, "CONTEXT");
   if (contextPath) docList.push(`- Milestone context (reference only): \`${contextRel}\``);
@@ -1891,6 +1891,6 @@ export async function buildRewriteDocsPrompt(
     sliceTitle: sTitle,
     overrideContent,
     documentList,
-    overridesPath: relGsdRootFile("OVERRIDES"),
+    overridesPath: relSddRootFile("OVERRIDES"),
   });
 }

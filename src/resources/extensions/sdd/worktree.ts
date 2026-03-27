@@ -144,9 +144,9 @@ export function resolveProjectRoot(basePath: string): string {
   // When .sdd is a symlink into ~/.sdd/projects/<hash>, the resolved path
   // contains /.sdd/ at the user-level boundary. Slicing there yields ~ — wrong.
   const gsdHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".sdd"));
+  const candidateSddPath = normalizePathForCompare(join(candidate, ".sdd"));
 
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  if (candidateSddPath === gsdHome || candidateSddPath.startsWith(gsdHome + "/")) {
     // The candidate is the home directory (or within it in a way that .sdd
     // maps to the user-level SDD dir). Try to recover the real project root
     // from the worktree's .git file.

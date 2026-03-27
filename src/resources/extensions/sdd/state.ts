@@ -30,14 +30,14 @@ import {
   resolveSliceFile,
   resolveTaskFile,
   resolveTasksDir,
-  resolveGsdRootFile,
+  resolveSddRootFile,
   sddRoot,
 } from './paths.js';
 
 import { findMilestoneIds } from './milestone-ids.js';
 import { loadQueueOrder, sortByQueueOrder } from './queue-order.js';
 import { isClosedStatus } from './status-guards.js';
-import { nativeBatchParseGsdFiles, type BatchParsedFile } from './native-parser-bridge.js';
+import { nativeBatchParseSddFiles, type BatchParsedFile } from './native-parser-bridge.js';
 
 import { join, resolve } from 'path';
 import { existsSync, readdirSync } from 'node:fs';
@@ -277,7 +277,7 @@ function extractContextTitle(content: string | null, fallback: string): string {
  * Must produce field-identical SDDState to _deriveStateImpl() for the same project.
  */
 export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
-  const requirements = parseRequirementCounts(await loadFile(resolveGsdRootFile(basePath, "REQUIREMENTS")));
+  const requirements = parseRequirementCounts(await loadFile(resolveSddRootFile(basePath, "REQUIREMENTS")));
 
   let allMilestones = getAllMilestones();
 
@@ -570,7 +570,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
   // ── All slices done → validating/completing ─────────────────────────
   // Guard: [].every() === true (vacuous truth). Without the length check,
   // an empty slice array causes a premature phase transition to
-  // validating-milestone. See: https://github.com/sdd-build/sdd-2/issues/2667
+  // validating-milestone. See: https://github.com/gsd-build/gsd-2/issues/2667
   const allSlicesDone = activeMilestoneSlices.length > 0 && activeMilestoneSlices.every(s => isClosedStatus(s.status));
   if (allSlicesDone) {
     const validationFile = resolveMilestoneFile(basePath, activeMilestone.id, "VALIDATION");
@@ -851,7 +851,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
   // Filesystem fallback: used when deriveStateFromDb() is not available
   // (pre-migration projects). The DB-backed path is preferred when available
   // — see deriveStateFromDb() above.
-  const batchFiles = nativeBatchParseGsdFiles(sddDir);
+  const batchFiles = nativeBatchParseSddFiles(sddDir);
   if (batchFiles) {
     for (const f of batchFiles) {
       const absPath = resolve(sddDir, f.path);
@@ -870,7 +870,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
     return loadFile(path);
   }
 
-  const requirements = parseRequirementCounts(await cachedLoadFile(resolveGsdRootFile(basePath, "REQUIREMENTS")));
+  const requirements = parseRequirementCounts(await cachedLoadFile(resolveSddRootFile(basePath, "REQUIREMENTS")));
 
   if (milestoneIds.length === 0) {
     return {

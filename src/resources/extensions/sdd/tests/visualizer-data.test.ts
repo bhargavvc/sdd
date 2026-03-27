@@ -194,8 +194,8 @@ assert.ok(
 );
 
 assert.ok(
-  dataSrc.includes("resolveGsdRootFile"),
-  "uses resolveGsdRootFile for KNOWLEDGE path",
+  dataSrc.includes("resolveSddRootFile"),
+  "uses resolveSddRootFile for KNOWLEDGE path",
 );
 
 // Interface fields

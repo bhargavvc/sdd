@@ -32,7 +32,7 @@ import {
   buildSliceFileName,
   resolveMilestoneFile,
   clearPathCache,
-  resolveGsdRootFile,
+  resolveSddRootFile,
 } from "./paths.js";
 import {
   existsSync,
@@ -186,7 +186,7 @@ export function verifyExpectedArtifact(
   clearParseCache();
 
   if (unitType === "rewrite-docs") {
-    const overridesPath = resolveGsdRootFile(base, "OVERRIDES");
+    const overridesPath = resolveSddRootFile(base, "OVERRIDES");
     if (!existsSync(overridesPath)) return true;
     const content = readFileSync(overridesPath, "utf-8");
     return !content.includes("**Scope:** active");

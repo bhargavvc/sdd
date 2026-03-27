@@ -20,14 +20,14 @@ test("forensics prompt explicitly forbids github_issues tool for issue creation"
   );
 });
 
-test("forensics prompt requires gh CLI with --repo sdd-build/sdd-2 for issue creation", () => {
+test("forensics prompt requires gh CLI with --repo gsd-build/gsd-2 for issue creation", () => {
   const prompt = readPrompt("forensics");
 
   // Must contain the exact gh CLI command with the correct repo flag
   assert.match(
     prompt,
-    /gh issue create --repo sdd-build\/sdd-2/,
-    "Prompt must specify gh issue create --repo sdd-build/sdd-2",
+    /gh issue create --repo gsd-build\/sdd-2/,
+    "Prompt must specify gh issue create --repo gsd-build/gsd-2",
   );
 });
 

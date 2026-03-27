@@ -19,7 +19,7 @@ import {
   _getAdapter,
 } from './sdd-db.js';
 import {
-  resolveGsdRootFile,
+  resolveSddRootFile,
   resolveMilestoneFile,
   resolveSliceFile,
   resolveSlicePath,
@@ -271,7 +271,7 @@ export function parseRequirementsSections(content: string): Requirement[] {
  * Handles supersession chains.
  */
 function importDecisions(sddDir: string): number {
-  const filePath = resolveGsdRootFile(sddDir, 'DECISIONS');
+  const filePath = resolveSddRootFile(sddDir, 'DECISIONS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -288,7 +288,7 @@ function importDecisions(sddDir: string): number {
  * Import requirements from REQUIREMENTS.md into the database.
  */
 function importRequirements(sddDir: string): number {
-  const filePath = resolveGsdRootFile(sddDir, 'REQUIREMENTS');
+  const filePath = resolveSddRootFile(sddDir, 'REQUIREMENTS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');

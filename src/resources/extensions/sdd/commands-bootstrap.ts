@@ -62,7 +62,7 @@ function filterStartsWith(
     }));
 }
 
-function getGsdArgumentCompletions(prefix: string) {
+function getSddArgumentCompletions(prefix: string) {
   const parts = prefix.trim().split(/\s+/);
 
   if (parts.length <= 1) {
@@ -244,7 +244,7 @@ function getGsdArgumentCompletions(prefix: string) {
 export function registerLazySDDCommand(pi: ExtensionAPI): void {
   pi.registerCommand("sdd", {
     description: "SDD — Spec-Driven Development",
-    getArgumentCompletions: getGsdArgumentCompletions,
+    getArgumentCompletions: getSddArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
       const { handleSDDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
       await handleSDDCommand(args, ctx, pi);

@@ -12,7 +12,7 @@
 import { readdirSync, existsSync, realpathSync, Dirent } from "node:fs";
 import { join, dirname, normalize } from "node:path";
 import { spawnSync } from "node:child_process";
-import { nativeScanGsdTree, type GsdTreeEntry } from "./native-parser-bridge.js";
+import { nativeScanSddTree, type SddTreeEntry } from "./native-parser-bridge.js";
 import { DIR_CACHE_MAX } from "./constants.js";
 
 // ─── Directory Listing Cache ──────────────────────────────────────────────────
@@ -24,17 +24,17 @@ const dirListCache = new Map<string, string[]>();
 // When the native module is available, scan the entire .sdd/ tree in one call
 // and serve directory listings from memory instead of individual readdirSync calls.
 
-let nativeTreeCache: Map<string, GsdTreeEntry[]> | null = null;
+let nativeTreeCache: Map<string, SddTreeEntry[]> | null = null;
 let nativeTreeBase: string | null = null;
 
-function getNativeTree(sddDir: string): Map<string, GsdTreeEntry[]> | null {
+function getNativeTree(sddDir: string): Map<string, SddTreeEntry[]> | null {
   if (nativeTreeCache && nativeTreeBase === sddDir) return nativeTreeCache;
 
-  const entries = nativeScanGsdTree(sddDir);
+  const entries = nativeScanSddTree(sddDir);
   if (!entries) return null;
 
   // Build a map of parent directory -> entries
-  const tree = new Map<string, GsdTreeEntry[]>();
+  const tree = new Map<string, SddTreeEntry[]>();
   for (const entry of entries) {
     const parts = entry.path.split('/');
     const parentPath = parts.slice(0, -1).join('/');
@@ -283,7 +283,7 @@ const LEGACY_SDD_ROOT_FILES: Record<SDDRootFileKey, string> = {
 const sddRootCache = new Map<string, string>();
 
 /** Exported for tests only — do not call in production code. */
-export function _clearGsdRootCache(): void {
+export function _clearSddRootCache(): void {
   sddRootCache.clear();
 }
 
@@ -302,12 +302,12 @@ export function sddRoot(basePath: string): string {
   const cached = sddRootCache.get(basePath);
   if (cached) return cached;
 
-  const result = probeGsdRoot(basePath);
+  const result = probeSddRoot(basePath);
   sddRootCache.set(basePath, result);
   return result;
 }
 
-function probeGsdRoot(rawBasePath: string): string {
+function probeSddRoot(rawBasePath: string): string {
   // 1. Fast path — check the input path directly
   const local = join(rawBasePath, ".sdd");
   if (existsSync(local)) return local;
@@ -360,7 +360,7 @@ export function resolveRuntimeFile(basePath: string): string {
   return join(sddRoot(basePath), "RUNTIME.md");
 }
 
-export function resolveGsdRootFile(basePath: string, key: SDDRootFileKey): string {
+export function resolveSddRootFile(basePath: string, key: SDDRootFileKey): string {
   const root = sddRoot(basePath);
   const canonical = join(root, SDD_ROOT_FILES[key]);
   if (existsSync(canonical)) return canonical;
@@ -369,7 +369,7 @@ export function resolveGsdRootFile(basePath: string, key: SDDRootFileKey): strin
   return canonical;
 }
 
-export function relGsdRootFile(key: SDDRootFileKey): string {
+export function relSddRootFile(key: SDDRootFileKey): string {
   return `.sdd/${SDD_ROOT_FILES[key]}`;
 }
 

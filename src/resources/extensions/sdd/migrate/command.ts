@@ -145,8 +145,8 @@ export async function handleMigrate(
     );
   }
 
-  const targetGsdExists = existsSync(sddRoot(process.cwd()));
-  if (targetGsdExists) {
+  const targetSddExists = existsSync(sddRoot(process.cwd()));
+  if (targetSddExists) {
     lines.push("");
     lines.push("⚠ A .sdd directory already exists in the current working directory — it will be overwritten.");
   }

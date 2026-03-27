@@ -20,7 +20,7 @@ import {
   resolveSkillDiscoveryMode,
   getIsolationMode,
 } from "./preferences.js";
-import { ensureGsdSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
+import { ensureSddSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
 import { migrateToExternalState, recoverFailedMigration } from "./migrate-external.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
 import { sddRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
@@ -164,7 +164,7 @@ export async function bootstrapAutoSession(
       ctx.ui.notify(`External state migration warning: ${migration.error}`, "warning");
     }
     // Ensure symlink exists (handles fresh projects and post-migration)
-    ensureGsdSymlink(base);
+    ensureSddSymlink(base);
 
     // Ensure .gitignore has baseline patterns.
     // ensureGitignore checks for git-tracked .sdd/ files and skips the
@@ -497,7 +497,7 @@ export async function bootstrapAutoSession(
     // ── Auto-worktree setup ──
     s.originalBasePath = base;
 
-    const isUnderGsdWorktrees = (p: string): boolean => {
+    const isUnderSddWorktrees = (p: string): boolean => {
       // Direct layout: /.sdd/worktrees/
       const marker = `${pathSep}.sdd${pathSep}worktrees${pathSep}`;
       if (p.includes(marker)) return true;
@@ -514,7 +514,7 @@ export async function bootstrapAutoSession(
       s.currentMilestoneId &&
       shouldUseWorktreeIsolation() &&
       !detectWorktreeName(base) &&
-      !isUnderGsdWorktrees(base)
+      !isUnderSddWorktrees(base)
     ) {
       buildResolver().enterMilestone(s.currentMilestoneId, {
         notify: ctx.ui.notify.bind(ctx.ui),
