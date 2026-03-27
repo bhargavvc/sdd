@@ -1,4 +1,7 @@
 
+# ── SDD/GSD project state (must not be checked in) ──
+.sdd/
+.gsd/
 # ── GSD project state (development-only, lives in worktree branches) ──
 package-lock.json
 .claude/
