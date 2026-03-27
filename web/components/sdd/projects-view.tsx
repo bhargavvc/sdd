@@ -56,7 +56,7 @@ import {
 type ProjectDetectionKind = "active-sdd" | "empty-sdd" | "v1-legacy" | "brownfield" | "blank"
 
 interface ProjectDetectionSignals {
-  hasGsdFolder: boolean
+  hasSddFolder: boolean
   hasPlanningFolder: boolean
   hasGitRepo: boolean
   hasPackageJson: boolean

@@ -35,12 +35,12 @@ interface FileNode {
   children?: FileNode[];
 }
 
-function getGsdRoot(projectCwd: string): string {
+function getSddRoot(projectCwd: string): string {
   return join(projectCwd, ".sdd");
 }
 
 function getRootForMode(mode: RootMode, projectCwd: string): string {
-  return mode === "project" ? projectCwd : getGsdRoot(projectCwd);
+  return mode === "project" ? projectCwd : getSddRoot(projectCwd);
 }
 
 /**

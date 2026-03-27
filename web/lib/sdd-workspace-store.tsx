@@ -310,7 +310,7 @@ export type ProjectDetectionKind =
   | "blank"
 
 export interface ProjectDetectionSignals {
-  hasGsdFolder: boolean
+  hasSddFolder: boolean
   hasPlanningFolder: boolean
   hasGitRepo: boolean
   hasPackageJson: boolean

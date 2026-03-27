@@ -109,7 +109,7 @@ export function DualTerminal() {
             command="sdd"
             sessionPrefix="sdd-interactive"
             fontSize={terminalFontSize}
-            hideInitialGsdHeader
+            hideInitialSddHeader
             projectCwd={projectCwd}
           />
         </div>

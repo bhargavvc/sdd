@@ -8,7 +8,7 @@
 import { chmodSync, existsSync, statSync } from "node:fs";
 import { basename, join, dirname } from "node:path";
 import type { IPty } from "node-pty";
-import { resolveGsdCliEntry } from "../../src/web/cli-entry.ts";
+import { resolveSddCliEntry } from "../../src/web/cli-entry.ts";
 
 // Webpack escape hatch — this global exists at runtime in webpack bundles and
 // forwards to Node's native require(), bypassing webpack's module resolution.
@@ -144,7 +144,7 @@ function resolveTerminalSpawnSpec(cwd: string, command?: string, commandArgs: st
 
   if (command === "sdd") {
     try {
-      const cliEntry = resolveGsdCliEntry({
+      const cliEntry = resolveSddCliEntry({
         packageRoot: process.env.SDD_WEB_PACKAGE_ROOT || process.cwd(),
         cwd,
         execPath: process.execPath,

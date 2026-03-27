@@ -7,6 +7,7 @@
 #
 # USAGE:  bash scripts/rebrand-gsd-to-sdd.sh
 # RUN AFTER:  git merge upstream-sync  (into main)
+# MANIFEST:  scripts/REBRAND-MANIFEST.md — lists all patterns, exceptions, trouble spots
 ##############################################################################
 
 set -euo pipefail
@@ -141,7 +142,10 @@ echo ""
 echo "[2b/4] Fixing camelCase variables and branding..."
 
 # Fix camelCase: gsdDir→sddDir, gsdRoot→sddRoot, etc.
-grep -rl "${OLD_LC}[A-Z]" src/ --include="*.ts" 2>/dev/null | grep -v node_modules | while read -r f; do
+# See REBRAND-MANIFEST.md for full pattern list
+OLD_CC=$(printf '\x47\x73\x64')   # G-s-d (PascalCase mid-word)
+NEW_CC="Sdd"
+grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" src/ --include="*.ts" 2>/dev/null | grep -v node_modules | while read -r f; do
   sed -i \
     -e "s/${OLD_LC}Dir/${NEW_LC}Dir/g" \
     -e "s/${OLD_LC}Root/${NEW_LC}Root/g" \
@@ -152,7 +156,23 @@ grep -rl "${OLD_LC}[A-Z]" src/ --include="*.ts" 2>/dev/null | grep -v node_modul
     -e "s/${OLD_LC}Bin/${NEW_LC}Bin/g" \
     -e "s/${OLD_LC}Path/${NEW_LC}Path/g" \
     -e "s/${OLD_LC}State/${NEW_LC}State/g" \
+    -e "s/${OLD_LC}Home/${NEW_LC}Home/g" \
+    -e "s/bootstrap${OLD_CC}/bootstrap${NEW_CC}/g" \
+    -e "s/sync${OLD_CC}/sync${NEW_CC}/g" \
+    -e "s/getBundled${OLD_CC}/getBundled${NEW_CC}/g" \
+    -e "s/get${OLD_CC}/get${NEW_CC}/g" \
+    -e "s/resolve${OLD_CC}/resolve${NEW_CC}/g" \
+    -e "s/rel${OLD_CC}/rel${NEW_CC}/g" \
+    -e "s/inline${OLD_CC}/inline${NEW_CC}/g" \
+    -e "s/run${OLD_UC}/run${NEW_UC}/g" \
+    -e "s/loadEffective${OLD_UC}/loadEffective${NEW_UC}/g" \
+    -e "s/${OLD_UC}Preferences/${NEW_UC}Preferences/g" \
+    -e "s/${OLD_UC}State/${NEW_UC}State/g" \
     "$f"
+  # Restore @gsd-build in case mid-word replacement broke it
+  if grep -q "${NEW_LC}-build" "$f" 2>/dev/null; then
+    sed -i -e "s/@${NEW_LC}-build/@${OLD_LC}-build/g" "$f"
+  fi
 done
 
 # Fix branding text

@@ -477,7 +477,7 @@ export function FilesView() {
 
   const [activeRoot, setActiveRoot] = useState<RootMode>("sdd")
   const [leftPanel, setLeftPanel] = useState<LeftPanel>("tree")
-  const [gsdTree, setGsdTree] = useState<FileNode[] | null>(null)
+  const [gsdTree, setSddTree] = useState<FileNode[] | null>(null)
   const [projectTree, setProjectTree] = useState<FileNode[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -522,7 +522,7 @@ export function FilesView() {
   )
 
   // Expanded paths per root, restored from sessionStorage
-  const [gsdExpanded, setGsdExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "sdd"))
+  const [gsdExpanded, setSddExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "sdd"))
   const [projectExpanded, setProjectExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "project"))
 
   // Re-hydrate from storage once projectCwd is available (boot may arrive after first render)
@@ -530,12 +530,12 @@ export function FilesView() {
   useEffect(() => {
     if (!projectCwd || hydratedRef.current) return
     hydratedRef.current = true
-    setGsdExpanded(loadExpanded(projectCwd, "sdd"))
+    setSddExpanded(loadExpanded(projectCwd, "sdd"))
     setProjectExpanded(loadExpanded(projectCwd, "project"))
   }, [projectCwd])
 
   const expandedPaths = activeRoot === "sdd" ? gsdExpanded : projectExpanded
-  const setExpandedPaths = activeRoot === "sdd" ? setGsdExpanded : setProjectExpanded
+  const setExpandedPaths = activeRoot === "sdd" ? setSddExpanded : setProjectExpanded
 
   // ── Multi-tab state ──
   const [openTabs, setOpenTabs] = useState<OpenTab[]>([])
@@ -568,7 +568,7 @@ export function FilesView() {
       const data = await res.json()
       const nodes = data.tree ?? []
       if (root === "sdd") {
-        setGsdTree(nodes)
+        setSddTree(nodes)
       } else {
         setProjectTree(nodes)
       }
@@ -609,7 +609,7 @@ export function FilesView() {
 
     // Auto-expand parent dirs
     const parts = path.split("/")
-    const setExpanded = root === "sdd" ? setGsdExpanded : setProjectExpanded
+    const setExpanded = root === "sdd" ? setSddExpanded : setProjectExpanded
     setExpanded((prev) => {
       const next = new Set(prev)
       for (let i = 1; i < parts.length; i++) {
@@ -792,7 +792,7 @@ export function FilesView() {
   const handleNewFile = useCallback((parentDir: string) => {
     // Ensure parent directory is expanded
     if (parentDir) {
-      const setExpanded = activeRoot === "sdd" ? setGsdExpanded : setProjectExpanded
+      const setExpanded = activeRoot === "sdd" ? setSddExpanded : setProjectExpanded
       setExpanded((prev) => {
         const next = new Set(prev)
         const parts = parentDir.split("/")
@@ -808,7 +808,7 @@ export function FilesView() {
 
   const handleNewFolder = useCallback((parentDir: string) => {
     if (parentDir) {
-      const setExpanded = activeRoot === "sdd" ? setGsdExpanded : setProjectExpanded
+      const setExpanded = activeRoot === "sdd" ? setSddExpanded : setProjectExpanded
       setExpanded((prev) => {
         const next = new Set(prev)
         const parts = parentDir.split("/")

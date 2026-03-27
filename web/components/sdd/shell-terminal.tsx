@@ -5,7 +5,7 @@ import { useTheme } from "next-themes"
 import { Plus, X, TerminalSquare, Loader2, ImagePlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { validateImageFile } from "@/lib/image-utils"
-import { filterInitialGsdHeader } from "@/lib/initial-sdd-header-filter"
+import { filterInitialSddHeader } from "@/lib/initial-sdd-header-filter"
 import { buildProjectAbsoluteUrl, buildProjectPath } from "@/lib/project-url"
 import { authFetch, appendAuthParam } from "@/lib/auth"
 import "@xterm/xterm/css/xterm.css"
@@ -33,7 +33,7 @@ interface ShellTerminalProps {
   sessionPrefix?: string
   hideSidebar?: boolean
   fontSize?: number
-  hideInitialGsdHeader?: boolean
+  hideInitialSddHeader?: boolean
   projectCwd?: string
 }
 
@@ -184,7 +184,7 @@ interface TerminalInstanceProps {
   commandArgs?: string[]
   isDark: boolean
   fontSize?: number
-  hideInitialGsdHeader?: boolean
+  hideInitialSddHeader?: boolean
   projectCwd?: string
   onConnectionChange: (connected: boolean) => void
 }
@@ -196,7 +196,7 @@ function TerminalInstance({
   commandArgs,
   isDark,
   fontSize,
-  hideInitialGsdHeader = false,
+  hideInitialSddHeader = false,
   projectCwd,
   onConnectionChange,
 }: TerminalInstanceProps) {
@@ -208,7 +208,7 @@ function TerminalInstance({
   const flushingRef = useRef(false)
   const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onConnectionChangeRef = useRef(onConnectionChange)
-  const initialHeaderSettledRef = useRef(!hideInitialGsdHeader)
+  const initialHeaderSettledRef = useRef(!hideInitialSddHeader)
   const initialHeaderBufferRef = useRef("")
   const commandArgsKey = (commandArgs ?? []).join("\u0000")
   const [hasOutput, setHasOutput] = useState(false)
@@ -259,9 +259,9 @@ function TerminalInstance({
   }, [onConnectionChange])
 
   useEffect(() => {
-    initialHeaderSettledRef.current = !hideInitialGsdHeader
+    initialHeaderSettledRef.current = !hideInitialSddHeader
     initialHeaderBufferRef.current = ""
-  }, [hideInitialGsdHeader, sessionId])
+  }, [hideInitialSddHeader, sessionId])
 
   // Update xterm theme when isDark changes
   useEffect(() => {
@@ -362,9 +362,9 @@ function TerminalInstance({
           } else if (msg.type === "output" && msg.data) {
             let output = msg.data
 
-            if (hideInitialGsdHeader && !initialHeaderSettledRef.current) {
+            if (hideInitialSddHeader && !initialHeaderSettledRef.current) {
               initialHeaderBufferRef.current += output
-              const filtered = filterInitialGsdHeader(initialHeaderBufferRef.current)
+              const filtered = filterInitialSddHeader(initialHeaderBufferRef.current)
 
               if (filtered.status === "needs-more") {
                 return
@@ -412,7 +412,7 @@ function TerminalInstance({
       termRef.current = null
       fitAddonRef.current = null
     }
-  }, [sessionId, command, commandArgs, commandArgsKey, fontSize, hideInitialGsdHeader, isDark, projectCwd, sendInput, sendResize])
+  }, [sessionId, command, commandArgs, commandArgsKey, fontSize, hideInitialSddHeader, isDark, projectCwd, sendInput, sendResize])
 
   // Focus on click
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -543,7 +543,7 @@ export function ShellTerminal({
   sessionPrefix,
   hideSidebar = false,
   fontSize,
-  hideInitialGsdHeader = false,
+  hideInitialSddHeader = false,
   projectCwd,
 }: ShellTerminalProps) {
   const { resolvedTheme } = useTheme()
@@ -703,7 +703,7 @@ export function ShellTerminal({
             commandArgs={tab.id === defaultId ? commandArgs : undefined}
             isDark={isDark}
             fontSize={fontSize}
-            hideInitialGsdHeader={hideInitialGsdHeader}
+            hideInitialSddHeader={hideInitialSddHeader}
             projectCwd={projectCwd}
             onConnectionChange={(c) => updateConnection(tab.id, c)}
           />

@@ -1,4 +1,4 @@
-export type InitialGsdHeaderFilterResult =
+export type InitialSddHeaderFilterResult =
   | { status: 'matched'; text: string }
   | { status: 'needs-more'; text: '' }
   | { status: 'passthrough'; text: string }
@@ -106,7 +106,7 @@ function isLogoLine(line: string | undefined): boolean {
  * PTY pane often does. This filter removes only the initial branded banner from
  * the PTY attach stream so both panes start on real terminal content.
  */
-export function filterInitialGsdHeader(raw: string): InitialGsdHeaderFilterResult {
+export function filterInitialSddHeader(raw: string): InitialSddHeaderFilterResult {
   const { plainText, rawOffsetsByPlainIndex } = indexVisibleText(raw)
   if (!plainText) {
     return { status: 'needs-more', text: '' }
