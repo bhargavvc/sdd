@@ -4,7 +4,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { getAdaptiveTierAdjustment } from "./routing-history.js";
 import { parseUnitId } from "./unit-id.js";
 
@@ -190,7 +190,7 @@ function analyzePlanComplexity(
 
   // For slice planning, try to read the context/research to gauge complexity
   // If research exists and is large, bump to heavy
-  const researchPath = join(gsdRoot(basePath), mid, "slices", sid, "RESEARCH.md");
+  const researchPath = join(sddRoot(basePath), mid, "slices", sid, "RESEARCH.md");
   try {
     if (existsSync(researchPath)) {
       const content = readFileSync(researchPath, "utf-8");
@@ -213,7 +213,7 @@ function extractTaskMetadata(unitId: string, basePath: string): TaskMetadata {
   const meta: TaskMetadata = {};
   const { milestone: mid, slice: sid, task: tid } = parseUnitId(unitId);
   if (!mid || !sid || !tid) return meta;
-  const taskPlanPath = join(gsdRoot(basePath), mid, "slices", sid, "tasks", `${tid}-PLAN.md`);
+  const taskPlanPath = join(sddRoot(basePath), mid, "slices", sid, "tasks", `${tid}-PLAN.md`);
 
   try {
     if (!existsSync(taskPlanPath)) return meta;

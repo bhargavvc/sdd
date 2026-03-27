@@ -29,7 +29,7 @@ import { MergeConflictError } from "../git-service.js";
 import { join } from "node:path";
 import { existsSync, cpSync } from "node:fs";
 import { logWarning, logError } from "../workflow-logger.js";
-import { gsdRoot } from "../paths.js";
+import { sddRoot } from "../paths.js";
 import { atomicWriteSync } from "../atomic-write.js";
 import { verifyExpectedArtifact } from "../auto-recovery.js";
 import { writeUnitRuntimeRecord } from "../unit-runtime.js";
@@ -66,7 +66,7 @@ async function generateMilestoneReport(
     (m: { id: string }) => m.id === milestoneId,
   );
   const msTitle = completedMs?.title ?? milestoneId;
-  const gsdVersion = process.env.SDD_VERSION ?? "0.0.0";
+  const sddVersion = process.env.SDD_VERSION ?? "0.0.0";
   const projName = basename(reportBasePath);
   const doneSlices = snapData.milestones.reduce(
     (acc: number, m: { slices: { done: boolean }[] }) =>
@@ -82,7 +82,7 @@ async function generateMilestoneReport(
     html: generateHtmlReport(snapData, {
       projectName: projName,
       projectPath: reportBasePath,
-      gsdVersion,
+      sddVersion,
       milestoneId,
       indexRelPath: "index.html",
     }),
@@ -91,7 +91,7 @@ async function generateMilestoneReport(
     kind: "milestone",
     projectName: projName,
     projectPath: reportBasePath,
-    gsdVersion,
+    sddVersion,
     totalCost: snapData.totals?.cost ?? 0,
     totalTokens: snapData.totals?.tokens.total ?? 0,
     totalDuration: snapData.totals?.duration ?? 0,
@@ -298,10 +298,10 @@ export async function runPreDispatch(
 
     // Archive the old completed-units.json instead of wiping it (#2313).
     try {
-      const completedKeysPath = join(gsdRoot(s.basePath), "completed-units.json");
+      const completedKeysPath = join(sddRoot(s.basePath), "completed-units.json");
       if (existsSync(completedKeysPath) && s.currentMilestoneId) {
         const archivePath = join(
-          gsdRoot(s.basePath),
+          sddRoot(s.basePath),
           `completed-units-${s.currentMilestoneId}.json`,
         );
         cpSync(completedKeysPath, archivePath);

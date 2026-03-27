@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { createWorktree, worktreePath } from "./worktree-manager.js";
 import { autoWorktreeBranch, runWorktreePostCreateHook } from "./auto-worktree.js";
 import { nativeBranchExists } from "./native-git-bridge.js";
@@ -90,7 +90,7 @@ export interface PersistedState {
 }
 
 function stateFilePath(basePath: string): string {
-  return join(gsdRoot(basePath), ORCHESTRATOR_STATE_FILE);
+  return join(sddRoot(basePath), ORCHESTRATOR_STATE_FILE);
 }
 
 /**
@@ -100,7 +100,7 @@ function stateFilePath(basePath: string): string {
 export function persistState(basePath: string): void {
   if (!state) return;
   try {
-    const dir = gsdRoot(basePath);
+    const dir = sddRoot(basePath);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
     const persisted: PersistedState = {
@@ -182,12 +182,12 @@ export function restoreState(basePath: string): PersistedState | null {
 }
 
 function workerLogPath(basePath: string, milestoneId: string): string {
-  return join(gsdRoot(basePath), "parallel", `${milestoneId}.stderr.log`);
+  return join(sddRoot(basePath), "parallel", `${milestoneId}.stderr.log`);
 }
 
 function appendWorkerLog(basePath: string, milestoneId: string, chunk: string): void {
   try {
-    const dir = join(gsdRoot(basePath), "parallel");
+    const dir = join(sddRoot(basePath), "parallel");
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     appendFileSync(workerLogPath(basePath, milestoneId), chunk, "utf-8");
   } catch {

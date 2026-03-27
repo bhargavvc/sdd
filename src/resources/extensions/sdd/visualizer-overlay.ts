@@ -352,8 +352,8 @@ export class SDDVisualizerOverlay {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
       const { writeFileSync, mkdirSync } = require("node:fs");
       const { join } = require("node:path");
-      const { gsdRoot } = require("./paths.js");
-      const exportDir = gsdRoot(this.basePath);
+      const { sddRoot } = require("./paths.js");
+      const exportDir = sddRoot(this.basePath);
       mkdirSync(exportDir, { recursive: true });
       const outPath = join(exportDir, `snapshot-${timestamp}.txt`);
       writeFileSync(outPath, snapshotLines.join("\n") + "\n", "utf-8");

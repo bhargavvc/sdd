@@ -14,7 +14,7 @@ import { loadPrompt, inlineTemplate } from "./prompt-loader.js";
 import { deriveState } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import {
-  gsdRoot, resolveMilestoneFile, resolveSliceFile,
+  sddRoot, resolveMilestoneFile, resolveSliceFile,
   resolveGsdRootFile, relGsdRootFile, relSliceFile,
 } from "./paths.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -46,7 +46,7 @@ export async function showQueue(
   basePath: string,
 ): Promise<void> {
   // ── Ensure .sdd/ exists ─────────────────────────────────────────────
-  const sdd = gsdRoot(basePath);
+  const sdd = sddRoot(basePath);
   if (!existsSync(sdd)) {
     ctx.ui.notify("No SDD project found. Run /sdd to start one first.", "warning");
     return;

@@ -19,7 +19,7 @@
 import { createRequire } from "node:module";
 import { existsSync, readFileSync, readdirSync, mkdirSync, unlinkSync, rmSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { atomicWriteSync } from "./atomic-write.js";
 
 const _require = createRequire(import.meta.url);
@@ -69,12 +69,12 @@ let _lockCompromised: boolean = false;
 /** Whether we've already registered a process.on('exit') handler. */
 let _exitHandlerRegistered: boolean = false;
 
-/** Registry of all gsdDir paths where locks were created during this session.
- *  The exit handler cleans ALL of these, not just the current gsdRoot(). (#1578) */
+/** Registry of all sddDir paths where locks were created during this session.
+ *  The exit handler cleans ALL of these, not just the current sddRoot(). (#1578) */
 const _lockDirRegistry: Set<string> = new Set();
 
 /** Snapshotted lock file path — captured at acquireSessionLock time to avoid
- *  gsdRoot() resolving differently in worktree vs project root contexts (#1363). */
+ *  sddRoot() resolving differently in worktree vs project root contexts (#1363). */
 let _snapshotLockPath: string | null = null;
 
 /** Timestamp when the session lock was acquired — used to detect false-positive
@@ -86,7 +86,7 @@ const LOCK_FILE = "auto.lock";
 function lockPath(basePath: string): string {
   // If we have a snapshotted path from acquisition, use it for consistency
   if (_snapshotLockPath) return _snapshotLockPath;
-  return join(gsdRoot(basePath), LOCK_FILE);
+  return join(sddRoot(basePath), LOCK_FILE);
 }
 
 // ─── Stray Lock Cleanup ─────────────────────────────────────────────────────
@@ -99,15 +99,15 @@ function lockPath(basePath: string): string {
  * Also removes stray proper-lockfile directories beyond the canonical `.sdd.lock/`.
  */
 export function cleanupStrayLockFiles(basePath: string): void {
-  const gsdDir = gsdRoot(basePath);
+  const sddDir = sddRoot(basePath);
 
   // Clean numbered auto lock files inside .sdd/
   try {
-    if (existsSync(gsdDir)) {
-      for (const entry of readdirSync(gsdDir)) {
+    if (existsSync(sddDir)) {
+      for (const entry of readdirSync(sddDir)) {
         // Match "auto <N>.lock" or "auto (<N>).lock" variants but NOT the canonical "auto.lock"
         if (entry !== LOCK_FILE && /^auto\s.+\.lock$/i.test(entry)) {
-          try { unlinkSync(join(gsdDir, entry)); } catch { /* best-effort */ }
+          try { unlinkSync(join(sddDir, entry)); } catch { /* best-effort */ }
         }
       }
     }
@@ -116,12 +116,12 @@ export function cleanupStrayLockFiles(basePath: string): void {
   // Clean stray proper-lockfile directories (e.g. ".sdd 2.lock/")
   // The canonical one is ".sdd.lock/" — anything else is stray.
   try {
-    const parentDir = dirname(gsdDir);
-    const gsdDirName = gsdDir.split("/").pop() || ".sdd";
+    const parentDir = dirname(sddDir);
+    const sddDirName = sddDir.split("/").pop() || ".sdd";
     if (existsSync(parentDir)) {
       for (const entry of readdirSync(parentDir)) {
         // Match ".sdd <N>.lock" or ".sdd (<N>).lock" directories but NOT ".sdd.lock"
-        if (entry !== `${gsdDirName}.lock` && entry.startsWith(gsdDirName) && entry.endsWith(".lock")) {
+        if (entry !== `${sddDirName}.lock` && entry.startsWith(sddDirName) && entry.endsWith(".lock")) {
           const fullPath = join(parentDir, entry);
           try {
             const stat = statSync(fullPath);
@@ -141,7 +141,7 @@ export function cleanupStrayLockFiles(basePath: string): void {
  * Only registers once — subsequent calls are no-ops.
  */
 function ensureExitHandler(_sddDir: string): void {
-  // Register the gsdDir so exit cleanup covers it
+  // Register the sddDir so exit cleanup covers it
   _lockDirRegistry.add(_sddDir);
 
   if (_exitHandlerRegistered) return;
@@ -264,15 +264,15 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
     return acquireFallbackLock(basePath, lp, lockData);
   }
 
-  const gsdDir = gsdRoot(basePath);
+  const sddDir = sddRoot(basePath);
 
   try {
     // Try to acquire an exclusive OS-level lock on the lock file.
-    // We lock the directory (gsdRoot) since proper-lockfile works best
+    // We lock the directory (sddRoot) since proper-lockfile works best
     // on directories, and the lock file itself may not exist yet.
-    mkdirSync(gsdDir, { recursive: true });
+    mkdirSync(sddDir, { recursive: true });
 
-    const release = lockfile.lockSync(gsdDir, {
+    const release = lockfile.lockSync(sddDir, {
       realpath: false,
       stale: 1_800_000, // 30 minutes — safe for laptop sleep / long event loop stalls
       update: 10_000, // Update lock mtime every 10s to prove liveness
@@ -283,7 +283,7 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
 
     // Safety net: clean up lock dir on process exit if _releaseFunction
     // wasn't called (e.g., normal exit after clean completion) (#1245).
-    ensureExitHandler(gsdDir);
+    ensureExitHandler(sddDir);
 
     // Write the informational lock data
     atomicWriteSync(lp, JSON.stringify(lockData, null, 2));
@@ -298,12 +298,12 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
     // If no lock file or no alive process, try to clean up and re-acquire (#1245)
     if (!existingData || (existingPid && !isPidAlive(existingPid))) {
       try {
-        const lockDir = join(gsdDir + ".lock");
+        const lockDir = join(sddDir + ".lock");
         if (existsSync(lockDir)) rmSync(lockDir, { recursive: true, force: true });
         if (existsSync(lp)) unlinkSync(lp);
 
         // Retry acquisition after cleanup
-        const release = lockfile.lockSync(gsdDir, {
+        const release = lockfile.lockSync(sddDir, {
           realpath: false,
           stale: 1_800_000, // 30 minutes — match primary lock settings
           update: 10_000,
@@ -312,7 +312,7 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
         assignLockState(basePath, release, lp);
 
         // Safety net — uses centralized handler to avoid double-registration
-        ensureExitHandler(gsdDir);
+        ensureExitHandler(sddDir);
 
         atomicWriteSync(lp, JSON.stringify(lockData, null, 2));
         return { acquired: true };
@@ -485,7 +485,7 @@ export function releaseSessionLock(basePath: string): void {
 
   // Remove the proper-lockfile directory (.sdd.lock/) for the current path
   try {
-    const lockDir = join(gsdRoot(basePath) + ".lock");
+    const lockDir = join(sddRoot(basePath) + ".lock");
     if (existsSync(lockDir)) rmSync(lockDir, { recursive: true, force: true });
   } catch {
     // Non-fatal

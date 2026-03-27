@@ -16,7 +16,7 @@
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
-import { gsdRoot } from './paths.js';
+import { sddRoot } from './paths.js';
 import { formatCost, formatTokenCount } from './metrics.js';
 import { formatDateShort, formatDuration } from '../shared/format-utils.js';
 
@@ -50,14 +50,14 @@ export interface ReportsIndex {
   version: 1;
   projectName: string;
   projectPath: string;
-  gsdVersion: string;
+  sddVersion: string;
   entries: ReportEntry[];
 }
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
 export function reportsDir(basePath: string): string {
-  return join(gsdRoot(basePath), 'reports');
+  return join(sddRoot(basePath), 'reports');
 }
 
 function reportsIndexPath(basePath: string): string {
@@ -96,7 +96,7 @@ export interface WriteReportSnapshotArgs {
   kind: 'milestone' | 'manual' | 'final';
   projectName: string;
   projectPath: string;
-  gsdVersion: string;
+  sddVersion: string;
   // metrics
   totalCost: number;
   totalTokens: number;
@@ -129,14 +129,14 @@ export function writeReportSnapshot(args: WriteReportSnapshotArgs): string {
     version: 1,
     projectName: args.projectName,
     projectPath: args.projectPath,
-    gsdVersion: args.gsdVersion,
+    sddVersion: args.sddVersion,
     entries: [],
   };
 
   // Keep metadata fresh
   index.projectName = args.projectName;
   index.projectPath = args.projectPath;
-  index.gsdVersion = args.gsdVersion;
+  index.sddVersion = args.sddVersion;
 
   const label = args.milestoneId === 'final'
     ? 'Final Report'
@@ -174,7 +174,7 @@ export function regenerateHtmlIndex(basePath: string, index: ReportsIndex): void
 }
 
 function buildIndexHtml(index: ReportsIndex): string {
-  const { projectName, projectPath, gsdVersion, entries } = index;
+  const { projectName, projectPath, sddVersion, entries } = index;
   const generated = new Date().toISOString();
 
   // Sort oldest → newest for the progression timeline
@@ -285,7 +285,7 @@ function buildIndexHtml(index: ReportsIndex): string {
   <div class="hdr-inner">
     <div class="branding">
       <span class="logo">SDD</span>
-      <span class="ver">v${esc(gsdVersion)}</span>
+      <span class="ver">v${esc(sddVersion)}</span>
     </div>
     <div class="hdr-meta">
       <h1>${esc(projectName)} <span class="hdr-subtitle">Reports</span></h1>
@@ -324,7 +324,7 @@ function buildIndexHtml(index: ReportsIndex): string {
 
 <footer>
   <div class="ftr-inner">
-    <span class="ftr-brand">SDD v${esc(gsdVersion)}</span>
+    <span class="ftr-brand">SDD v${esc(sddVersion)}</span>
     <span class="ftr-sep">—</span>
     <span>${esc(projectName)}</span>
     <span class="ftr-sep">—</span>

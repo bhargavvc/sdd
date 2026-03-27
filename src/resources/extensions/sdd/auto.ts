@@ -23,7 +23,7 @@ import { getManifestStatus } from "./files.js";
 export { inlinePriorMilestoneSummary } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
 import {
-  gsdRoot,
+  sddRoot,
   resolveMilestoneFile,
   resolveSliceFile,
   resolveSlicePath,
@@ -526,7 +526,7 @@ function handleLostSessionLock(
   deregisterSigtermHandler();
   clearCmuxSidebar(loadEffectiveSDDPreferences()?.preferences);
   const base = lockBase();
-  const lockFilePath = base ? join(gsdRoot(base), "auto.lock") : "unknown";
+  const lockFilePath = base ? join(sddRoot(base), "auto.lock") : "unknown";
   const recoverySuggestion = "\nTo recover, run: sdd doctor --fix";
   const message =
     lockStatus?.failureReason === "pid-mismatch"
@@ -758,7 +758,7 @@ export async function stopAuto(
 
     // ── Step 12: Remove paused-session metadata (#1383) ──
     try {
-      const pausedPath = join(gsdRoot(s.originalBasePath || s.basePath), "runtime", "paused-session.json");
+      const pausedPath = join(sddRoot(s.originalBasePath || s.basePath), "runtime", "paused-session.json");
       if (existsSync(pausedPath)) unlinkSync(pausedPath);
     } catch { /* non-fatal */ }
 
@@ -845,7 +845,7 @@ export async function pauseAuto(
       activeEngineId: s.activeEngineId,
       activeRunDir: s.activeRunDir,
     };
-    const runtimeDir = join(gsdRoot(s.originalBasePath || s.basePath), "runtime");
+    const runtimeDir = join(sddRoot(s.originalBasePath || s.basePath), "runtime");
     mkdirSync(runtimeDir, { recursive: true });
     writeFileSync(
       join(runtimeDir, "paused-session.json"),
@@ -1070,7 +1070,7 @@ export async function startAuto(
   // Check persisted paused-session first (#1383) — survives /exit.
   if (!s.paused) {
     try {
-      const pausedPath = join(gsdRoot(base), "runtime", "paused-session.json");
+      const pausedPath = join(sddRoot(base), "runtime", "paused-session.json");
       if (existsSync(pausedPath)) {
         const meta = JSON.parse(readFileSync(pausedPath, "utf-8"));
         if (meta.activeEngineId && meta.activeEngineId !== "dev") {
@@ -1181,7 +1181,7 @@ export async function startAuto(
     invalidateAllCaches();
 
     if (s.pausedSessionFile) {
-      const activityDir = join(gsdRoot(s.basePath), "activity");
+      const activityDir = join(sddRoot(s.basePath), "activity");
       const recovery = synthesizeCrashRecovery(
         s.basePath,
         s.currentUnit?.type ?? "unknown",

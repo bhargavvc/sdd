@@ -4,7 +4,7 @@
 
 import { appendFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import { gsdRoot } from './paths.js';
+import { sddRoot } from './paths.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ const MAX_DEBUG_LOGS = 5;
  * Can be activated via `--debug` flag or `SDD_DEBUG=1` env var.
  */
 export function enableDebug(basePath: string): void {
-  const debugDir = join(gsdRoot(basePath), 'debug');
+  const debugDir = join(sddRoot(basePath), 'debug');
   mkdirSync(debugDir, { recursive: true });
 
   // Prune old debug logs

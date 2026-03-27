@@ -426,9 +426,9 @@ export async function saveArtifactToDb(
     const db = await import('./sdd-db.js');
 
     // Guard against path traversal before any reads/writes
-    const gsdDir = resolve(basePath, '.sdd');
+    const sddDir = resolve(basePath, '.sdd');
     const fullPath = resolve(basePath, '.sdd', opts.path);
-    if (!fullPath.startsWith(gsdDir)) {
+    if (!fullPath.startsWith(sddDir)) {
       throw new SDDError(SDD_IO_ERROR, `saveArtifactToDb: path escapes .sdd/ directory: ${opts.path}`);
     }
 

@@ -14,7 +14,7 @@
 
 import { appendFileSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,14 +75,14 @@ export interface JournalQueryFilters {
 /**
  * Append a journal event to the daily JSONL file.
  *
- * File path: `<gsdRoot>/journal/<YYYY-MM-DD>.jsonl`
+ * File path: `<sddRoot>/journal/<YYYY-MM-DD>.jsonl`
  * where the date is extracted from `entry.ts.slice(0, 10)`.
  *
  * Never throws — all errors are silently caught.
  */
 export function emitJournalEvent(basePath: string, entry: JournalEntry): void {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(sddRoot(basePath), "journal");
     mkdirSync(journalDir, { recursive: true });
     const dateStr = entry.ts.slice(0, 10);
     const filePath = join(journalDir, `${dateStr}.jsonl`);
@@ -104,7 +104,7 @@ export function queryJournal(
   filters?: JournalQueryFilters,
 ): JournalEntry[] {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(sddRoot(basePath), "journal");
     const files = readdirSync(journalDir).filter(f => f.endsWith(".jsonl")).sort();
 
     const entries: JournalEntry[] = [];

@@ -30,27 +30,27 @@ test('knowledge: KNOWLEDGE key exists in SDD_ROOT_FILES', () => {
 
 test('knowledge: resolveGsdRootFile returns canonical path when KNOWLEDGE.md exists', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
-  writeFileSync(join(gsdDir, 'KNOWLEDGE.md'), '# Project Knowledge\n');
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
+  writeFileSync(join(sddDir, 'KNOWLEDGE.md'), '# Project Knowledge\n');
 
   const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
-  assert.strictEqual(resolved, join(gsdDir, 'KNOWLEDGE.md'));
+  assert.strictEqual(resolved, join(sddDir, 'KNOWLEDGE.md'));
 
   rmSync(tmp, { recursive: true, force: true });
 });
 
 test('knowledge: resolveGsdRootFile resolves when legacy knowledge.md exists', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
-  writeFileSync(join(gsdDir, 'knowledge.md'), '# Project Knowledge\n');
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
+  writeFileSync(join(sddDir, 'knowledge.md'), '# Project Knowledge\n');
 
   const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
   // On case-insensitive filesystems (macOS), canonical path matches;
   // on case-sensitive (Linux), legacy path matches. Either is valid.
-  const canonical = join(gsdDir, 'KNOWLEDGE.md');
-  const legacy = join(gsdDir, 'knowledge.md');
+  const canonical = join(sddDir, 'KNOWLEDGE.md');
+  const legacy = join(sddDir, 'knowledge.md');
   assert.ok(
     resolved === canonical || resolved === legacy,
     `resolved path should be canonical or legacy, got: ${resolved}`,
@@ -61,11 +61,11 @@ test('knowledge: resolveGsdRootFile resolves when legacy knowledge.md exists', (
 
 test('knowledge: resolveGsdRootFile returns canonical path when file does not exist', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-knowledge-')));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   const resolved = resolveGsdRootFile(tmp, 'KNOWLEDGE');
-  assert.strictEqual(resolved, join(gsdDir, 'KNOWLEDGE.md'));
+  assert.strictEqual(resolved, join(sddDir, 'KNOWLEDGE.md'));
 
   rmSync(tmp, { recursive: true, force: true });
 });
@@ -74,9 +74,9 @@ test('knowledge: resolveGsdRootFile returns canonical path when file does not ex
 
 test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
-  writeFileSync(join(gsdDir, 'KNOWLEDGE.md'), '# Project Knowledge\n\n## Rules\n\nK001: Use real DB');
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
+  writeFileSync(join(sddDir, 'KNOWLEDGE.md'), '# Project Knowledge\n\n## Rules\n\nK001: Use real DB');
 
   const result = await inlineGsdRootFile(tmp, 'knowledge.md', 'Project Knowledge');
   assert.ok(result !== null, 'should return content');
@@ -88,8 +88,8 @@ test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', as
 
 test('knowledge: inlineGsdRootFile returns null when KNOWLEDGE.md does not exist', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   const result = await inlineGsdRootFile(tmp, 'knowledge.md', 'Project Knowledge');
   assert.strictEqual(result, null, 'should return null when file does not exist');
@@ -101,12 +101,12 @@ test('knowledge: inlineGsdRootFile returns null when KNOWLEDGE.md does not exist
 
 test('knowledge: appendKnowledge creates KNOWLEDGE.md with rule when file does not exist', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   await appendKnowledge(tmp, 'rule', 'Use real DB for integration tests', 'M001/S01');
 
-  const content = readFileSync(join(gsdDir, 'KNOWLEDGE.md'), 'utf-8');
+  const content = readFileSync(join(sddDir, 'KNOWLEDGE.md'), 'utf-8');
   assert.ok(content.includes('# Project Knowledge'), 'should have header');
   assert.ok(content.includes('K001'), 'should have K001 id');
   assert.ok(content.includes('Use real DB for integration tests'), 'should have rule text');
@@ -117,15 +117,15 @@ test('knowledge: appendKnowledge creates KNOWLEDGE.md with rule when file does n
 
 test('knowledge: appendKnowledge appends to existing KNOWLEDGE.md with auto-incrementing ID', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   // Create initial file with one rule
   await appendKnowledge(tmp, 'rule', 'First rule', 'M001');
   // Add second rule
   await appendKnowledge(tmp, 'rule', 'Second rule', 'M001/S02');
 
-  const content = readFileSync(join(gsdDir, 'KNOWLEDGE.md'), 'utf-8');
+  const content = readFileSync(join(sddDir, 'KNOWLEDGE.md'), 'utf-8');
   assert.ok(content.includes('K001'), 'should have K001');
   assert.ok(content.includes('K002'), 'should have K002');
   assert.ok(content.includes('First rule'), 'should have first rule');
@@ -136,12 +136,12 @@ test('knowledge: appendKnowledge appends to existing KNOWLEDGE.md with auto-incr
 
 test('knowledge: appendKnowledge handles pattern type', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   await appendKnowledge(tmp, 'pattern', 'Middleware chain for auth', 'M001');
 
-  const content = readFileSync(join(gsdDir, 'KNOWLEDGE.md'), 'utf-8');
+  const content = readFileSync(join(sddDir, 'KNOWLEDGE.md'), 'utf-8');
   assert.ok(content.includes('P001'), 'should have P001 id');
   assert.ok(content.includes('Middleware chain for auth'), 'should have pattern text');
 
@@ -150,12 +150,12 @@ test('knowledge: appendKnowledge handles pattern type', async () => {
 
 test('knowledge: appendKnowledge handles lesson type', async () => {
   const tmp = mkdtempSync(join(tmpdir(), 'sdd-knowledge-'));
-  const gsdDir = join(tmp, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   await appendKnowledge(tmp, 'lesson', 'API timeout on large payloads', 'M002');
 
-  const content = readFileSync(join(gsdDir, 'KNOWLEDGE.md'), 'utf-8');
+  const content = readFileSync(join(sddDir, 'KNOWLEDGE.md'), 'utf-8');
   assert.ok(content.includes('L001'), 'should have L001 id');
   assert.ok(content.includes('API timeout on large payloads'), 'should have lesson text');
 

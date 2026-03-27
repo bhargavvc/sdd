@@ -11,7 +11,7 @@ import { projectRoot } from "../context.js";
 
 export function showHelp(ctx: ExtensionCommandContext): void {
   const lines = [
-    "SDD — Get Shit Done\n",
+    "SDD — Spec-Driven Development\n",
     "WORKFLOW",
     "  /sdd start <tpl>   Start a workflow template (bugfix, spike, feature, hotfix, etc.)",
     "  /sdd templates     List available workflow templates  [info <name>]",

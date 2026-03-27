@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { loadFile, parseSummary, saveFile, parseTaskPlanMustHaves, countMustHavesMentionedInSummary } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap, parsePlan as parseLegacyPlan } from "./parsers-legacy.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
-import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, gsdRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relGsdRootFile, resolveGsdRootFile, relMilestonePath } from "./paths.js";
+import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, sddRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relGsdRootFile, resolveGsdRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import { loadEffectiveSDDPreferences, type SDDPreferences } from "./preferences.js";
@@ -268,7 +268,7 @@ export interface DoctorHistoryEntry {
 
 async function appendDoctorHistory(basePath: string, report: DoctorReport): Promise<void> {
   try {
-    const historyPath = join(gsdRoot(basePath), "doctor-history.jsonl");
+    const historyPath = join(sddRoot(basePath), "doctor-history.jsonl");
     const errorCount = report.issues.filter(i => i.severity === "error").length;
     const warningCount = report.issues.filter(i => i.severity === "warning").length;
     const issueDetails = report.issues
@@ -314,7 +314,7 @@ async function appendDoctorHistory(basePath: string, report: DoctorReport): Prom
 /** Read the last N doctor history entries. Returns most-recent-first. */
 export async function readDoctorHistory(basePath: string, lastN = 50): Promise<DoctorHistoryEntry[]> {
   try {
-    const historyPath = join(gsdRoot(basePath), "doctor-history.jsonl");
+    const historyPath = join(sddRoot(basePath), "doctor-history.jsonl");
     if (!existsSync(historyPath)) return [];
     const lines = readFileSync(historyPath, "utf-8").split("\n").filter(l => l.trim());
     return lines.slice(-lastN).reverse().map(l => JSON.parse(l) as DoctorHistoryEntry);
@@ -387,7 +387,7 @@ export async function runSDDDoctor(basePath: string, options?: { fix?: boolean; 
 
   const milestonesPath = milestonesDir(basePath);
   if (!existsSync(milestonesPath)) {
-    const report: DoctorReport = { ok: issues.every(i => i.severity !== "error"), basePath, issues, fixesApplied, timing: { git: gitMs, runtime: runtimeMs, environment: envMs, gsdState: 0 } };
+    const report: DoctorReport = { ok: issues.every(i => i.severity !== "error"), basePath, issues, fixesApplied, timing: { git: gitMs, runtime: runtimeMs, environment: envMs, sddState: 0 } };
     await appendDoctorHistory(basePath, report);
     return report;
   }
@@ -799,7 +799,7 @@ export async function runSDDDoctor(basePath: string, options?: { fix?: boolean; 
     basePath,
     issues,
     fixesApplied,
-    timing: { git: gitMs, runtime: runtimeMs, environment: envMs, gsdState: Math.max(0, Date.now() - t0env - envMs) },
+    timing: { git: gitMs, runtime: runtimeMs, environment: envMs, sddState: Math.max(0, Date.now() - t0env - envMs) },
   };
   await appendDoctorHistory(basePath, report);
   return report;

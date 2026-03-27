@@ -15,7 +15,7 @@ import { SDDError, SDD_IO_ERROR } from "./errors.js";
 
 const SEQ_PREFIX_RE = /^(\d+)-/;
 import type { ExtensionContext } from "@sdd/pi-coding-agent";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 
 interface ActivityLogState {
   nextSeq: number;
@@ -109,7 +109,7 @@ export function saveActivityLog(
     const entries = ctx.sessionManager.getEntries();
     if (!entries || entries.length === 0) return null;
 
-    const activityDir = join(gsdRoot(basePath), "activity");
+    const activityDir = join(sddRoot(basePath), "activity");
     mkdirSync(activityDir, { recursive: true });
 
     const safeUnitId = unitId.replace(/\//g, "-");

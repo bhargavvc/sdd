@@ -8,25 +8,25 @@ import { existsSync, readFileSync, mkdirSync, symlinkSync, cpSync } from 'fs'
 // Fast-path: handle --version/-v and --help/-h before importing any heavy
 // dependencies. This avoids loading the entire pi-coding-agent barrel import
 // (~1s) just to print a version string.
-const gsdRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const sddRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
 const firstArg = args[0]
 
 // Read package.json once — reused for version, banner, and SDD_VERSION below
-let gsdVersion = '0.0.0'
+let sddVersion = '0.0.0'
 try {
-  const pkg = JSON.parse(readFileSync(join(gsdRoot, 'package.json'), 'utf-8'))
-  gsdVersion = pkg.version || '0.0.0'
+  const pkg = JSON.parse(readFileSync(join(sddRoot, 'package.json'), 'utf-8'))
+  sddVersion = pkg.version || '0.0.0'
 } catch { /* ignore */ }
 
 if (firstArg === '--version' || firstArg === '-v') {
-  process.stdout.write(gsdVersion + '\n')
+  process.stdout.write(sddVersion + '\n')
   process.exit(0)
 }
 
 if (firstArg === '--help' || firstArg === '-h') {
   const { printHelp } = await import('./help-text.js')
-  printHelp(gsdVersion)
+  printHelp(sddVersion)
   process.exit(0)
 }
 
@@ -101,7 +101,7 @@ if (!existsSync(appRoot)) {
   process.stderr.write(
     renderLogo(colorCyan) +
     '\n' +
-    `  Get Shit Done ${dim}v${gsdVersion}${reset}\n` +
+    `  Spec-Driven Development ${dim}v${sddVersion}${reset}\n` +
     `  ${green}Welcome.${reset} Setting up your environment...\n\n`
   )
   process.env.SDD_FIRST_RUN_BANNER = '1'
@@ -118,8 +118,8 @@ applyRtkProcessEnv(process.env)
 // Without this, extensions (e.g. browser-tools) can't resolve dependencies like
 // `playwright` because jiti resolves modules from pi-coding-agent's location, not sdd's.
 // Prepending sdd's node_modules to NODE_PATH fixes this for all extensions.
-const gsdNodeModules = join(gsdRoot, 'node_modules')
-process.env.NODE_PATH = [gsdNodeModules, process.env.NODE_PATH]
+const sddNodeModules = join(sddRoot, 'node_modules')
+process.env.NODE_PATH = [sddNodeModules, process.env.NODE_PATH]
   .filter(Boolean)
   .join(delimiter)
 // Force Node to re-evaluate module search paths with the updated NODE_PATH.
@@ -129,7 +129,7 @@ const { Module } = await import('module');
 (Module as any)._initPaths?.()
 
 // SDD_VERSION — expose package version so extensions can display it
-process.env.SDD_VERSION = gsdVersion
+process.env.SDD_VERSION = sddVersion
 
 // SDD_BIN_PATH — absolute path to this loader (dist/loader.js), used by patched subagent
 // to spawn sdd instead of pi when dispatching workflow tasks
@@ -138,8 +138,8 @@ process.env.SDD_BIN_PATH = process.argv[1]
 // SDD_WORKFLOW_PATH — absolute path to bundled SDD-WORKFLOW.md, used by patched sdd extension
 // when dispatching workflow prompts. Prefers dist/resources/ (stable, set at build time)
 // over src/resources/ (live working tree) — see resource-loader.ts for rationale.
-const distRes = join(gsdRoot, 'dist', 'resources')
-const srcRes = join(gsdRoot, 'src', 'resources')
+const distRes = join(sddRoot, 'dist', 'resources')
+const srcRes = join(sddRoot, 'src', 'resources')
 const resourcesDir = existsSync(distRes) ? distRes : srcRes
 process.env.SDD_WORKFLOW_PATH = join(resourcesDir, 'SDD-WORKFLOW.md')
 
@@ -175,13 +175,13 @@ if (process.env.HTTP_PROXY || process.env.HTTPS_PROXY || process.env.http_proxy 
 // On Windows without Developer Mode or admin rights, symlinkSync will throw even for
 // 'junction' type — so we fall back to cpSync (a full directory copy) which works
 // everywhere without elevated permissions.
-const gsdScopeDir = join(gsdNodeModules, '@sdd')
-const packagesDir = join(gsdRoot, 'packages')
+const sddScopeDir = join(sddNodeModules, '@sdd')
+const packagesDir = join(sddRoot, 'packages')
 const wsPackages = ['native', 'pi-agent-core', 'pi-ai', 'pi-coding-agent', 'pi-tui']
 try {
-  if (!existsSync(gsdScopeDir)) mkdirSync(gsdScopeDir, { recursive: true })
+  if (!existsSync(sddScopeDir)) mkdirSync(sddScopeDir, { recursive: true })
   for (const pkg of wsPackages) {
-    const target = join(gsdScopeDir, pkg)
+    const target = join(sddScopeDir, pkg)
     const source = join(packagesDir, pkg)
     if (!existsSync(source) || existsSync(target)) continue
     try {
@@ -198,7 +198,7 @@ try {
 // symlink+copy attempts, emit a clear diagnostic instead of a cryptic
 // ERR_MODULE_NOT_FOUND from deep inside cli.js.
 const criticalPackages = ['pi-coding-agent']
-const missingPackages = criticalPackages.filter(pkg => !existsSync(join(gsdScopeDir, pkg)))
+const missingPackages = criticalPackages.filter(pkg => !existsSync(join(sddScopeDir, pkg)))
 if (missingPackages.length > 0) {
   const missing = missingPackages.map(p => `@sdd/${p}`).join(', ')
   process.stderr.write(

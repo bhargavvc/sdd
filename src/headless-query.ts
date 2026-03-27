@@ -20,14 +20,14 @@ import type { SDDState } from './resources/extensions/sdd/types.js'
 import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
-const gsdExtensionPath = (...segments: string[]) =>
+const sddExtensionPath = (...segments: string[]) =>
   resolveBundledSourceResource(import.meta.url, 'extensions', 'sdd', ...segments)
 
 async function loadExtensionModules() {
-  const stateModule = await jiti.import(gsdExtensionPath('state.ts'), {}) as any
-  const dispatchModule = await jiti.import(gsdExtensionPath('auto-dispatch.ts'), {}) as any
-  const sessionModule = await jiti.import(gsdExtensionPath('session-status-io.ts'), {}) as any
-  const prefsModule = await jiti.import(gsdExtensionPath('preferences.ts'), {}) as any
+  const stateModule = await jiti.import(sddExtensionPath('state.ts'), {}) as any
+  const dispatchModule = await jiti.import(sddExtensionPath('auto-dispatch.ts'), {}) as any
+  const sessionModule = await jiti.import(sddExtensionPath('session-status-io.ts'), {}) as any
+  const prefsModule = await jiti.import(sddExtensionPath('preferences.ts'), {}) as any
   return {
     deriveState: stateModule.deriveState as (basePath: string) => Promise<SDDState>,
     resolveDispatch: dispatchModule.resolveDispatch as (opts: any) => Promise<any>,

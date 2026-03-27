@@ -243,7 +243,7 @@ function getGsdArgumentCompletions(prefix: string) {
 
 export function registerLazySDDCommand(pi: ExtensionAPI): void {
   pi.registerCommand("sdd", {
-    description: "SDD — Get Shit Done",
+    description: "SDD — Spec-Driven Development",
     getArgumentCompletions: getGsdArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
       const { handleSDDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");

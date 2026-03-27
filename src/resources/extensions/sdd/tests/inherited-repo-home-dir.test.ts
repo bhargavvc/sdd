@@ -94,11 +94,11 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     // .sdd is a symlink to an external state directory.
     const externalState = join(stateDir, "projects", "home-project");
     mkdirSync(externalState, { recursive: true });
-    const gsdDir = join(fakeHome, ".sdd");
+    const sddDir = join(fakeHome, ".sdd");
 
     // Remove the plain directory and replace with a symlink (real project .sdd)
-    rmSync(gsdDir, { recursive: true, force: true });
-    symlinkSync(externalState, gsdDir);
+    rmSync(sddDir, { recursive: true, force: true });
+    symlinkSync(externalState, sddDir);
 
     const projectDir = join(fakeHome, "projects", "my-app");
     mkdirSync(projectDir, { recursive: true });

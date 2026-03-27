@@ -27,10 +27,10 @@ const dirListCache = new Map<string, string[]>();
 let nativeTreeCache: Map<string, GsdTreeEntry[]> | null = null;
 let nativeTreeBase: string | null = null;
 
-function getNativeTree(gsdDir: string): Map<string, GsdTreeEntry[]> | null {
-  if (nativeTreeCache && nativeTreeBase === gsdDir) return nativeTreeCache;
+function getNativeTree(sddDir: string): Map<string, GsdTreeEntry[]> | null {
+  if (nativeTreeCache && nativeTreeBase === sddDir) return nativeTreeCache;
 
-  const entries = nativeScanGsdTree(gsdDir);
+  const entries = nativeScanGsdTree(sddDir);
   if (!entries) return null;
 
   // Build a map of parent directory -> entries
@@ -44,17 +44,17 @@ function getNativeTree(gsdDir: string): Map<string, GsdTreeEntry[]> | null {
   }
 
   nativeTreeCache = tree;
-  nativeTreeBase = gsdDir;
+  nativeTreeBase = sddDir;
   return tree;
 }
 
 /**
  * Convert a native tree lookup into a relative key for the tree map.
- * Returns the relative path from the gsdDir, or null if the path isn't under gsdDir.
+ * Returns the relative path from the sddDir, or null if the path isn't under sddDir.
  */
-function nativeTreeKey(dirPath: string, gsdDir: string): string | null {
-  if (!dirPath.startsWith(gsdDir)) return null;
-  const rel = dirPath.slice(gsdDir.length).replace(/^\//, '');
+function nativeTreeKey(dirPath: string, sddDir: string): string | null {
+  if (!dirPath.startsWith(sddDir)) return null;
+  const rel = dirPath.slice(sddDir.length).replace(/^\//, '');
   return rel || '.';
 }
 
@@ -280,11 +280,11 @@ const LEGACY_SDD_ROOT_FILES: Record<SDDRootFileKey, string> = {
 
 // ─── SDD Root Discovery ───────────────────────────────────────────────────────
 
-const gsdRootCache = new Map<string, string>();
+const sddRootCache = new Map<string, string>();
 
 /** Exported for tests only — do not call in production code. */
 export function _clearGsdRootCache(): void {
-  gsdRootCache.clear();
+  sddRootCache.clear();
 }
 
 /**
@@ -298,12 +298,12 @@ export function _clearGsdRootCache(): void {
  *
  * Result is cached per basePath for the process lifetime.
  */
-export function gsdRoot(basePath: string): string {
-  const cached = gsdRootCache.get(basePath);
+export function sddRoot(basePath: string): string {
+  const cached = sddRootCache.get(basePath);
   if (cached) return cached;
 
   const result = probeGsdRoot(basePath);
-  gsdRootCache.set(basePath, result);
+  sddRootCache.set(basePath, result);
   return result;
 }
 
@@ -353,15 +353,15 @@ function probeGsdRoot(rawBasePath: string): string {
   return local;
 }
 export function milestonesDir(basePath: string): string {
-  return join(gsdRoot(basePath), "milestones");
+  return join(sddRoot(basePath), "milestones");
 }
 
 export function resolveRuntimeFile(basePath: string): string {
-  return join(gsdRoot(basePath), "RUNTIME.md");
+  return join(sddRoot(basePath), "RUNTIME.md");
 }
 
 export function resolveGsdRootFile(basePath: string, key: SDDRootFileKey): string {
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
   const canonical = join(root, SDD_ROOT_FILES[key]);
   if (existsSync(canonical)) return canonical;
   const legacy = join(root, LEGACY_SDD_ROOT_FILES[key]);

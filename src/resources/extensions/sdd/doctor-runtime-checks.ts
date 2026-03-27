@@ -3,7 +3,7 @@ import { basename, dirname, join } from "node:path";
 
 import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
 import { cleanNumberedGsdVariants } from "./repo-identity.js";
-import { milestonesDir, gsdRoot, resolveGsdRootFile } from "./paths.js";
+import { milestonesDir, sddRoot, resolveGsdRootFile } from "./paths.js";
 import { deriveState } from "./state.js";
 import { saveFile } from "./files.js";
 import { nativeIsRepo, nativeForEachRef, nativeUpdateRef } from "./native-git-bridge.js";
@@ -18,7 +18,7 @@ export async function checkRuntimeHealth(
   fixesApplied: string[],
   shouldFix: (code: DoctorIssueCode) => boolean,
 ): Promise<void> {
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
 
   // ── Stale crash lock ──────────────────────────────────────────────────
   try {

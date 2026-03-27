@@ -248,8 +248,8 @@ function createFixture(): string {
   execSync('git config user.name "Test"', { cwd: tmpDir, stdio: "pipe" });
 
   // Create .sdd/ structure
-  const gsdDir = join(tmpDir, ".sdd");
-  const milestonesDir = join(gsdDir, "milestones");
+  const sddDir = join(tmpDir, ".sdd");
+  const milestonesDir = join(sddDir, "milestones");
   const m001Dir = join(milestonesDir, "M001");
   const slicesDir = join(m001Dir, "slices");
   const s01Dir = join(slicesDir, "S01");
@@ -258,8 +258,8 @@ function createFixture(): string {
   mkdirSync(tasksDir, { recursive: true });
 
   // Write fixture files
-  writeFileSync(join(gsdDir, "PROJECT.md"), FIXTURE_PROJECT_MD);
-  writeFileSync(join(gsdDir, "STATE.md"), FIXTURE_STATE_MD);
+  writeFileSync(join(sddDir, "PROJECT.md"), FIXTURE_PROJECT_MD);
+  writeFileSync(join(sddDir, "STATE.md"), FIXTURE_STATE_MD);
   writeFileSync(join(m001Dir, "M001-CONTEXT.md"), FIXTURE_CONTEXT_MD);
   writeFileSync(join(m001Dir, "M001-ROADMAP.md"), FIXTURE_ROADMAP_MD);
   writeFileSync(join(s01Dir, "S01-PLAN.md"), FIXTURE_PLAN_MD);

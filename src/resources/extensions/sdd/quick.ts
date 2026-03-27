@@ -13,7 +13,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadPrompt } from "./prompt-loader.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { GitServiceImpl, runGit } from "./git-service.js";
 import { loadEffectiveSDDPreferences } from "./preferences.js";
 import { nativeHasStagedChanges } from "./native-git-bridge.js";
@@ -71,19 +71,19 @@ function getNextTaskNum(quickDir: string): number {
  * Returns the task directory path.
  */
 function ensureQuickDir(basePath: string, taskNum: number, slug: string): string {
-  const quickDir = join(gsdRoot(basePath), "quick");
+  const quickDir = join(sddRoot(basePath), "quick");
   const taskDir = join(quickDir, `${taskNum}-${slug}`);
   mkdirSync(taskDir, { recursive: true });
   return taskDir;
 }
 
 function quickReturnStatePath(basePath: string): string {
-  return join(gsdRoot(basePath), "runtime", "quick-return.json");
+  return join(sddRoot(basePath), "runtime", "quick-return.json");
 }
 
 function persistPendingReturn(state: QuickReturnState): void {
   pendingQuickReturn = state;
-  mkdirSync(join(gsdRoot(state.basePath), "runtime"), { recursive: true });
+  mkdirSync(join(sddRoot(state.basePath), "runtime"), { recursive: true });
   writeFileSync(quickReturnStatePath(state.basePath), JSON.stringify(state) + "\n", "utf-8");
 }
 
@@ -163,7 +163,7 @@ export async function handleQuick(
   pi: ExtensionAPI,
 ): Promise<void> {
   const basePath = process.cwd();
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
 
   // Validate: .sdd/ must exist
   if (!existsSync(root)) {

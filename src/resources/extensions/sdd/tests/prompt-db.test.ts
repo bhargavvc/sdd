@@ -326,8 +326,8 @@ describe('prompt-db', () => {
 test('prompt-db: re-import updates DB when source markdown changes', () => {
   // Create a temp dir simulating a project with .sdd/DECISIONS.md
   const tmpDir = mkdtempSync(join(tmpdir(), 'prompt-db-reimport-'));
-  const gsdDir = join(tmpDir, '.sdd');
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmpDir, '.sdd');
+  mkdirSync(sddDir, { recursive: true });
 
   // Write initial DECISIONS.md with 2 decisions
   const initialDecisions = `# Decisions Register
@@ -337,7 +337,7 @@ test('prompt-db: re-import updates DB when source markdown changes', () => {
 | D001 | M001/S01 | architecture | use SQLite | better-sqlite3 | fast and embedded | yes |
 | D002 | M001/S01 | tooling | use vitest | vitest | modern test runner | yes |
 `;
-  writeFileSync(join(gsdDir, 'DECISIONS.md'), initialDecisions);
+  writeFileSync(join(sddDir, 'DECISIONS.md'), initialDecisions);
 
   // Open in-memory DB and do initial import
   openDatabase(':memory:');
@@ -358,7 +358,7 @@ test('prompt-db: re-import updates DB when source markdown changes', () => {
 | D002 | M001/S01 | tooling | use vitest | vitest | modern test runner | yes |
 | D003 | M001/S02 | runtime | dynamic imports | D014 pattern | lazy loading | yes |
 `;
-  writeFileSync(join(gsdDir, 'DECISIONS.md'), updatedDecisions);
+  writeFileSync(join(sddDir, 'DECISIONS.md'), updatedDecisions);
 
   // Re-import (simulating what handleAgentEnd does)
   migrateFromMarkdown(tmpDir);

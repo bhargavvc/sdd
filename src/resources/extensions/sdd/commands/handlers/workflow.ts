@@ -7,7 +7,7 @@ import { parse as parseYaml } from "yaml";
 import { handleQuick } from "../../quick.js";
 import { showDiscuss, showHeadlessMilestoneCreation, showQueue } from "../../guided-flow.js";
 import { handleStart, handleTemplates } from "../../commands-workflow-templates.js";
-import { gsdRoot } from "../../paths.js";
+import { sddRoot } from "../../paths.js";
 import { deriveState } from "../../state.js";
 import { isParked, parkMilestone, unparkMilestone } from "../../milestone-actions.js";
 import { loadEffectiveSDDPreferences } from "../../preferences.js";
@@ -201,7 +201,7 @@ export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionComma
   }
   if (trimmed === "new-milestone") {
     const basePath = projectRoot();
-    const headlessContextPath = join(gsdRoot(basePath), "runtime", "headless-context.md");
+    const headlessContextPath = join(sddRoot(basePath), "runtime", "headless-context.md");
     if (existsSync(headlessContextPath)) {
       const seedContext = readFileSync(headlessContextPath, "utf-8");
       try { unlinkSync(headlessContextPath); } catch { /* non-fatal */ }

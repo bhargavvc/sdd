@@ -5,7 +5,7 @@
 
 import { join } from 'node:path';
 import { saveFile } from '../files.js';
-import { gsdRoot } from '../paths.js';
+import { sddRoot } from '../paths.js';
 
 import type {
   SDDMilestone,
@@ -422,8 +422,8 @@ export async function writeSDDDirectory(
   project: SDDProject,
   targetPath: string,
 ): Promise<WrittenFiles> {
-  const gsdDir = gsdRoot(targetPath);
-  const milestonesBase = join(gsdDir, 'milestones');
+  const sddDir = sddRoot(targetPath);
+  const milestonesBase = join(sddDir, 'milestones');
   const paths: string[] = [];
   const counts: WrittenFiles['counts'] = {
     roadmaps: 0,
@@ -438,23 +438,23 @@ export async function writeSDDDirectory(
   };
 
   // Root-level files
-  const projectPath = join(gsdDir, 'PROJECT.md');
+  const projectPath = join(sddDir, 'PROJECT.md');
   await saveFile(projectPath, formatProject(project.projectContent));
   paths.push(projectPath);
   counts.other++;
 
-  const decisionsPath = join(gsdDir, 'DECISIONS.md');
+  const decisionsPath = join(sddDir, 'DECISIONS.md');
   await saveFile(decisionsPath, formatDecisions(project.decisionsContent));
   paths.push(decisionsPath);
   counts.other++;
 
-  const statePath = join(gsdDir, 'STATE.md');
+  const statePath = join(sddDir, 'STATE.md');
   await saveFile(statePath, formatState(project.milestones));
   paths.push(statePath);
   counts.other++;
 
   if (project.requirements.length > 0) {
-    const reqPath = join(gsdDir, 'REQUIREMENTS.md');
+    const reqPath = join(sddDir, 'REQUIREMENTS.md');
     await saveFile(reqPath, formatRequirements(project.requirements));
     paths.push(reqPath);
     counts.requirements++;

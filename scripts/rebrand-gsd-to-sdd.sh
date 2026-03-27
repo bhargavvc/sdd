@@ -136,6 +136,34 @@ done < /tmp/${NEW_LC}-rebrand-files.txt
 rm -f /tmp/${NEW_LC}-rebrand-files.txt
 echo "  Done."
 
+# ─── STEP 2b: Fix camelCase variables and branding ────────────────────────────
+echo ""
+echo "[2b/4] Fixing camelCase variables and branding..."
+
+# Fix camelCase: gsdDir→sddDir, gsdRoot→sddRoot, etc.
+grep -rl "${OLD_LC}[A-Z]" src/ --include="*.ts" 2>/dev/null | grep -v node_modules | while read -r f; do
+  sed -i \
+    -e "s/${OLD_LC}Dir/${NEW_LC}Dir/g" \
+    -e "s/${OLD_LC}Root/${NEW_LC}Root/g" \
+    -e "s/${OLD_LC}ExtensionPath/${NEW_LC}ExtensionPath/g" \
+    -e "s/${OLD_LC}ScopeDir/${NEW_LC}ScopeDir/g" \
+    -e "s/${OLD_LC}NodeModules/${NEW_LC}NodeModules/g" \
+    -e "s/${OLD_LC}Version/${NEW_LC}Version/g" \
+    -e "s/${OLD_LC}Bin/${NEW_LC}Bin/g" \
+    -e "s/${OLD_LC}Path/${NEW_LC}Path/g" \
+    -e "s/${OLD_LC}State/${NEW_LC}State/g" \
+    "$f"
+done
+
+# Fix branding text
+grep -rl 'Get Shit Done\|Get Stuff Done' src/ --include="*.ts" 2>/dev/null | while read -r f; do
+  sed -i \
+    -e 's/Get Shit Done/Spec-Driven Development/g' \
+    -e 's/Get Stuff Done/Spec-Driven Development/g' \
+    "$f"
+done
+echo "  Done."
+
 # ─── STEP 3: Fix logo if needed ──────────────────────────────────────────────
 echo ""
 echo "[3/4] Checking logo..."

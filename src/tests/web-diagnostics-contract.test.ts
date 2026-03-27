@@ -56,7 +56,7 @@ describe("diagnostics type exports", () => {
 
   it("ForensicReport has all required fields", () => {
     const report: ForensicReport = {
-      gsdVersion: "1.0.0",
+      sddVersion: "1.0.0",
       timestamp: new Date().toISOString(),
       basePath: "/tmp/test",
       activeMilestone: "M001",
@@ -72,7 +72,7 @@ describe("diagnostics type exports", () => {
       journalSummary: null,
       activityLogMeta: null,
     }
-    assert.equal(typeof report.gsdVersion, "string")
+    assert.equal(typeof report.sddVersion, "string")
     assert.equal(typeof report.timestamp, "string")
     assert.deepEqual(report.anomalies, [])
     assert.deepEqual(report.recentUnits, [])

@@ -214,7 +214,7 @@ describe('doctor-enhancements', async () => {
     assert.ok(typeof result.timing?.git === "number", "timing.git is a number");
     assert.ok(typeof result.timing?.runtime === "number", "timing.runtime is a number");
     assert.ok(typeof result.timing?.environment === "number", "timing.environment is a number");
-    assert.ok(typeof result.timing?.gsdState === "number", "timing.gsdState is a number");
+    assert.ok(typeof result.timing?.sddState === "number", "timing.sddState is a number");
 
     rmSync(base, { recursive: true, force: true });
   });

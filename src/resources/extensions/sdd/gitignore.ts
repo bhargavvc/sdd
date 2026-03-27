@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs";
 import { nativeRmCached, nativeLsFiles } from "./native-git-bridge.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 /**
@@ -224,8 +224,8 @@ export function untrackRuntimeFiles(basePath: string): void {
  * creating a duplicate when a lowercase file already exists.
  */
 export function ensurePreferences(basePath: string): boolean {
-  const preferencesPath = join(gsdRoot(basePath), "PREFERENCES.md");
-  const legacyPath = join(gsdRoot(basePath), "preferences.md");
+  const preferencesPath = join(sddRoot(basePath), "PREFERENCES.md");
+  const legacyPath = join(sddRoot(basePath), "preferences.md");
 
   if (existsSync(preferencesPath) || existsSync(legacyPath)) {
     return false;

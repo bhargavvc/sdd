@@ -10,7 +10,7 @@ import {
   aggregateByModel, formatCost, formatTokenCount, loadLedgerFromDisk,
 } from "./metrics.js";
 import type { UnitMetrics } from "./metrics.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { formatDuration, fileLink } from "../shared/format-utils.js";
 import { getErrorMessage } from "./error-utils.js";
 
@@ -53,7 +53,7 @@ export function writeExportFile(
   }
 
   const projectName = basename(basePath);
-  const exportDir = gsdRoot(basePath);
+  const exportDir = sddRoot(basePath);
   mkdirSync(exportDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
@@ -123,13 +123,13 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
       const { basename: bn } = await import("node:path");
       const data = await loadVisualizerData(basePath);
       const projName = basename(basePath);
-      const gsdVersion = process.env.SDD_VERSION ?? "0.0.0";
+      const sddVersion = process.env.SDD_VERSION ?? "0.0.0";
       const doneMilestones = data.milestones.filter(m => m.status === "complete").length;
 
       const htmlOpts = {
         projectName: projName,
         projectPath: basePath,
-        gsdVersion,
+        sddVersion,
         indexRelPath: "index.html",
       };
 
@@ -171,7 +171,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
             kind: ms.status === "complete" ? "milestone" : "manual",
             projectName: projName,
             projectPath: basePath,
-            gsdVersion,
+            sddVersion,
             totalCost: data.totals?.cost ?? 0,
             totalTokens: data.totals?.tokens.total ?? 0,
             totalDuration: data.totals?.duration ?? 0,
@@ -184,7 +184,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
           paths.push(bn(outPath));
         }
 
-        const indexPath = join(gsdRoot(basePath), "reports", "index.html");
+        const indexPath = join(sddRoot(basePath), "reports", "index.html");
         ctx.ui.notify(
           `Generated ${paths.length} report snapshot${paths.length !== 1 ? "s" : ""}:\n${paths.map(p => `  ${p}`).join("\n")}\nOpening reports index in browser...`,
           "success",
@@ -202,7 +202,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
           kind: "manual",
           projectName: projName,
           projectPath: basePath,
-          gsdVersion,
+          sddVersion,
           totalCost: data.totals?.cost ?? 0,
           totalTokens: data.totals?.tokens.total ?? 0,
           totalDuration: data.totals?.duration ?? 0,
@@ -245,7 +245,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
   }
 
   const projectName = basename(basePath);
-  const exportDir = gsdRoot(basePath);
+  const exportDir = sddRoot(basePath);
   mkdirSync(exportDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 

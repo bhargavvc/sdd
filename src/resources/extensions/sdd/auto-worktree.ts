@@ -29,7 +29,7 @@ import {
 import { atomicWriteSync } from "./atomic-write.js";
 import { execFileSync } from "node:child_process";
 import { safeCopy, safeCopyRecursive } from "./safe-fs.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import {
   createWorktree,
   removeWorktree,
@@ -106,11 +106,11 @@ function isSamePath(a: string, b: string): boolean {
 let originalBase: string | null = null;
 
 function clearProjectRootStateFiles(basePath: string, milestoneId: string): void {
-  const gsdDir = gsdRoot(basePath);
+  const sddDir = sddRoot(basePath);
   const transientFiles = [
-    join(gsdDir, "STATE.md"),
-    join(gsdDir, "auto.lock"),
-    join(gsdDir, "milestones", milestoneId, `${milestoneId}-META.json`),
+    join(sddDir, "STATE.md"),
+    join(sddDir, "auto.lock"),
+    join(sddDir, "milestones", milestoneId, `${milestoneId}-META.json`),
   ];
 
   for (const file of transientFiles) {
@@ -127,8 +127,8 @@ function clearProjectRootStateFiles(basePath: string, milestoneId: string): void
   // `git merge --squash`, git rejects the merge with "local changes would
   // be overwritten", causing silent data loss (#1738).
   const syncedDirs = [
-    join(gsdDir, "milestones", milestoneId),
-    join(gsdDir, "runtime", "units"),
+    join(sddDir, "milestones", milestoneId),
+    join(sddDir, "runtime", "units"),
   ];
 
   for (const dir of syncedDirs) {
@@ -276,7 +276,7 @@ export function syncStateToProjectRoot(
 
 /**
  * Read the resource version (semver) from the managed-resources manifest.
- * Uses gsdVersion instead of syncedAt so that launching a second session
+ * Uses sddVersion instead of syncedAt so that launching a second session
  * doesn't falsely trigger staleness (#804).
  */
 export function readResourceVersion(): string | null {
@@ -285,8 +285,8 @@ export function readResourceVersion(): string | null {
   const manifestPath = join(agentDir, "managed-resources.json");
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
-    return typeof manifest?.gsdVersion === "string"
-      ? manifest.gsdVersion
+    return typeof manifest?.sddVersion === "string"
+      ? manifest.sddVersion
       : null;
   } catch {
     return null;
@@ -369,10 +369,10 @@ export function escapeStaleWorktree(base: string): string {
  * for milestones that have a SUMMARY (fully complete).
  */
 export function cleanStaleRuntimeUnits(
-  gsdRootPath: string,
+  sddRootPath: string,
   hasMilestoneSummary: (mid: string) => boolean,
 ): number {
-  const runtimeUnitsDir = join(gsdRootPath, "runtime", "units");
+  const runtimeUnitsDir = join(sddRootPath, "runtime", "units");
   if (!existsSync(runtimeUnitsDir)) return 0;
 
   let cleaned = 0;
@@ -416,8 +416,8 @@ export function syncSddStateToWorktree(
   mainBasePath: string,
   worktreePath_: string,
 ): { synced: string[] } {
-  const mainGsd = gsdRoot(mainBasePath);
-  const wtGsd = gsdRoot(worktreePath_);
+  const mainGsd = sddRoot(mainBasePath);
+  const wtGsd = sddRoot(worktreePath_);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
@@ -570,8 +570,8 @@ export function syncWorktreeStateBack(
   worktreePath: string,
   milestoneId: string,
 ): { synced: string[] } {
-  const mainGsd = gsdRoot(mainBasePath);
-  const wtGsd = gsdRoot(worktreePath);
+  const mainGsd = sddRoot(mainBasePath);
+  const wtGsd = sddRoot(worktreePath);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed

@@ -9,7 +9,7 @@
 import { existsSync, openSync, readSync, closeSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 
 const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
@@ -354,18 +354,18 @@ export function detectV1Planning(basePath: string): V1Detection | null {
 // ─── V2 SDD Detection ──────────────────────────────────────────────────────────
 
 function detectV2Gsd(basePath: string): V2Detection | null {
-  const gsdPath = gsdRoot(basePath);
+  const sddPath = sddRoot(basePath);
 
-  if (!existsSync(gsdPath)) return null;
+  if (!existsSync(sddPath)) return null;
 
   const hasPreferences =
-    existsSync(join(gsdPath, "PREFERENCES.md")) ||
-    existsSync(join(gsdPath, "preferences.md"));
+    existsSync(join(sddPath, "PREFERENCES.md")) ||
+    existsSync(join(sddPath, "preferences.md"));
 
-  const hasContext = existsSync(join(gsdPath, "CONTEXT.md"));
+  const hasContext = existsSync(join(sddPath, "CONTEXT.md"));
 
   let milestoneCount = 0;
-  const milestonesPath = join(gsdPath, "milestones");
+  const milestonesPath = join(sddPath, "milestones");
   if (existsSync(milestonesPath)) {
     try {
       const entries = readdirSync(milestonesPath, { withFileTypes: true });

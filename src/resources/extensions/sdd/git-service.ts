@@ -11,7 +11,7 @@
 import { execFileSync, execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 import { loadEffectiveSDDPreferences } from "./preferences.js";
 
@@ -211,7 +211,7 @@ export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
  * Format: .sdd/milestones/<MID>/<MID>-META.json
  */
 function milestoneMetaPath(basePath: string, milestoneId: string): string {
-  return join(gsdRoot(basePath), "milestones", milestoneId, `${milestoneId}-META.json`);
+  return join(sddRoot(basePath), "milestones", milestoneId, `${milestoneId}-META.json`);
 }
 
 /**
@@ -270,7 +270,7 @@ export function writeIntegrationBranch(
   if (existingBranch === branch) return;
 
   const metaFile = milestoneMetaPath(basePath, milestoneId);
-  mkdirSync(join(gsdRoot(basePath), "milestones", milestoneId), { recursive: true });
+  mkdirSync(join(sddRoot(basePath), "milestones", milestoneId), { recursive: true });
 
   // Merge with existing metadata if present
   let existing: Record<string, unknown> = {};

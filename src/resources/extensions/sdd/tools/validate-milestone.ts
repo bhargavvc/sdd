@@ -85,8 +85,8 @@ export async function handleValidateMilestone(
   if (milestoneDir) {
     validationPath = join(milestoneDir, `${params.milestoneId}-VALIDATION.md`);
   } else {
-    const gsdDir = join(basePath, ".sdd");
-    const manualDir = join(gsdDir, "milestones", params.milestoneId);
+    const sddDir = join(basePath, ".sdd");
+    const manualDir = join(sddDir, "milestones", params.milestoneId);
     validationPath = join(manualDir, `${params.milestoneId}-VALIDATION.md`);
   }
 

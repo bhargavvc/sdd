@@ -24,7 +24,7 @@ import {
   updateSessionLock,
   isSessionLockHeld,
 } from '../session-lock.ts';
-import { gsdRoot } from '../paths.ts';
+import { sddRoot } from '../paths.ts';
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -61,11 +61,11 @@ describe('session-lock-regression', async () => {
       releaseSessionLock(base);
 
       // After release, the lock file should be cleaned up
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       assert.ok(!existsSync(lockFile), 'lock file removed after release');
 
       // The .sdd.lock/ directory should be cleaned up
-      const lockDir = gsdRoot(base) + '.lock';
+      const lockDir = sddRoot(base) + '.lock';
       assert.ok(!existsSync(lockDir), '.sdd.lock/ directory removed after release (#1245)');
     } finally {
       rmSync(base, { recursive: true, force: true });
@@ -128,7 +128,7 @@ describe('session-lock-regression', async () => {
 
     try {
       // Write a lock file with a definitely-dead PID
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const staleLock = {
         pid: 99999999, // extremely unlikely to be alive
         startedAt: new Date(Date.now() - 3600000).toISOString(),
@@ -190,7 +190,7 @@ describe('session-lock-regression', async () => {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       writeFileSync(lockFile, 'NOT VALID JSON {{{');
 
       const data = readSessionLockData(base);
@@ -224,7 +224,7 @@ describe('session-lock-regression', async () => {
 
     try {
       const foreignPid = process.pid + 1000;
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       writeFileSync(lockFile, JSON.stringify({
         pid: foreignPid,
         startedAt: new Date().toISOString(),
@@ -294,7 +294,7 @@ describe('session-lock-regression', async () => {
       const r1 = acquireSessionLock(base);
       assert.ok(r1.acquired, 'first acquisition succeeds');
 
-      const lockDir = gsdRoot(base) + '.lock';
+      const lockDir = sddRoot(base) + '.lock';
       if (properLockfileAvailable) {
         assert.ok(existsSync(lockDir), '.sdd.lock/ exists after first acquisition');
       }

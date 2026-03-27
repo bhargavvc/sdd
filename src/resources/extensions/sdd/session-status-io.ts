@@ -17,7 +17,7 @@ import {
   existsSync,
 } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { loadJsonFileOrNull, writeJsonFileAtomic } from "./json-persistence.js";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ function isSignalMessage(data: unknown): data is SignalMessage {
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
 function parallelDir(basePath: string): string {
-  return join(gsdRoot(basePath), PARALLEL_DIR);
+  return join(sddRoot(basePath), PARALLEL_DIR);
 }
 
 function statusPath(basePath: string, milestoneId: string): string {

@@ -42,7 +42,7 @@ export async function ensureDbOpen(): Promise<boolean> {
 
     const basePath = process.cwd();
     const dbPath = resolveProjectRootDbPath(basePath);
-    const gsdDir = join(basePath, ".sdd");
+    const sddDir = join(basePath, ".sdd");
 
     // Derive the project root from the DB path (strip .sdd/sdd.db)
     const projectRoot = join(dbPath, "..", "..");
@@ -55,10 +55,10 @@ export async function ensureDbOpen(): Promise<boolean> {
     }
 
     // No DB file — create + migrate from Markdown if .sdd/ has content
-    if (existsSync(gsdDir)) {
-      const hasDecisions = existsSync(join(gsdDir, "DECISIONS.md"));
-      const hasRequirements = existsSync(join(gsdDir, "REQUIREMENTS.md"));
-      const hasMilestones = existsSync(join(gsdDir, "milestones"));
+    if (existsSync(sddDir)) {
+      const hasDecisions = existsSync(join(sddDir, "DECISIONS.md"));
+      const hasRequirements = existsSync(join(sddDir, "REQUIREMENTS.md"));
+      const hasMilestones = existsSync(join(sddDir, "milestones"));
       if (hasDecisions || hasRequirements || hasMilestones) {
         const opened = db.openDatabase(dbPath);
         if (opened) {

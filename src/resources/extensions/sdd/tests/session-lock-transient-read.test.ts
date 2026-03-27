@@ -25,7 +25,7 @@ import {
   readExistingLockDataWithRetry,
   type SessionLockData,
 } from '../session-lock.ts';
-import { gsdRoot } from '../paths.ts';
+import { sddRoot } from '../paths.ts';
 import { createTestContext } from './test-helpers.ts';
 
 const { assertEq, assertTrue, report } = createTestContext();
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const lockData: SessionLockData = {
         pid: process.pid,
         startedAt: new Date().toISOString(),
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       // File doesn't exist
       const result = readExistingLockDataWithRetry(lockFile, { maxAttempts: 2, delayMs: 10 });
       assertEq(result, null, 'null for truly missing file after retries');
@@ -82,7 +82,7 @@ async function main(): Promise<void> {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const tmpFile = lockFile + '.hidden';
       const lockData: SessionLockData = {
         pid: process.pid,
@@ -119,7 +119,7 @@ async function main(): Promise<void> {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const lockData: SessionLockData = {
         pid: process.pid,
         startedAt: new Date().toISOString(),
@@ -164,7 +164,7 @@ async function main(): Promise<void> {
       assertTrue(status1.valid, 'lock valid before transient failure');
 
       // Temporarily hide the lock file
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const tmpFile = lockFile + '.hidden';
       renameSync(lockFile, tmpFile);
 
@@ -196,7 +196,7 @@ async function main(): Promise<void> {
     mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
-      const lockFile = join(gsdRoot(base), 'auto.lock');
+      const lockFile = join(sddRoot(base), 'auto.lock');
       const lockData: SessionLockData = {
         pid: process.pid,
         startedAt: new Date().toISOString(),

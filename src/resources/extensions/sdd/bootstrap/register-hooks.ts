@@ -53,11 +53,11 @@ export function registerHooks(pi: ExtensionAPI): void {
       isFirstSession = false;
     } else {
       try {
-        const gsdBinPath = process.env.SDD_BIN_PATH;
-        if (gsdBinPath) {
+        const sddBinPath = process.env.SDD_BIN_PATH;
+        if (sddBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
-            join(dirname(gsdBinPath), "welcome-screen.js")
+            join(dirname(sddBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string }) => void };
           printWelcomeScreen({ version: process.env.SDD_VERSION || "0.0.0" });
         }

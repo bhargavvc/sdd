@@ -155,11 +155,11 @@ export function isInheritedRepo(basePath: string): boolean {
  * Treating it as a project `.sdd` would cause isInheritedRepo() to wrongly
  * conclude that subdirectories are part of the home "project" (#2393).
  */
-function isProjectGsd(gsdPath: string): boolean {
-  if (!existsSync(gsdPath)) return false;
+function isProjectGsd(sddPath: string): boolean {
+  if (!existsSync(sddPath)) return false;
 
   try {
-    const stat = lstatSync(gsdPath);
+    const stat = lstatSync(sddPath);
 
     // Symlinks are always project .sdd (created by ensureGsdSymlink).
     if (stat.isSymbolicLink()) return true;
@@ -169,7 +169,7 @@ function isProjectGsd(gsdPath: string): boolean {
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
       const currentGsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
-      const normalizedGsdPath = canonicalizeExistingPath(gsdPath);
+      const normalizedGsdPath = canonicalizeExistingPath(sddPath);
       const normalizedGsdHome = canonicalizeExistingPath(currentGsdHome);
       if (normalizedGsdPath === normalizedGsdHome) return false;
       return true;

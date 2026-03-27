@@ -25,7 +25,7 @@ import {
   resolveSlicePath,
   resolveTasksDir,
   milestonesDir,
-  gsdRoot,
+  sddRoot,
   resolveTaskFiles,
 } from './paths.js';
 import { findMilestoneIds } from './guided-flow.js';
@@ -270,8 +270,8 @@ export function parseRequirementsSections(content: string): Requirement[] {
  * Import decisions from DECISIONS.md into the database.
  * Handles supersession chains.
  */
-function importDecisions(gsdDir: string): number {
-  const filePath = resolveGsdRootFile(gsdDir, 'DECISIONS');
+function importDecisions(sddDir: string): number {
+  const filePath = resolveGsdRootFile(sddDir, 'DECISIONS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -287,8 +287,8 @@ function importDecisions(gsdDir: string): number {
 /**
  * Import requirements from REQUIREMENTS.md into the database.
  */
-function importRequirements(gsdDir: string): number {
-  const filePath = resolveGsdRootFile(gsdDir, 'REQUIREMENTS');
+function importRequirements(sddDir: string): number {
+  const filePath = resolveGsdRootFile(sddDir, 'REQUIREMENTS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -312,14 +312,14 @@ const TASK_SUFFIXES = ['PLAN', 'SUMMARY', 'CONTINUE', 'CONTEXT', 'RESEARCH'];
  * Import hierarchy artifacts (roadmaps, plans, summaries, etc.) from the .sdd/ tree.
  * Walks milestones → slices → tasks directories.
  */
-function importHierarchyArtifacts(gsdDir: string): number {
+function importHierarchyArtifacts(sddDir: string): number {
   let count = 0;
-  const gsdPath = gsdRoot(gsdDir);
+  const sddPath = sddRoot(sddDir);
 
   // Root-level artifacts: PROJECT.md, QUEUE.md
   const rootFiles = ['PROJECT.md', 'QUEUE.md', 'SECRETS-MANIFEST.md'];
   for (const fileName of rootFiles) {
-    const filePath = join(gsdPath, fileName);
+    const filePath = join(sddPath, fileName);
     if (existsSync(filePath)) {
       const content = readFileSync(filePath, 'utf-8');
       const artifactType = fileName.replace('.md', '').replace('-', '_');
@@ -336,8 +336,8 @@ function importHierarchyArtifacts(gsdDir: string): number {
   }
 
   // Walk milestones
-  const milestoneIds = findMilestoneIds(gsdDir);
-  const msDir = milestonesDir(gsdDir);
+  const milestoneIds = findMilestoneIds(sddDir);
+  const msDir = milestonesDir(sddDir);
 
   for (const milestoneId of milestoneIds) {
     // Find the actual milestone directory name (handles legacy naming)
@@ -690,13 +690,13 @@ export function migrateHierarchyToDb(basePath: string): {
  *
  * Missing files are skipped gracefully — no errors produced.
  */
-export function migrateFromMarkdown(gsdDir: string): {
+export function migrateFromMarkdown(sddDir: string): {
   decisions: number;
   requirements: number;
   artifacts: number;
   hierarchy: { milestones: number; slices: number; tasks: number };
 } {
-  const dbPath = join(gsdRoot(gsdDir), 'sdd.db');
+  const dbPath = join(sddRoot(sddDir), 'sdd.db');
 
   // Open DB if not already open
   if (!_getAdapter()) {
@@ -710,25 +710,25 @@ export function migrateFromMarkdown(gsdDir: string): {
 
   transaction(() => {
     try {
-      decisions = importDecisions(gsdDir);
+      decisions = importDecisions(sddDir);
     } catch (err) {
       process.stderr.write(`sdd-migrate: skipping decisions import: ${(err as Error).message}\n`);
     }
 
     try {
-      requirements = importRequirements(gsdDir);
+      requirements = importRequirements(sddDir);
     } catch (err) {
       process.stderr.write(`sdd-migrate: skipping requirements import: ${(err as Error).message}\n`);
     }
 
     try {
-      artifacts = importHierarchyArtifacts(gsdDir);
+      artifacts = importHierarchyArtifacts(sddDir);
     } catch (err) {
       process.stderr.write(`sdd-migrate: skipping artifacts import: ${(err as Error).message}\n`);
     }
 
     try {
-      hierarchy = migrateHierarchyToDb(gsdDir);
+      hierarchy = migrateHierarchyToDb(sddDir);
     } catch (err) {
       process.stderr.write(`sdd-migrate: skipping hierarchy migration: ${(err as Error).message}\n`);
     }

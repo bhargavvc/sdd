@@ -41,7 +41,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Narrow terminal fallback
   if (termWidth < 70) {
-    process.stderr.write(`\n  Get Shit Done v${version}\n  ${shortCwd}\n\n`)
+    process.stderr.write(`\n  Spec-Driven Development v${version}\n  ${shortCwd}\n\n`)
     return
   }
 
@@ -58,7 +58,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
   const leftRows = ['', ...SDD_LOGO, '']
 
   // ── Right rows (8 total, null = divider) ────────────────────────────────────
-  const titleLeft  = `  ${chalk.bold('Get Shit Done')}`
+  const titleLeft  = `  ${chalk.bold('Spec-Driven Development')}`
   const titleRight = chalk.dim(`v${version}`)
   const titleFill  = RIGHT_INNER - visLen(titleLeft) - visLen(titleRight)
   const titleRow   = titleLeft + ' '.repeat(Math.max(1, titleFill)) + titleRight

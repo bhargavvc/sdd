@@ -66,9 +66,9 @@ _None_
 
 /** Write a .sdd/PREFERENCES.md with the given git isolation mode. */
 function writePreferencesFile(dir: string, isolation: "none" | "worktree" | "branch"): void {
-  const gsdDir = join(dir, ".sdd");
-  mkdirSync(gsdDir, { recursive: true });
-  writeFileSync(join(gsdDir, "PREFERENCES.md"), `---\ngit:\n  isolation: "${isolation}"\n---\n`);
+  const sddDir = join(dir, ".sdd");
+  mkdirSync(sddDir, { recursive: true });
+  writeFileSync(join(sddDir, "PREFERENCES.md"), `---\ngit:\n  isolation: "${isolation}"\n---\n`);
 }
 
 /** Create a repo with an in-progress milestone. */

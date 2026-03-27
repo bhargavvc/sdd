@@ -37,7 +37,7 @@ test('renders SDD logo', () => {
 test('renders version', () => {
   const out = strip(capture({ version: '2.38.0' }))
   assert.ok(out.includes('v2.38.0'), 'version missing')
-  assert.ok(out.includes('Get Shit Done'), 'brand name missing')
+  assert.ok(out.includes('Spec-Driven Development'), 'brand name missing')
 })
 
 test('renders model and provider', () => {

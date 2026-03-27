@@ -23,7 +23,7 @@ function createCtx(entries: unknown[]) {
 
 test("clearActivityLogState resets dedup state so identical saves write again", () => {
   clearActivityLogState();
-  // Pre-resolve baseDir so gsdRoot() returns a stable key across calls.
+  // Pre-resolve baseDir so sddRoot() returns a stable key across calls.
   // On macOS, /tmp is a symlink to /private/tmp — without realpathSync, the
   // key changes between the first save (dir doesn't exist, realpathSync throws)
   // and subsequent saves (dir exists, realpathSync resolves to /private/tmp/...).

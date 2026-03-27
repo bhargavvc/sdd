@@ -27,7 +27,7 @@ import { verifyExpectedArtifact } from "./auto-recovery.js";
 import { deriveState } from "./state.js";
 import { isAutoActive } from "./auto.js";
 import { loadPrompt } from "./prompt-loader.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { formatDuration } from "../shared/format-utils.js";
 import { getAutoWorktreePath } from "./auto-worktree.js";
 import { loadEffectiveSDDPreferences, loadGlobalSDDPreferences, getGlobalSDDPreferencesPath } from "./preferences.js";
@@ -86,7 +86,7 @@ interface JournalSummary {
 }
 
 interface ForensicReport {
-  gsdVersion: string;
+  sddVersion: string;
   timestamp: string;
   basePath: string;
   activeMilestone: string | null;
@@ -181,7 +181,7 @@ export async function handleForensics(
   }
 
   const basePath = process.cwd();
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
   if (!existsSync(root)) {
     ctx.ui.notify("No SDD state found. Run /sdd auto first.", "warning");
     return;
@@ -307,7 +307,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   // 8. SDD version — use SDD_VERSION env var set by the loader at startup.
   // Extensions run from ~/.sdd/agent/extensions/sdd/ at runtime, so path-traversal
   // from import.meta.url would resolve to ~/package.json (wrong on every system).
-  const gsdVersion = process.env.SDD_VERSION || "unknown";
+  const sddVersion = process.env.SDD_VERSION || "unknown";
 
   // 9. Scan journal for flow timeline and structured events
   const journalSummary = scanJournalForForensics(basePath);
@@ -326,7 +326,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   detectJournalAnomalies(journalSummary, anomalies);
 
   return {
-    gsdVersion,
+    sddVersion,
     timestamp: new Date().toISOString(),
     basePath,
     activeMilestone,
@@ -411,7 +411,7 @@ function resolveActivityDirs(basePath: string, activeMilestone?: string | null):
   if (activeMilestone) {
     const wtPath = getAutoWorktreePath(basePath, activeMilestone);
     if (wtPath) {
-      const wtActivityDir = join(gsdRoot(wtPath), "activity");
+      const wtActivityDir = join(sddRoot(wtPath), "activity");
       if (existsSync(wtActivityDir)) {
         dirs.push(wtActivityDir);
       }
@@ -419,7 +419,7 @@ function resolveActivityDirs(basePath: string, activeMilestone?: string | null):
   }
 
   // Always include root activity logs
-  const rootActivityDir = join(gsdRoot(basePath), "activity");
+  const rootActivityDir = join(sddRoot(basePath), "activity");
   dirs.push(rootActivityDir);
 
   return dirs;
@@ -447,7 +447,7 @@ const MAX_JOURNAL_RECENT_EVENTS = 20;
  */
 function scanJournalForForensics(basePath: string): JournalSummary | null {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(sddRoot(basePath), "journal");
     if (!existsSync(journalDir)) return null;
 
     const files = readdirSync(journalDir).filter(f => f.endsWith(".jsonl")).sort();
@@ -576,7 +576,7 @@ function gatherActivityLogMeta(basePath: string, activeMilestone?: string | null
 // ─── Completed Keys Loader ────────────────────────────────────────────────────
 
 function loadCompletedKeys(basePath: string): string[] {
-  const file = join(gsdRoot(basePath), "completed-units.json");
+  const file = join(sddRoot(basePath), "completed-units.json");
   try {
     if (existsSync(file)) {
       return JSON.parse(readFileSync(file, "utf-8"));
@@ -780,7 +780,7 @@ function detectJournalAnomalies(journal: JournalSummary | null, anomalies: Foren
 // ─── Report Persistence ───────────────────────────────────────────────────────
 
 function saveForensicReport(basePath: string, report: ForensicReport, problemDescription: string): string {
-  const dir = join(gsdRoot(basePath), "forensics");
+  const dir = join(sddRoot(basePath), "forensics");
   mkdirSync(dir, { recursive: true });
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "-").slice(0, 19);
@@ -792,7 +792,7 @@ function saveForensicReport(basePath: string, report: ForensicReport, problemDes
     `# SDD Forensic Report`,
     ``,
     `**Generated:** ${report.timestamp}`,
-    `**SDD Version:** ${report.gsdVersion}`,
+    `**SDD Version:** ${report.sddVersion}`,
     `**Active Milestone:** ${report.activeMilestone ?? "none"}`,
     `**Active Slice:** ${report.activeSlice ?? "none"}`,
     `**Active Worktree:** ${report.activeWorktree ?? "none"}`,
@@ -1010,7 +1010,7 @@ function formatReportForPrompt(report: ForensicReport): string {
 
   // Completed keys count
   sections.push(`### Completed Keys: ${report.completedKeys.length}`);
-  sections.push(`### SDD Version: ${report.gsdVersion}`);
+  sections.push(`### SDD Version: ${report.sddVersion}`);
   sections.push(`### Active Milestone: ${report.activeMilestone ?? "none"}`);
   sections.push(`### Active Slice: ${report.activeSlice ?? "none"}`);
   if (report.activeWorktree) {

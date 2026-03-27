@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { showNextAction } from "../shared/tui.js";
 import { nativeIsRepo, nativeInit } from "./native-git-bridge.js";
 import { ensureGitignore, untrackRuntimeFiles } from "./gitignore.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { assertSafeDirectory } from "./validate-directory.js";
 import type { ProjectDetection, ProjectSignals } from "./detection.js";
 import { runSkillInstallStep } from "./skill-catalog.js";
@@ -419,7 +419,7 @@ function bootstrapGsdDirectory(
   // Final safety check before writing any files
   assertSafeDirectory(basePath);
 
-  const sdd = gsdRoot(basePath);
+  const sdd = sddRoot(basePath);
   mkdirSync(join(sdd, "milestones"), { recursive: true });
 
   // Write PREFERENCES.md from wizard answers

@@ -19,9 +19,9 @@ test("/sdd inspect opens existing database when it was not yet opened in session
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
-  const gsdDir = path.join(tmp, ".sdd");
-  fs.mkdirSync(gsdDir, { recursive: true });
-  const dbPath = path.join(gsdDir, "sdd.db");
+  const sddDir = path.join(tmp, ".sdd");
+  fs.mkdirSync(sddDir, { recursive: true });
+  const dbPath = path.join(sddDir, "sdd.db");
 
   assert.equal(openDatabase(dbPath), true);
   closeDatabase();

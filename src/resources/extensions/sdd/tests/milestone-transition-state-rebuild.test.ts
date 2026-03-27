@@ -102,10 +102,10 @@ test("completed-units.json is cleared on milestone transition (functional)", () 
   const tempDir = realpathSync(mkdtempSync(join(tmpdir(), "sdd-cu-reset-")));
   try {
     // Create .sdd directory with a populated completed-units.json
-    const gsdDir = join(tempDir, ".sdd");
-    mkdirSync(gsdDir, { recursive: true });
+    const sddDir = join(tempDir, ".sdd");
+    mkdirSync(sddDir, { recursive: true });
 
-    const completedKeysPath = join(gsdDir, "completed-units.json");
+    const completedKeysPath = join(sddDir, "completed-units.json");
     const staleEntries = [
       "context-gather/M001",
       "roadmap-plan/M001",

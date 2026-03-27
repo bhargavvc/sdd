@@ -34,7 +34,7 @@ import type { UnitMetrics } from './metrics.js';
 export interface HtmlReportOptions {
   projectName: string;
   projectPath: string;
-  gsdVersion: string;
+  sddVersion: string;
   milestoneId?: string;
   indexRelPath?: string;
 }
@@ -81,7 +81,7 @@ export function generateHtmlReport(
   <div class="header-inner">
     <div class="branding">
       <span class="logo">SDD</span>
-      <span class="version">v${esc(opts.gsdVersion)}</span>
+      <span class="version">v${esc(opts.sddVersion)}</span>
     </div>
     <div class="header-meta">
       <h1>${esc(opts.projectName)}${milestoneTag}</h1>
@@ -114,7 +114,7 @@ ${sections.join('\n')}
 </main>
 <footer>
   <div class="footer-inner">
-    <span>SDD v${esc(opts.gsdVersion)}</span>
+    <span>SDD v${esc(opts.sddVersion)}</span>
     <span class="sep">/</span>
     <span>${esc(opts.projectName)}</span>
     ${opts.milestoneId ? `<span class="sep">/</span><span class="mono">${esc(opts.milestoneId)}</span>` : ''}

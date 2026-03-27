@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
-import { gsdRoot, milestonesDir } from "./paths.js";
+import { sddRoot, milestonesDir } from "./paths.js";
 import { MILESTONE_ID_RE } from "./milestone-ids.js";
 import type { Classification, CaptureEntry } from "./captures.js";
 import {
@@ -39,7 +39,7 @@ export function executeInject(
 ): string | null {
   try {
     // Resolve the plan file path
-    const planPath = join(gsdRoot(basePath), "milestones", mid, "slices", sid, `${sid}-PLAN.md`);
+    const planPath = join(sddRoot(basePath), "milestones", mid, "slices", sid, `${sid}-PLAN.md`);
     if (!existsSync(planPath)) return null;
 
     const content = readFileSync(planPath, "utf-8");

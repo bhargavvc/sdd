@@ -23,7 +23,7 @@ import {
 import { ensureGsdSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
 import { migrateToExternalState, recoverFailedMigration } from "./migrate-external.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
-import { gsdRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
+import { sddRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
 import { invalidateAllCaches } from "./cache.js";
 import { synthesizeCrashRecovery } from "./session-forensics.js";
 import {
@@ -175,9 +175,9 @@ export async function bootstrapAutoSession(
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
     // Bootstrap .sdd/ if it doesn't exist
-    const gsdDir = join(base, ".sdd");
-    if (!existsSync(gsdDir)) {
-      mkdirSync(join(gsdDir, "milestones"), { recursive: true });
+    const sddDir = join(base, ".sdd");
+    if (!existsSync(sddDir)) {
+      mkdirSync(join(sddDir, "milestones"), { recursive: true });
       try {
         nativeAddAll(base);
         nativeCommit(base, "chore: init sdd");
@@ -213,7 +213,7 @@ export async function bootstrapAutoSession(
           "info",
         );
       } else {
-        const activityDir = join(gsdRoot(base), "activity");
+        const activityDir = join(sddRoot(base), "activity");
         const recovery = synthesizeCrashRecovery(
           base,
           crashLock.unitType,
@@ -261,7 +261,7 @@ export async function bootstrapAutoSession(
 
     // Clean stale runtime unit files for completed milestones (#887)
     cleanStaleRuntimeUnits(
-      gsdRoot(base),
+      sddRoot(base),
       (mid) => !!resolveMilestoneFile(base, mid, "SUMMARY"),
     );
 
@@ -527,11 +527,11 @@ export async function bootstrapAutoSession(
 
     // ── DB lifecycle ──
     const gsdDbPath = join(s.basePath, ".sdd", "sdd.db");
-    const gsdDirPath = join(s.basePath, ".sdd");
-    if (existsSync(gsdDirPath) && !existsSync(gsdDbPath)) {
-      const hasDecisions = existsSync(join(gsdDirPath, "DECISIONS.md"));
-      const hasRequirements = existsSync(join(gsdDirPath, "REQUIREMENTS.md"));
-      const hasMilestones = existsSync(join(gsdDirPath, "milestones"));
+    const sddDirPath = join(s.basePath, ".sdd");
+    if (existsSync(sddDirPath) && !existsSync(gsdDbPath)) {
+      const hasDecisions = existsSync(join(sddDirPath, "DECISIONS.md"));
+      const hasRequirements = existsSync(join(sddDirPath, "REQUIREMENTS.md"));
+      const hasMilestones = existsSync(join(sddDirPath, "milestones"));
       try {
         const { openDatabase: openDb } = await import("./sdd-db.js");
         openDb(gsdDbPath);

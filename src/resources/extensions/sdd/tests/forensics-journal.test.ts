@@ -5,11 +5,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const sddDir = join(__dirname, "..");
 
 describe("forensics journal & activity log awareness", () => {
-  const forensicsSrc = readFileSync(join(gsdDir, "forensics.ts"), "utf-8");
-  const promptSrc = readFileSync(join(gsdDir, "prompts", "forensics.md"), "utf-8");
+  const forensicsSrc = readFileSync(join(sddDir, "forensics.ts"), "utf-8");
+  const promptSrc = readFileSync(join(sddDir, "prompts", "forensics.md"), "utf-8");
 
   it("scanJournalForForensics reads journal files directly (no full queryJournal load)", () => {
     // Must NOT use queryJournal which loads ALL entries into memory

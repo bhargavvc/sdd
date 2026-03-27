@@ -7,7 +7,7 @@ import { parseSummary, loadFile } from './files.js';
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from './sdd-db.js';
 import { parseRoadmap, parsePlan } from './parsers-legacy.js';
 import { findMilestoneIds } from './milestone-ids.js';
-import { resolveMilestoneFile, resolveSliceFile, resolveGsdRootFile, gsdRoot } from './paths.js';
+import { resolveMilestoneFile, resolveSliceFile, resolveGsdRootFile, sddRoot } from './paths.js';
 import {
   getLedger,
   getProjectTotals,
@@ -641,7 +641,7 @@ function loadHealth(units: UnitMetrics[], totals: ProjectTotals | null, basePath
   // Doctor run history — persisted across sessions (sync read to keep loadHealth sync)
   let doctorHistory: VisualizerDoctorEntry[] = [];
   try {
-    const historyPath = join(gsdRoot(basePath), "doctor-history.jsonl");
+    const historyPath = join(sddRoot(basePath), "doctor-history.jsonl");
     if (existsSync(historyPath)) {
       const lines = readFileSync(historyPath, "utf-8").split("\n").filter(l => l.trim());
       doctorHistory = lines.slice(-20).reverse().map(l => JSON.parse(l) as VisualizerDoctorEntry);

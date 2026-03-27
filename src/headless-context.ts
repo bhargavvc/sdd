@@ -53,7 +53,7 @@ export async function loadContext(options: ContextOptions): Promise<string> {
  * Mirrors the bootstrap logic from guided-flow.ts showSmartEntry().
  */
 export function bootstrapGsdProject(basePath: string): void {
-  const gsdDir = join(basePath, '.sdd')
-  mkdirSync(join(gsdDir, 'milestones'), { recursive: true })
-  mkdirSync(join(gsdDir, 'runtime'), { recursive: true })
+  const sddDir = join(basePath, '.sdd')
+  mkdirSync(join(sddDir, 'milestones'), { recursive: true })
+  mkdirSync(join(sddDir, 'runtime'), { recursive: true })
 }

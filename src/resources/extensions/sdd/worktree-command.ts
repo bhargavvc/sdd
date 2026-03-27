@@ -15,7 +15,7 @@ import { loadPrompt } from "./prompt-loader.js";
 import { autoCommitCurrentBranch, getMainBranch, resolveGitHeadPath, nudgeGitBranchCache } from "./worktree.js";
 import { runWorktreePostCreateHook } from "./auto-worktree.js";
 import { showConfirm } from "../shared/tui.js";
-import { gsdRoot, milestonesDir } from "./paths.js";
+import { sddRoot, milestonesDir } from "./paths.js";
 import {
   createWorktree,
   listWorktrees,
@@ -299,7 +299,7 @@ function clearSDDPlans(wtPath: string): void {
 
   // Remove root planning files — PROJECT.md, DECISIONS.md, QUEUE.md, REQUIREMENTS.md
   // Keep STATE.md (gitignored, will be rebuilt) and other runtime files
-  const root = gsdRoot(wtPath);
+  const root = sddRoot(wtPath);
   const planningFiles = ["PROJECT.md", "DECISIONS.md", "QUEUE.md", "REQUIREMENTS.md"];
   for (const file of planningFiles) {
     const filePath = join(root, file);

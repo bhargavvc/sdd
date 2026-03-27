@@ -9,7 +9,7 @@ function mockOpts(overrides: Partial<HtmlReportOptions> = {}): HtmlReportOptions
   return {
     projectName: "TestProject",
     projectPath: "/tmp/test",
-    gsdVersion: "2.28.0",
+    sddVersion: "2.28.0",
     ...overrides,
   };
 }

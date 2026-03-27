@@ -29,7 +29,7 @@ const bundledExtensionsDir = join(resourcesDir, 'extensions')
 const resourceVersionManifestName = 'managed-resources.json'
 
 interface ManagedResourceManifest {
-  gsdVersion: string
+  sddVersion: string
   syncedAt?: number
   /** Content fingerprint of bundled resources — detects same-version content changes. */
   contentHash?: string
@@ -96,7 +96,7 @@ function writeManagedResourceManifest(agentDir: string): void {
   } catch { /* non-fatal */ }
 
   const manifest: ManagedResourceManifest = {
-    gsdVersion: getBundledGsdVersion(),
+    sddVersion: getBundledGsdVersion(),
     syncedAt: Date.now(),
     contentHash: computeResourceFingerprint(),
     installedExtensionRootFiles,
@@ -108,7 +108,7 @@ function writeManagedResourceManifest(agentDir: string): void {
 export function readManagedResourceVersion(agentDir: string): string | null {
   try {
     const manifest = JSON.parse(readFileSync(getManagedResourceManifestPath(agentDir), 'utf-8')) as ManagedResourceManifest
-    return typeof manifest?.gsdVersion === 'string' ? manifest.gsdVersion : null
+    return typeof manifest?.sddVersion === 'string' ? manifest.sddVersion : null
   } catch {
     return null
   }
@@ -286,7 +286,7 @@ function copyDirRecursive(src: string, dest: string): void {
  */
 function ensureNodeModulesSymlink(agentDir: string): void {
   const agentNodeModules = join(agentDir, 'node_modules')
-  const gsdNodeModules = join(packageRoot, 'node_modules')
+  const sddNodeModules = join(packageRoot, 'node_modules')
 
   try {
     const stat = lstatSync(agentNodeModules)
@@ -294,7 +294,7 @@ function ensureNodeModulesSymlink(agentDir: string): void {
     if (stat.isSymbolicLink()) {
       const existing = readlinkSync(agentNodeModules)
       // Symlink exists — verify it points to the correct, existing target
-      if (existing === gsdNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
+      if (existing === sddNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
       // Stale or wrong target — remove and recreate
       unlinkSync(agentNodeModules)
     } else {
@@ -306,10 +306,10 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   }
 
   try {
-    symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
+    symlinkSync(sddNodeModules, agentNodeModules, 'junction')
   } catch (err) {
     // This failure makes SDD non-functional — extensions can't resolve @sdd/* packages
-    console.error(`[sdd] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
+    console.error(`[sdd] WARN: Failed to symlink ${agentNodeModules} → ${sddNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 
@@ -418,7 +418,7 @@ export function initResources(agentDir: string): void {
   // Skip the full copy when both version AND content fingerprint match.
   // Version-only checks miss same-version content changes (npm link dev workflow,
   // hotfixes within a release). The content hash catches those at ~1ms cost.
-  if (manifest && manifest.gsdVersion === currentVersion) {
+  if (manifest && manifest.sddVersion === currentVersion) {
     // Version matches — check content fingerprint for same-version staleness.
     const currentHash = computeResourceFingerprint()
     const hasStaleExtensionFiles = hasStaleCompiledExtensionSiblings(join(agentDir, 'extensions'))

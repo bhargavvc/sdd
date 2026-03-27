@@ -15,7 +15,7 @@
 
 import { join } from "node:path";
 import type { ExtensionContext } from "@sdd/pi-coding-agent";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { getAndClearSkills } from "./skill-telemetry.js";
 import { loadJsonFile, loadJsonFileOrNull, saveJsonFile } from "./json-persistence.js";
 import { parseUnitId } from "./unit-id.js";
@@ -514,7 +514,7 @@ export function formatCostProjection(
 // ─── Disk I/O ─────────────────────────────────────────────────────────────────
 
 function metricsPath(base: string): string {
-  return join(gsdRoot(base), "metrics.json");
+  return join(sddRoot(base), "metrics.json");
 }
 
 function isMetricsLedger(data: unknown): data is MetricsLedger {

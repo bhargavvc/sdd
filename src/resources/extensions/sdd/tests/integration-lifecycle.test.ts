@@ -121,19 +121,19 @@ const ROADMAP_CONTENT = `# M001: Test Milestone\n\n**Vision:** Integration test 
 test('integration-lifecycle: full pipeline', async () => {
     // ── Step 1: Set up temp dir with realistic .sdd/ structure ──────────
     const base = mkdtempSync(join(tmpdir(), 'sdd-int-lifecycle-'));
-    const gsdDir = join(base, '.sdd');
-    mkdirSync(gsdDir, { recursive: true });
-    mkdirSync(join(gsdDir, 'milestones', 'M001'), { recursive: true });
-    mkdirSync(join(gsdDir, 'milestones', 'M002'), { recursive: true });
+    const sddDir = join(base, '.sdd');
+    mkdirSync(sddDir, { recursive: true });
+    mkdirSync(join(sddDir, 'milestones', 'M001'), { recursive: true });
+    mkdirSync(join(sddDir, 'milestones', 'M002'), { recursive: true });
 
     const decisionsMarkdown = generateDecisionsMarkdown(DECISIONS_COUNT, MILESTONES);
     const requirementsMarkdown = generateRequirementsMarkdown(REQUIREMENTS_COUNT, SLICE_ASSIGNMENTS);
 
-    writeFileSync(join(gsdDir, 'DECISIONS.md'), decisionsMarkdown);
-    writeFileSync(join(gsdDir, 'REQUIREMENTS.md'), requirementsMarkdown);
-    writeFileSync(join(gsdDir, 'milestones', 'M001', 'M001-ROADMAP.md'), ROADMAP_CONTENT);
+    writeFileSync(join(sddDir, 'DECISIONS.md'), decisionsMarkdown);
+    writeFileSync(join(sddDir, 'REQUIREMENTS.md'), requirementsMarkdown);
+    writeFileSync(join(sddDir, 'milestones', 'M001', 'M001-ROADMAP.md'), ROADMAP_CONTENT);
 
-    const dbPath = join(gsdDir, 'test-lifecycle.db');
+    const dbPath = join(sddDir, 'test-lifecycle.db');
 
     try {
       // ── Step 2: Open file-backed DB + migrateFromMarkdown ──────────────
@@ -191,8 +191,8 @@ test('integration-lifecycle: full pipeline', async () => {
       assert.match(formattedRequirements, /### R\d+/, 'lifecycle: formatted requirements has headings');
 
       // Token savings: scoped output vs full file content
-      const fullDecisionsContent = readFileSync(join(gsdDir, 'DECISIONS.md'), 'utf-8');
-      const fullRequirementsContent = readFileSync(join(gsdDir, 'REQUIREMENTS.md'), 'utf-8');
+      const fullDecisionsContent = readFileSync(join(sddDir, 'DECISIONS.md'), 'utf-8');
+      const fullRequirementsContent = readFileSync(join(sddDir, 'REQUIREMENTS.md'), 'utf-8');
       const dbScopedTotal = formattedDecisions.length + formattedRequirements.length;
       const fullTotal = fullDecisionsContent.length + fullRequirementsContent.length;
       const savingsPercent = ((fullTotal - dbScopedTotal) / fullTotal) * 100;
@@ -205,7 +205,7 @@ test('integration-lifecycle: full pipeline', async () => {
 
       // ── Step 6: Simulate content change → re-import ────────────────────
       const newDecisionRow = `| D${DECISIONS_COUNT + 1} | M001/S01 | testing | new decision added after initial import | choice X | rationale Y | yes |`;
-      appendFileSync(join(gsdDir, 'DECISIONS.md'), '\n' + newDecisionRow + '\n');
+      appendFileSync(join(sddDir, 'DECISIONS.md'), '\n' + newDecisionRow + '\n');
 
       const result2 = migrateFromMarkdown(base);
       assert.ok(result2.decisions === DECISIONS_COUNT + 1, `lifecycle: re-import got ${result2.decisions} decisions, expected ${DECISIONS_COUNT + 1}`);
@@ -241,7 +241,7 @@ test('integration-lifecycle: full pipeline', async () => {
       assert.deepStrictEqual(savedDecision?.choice, 'option Z', 'lifecycle: saved choice matches');
 
       // Verify DECISIONS.md was regenerated with the new decision
-      const regeneratedMd = readFileSync(join(gsdDir, 'DECISIONS.md'), 'utf-8');
+      const regeneratedMd = readFileSync(join(sddDir, 'DECISIONS.md'), 'utf-8');
       assert.ok(regeneratedMd.includes(saved.id), `lifecycle: regenerated DECISIONS.md contains ${saved.id}`);
       assert.ok(regeneratedMd.includes('integration test write-back decision'), 'lifecycle: regenerated md contains write-back text');
 

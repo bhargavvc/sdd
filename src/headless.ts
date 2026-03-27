@@ -297,8 +297,8 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     }
 
     // Bootstrap .sdd/ if needed
-    const gsdDir = join(process.cwd(), '.sdd')
-    if (!existsSync(gsdDir)) {
+    const sddDir = join(process.cwd(), '.sdd')
+    if (!existsSync(sddDir)) {
       if (!options.json) {
         process.stderr.write('[headless] Bootstrapping .sdd/ project structure...\n')
       }
@@ -306,14 +306,14 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     }
 
     // Write context to temp file for the RPC child to read
-    const runtimeDir = join(gsdDir, 'runtime')
+    const runtimeDir = join(sddDir, 'runtime')
     mkdirSync(runtimeDir, { recursive: true })
     writeFileSync(join(runtimeDir, 'headless-context.md'), contextContent, 'utf-8')
   }
 
   // Validate .sdd/ directory (skip for new-milestone since we just bootstrapped it)
-  const gsdDir = join(process.cwd(), '.sdd')
-  if (!isNewMilestone && !existsSync(gsdDir)) {
+  const sddDir = join(process.cwd(), '.sdd')
+  if (!isNewMilestone && !existsSync(sddDir)) {
     process.stderr.write('[headless] Error: No .sdd/ directory found in current directory.\n')
     process.stderr.write("[headless] Run 'sdd' interactively first to initialize a project.\n")
     process.exit(1)

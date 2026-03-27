@@ -7,7 +7,7 @@
 import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { getErrorMessage } from "./error-utils.js";
 
 export interface InspectData {
@@ -50,9 +50,9 @@ export async function handleInspect(ctx: ExtensionCommandContext): Promise<void>
     const { isDbAvailable, _getAdapter, openDatabase } = await import("./sdd-db.js");
 
     if (!isDbAvailable()) {
-      const gsdDir = gsdRoot(process.cwd());
-      const dbPath = join(gsdDir, "sdd.db");
-      if (!existsSync(gsdDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
+      const sddDir = sddRoot(process.cwd());
+      const dbPath = join(sddDir, "sdd.db");
+      if (!existsSync(sddDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
         ctx.ui.notify("No SDD database available. Run /sdd auto to create one.", "info");
         return;
       }

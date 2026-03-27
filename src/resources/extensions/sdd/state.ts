@@ -31,7 +31,7 @@ import {
   resolveTaskFile,
   resolveTasksDir,
   resolveGsdRootFile,
-  gsdRoot,
+  sddRoot,
 } from './paths.js';
 
 import { findMilestoneIds } from './milestone-ids.js';
@@ -846,15 +846,15 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
   // in one call and build an in-memory content map keyed by absolute path.
   // This eliminates O(N) individual fs.readFile calls during traversal.
   const fileContentCache = new Map<string, string>();
-  const gsdDir = gsdRoot(basePath);
+  const sddDir = sddRoot(basePath);
 
   // Filesystem fallback: used when deriveStateFromDb() is not available
   // (pre-migration projects). The DB-backed path is preferred when available
   // — see deriveStateFromDb() above.
-  const batchFiles = nativeBatchParseGsdFiles(gsdDir);
+  const batchFiles = nativeBatchParseGsdFiles(sddDir);
   if (batchFiles) {
     for (const f of batchFiles) {
-      const absPath = resolve(gsdDir, f.path);
+      const absPath = resolve(sddDir, f.path);
       fileContentCache.set(absPath, f.rawContent);
     }
   }

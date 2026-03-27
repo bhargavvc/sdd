@@ -12,7 +12,7 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, join, dirname } from "node:path";
-import { gsdRoot } from "../paths.js";
+import { sddRoot } from "../paths.js";
 import { fileURLToPath } from "node:url";
 import { showNextAction } from "../../shared/tui.js";
 import {
@@ -43,7 +43,7 @@ function formatPreviewStats(preview: MigrationPreview): string {
 /** Load and interpolate the review-migration prompt template. */
 function buildReviewPrompt(
   sourcePath: string,
-  gsdPath: string,
+  sddPath: string,
   preview: MigrationPreview,
 ): string {
   const promptsDir = join(dirname(fileURLToPath(import.meta.url)), "..", "prompts");
@@ -51,7 +51,7 @@ function buildReviewPrompt(
   let content = readFileSync(templatePath, "utf-8");
 
   content = content.replaceAll("{{sourcePath}}", sourcePath);
-  content = content.replaceAll("{{gsdPath}}", gsdPath);
+  content = content.replaceAll("{{sddPath}}", sddPath);
   content = content.replaceAll("{{previewStats}}", formatPreviewStats(preview));
 
   return content.trim();
@@ -61,10 +61,10 @@ function buildReviewPrompt(
 function dispatchReview(
   pi: ExtensionAPI,
   sourcePath: string,
-  gsdPath: string,
+  sddPath: string,
   preview: MigrationPreview,
 ): void {
-  const prompt = buildReviewPrompt(sourcePath, gsdPath, preview);
+  const prompt = buildReviewPrompt(sourcePath, sddPath, preview);
 
   pi.sendMessage(
     {
@@ -145,7 +145,7 @@ export async function handleMigrate(
     );
   }
 
-  const targetGsdExists = existsSync(gsdRoot(process.cwd()));
+  const targetGsdExists = existsSync(sddRoot(process.cwd()));
   if (targetGsdExists) {
     lines.push("");
     lines.push("⚠ A .sdd directory already exists in the current working directory — it will be overwritten.");
@@ -180,7 +180,7 @@ export async function handleMigrate(
   ctx.ui.notify("Writing .sdd directory…", "info");
 
   const result = await writeSDDDirectory(project, process.cwd());
-  const gsdPath = gsdRoot(process.cwd());
+  const sddPath = sddRoot(process.cwd());
 
   ctx.ui.notify(
     `✓ Migration complete — ${result.paths.length} file(s) written to .sdd/`,
@@ -214,6 +214,6 @@ export async function handleMigrate(
   });
 
   if (reviewChoice === "review") {
-    dispatchReview(pi, sourcePath, gsdPath, preview);
+    dispatchReview(pi, sourcePath, sddPath, preview);
   }
 }

@@ -30,7 +30,7 @@ import {
   resolveSliceFile,
   resolveSlicePath,
   resolveTasksDir,
-  gsdRoot,
+  sddRoot,
   buildTaskFileName,
   buildSliceFileName,
 } from "./paths.js";
@@ -45,7 +45,7 @@ import { clearPathCache } from "./paths.js";
  * E.g. "/project/.sdd/milestones/M001/M001-ROADMAP.md" → "milestones/M001/M001-ROADMAP.md"
  */
 function toArtifactPath(absPath: string, basePath: string): string {
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
   const rel = relative(root, absPath);
   // Normalize to forward slashes for consistent DB keys
   return rel.replace(/\\/g, "/");
@@ -382,7 +382,7 @@ export async function renderPlanFromDb(
   }
 
   const slicePath = resolveSlicePath(basePath, milestoneId, sliceId)
-    ?? join(gsdRoot(basePath), "milestones", milestoneId, "slices", sliceId);
+    ?? join(sddRoot(basePath), "milestones", milestoneId, "slices", sliceId);
   const absPath = resolveSliceFile(basePath, milestoneId, sliceId, "PLAN")
     ?? join(slicePath, `${sliceId}-PLAN.md`);
   const artifactPath = toArtifactPath(absPath, basePath);
@@ -416,7 +416,7 @@ export async function renderTaskPlanFromDb(
   }
 
   const tasksDir = resolveTasksDir(basePath, milestoneId, sliceId)
-    ?? join(gsdRoot(basePath), "milestones", milestoneId, "slices", sliceId, "tasks");
+    ?? join(sddRoot(basePath), "milestones", milestoneId, "slices", sliceId, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   const absPath = join(tasksDir, buildTaskFileName(taskId, "PLAN"));
   const artifactPath = toArtifactPath(absPath, basePath);
@@ -444,7 +444,7 @@ export async function renderRoadmapFromDb(
 
   const slices = getMilestoneSlices(milestoneId);
   const absPath = resolveMilestoneFile(basePath, milestoneId, "ROADMAP") ??
-    join(gsdRoot(basePath), "milestones", milestoneId, `${milestoneId}-ROADMAP.md`);
+    join(sddRoot(basePath), "milestones", milestoneId, `${milestoneId}-ROADMAP.md`);
   const artifactPath = toArtifactPath(absPath, basePath);
   const content = renderRoadmapMarkdown(milestone, slices);
 
@@ -1061,7 +1061,7 @@ export async function renderReplanFromDb(
   replanData: ReplanData,
 ): Promise<{ replanPath: string; content: string }> {
   const slicePath = resolveSlicePath(basePath, milestoneId, sliceId)
-    ?? join(gsdRoot(basePath), "milestones", milestoneId, "slices", sliceId);
+    ?? join(sddRoot(basePath), "milestones", milestoneId, "slices", sliceId);
   const absPath = join(slicePath, `${sliceId}-REPLAN.md`);
   const artifactPath = toArtifactPath(absPath, basePath);
 
@@ -1100,7 +1100,7 @@ export async function renderAssessmentFromDb(
   assessmentData: AssessmentData,
 ): Promise<{ assessmentPath: string; content: string }> {
   const slicePath = resolveSlicePath(basePath, milestoneId, sliceId)
-    ?? join(gsdRoot(basePath), "milestones", milestoneId, "slices", sliceId);
+    ?? join(sddRoot(basePath), "milestones", milestoneId, "slices", sliceId);
   const absPath = join(slicePath, `${sliceId}-ASSESSMENT.md`);
   const artifactPath = toArtifactPath(absPath, basePath);
 

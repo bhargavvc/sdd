@@ -26,7 +26,7 @@ import { existsSync } from 'node:fs'
 import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
-const gsdExtensionPath = (...segments: string[]) =>
+const sddExtensionPath = (...segments: string[]) =>
   resolveBundledSourceResource(import.meta.url, 'extensions', 'sdd', ...segments)
 
 // Lazily-loaded extension modules (loaded once on first use via jiti)
@@ -52,11 +52,11 @@ interface ExtensionModules {
 async function loadExtensionModules(): Promise<ExtensionModules> {
   if (_ext) return _ext
   const [wtMgr, autoWt, gitBridge, gitSvc, wt] = await Promise.all([
-    jiti.import(gsdExtensionPath('worktree-manager.ts'), {}) as Promise<any>,
-    jiti.import(gsdExtensionPath('auto-worktree.ts'), {}) as Promise<any>,
-    jiti.import(gsdExtensionPath('native-git-bridge.ts'), {}) as Promise<any>,
-    jiti.import(gsdExtensionPath('git-service.ts'), {}) as Promise<any>,
-    jiti.import(gsdExtensionPath('worktree.ts'), {}) as Promise<any>,
+    jiti.import(sddExtensionPath('worktree-manager.ts'), {}) as Promise<any>,
+    jiti.import(sddExtensionPath('auto-worktree.ts'), {}) as Promise<any>,
+    jiti.import(sddExtensionPath('native-git-bridge.ts'), {}) as Promise<any>,
+    jiti.import(sddExtensionPath('git-service.ts'), {}) as Promise<any>,
+    jiti.import(sddExtensionPath('worktree.ts'), {}) as Promise<any>,
   ])
   _ext = {
     createWorktree: wtMgr.createWorktree,

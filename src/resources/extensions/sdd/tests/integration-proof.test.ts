@@ -118,13 +118,13 @@ function makeCtx(): { notifications: Array<{ message: string; level: string }>; 
  */
 function createRealisticFixture(): string {
   const base = makeTempDir();
-  const gsdDir = join(base, ".sdd");
-  const mDir = join(gsdDir, "milestones", "M001");
+  const sddDir = join(base, ".sdd");
+  const mDir = join(sddDir, "milestones", "M001");
   const sliceDir = join(mDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
 
   mkdirSync(tasksDir, { recursive: true });
-  mkdirSync(join(gsdDir, "activity"), { recursive: true });
+  mkdirSync(join(sddDir, "activity"), { recursive: true });
 
   // Roadmap with exact format
   writeFileSync(
@@ -184,7 +184,7 @@ Prove all subsystems compose.
 
   // Minimal REQUIREMENTS.md
   writeFileSync(
-    join(gsdDir, "REQUIREMENTS.md"),
+    join(sddDir, "REQUIREMENTS.md"),
     `# Requirements
 
 ## Active
@@ -198,7 +198,7 @@ Prove all subsystems compose.
 
   // Minimal DECISIONS.md
   writeFileSync(
-    join(gsdDir, "DECISIONS.md"),
+    join(sddDir, "DECISIONS.md"),
     `# Decisions
 
 | ID | Decision | Choice | Rationale |
@@ -209,7 +209,7 @@ Prove all subsystems compose.
 
   // PROJECT.md stub
   writeFileSync(
-    join(gsdDir, "PROJECT.md"),
+    join(sddDir, "PROJECT.md"),
     "# Integration Proof Project\n\nTest project for integration proof.\n",
     "utf-8",
   );
@@ -457,7 +457,7 @@ test("recovery: DB loss → migrateFromMarkdown restores state, stale render det
 
     assert.equal(existsSync(dbPath), false, "DB file should be deleted");
 
-    // Clear path caches so gsdRoot re-probes after DB deletion
+    // Clear path caches so sddRoot re-probes after DB deletion
     const { clearPathCache: clearPaths } = await import("../paths.ts");
     clearPaths();
     invalidateAllCaches();

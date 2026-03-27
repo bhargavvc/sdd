@@ -13,7 +13,7 @@
 import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readdirSync, readFileSync, statSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { loadJsonFileOrNull } from "./json-persistence.js";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -36,11 +36,11 @@ interface DebugLogEntry {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function activityDir(basePath: string): string {
-  return join(gsdRoot(basePath), "activity");
+  return join(sddRoot(basePath), "activity");
 }
 
 function debugDir(basePath: string): string {
-  return join(gsdRoot(basePath), "debug");
+  return join(sddRoot(basePath), "debug");
 }
 
 function listActivityLogs(basePath: string): LogEntry[] {
@@ -331,7 +331,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
   }
 
   // Metrics summary
-  const metricsPath = join(gsdRoot(basePath), "metrics.json");
+  const metricsPath = join(sddRoot(basePath), "metrics.json");
   const isMetrics = (d: unknown): d is { units: Array<Record<string, unknown>> } =>
     d !== null && typeof d === "object" && "units" in d! && Array.isArray((d as Record<string, unknown>).units);
   const metrics = loadJsonFileOrNull(metricsPath, isMetrics);

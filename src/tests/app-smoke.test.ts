@@ -240,7 +240,7 @@ test("initResources skips copy when managed version matches current version", as
 
   // Simulate version mismatch by writing older version to manifest
   const manifestPath = join(fakeAgentDir, "managed-resources.json");
-  writeFileSync(manifestPath, JSON.stringify({ gsdVersion: "0.0.1", syncedAt: Date.now() }));
+  writeFileSync(manifestPath, JSON.stringify({ sddVersion: "0.0.1", syncedAt: Date.now() }));
 
   // Third run: version mismatch — full sync, marker removed
   initResources(fakeAgentDir);
@@ -450,11 +450,11 @@ test("runSDDDoctor issue objects have required fields", async (t) => {
 test("runSDDDoctor with fix:false never modifies the filesystem", async (t) => {
   const { runSDDDoctor } = await import("../resources/extensions/sdd/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "sdd-doctor-readonly-"));
-  const gsdDir = join(tmp, ".sdd");
-  mkdirSync(gsdDir, { recursive: true });
+  const sddDir = join(tmp, ".sdd");
+  mkdirSync(sddDir, { recursive: true });
 
   // Write a sentinel file — doctor must not delete or modify it
-  const sentinelPath = join(gsdDir, "SENTINEL.md");
+  const sentinelPath = join(sddDir, "SENTINEL.md");
   writeFileSync(sentinelPath, "# sentinel\n");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
