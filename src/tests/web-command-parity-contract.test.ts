@@ -144,7 +144,7 @@ test("registered SDD command roots stay on the prompt/extension path", async () 
   const registeredRoots = await collectRegisteredSddCommandRoots()
   assert.deepEqual(
     registeredRoots,
-    ["exit", "sdd", "kill", "worktree", "wt"],
+    ["exit", "kill", "sdd", "worktree", "wt"],
     "browser parity contract only expects the current SDD command roots",
   )
 

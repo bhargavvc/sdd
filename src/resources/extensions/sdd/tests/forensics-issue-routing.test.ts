@@ -26,7 +26,7 @@ test("forensics prompt requires gh CLI with --repo gsd-build/gsd-2 for issue cre
   // Must contain the exact gh CLI command with the correct repo flag
   assert.match(
     prompt,
-    /gh issue create --repo gsd-build\/sdd-2/,
+    /gh issue create --repo gsd-build\/gsd-2/,
     "Prompt must specify gh issue create --repo gsd-build/gsd-2",
   );
 });
