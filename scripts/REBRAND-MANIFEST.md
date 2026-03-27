@@ -313,6 +313,35 @@ These fail on CI regardless of rebrand and can be ignored:
 **Fix:** Added explicit Dockerfile check.
 **Lesson:** Add `--include="Dockerfile*"` or explicit Dockerfile processing.
 
+### Mistake 9: `gsd-2` in URLs got rebranded to `sdd-2`
+**What happened:** `\bgsd\b → sdd` also matched `gsd-2` in `gsd-build/gsd-2` URLs, making `gsd-build/sdd-2`.
+**Impact:** `forensics-issue-routing.test.ts` regex expected `gsd-build/gsd-2` but found `gsd-build/sdd-2`.
+**Fix:** Manually fixed the regex. Also, the @gsd-build restore step needs to also restore `gsd-build/gsd-2`.
+**Lesson:** The restore step must cover BOTH `@gsd-build` scope AND `gsd-build/gsd-2` repo URLs. Check: `grep -rn 'gsd-build/sdd' src/ --include="*.ts"` after every sync.
+
+### Mistake 10: Alphabetical sort order changed (gsd → sdd)
+**What happened:** `web-command-parity-contract.test.ts` expected `["exit", "sdd", "kill", ...]` but `sdd` sorts after `kill` alphabetically (unlike `gsd` which sorted before `kill`).
+**Impact:** `deepStrictEqual` failed because array order differed.
+**Fix:** Updated expected array to match new alphabetical order: `["exit", "kill", "sdd", "worktree", "wt"]`.
+**Lesson:** After rename, check any test that asserts on sorted arrays of command names.
+
+### Mistake 11: TTSR rule-loader had `gsdHome` variable
+**What happened:** `src/resources/extensions/ttsr/rule-loader.ts` had `const gsdHome = ...` — missed because the camelCase sweep only covered `src/resources/extensions/sdd/` patterns.
+**Fix:** Added to the manual fix list.
+**Lesson:** Extensions outside `sdd/` directory (like `ttsr/`, `remote-questions/`) also have gsd variables.
+
+---
+
+## Pre-existing CI Failures (NOT Rebrand Bugs)
+
+| Test | Error | Root Cause |
+|------|-------|------------|
+| `showSecretsSummary` | `Native function 'truncateToWidth' not available on win32-x64` | Native Rust addon not installed in CI |
+| `collectOneSecret` | Same native function error | Same |
+| `matches across multiple deltas (buffering)` | `0 !== 1` | TTSR JS fallback has 50ms throttle; test sends 3 synchronous deltas (0ms apart) → throttled |
+| `buffers are isolated by stream key` | `0 !== 1` | Same TTSR throttle issue |
+| `visualizer-views.test.ts` | Timeout (5207ms) | Heavy test, sometimes times out in CI |
+
 ---
 
 ## Files That Are ALWAYS Safe to Ignore
