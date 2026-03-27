@@ -18,9 +18,9 @@ jobs:
   dev-publish:
     name: Dev Publish
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/gsd-build/gsd-ci-builder:latest
+      image: ghcr.io/sdd-build/sdd-ci-builder:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +54,7 @@ jobs:
       - name: Publish @dev
         run: |
           VERSION=$(node -e 'process.stdout.write(require("./package.json").version)')
-          if npm view "gsd-pi@${VERSION}" version 2>/dev/null; then
+          if npm view "sdd-pi@${VERSION}" version 2>/dev/null; then
             echo "Version ${VERSION} already published — skipping"
           else
             npm publish --tag dev
@@ -65,13 +65,13 @@ jobs:
       - name: Smoke test (local)
         run: |
           chmod +x dist/loader.js
-          export GSD_SMOKE_BINARY="$(pwd)/dist/loader.js"
+          export SDD_SMOKE_BINARY="$(pwd)/dist/loader.js"
           npm run test:smoke
 
   test-verify:
     name: Test & Verify
     needs: dev-publish
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
@@ -81,19 +81,19 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: 'npm'
 
-      - name: Install gsd-pi@dev globally (with registry propagation retry)
+      - name: Install sdd-pi@dev globally (with registry propagation retry)
         run: |
           for i in 1 2 3 4 5 6; do
-            npm install -g gsd-pi@dev && exit 0
+            npm install -g sdd-pi@dev && exit 0
             echo "Attempt $i failed — waiting 10s for npm registry propagation..."
             sleep 10
           done
-          echo "Failed to install gsd-pi@dev after 6 attempts"
+          echo "Failed to install sdd-pi@dev after 6 attempts"
           exit 1
 
       - name: Run smoke tests (against installed binary)
         run: |
-          export GSD_SMOKE_BINARY=$(which gsd)
+          export SDD_SMOKE_BINARY=$(which sdd)
           npm run test:smoke
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -106,14 +106,14 @@ jobs:
 
       - name: Run live regression tests (against installed binary)
         run: |
-          export GSD_SMOKE_BINARY=$(which gsd)
+          export SDD_SMOKE_BINARY=$(which sdd)
           npm run test:live-regression
 
       - name: Promote to @next
         env:
           DEV_VERSION: ${{ needs.dev-publish.outputs.dev-version }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm dist-tag add "gsd-pi@${DEV_VERSION}" next
+        run: npm dist-tag add "sdd-pi@${DEV_VERSION}" next
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -127,16 +127,16 @@ jobs:
           DEV_VERSION: ${{ needs.dev-publish.outputs.dev-version }}
         run: |
           docker build --target runtime \
-            -t "ghcr.io/gsd-build/gsd-pi:next" \
-            -t "ghcr.io/gsd-build/gsd-pi:${DEV_VERSION}" \
+            -t "ghcr.io/sdd-build/sdd-pi:next" \
+            -t "ghcr.io/sdd-build/sdd-pi:${DEV_VERSION}" \
             .
-          docker push ghcr.io/gsd-build/gsd-pi:next
-          docker push "ghcr.io/gsd-build/gsd-pi:${DEV_VERSION}"
+          docker push ghcr.io/sdd-build/sdd-pi:next
+          docker push "ghcr.io/sdd-build/sdd-pi:${DEV_VERSION}"
 
   prod-release:
     name: Production Release
     needs: [dev-publish, test-verify]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     environment: prod
     steps:
       - uses: actions/checkout@v6
@@ -159,7 +159,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GSD_LIVE_TESTS: "1"
+          SDD_LIVE_TESTS: "1"
 
       - name: Generate changelog and determine version
         id: release
@@ -202,7 +202,7 @@ jobs:
           OUTPUT=$(npm publish 2>&1) && echo "$OUTPUT" || {
             if echo "$OUTPUT" | grep -q "cannot publish over the previously published"; then
               echo "Version already published — promoting to latest"
-              npm dist-tag add "gsd-pi@${RELEASE_VERSION}" latest
+              npm dist-tag add "sdd-pi@${RELEASE_VERSION}" latest
             else
               echo "$OUTPUT"
               exit 1
@@ -228,7 +228,7 @@ jobs:
           NOTES=$(cat /tmp/release-notes.md)
           curl -s -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg c "**GSD v${RELEASE_VERSION} Released**\n\n${NOTES}\n\n\`npm i gsd-pi@${RELEASE_VERSION}\`" '{content:$c}')"
+            -d "$(jq -n --arg c "**SDD v${RELEASE_VERSION} Released**\n\n${NOTES}\n\n\`npm i sdd-pi@${RELEASE_VERSION}\`" '{content:$c}')"
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -241,14 +241,14 @@ jobs:
         env:
           DEV_VERSION: ${{ needs.dev-publish.outputs.dev-version }}
         run: |
-          docker pull "ghcr.io/gsd-build/gsd-pi:${DEV_VERSION}"
-          docker tag "ghcr.io/gsd-build/gsd-pi:${DEV_VERSION}" ghcr.io/gsd-build/gsd-pi:latest
-          docker push ghcr.io/gsd-build/gsd-pi:latest
+          docker pull "ghcr.io/sdd-build/sdd-pi:${DEV_VERSION}"
+          docker tag "ghcr.io/sdd-build/sdd-pi:${DEV_VERSION}" ghcr.io/sdd-build/sdd-pi:latest
+          docker push ghcr.io/sdd-build/sdd-pi:latest
 
   update-builder:
     name: Update CI Builder Image
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -274,6 +274,6 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         run: |
           docker build --target builder \
-            -t ghcr.io/gsd-build/gsd-ci-builder:latest \
+            -t ghcr.io/sdd-build/sdd-ci-builder:latest \
             .
-          docker push ghcr.io/gsd-build/gsd-ci-builder:latest
+          docker push ghcr.io/sdd-build/sdd-ci-builder:latest

@@ -77,8 +77,8 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           mkdir -p artifacts
-          cp native/target/${{ matrix.target }}/release/libgsd_engine.dylib artifacts/gsd_engine.node 2>/dev/null || \
-          cp native/target/${{ matrix.target }}/release/libgsd_engine.so artifacts/gsd_engine.node 2>/dev/null || \
+          cp native/target/${{ matrix.target }}/release/libsdd_engine.dylib artifacts/sdd_engine.node 2>/dev/null || \
+          cp native/target/${{ matrix.target }}/release/libsdd_engine.so artifacts/sdd_engine.node 2>/dev/null || \
           { echo "::error::No library found for ${{ matrix.platform }}"; exit 1; }
           ls -la artifacts/
 
@@ -86,19 +86,19 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir artifacts
-          copy native\target\${{ matrix.target }}\release\gsd_engine.dll artifacts\gsd_engine.node
+          copy native\target\${{ matrix.target }}\release\sdd_engine.dll artifacts\sdd_engine.node
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.platform }}
-          path: artifacts/gsd_engine.node
+          path: artifacts/sdd_engine.node
           if-no-files-found: error
 
   publish:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.publish == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     name: Publish platform packages
 
     steps:
@@ -117,7 +117,7 @@ jobs:
       - name: Copy binaries to platform packages
         run: |
           for platform in darwin-arm64 darwin-x64 linux-x64-gnu linux-arm64-gnu win32-x64-msvc; do
-            cp "artifacts/native-${platform}/gsd_engine.node" "native/npm/${platform}/gsd_engine.node"
+            cp "artifacts/native-${platform}/sdd_engine.node" "native/npm/${platform}/sdd_engine.node"
             echo "Copied binary for ${platform}"
             ls -la "native/npm/${platform}/"
           done
@@ -230,16 +230,16 @@ jobs:
           npm init -y > /dev/null 2>&1
 
           # Wait for npm registry with exponential backoff (5s, 10s, 20s, 30s, 30s, 30s, 30s — max ~155s vs fixed 5min)
-          echo "Waiting for gsd-pi@${VERSION} to appear on npm..."
+          echo "Waiting for sdd-pi@${VERSION} to appear on npm..."
           DELAY=5
           for attempt in $(seq 1 8); do
-            PUBLISHED=$(npm view "gsd-pi@${VERSION}" version 2>/dev/null || echo "")
+            PUBLISHED=$(npm view "sdd-pi@${VERSION}" version 2>/dev/null || echo "")
             if [ "${PUBLISHED}" = "${VERSION}" ]; then
               echo "  ✓ Version ${VERSION} visible on npm (attempt ${attempt})"
               break
             fi
             if [ "$attempt" = "8" ]; then
-              echo "::warning::gsd-pi@${VERSION} not visible on npm after 8 attempts — skipping smoke test"
+              echo "::warning::sdd-pi@${VERSION} not visible on npm after 8 attempts — skipping smoke test"
               exit 0
             fi
             echo "  Attempt ${attempt}: not yet visible, retrying in ${DELAY}s..."
@@ -249,15 +249,15 @@ jobs:
           done
 
           # Install and verify with backoff (5s, 10s, 20s)
-          echo "Installing gsd-pi@${VERSION}..."
+          echo "Installing sdd-pi@${VERSION}..."
           DELAY=5
           for attempt in 1 2 3; do
-            if npm install "gsd-pi@${VERSION}" 2>&1 | tee /tmp/install-output.txt; then
+            if npm install "sdd-pi@${VERSION}" 2>&1 | tee /tmp/install-output.txt; then
               echo "  ✓ Install succeeded"
-              RAW=$(node node_modules/gsd-pi/dist/loader.js --version 2>&1 || echo "FAILED")
+              RAW=$(node node_modules/sdd-pi/dist/loader.js --version 2>&1 || echo "FAILED")
               ACTUAL=$(echo "$RAW" | sed 's/\x1b\[[0-9;]*m//g' | grep -oE "^${VERSION}$" | head -1)
               if [ "$ACTUAL" = "$VERSION" ]; then
-                echo "  ✓ gsd --version = ${VERSION}"
+                echo "  ✓ sdd --version = ${VERSION}"
                 echo "Published package is functional"
                 exit 0
               else
@@ -271,7 +271,7 @@ jobs:
             sleep "$DELAY"
             DELAY=$((DELAY * 2))
           done
-          echo "::error::Smoke test failed — gsd-pi@${VERSION} not installable"
+          echo "::error::Smoke test failed — sdd-pi@${VERSION} not installable"
           exit 1
 
       - name: Verify dist-tag after publish
@@ -281,7 +281,7 @@ jobs:
           echo "Verifying npm dist-tag 'latest' points to ${VERSION}..."
           DELAY=5
           for attempt in $(seq 1 6); do
-            LATEST=$(npm view gsd-pi dist-tags.latest 2>/dev/null || echo "")
+            LATEST=$(npm view sdd-pi dist-tags.latest 2>/dev/null || echo "")
             if [ "${LATEST}" = "${VERSION}" ]; then
               echo "  ✓ npm dist-tags.latest = ${VERSION}"
               exit 0
@@ -291,5 +291,5 @@ jobs:
             DELAY=$((DELAY * 2))
             if [ "$DELAY" -gt 30 ]; then DELAY=30; fi
           done
-          echo "::error::dist-tags.latest is '${LATEST}' but expected '${VERSION}' — run: npm dist-tag add gsd-pi@${VERSION} latest"
+          echo "::error::dist-tags.latest is '${LATEST}' but expected '${VERSION}' — run: npm dist-tag add sdd-pi@${VERSION} latest"
           exit 1
