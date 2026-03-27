@@ -44,8 +44,8 @@ import {
   getCurrentScopeLabel,
   getLiveWorkspaceIndex,
   getLiveAutoDashboard,
-  useGSDWorkspaceState,
-  useGSDWorkspaceActions,
+  useSDDWorkspaceState,
+  useSDDWorkspaceActions,
   buildPromptCommand,
 } from "@/lib/sdd-workspace-store"
 import { getMilestoneStatus, getSliceStatus, getTaskStatus, type ItemStatus } from "@/lib/workspace-status"
@@ -74,7 +74,7 @@ interface NavRailProps {
 }
 
 export function NavRail({ activeView, onViewChange, isConnecting = false }: NavRailProps) {
-  const { openCommandSurface } = useGSDWorkspaceActions()
+  const { openCommandSurface } = useSDDWorkspaceActions()
   const manager = useProjectStoreManager()
   const activeProjectCwd = useSyncExternalStore(manager.subscribe, manager.getSnapshot, manager.getSnapshot)
   const [exitDialogOpen, setExitDialogOpen] = useState(false)
@@ -314,8 +314,8 @@ function ExitDialog({
 /* ─── Milestone Explorer (right sidebar) ─── */
 
 export function MilestoneExplorer({ isConnecting = false, width, onCollapse }: { isConnecting?: boolean; width?: number; onCollapse?: () => void }) {
-  const workspace = useGSDWorkspaceState()
-  const { openCommandSurface, setCommandSurfaceSection, sendCommand } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { openCommandSurface, setCommandSurfaceSection, sendCommand } = useSDDWorkspaceActions()
   const [expandedMilestones, setExpandedMilestones] = useState<string[]>([])
   const [expandedSlices, setExpandedSlices] = useState<string[]>([])
 
@@ -624,8 +624,8 @@ export function MilestoneExplorer({ isConnecting = false, width, onCollapse }: {
 /* ─── Collapsed Milestone Sidebar (icon-only rail) ─── */
 
 export function CollapsedMilestoneSidebar({ onExpand }: { onExpand: () => void }) {
-  const workspace = useGSDWorkspaceState()
-  const { sendCommand } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { sendCommand } = useSDDWorkspaceActions()
 
   const liveWorkspace = getLiveWorkspaceIndex(workspace)
   const milestones = liveWorkspace?.milestones ?? []
@@ -715,7 +715,7 @@ export function Sidebar({ activeView, onViewChange, isConnecting = false, mobile
 /* ─── Mobile Nav Panel (full-width labels for touch) ─── */
 
 function MobileNavPanel({ activeView, onViewChange, isConnecting = false }: NavRailProps) {
-  const { openCommandSurface } = useGSDWorkspaceActions()
+  const { openCommandSurface } = useSDDWorkspaceActions()
   const { theme, setTheme } = useTheme()
 
   const cycleTheme = () => {

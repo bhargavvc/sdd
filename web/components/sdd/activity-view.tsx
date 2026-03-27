@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Play, Clock, Terminal, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useGSDWorkspaceState, type TerminalLineType } from "@/lib/sdd-workspace-store"
+import { useSDDWorkspaceState, type TerminalLineType } from "@/lib/sdd-workspace-store"
 
 function EventIcon({ type }: { type: TerminalLineType }) {
   const baseClass = "h-4 w-4"
@@ -23,7 +23,7 @@ function EventIcon({ type }: { type: TerminalLineType }) {
 }
 
 export function ActivityView() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const terminalLines = workspace.terminalLines ?? []
 
   // Show most recent events first

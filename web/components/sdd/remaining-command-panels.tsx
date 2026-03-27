@@ -47,8 +47,8 @@ import { cn } from "@/lib/utils"
 import {
   formatCost,
   getLiveWorkspaceIndex,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useSDDWorkspaceActions,
+  useSDDWorkspaceState,
   type WorkspaceMilestoneTarget,
   type WorkspaceSliceTarget,
 } from "@/lib/sdd-workspace-store"
@@ -201,8 +201,8 @@ export function QuickPanel() {
 type HistoryTab = "phase" | "slice" | "model" | "units"
 
 export function HistoryPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadHistoryData } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadHistoryData } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.history
   const data = state.data as HistoryData | null
   const busy = state.phase === "loading"
@@ -373,8 +373,8 @@ export function HistoryPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function UndoPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadUndoInfo, executeUndoAction } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadUndoInfo, executeUndoAction } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.undo
   const data = state.data as UndoInfo | null
   const busy = state.phase === "loading"
@@ -519,8 +519,8 @@ export function UndoPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function SteerPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadSteerData, sendSteer } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadSteerData, sendSteer } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.steer
   const data = state.data as SteerData | null
   const busy = state.phase === "loading"
@@ -607,8 +607,8 @@ export function SteerPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function HooksPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadHooksData } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadHooksData } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.hooks
   const data = state.data as HooksData | null
   const busy = state.phase === "loading"
@@ -699,8 +699,8 @@ export function HooksPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function InspectPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadInspectData } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadInspectData } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.inspect
   const data = state.data as InspectData | null
   const busy = state.phase === "loading"
@@ -807,8 +807,8 @@ export function InspectPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function ExportPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadExportData } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadExportData } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.exportData
   const data = state.data as ExportResult | null
   const busy = state.phase === "loading"
@@ -907,8 +907,8 @@ export function ExportPanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function CleanupPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadCleanupData, executeCleanupAction } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadCleanupData, executeCleanupAction } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.remainingCommands.cleanup
   const data = state.data as CleanupData | null
   const busy = state.phase === "loading"
@@ -1072,7 +1072,7 @@ function sliceProgress(slices: WorkspaceSliceTarget[]): { done: number; total: n
 }
 
 export function QueuePanel() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const workspaceIndex = getLiveWorkspaceIndex(workspace)
   const milestones = workspaceIndex?.milestones ?? []
   const active = workspaceIndex?.active
@@ -1175,7 +1175,7 @@ export function QueuePanel() {
 // ═══════════════════════════════════════════════════════════════════════
 
 export function StatusPanel() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const workspaceIndex = getLiveWorkspaceIndex(workspace)
   const active = workspaceIndex?.active
   const milestones = workspaceIndex?.milestones ?? []

@@ -77,8 +77,8 @@ import {
   getModelLabel,
   getSessionLabelFromBridge,
   shortenPath,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useSDDWorkspaceActions,
+  useSDDWorkspaceState,
 } from "@/lib/sdd-workspace-store"
 
 // ─── Section metadata ────────────────────────────────────────────────
@@ -318,7 +318,7 @@ function SegmentedControl<T extends string>({
 // ═════════════════════════════════════════════════════════════════════
 
 export function CommandSurface() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const {
     closeCommandSurface,
     openCommandSurface,
@@ -361,7 +361,7 @@ export function CommandSurface() {
     loadUndoInfo,
     loadCleanupData,
     loadSteerData,
-  } = useGSDWorkspaceActions()
+  } = useSDDWorkspaceActions()
 
   const { commandSurface } = workspace
   const onboarding = workspace.boot?.onboarding ?? null

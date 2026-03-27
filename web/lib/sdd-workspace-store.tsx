@@ -1851,7 +1851,7 @@ export function buildProjectUrl(path: string, projectCwd?: string): string {
   return url.pathname + url.search
 }
 
-export class GSDWorkspaceStore {
+export class SDDWorkspaceStore {
   constructor(private readonly projectCwd?: string) {}
 
   private buildUrl(path: string): string {
@@ -5169,10 +5169,10 @@ export class GSDWorkspaceStore {
   }
 }
 
-const WorkspaceStoreContext = createContext<GSDWorkspaceStore | null>(null)
+const WorkspaceStoreContext = createContext<SDDWorkspaceStore | null>(null)
 
-export function GSDWorkspaceProvider({ children, store: externalStore }: { children: ReactNode; store?: GSDWorkspaceStore }) {
-  const [internalStore] = useState(() => new GSDWorkspaceStore())
+export function SDDWorkspaceProvider({ children, store: externalStore }: { children: ReactNode; store?: SDDWorkspaceStore }) {
+  const [internalStore] = useState(() => new SDDWorkspaceStore())
   const store = externalStore ?? internalStore
 
   useEffect(() => {
@@ -5186,21 +5186,21 @@ export function GSDWorkspaceProvider({ children, store: externalStore }: { child
   return <WorkspaceStoreContext.Provider value={store}>{children}</WorkspaceStoreContext.Provider>
 }
 
-function useWorkspaceStore(): GSDWorkspaceStore {
+function useWorkspaceStore(): SDDWorkspaceStore {
   const store = useContext(WorkspaceStoreContext)
   if (!store) {
-    throw new Error("useWorkspaceStore must be used within GSDWorkspaceProvider")
+    throw new Error("useWorkspaceStore must be used within SDDWorkspaceProvider")
   }
   return store
 }
 
-export function useGSDWorkspaceState(): WorkspaceStoreState {
+export function useSDDWorkspaceState(): WorkspaceStoreState {
   const store = useWorkspaceStore()
   return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 }
 
-export function useGSDWorkspaceActions(): Pick<
-  GSDWorkspaceStore,
+export function useSDDWorkspaceActions(): Pick<
+  SDDWorkspaceStore,
   | "sendCommand"
   | "submitInput"
   | "clearTerminalLines"

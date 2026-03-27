@@ -158,7 +158,7 @@ Advanced:    export · cleanup · run-hook · migrate · remote
 
 Type /sdd <subcommand> to run. Use /sdd help for this message.`
 
-function dispatchGSDSubcommand(
+function dispatchSDDSubcommand(
   input: string,
   args: string,
   options: BrowserSlashCommandDispatchOptions,
@@ -344,7 +344,7 @@ export function dispatchBrowserSlashCommand(
   // SDD subcommand dispatch — must precede SURFACE_COMMANDS to avoid
   // `/sdd export` colliding with the built-in `/export` surface.
   if (parsed.name === "sdd") {
-    return dispatchGSDSubcommand(trimmed, parsed.args, options)
+    return dispatchSDDSubcommand(trimmed, parsed.args, options)
   }
 
   const browserSurface = SURFACE_COMMANDS.get(parsed.name)

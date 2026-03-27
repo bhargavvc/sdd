@@ -459,7 +459,7 @@ function TerminalInstance({
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-terminal">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           <span className="text-xs text-muted-foreground">
-            {command ? "Starting GSD…" : "Connecting…"}
+            {command ? "Starting SDD…" : "Connecting…"}
           </span>
         </div>
       )}

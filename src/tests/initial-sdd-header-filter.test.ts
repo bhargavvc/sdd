@@ -4,12 +4,12 @@ import assert from "node:assert/strict";
 const { filterInitialSddHeader } = await import("../../web/lib/initial-sdd-header-filter.ts");
 
 const SDD_LOGO_LINES = [
-  "   ██████╗ ███████╗██████╗ ",
-  "  ██╔════╝ ██╔════╝██╔══██╗",
-  "  ██║  ███╗███████╗██║  ██║",
-  "  ██║   ██║╚════██║██║  ██║",
-  "  ╚██████╔╝███████║██████╔╝",
-  "   ╚═════╝ ╚══════╝╚═════╝ ",
+  "  ███████╗██████╗ ██████╗ ",
+  "  ██╔════╝██╔══██╗██╔══██╗",
+  "  ███████╗██║  ██║██║  ██║",
+  "  ╚════██║██║  ██║██║  ██║",
+  "  ███████║██████╔╝██████╔╝",
+  "  ╚══════╝╚═════╝ ╚═════╝ ",
 ] as const;
 
 test("filterInitialSddHeader strips a plain startup banner and keeps real terminal content", () => {

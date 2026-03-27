@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useProjectStoreManager } from "@/lib/project-store-manager"
 import {
-  useGSDWorkspaceState,
+  useSDDWorkspaceState,
   getLiveWorkspaceIndex,
   getLiveAutoDashboard,
   formatCost,
@@ -348,7 +348,7 @@ export function ProjectsPanel({
 
   const [newProjectOpen, setNewProjectOpen] = useState(false)
   const [changeRootOpen, setChangeRootOpen] = useState(false)
-  const workspaceState = useGSDWorkspaceState()
+  const workspaceState = useSDDWorkspaceState()
 
   const handleProjectCreated = useCallback(
     (newProject: ProjectMetadata) => {
@@ -522,7 +522,7 @@ export function ProjectsPanel({
 
 // ─── Active project inline summary (compact for panel card) ────────────
 
-function ActiveProjectSummary({ workspaceState }: { workspaceState: ReturnType<typeof useGSDWorkspaceState> }) {
+function ActiveProjectSummary({ workspaceState }: { workspaceState: ReturnType<typeof useSDDWorkspaceState> }) {
   const workspace = getLiveWorkspaceIndex(workspaceState)
   const dashboard = getLiveAutoDashboard(workspaceState)
   const currentSlice = getCurrentSlice(workspace)

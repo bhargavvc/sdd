@@ -21,7 +21,7 @@ import {
   Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useGSDWorkspaceState, buildProjectUrl } from "@/lib/sdd-workspace-store"
+import { useSDDWorkspaceState, buildProjectUrl } from "@/lib/sdd-workspace-store"
 import { authFetch } from "@/lib/auth"
 import { FileContentViewer } from "@/components/sdd/file-content-viewer"
 import { ChatPane } from "@/components/sdd/chat-mode"
@@ -472,7 +472,7 @@ function tabLabel(tab: OpenTab): string {
 type LeftPanel = "tree" | "agent"
 
 export function FilesView() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const projectCwd = workspace.boot?.project.cwd
 
   const [activeRoot, setActiveRoot] = useState<RootMode>("sdd")

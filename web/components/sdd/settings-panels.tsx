@@ -30,8 +30,8 @@ import { cn } from "@/lib/utils"
 import {
   formatCost,
   formatTokens,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useSDDWorkspaceActions,
+  useSDDWorkspaceState,
 } from "@/lib/sdd-workspace-store"
 import { useTerminalFontSize } from "@/lib/use-terminal-font-size"
 import { useEditorFontSize } from "@/lib/use-editor-font-size"
@@ -153,8 +153,8 @@ function KvRow({ label, children }: { label: string; children: React.ReactNode }
 // ═══════════════════════════════════════════════════════════════════════
 
 function useSettingsData() {
-  const workspace = useGSDWorkspaceState()
-  const { loadSettingsData } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadSettingsData } = useSDDWorkspaceActions()
   const state = workspace.commandSurface.settingsData
   return {
     state,

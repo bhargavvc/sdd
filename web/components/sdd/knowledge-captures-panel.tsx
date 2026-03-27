@@ -29,8 +29,8 @@ import type {
 } from "@/lib/knowledge-captures-types"
 import { cn } from "@/lib/utils"
 import {
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useSDDWorkspaceActions,
+  useSDDWorkspaceState,
 } from "@/lib/sdd-workspace-store"
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -374,8 +374,8 @@ interface KnowledgeCapturesPanelProps {
 
 export function KnowledgeCapturesPanel({ initialTab }: KnowledgeCapturesPanelProps) {
   const [activeTab, setActiveTab] = useState<"knowledge" | "captures">(initialTab)
-  const workspace = useGSDWorkspaceState()
-  const { loadKnowledgeData, loadCapturesData, resolveCaptureAction } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { loadKnowledgeData, loadCapturesData, resolveCaptureAction } = useSDDWorkspaceActions()
 
   const knowledgeCaptures = workspace.commandSurface.knowledgeCaptures
   const knowledgeState = knowledgeCaptures.knowledge

@@ -21,13 +21,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
-  GSDWorkspaceProvider,
+  SDDWorkspaceProvider,
   getCurrentScopeLabel,
   getProjectDisplayName,
   getStatusPresentation,
   getVisibleWorkspaceError,
-  useGSDWorkspaceState,
-  useGSDWorkspaceActions,
+  useSDDWorkspaceState,
+  useSDDWorkspaceActions,
 } from "@/lib/sdd-workspace-store"
 import { ChatMode } from "@/components/sdd/chat-mode"
 import { ScopeBadge } from "@/components/sdd/scope-badge"
@@ -60,8 +60,8 @@ function WorkspaceChrome() {
   const [projectsPanelOpen, setProjectsPanelOpen] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [mobileMilestoneOpen, setMobileMilestoneOpen] = useState(false)
-  const workspace = useGSDWorkspaceState()
-  const { refreshBoot } = useGSDWorkspaceActions()
+  const workspace = useSDDWorkspaceState()
+  const { refreshBoot } = useSDDWorkspaceActions()
 
   const status = getStatusPresentation(workspace)
   const projectPath = workspace.boot?.project.cwd
@@ -537,7 +537,7 @@ function WorkspaceChrome() {
   )
 }
 
-export function GSDAppShell() {
+export function SDDAppShell() {
   // Extract the auth token from the URL fragment on first render.
   // Must happen before any API calls fire.
   getAuthToken()
@@ -577,10 +577,10 @@ function ProjectAwareWorkspace() {
   }
 
   return (
-    <GSDWorkspaceProvider store={activeStore}>
+    <SDDWorkspaceProvider store={activeStore}>
       <DevOverridesProvider>
         <WorkspaceChrome />
       </DevOverridesProvider>
-    </GSDWorkspaceProvider>
+    </SDDWorkspaceProvider>
   )
 }

@@ -5,7 +5,7 @@ import { GripVertical, Loader2 } from "lucide-react"
 import { MainSessionTerminal } from "@/components/sdd/main-session-terminal"
 import { ShellTerminal } from "@/components/sdd/shell-terminal"
 import { useTerminalFontSize } from "@/lib/use-terminal-font-size"
-import { useGSDWorkspaceState } from "@/lib/sdd-workspace-store"
+import { useSDDWorkspaceState } from "@/lib/sdd-workspace-store"
 import { derivePendingWorkflowCommandLabel } from "@/lib/workflow-action-execution"
 
 export function DualTerminal() {
@@ -14,7 +14,7 @@ export function DualTerminal() {
   const rootRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
   const [terminalFontSize] = useTerminalFontSize()
-  const workspace = useGSDWorkspaceState()
+  const workspace = useSDDWorkspaceState()
   const projectCwd = workspace.boot?.project.cwd
   const pendingCommandLabel = derivePendingWorkflowCommandLabel({
     commandInFlight: workspace.commandInFlight,
