@@ -122,6 +122,7 @@ export class SddClient implements vscode.Disposable {
 			cwd: this.cwd,
 			stdio: ["pipe", "pipe", "pipe"],
 			env: { ...process.env },
+			shell: process.platform === "win32",
 		});
 
 		this.buffer = "";
@@ -174,12 +175,25 @@ export class SddClient implements vscode.Disposable {
 		}
 
 		const proc = this.process;
+		const pid = proc.pid;
 		this.process = null;
-		proc.kill("SIGTERM");
+
+		// On Windows with shell:true, SIGTERM only kills cmd.exe, not the child node process.
+		// Use taskkill /T to kill the entire process tree.
+		if (process.platform === "win32" && pid) {
+			try {
+				const { execSync } = require("node:child_process");
+				execSync(`taskkill /pid ${pid} /T /F`, { stdio: "ignore" });
+			} catch {
+				proc.kill("SIGKILL");
+			}
+		} else {
+			proc.kill("SIGTERM");
+		}
 
 		await new Promise<void>((resolve) => {
 			const timeout = setTimeout(() => {
-				proc.kill("SIGKILL");
+				try { proc.kill("SIGKILL"); } catch { /* already dead */ }
 				resolve();
 			}, 2000);
 			proc.on("exit", () => {
@@ -493,11 +507,15 @@ export class SddClient implements vscode.Disposable {
 		const id = `req_${++this.requestId}`;
 		const fullCommand = { ...command, id };
 
+		// Prompts can take minutes; state/model commands should be fast
+		const isPrompt = command.type === "prompt" || command.type === "steer" || command.type === "follow_up";
+		const timeoutMs = isPrompt ? 300_000 : 30_000; // 5min for prompts, 30s for others
+
 		return new Promise<RpcResponse>((resolve, reject) => {
 			const timer = setTimeout(() => {
 				this.pendingRequests.delete(id);
 				reject(new Error(`Timeout waiting for response to ${command.type}`));
-			}, 30_000);
+			}, timeoutMs);
 
 			this.pendingRequests.set(id, { resolve, reject, timer });
 			this.process!.stdin!.write(JSON.stringify(fullCommand) + "\n");

@@ -3,7 +3,7 @@
   "displayName": "SDD",
   "description": "VS Code integration for the SDD coding agent — sidebar dashboard, @sdd chat participant, and 15 commands",
   "publisher": "bhargavvc",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "icon": "logo.png",
   "license": "MIT",
   "repository": {
@@ -101,6 +101,48 @@
       {
         "command": "sdd.listCommands",
         "title": "SDD: List Available Commands"
+      },
+      {
+        "command": "sdd.explain",
+        "title": "SDD: Explain Code"
+      },
+      {
+        "command": "sdd.fix",
+        "title": "SDD: Fix Code"
+      },
+      {
+        "command": "sdd.addTests",
+        "title": "SDD: Add Tests"
+      },
+      {
+        "command": "sdd.refactor",
+        "title": "SDD: Refactor Code"
+      },
+      {
+        "command": "sdd.optimize",
+        "title": "SDD: Optimize Code"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "sdd.contextMenu",
+          "group": "1_sdd",
+          "when": "editorHasSelection"
+        }
+      ],
+      "sdd.contextMenu": [
+        { "command": "sdd.explain" },
+        { "command": "sdd.fix" },
+        { "command": "sdd.addTests" },
+        { "command": "sdd.refactor" },
+        { "command": "sdd.optimize" }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "sdd.contextMenu",
+        "label": "SDD"
       }
     ],
     "keybindings": [
@@ -157,7 +199,7 @@
         },
         "sdd.autoStart": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Automatically start the SDD agent when the extension activates"
         },
         "sdd.autoCompaction": {

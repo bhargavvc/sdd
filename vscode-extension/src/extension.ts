@@ -45,7 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Sidebar -----------------------------------------------------------
 
-	sidebarProvider = new SddSidebarProvider(context.extensionUri, client);
+	sidebarProvider = new SddSidebarProvider(context.extensionUri, client, context.globalState);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SddSidebarProvider.viewId,
@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				const autoCompaction = vscode.workspace.getConfiguration("sdd").get<boolean>("autoCompaction", true);
 				await client!.setAutoCompaction(autoCompaction).catch(() => {});
 				sidebarProvider?.refresh();
-				vscode.window.showInformationMessage("SDD agent started.");
+				vscode.window.setStatusBarMessage("$(hubot) SDD agent started", 3000);
 			} catch (err) {
 				handleError(err, "Failed to start SDD");
 			}
@@ -80,7 +80,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand("sdd.stop", async () => {
 			await client!.stop();
 			sidebarProvider?.refresh();
-			vscode.window.showInformationMessage("SDD agent stopped.");
+			vscode.window.setStatusBarMessage("$(hubot) SDD agent stopped", 3000);
 		}),
 	);
 
@@ -91,7 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			try {
 				await client!.newSession();
 				sidebarProvider?.refresh();
-				vscode.window.showInformationMessage("New SDD session started.");
+				vscode.window.setStatusBarMessage("$(hubot) New SDD session", 3000);
 			} catch (err) {
 				handleError(err, "Failed to start new session");
 			}
@@ -121,7 +121,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				await client!.abort();
-				vscode.window.showInformationMessage("Operation aborted.");
+				vscode.window.setStatusBarMessage("$(hubot) Operation aborted", 3000);
 			} catch (err) {
 				handleError(err, "Failed to abort");
 			}
@@ -220,7 +220,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				await client!.compact();
-				vscode.window.showInformationMessage("Context compacted.");
+				vscode.window.setStatusBarMessage("$(hubot) Context compacted", 3000);
 				sidebarProvider?.refresh();
 			} catch (err) {
 				handleError(err, "Failed to compact context");
@@ -343,6 +343,45 @@ export function activate(context: vscode.ExtensionContext): void {
 			}
 		}),
 	);
+
+	// -- Editor Context Menu Actions ----------------------------------------
+
+	const editorActions = [
+		{ command: "sdd.explain", label: "Explain", prompt: "Explain this code clearly. What does it do, why, and any edge cases?" },
+		{ command: "sdd.fix", label: "Fix", prompt: "Find and fix any bugs in this code. Show what you changed and why." },
+		{ command: "sdd.addTests", label: "Add Tests", prompt: "Write comprehensive tests for this code covering happy path, edge cases, and error conditions." },
+		{ command: "sdd.refactor", label: "Refactor", prompt: "Refactor this code for better readability, performance, and maintainability." },
+		{ command: "sdd.optimize", label: "Optimize", prompt: "Optimize this code for performance. Identify bottlenecks and improve them." },
+	];
+
+	for (const action of editorActions) {
+		context.subscriptions.push(
+			vscode.commands.registerCommand(action.command, async () => {
+				const editor = vscode.window.activeTextEditor;
+				if (!editor) return;
+				const selection = editor.selection;
+				const selectedText = editor.document.getText(selection);
+				if (!selectedText) {
+					vscode.window.showWarningMessage("Select some code first.");
+					return;
+				}
+				const filePath = editor.document.uri.fsPath;
+				const relativePath = vscode.workspace.asRelativePath(filePath);
+				const startLine = selection.start.line + 1;
+				const message = `${action.prompt}\n\nFile: ${relativePath} (line ${startLine})\n\`\`\`\n${selectedText}\n\`\`\``;
+
+				if (!client?.isConnected) {
+					try { await client!.start(); } catch { return; }
+				}
+				try {
+					sidebarProvider?.refresh();
+					await client!.sendPrompt(message);
+				} catch (err) {
+					handleError(err, `Failed to ${action.label.toLowerCase()}`);
+				}
+			}),
+		);
+	}
 
 	// -- Auto-start ---------------------------------------------------------
 
