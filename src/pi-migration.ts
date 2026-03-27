@@ -1,13 +1,13 @@
 /**
  * One-time migration of provider credentials from Pi (~/.pi/agent/auth.json)
- * into GSD's auth storage. Runs when GSD has no LLM providers configured,
+ * into SDD's auth storage. Runs when SDD has no LLM providers configured,
  * so users with an existing Pi install skip re-authentication.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import type { AuthStorage, AuthCredential } from '@gsd/pi-coding-agent'
+import type { AuthStorage, AuthCredential } from '@sdd/pi-coding-agent'
 
 const PI_AUTH_PATH = join(homedir(), '.pi', 'agent', 'auth.json')
 const PI_SETTINGS_PATH = join(homedir(), '.pi', 'agent', 'settings.json')
@@ -27,10 +27,10 @@ const LLM_PROVIDER_IDS = [
 ]
 
 /**
- * Migrate provider credentials from Pi's auth.json into GSD's AuthStorage.
+ * Migrate provider credentials from Pi's auth.json into SDD's AuthStorage.
  *
- * Only runs when GSD has no LLM provider configured and Pi's auth.json exists.
- * Copies any credentials GSD doesn't already have. Returns true if an LLM
+ * Only runs when SDD has no LLM provider configured and Pi's auth.json exists.
+ * Copies any credentials SDD doesn't already have. Returns true if an LLM
  * provider was migrated (so onboarding can be skipped).
  */
 export function migratePiCredentials(authStorage: AuthStorage): boolean {
@@ -50,7 +50,7 @@ export function migratePiCredentials(authStorage: AuthStorage): boolean {
       authStorage.set(providerId, credential)
       const isLlm = LLM_PROVIDER_IDS.includes(providerId)
       if (isLlm) migratedLlm = true
-      process.stderr.write(`[gsd] Migrated ${isLlm ? 'LLM provider' : 'credential'}: ${providerId} (from Pi)\n`)
+      process.stderr.write(`[sdd] Migrated ${isLlm ? 'LLM provider' : 'credential'}: ${providerId} (from Pi)\n`)
     }
 
     return migratedLlm

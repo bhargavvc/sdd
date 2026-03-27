@@ -1,5 +1,5 @@
 {
-  "name": "@gsd/pi-agent-core",
+  "name": "@sdd/pi-agent-core",
   "version": "0.57.1",
   "description": "General-purpose agent core (vendored from pi-mono)",
   "type": "module",

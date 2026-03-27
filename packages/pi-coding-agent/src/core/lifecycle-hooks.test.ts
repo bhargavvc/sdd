@@ -156,9 +156,9 @@ describe("verifyRuntimeDependencies", () => {
 
 	it("includes appName and source in error for retry hint", () => {
 		assert.throws(
-			() => verifyRuntimeDependencies(["__missing__"], "github:user/repo", "gsd"),
+			() => verifyRuntimeDependencies(["__missing__"], "github:user/repo", "sdd"),
 			(err: Error) => {
-				assert.ok(err.message.includes("gsd"));
+				assert.ok(err.message.includes("sdd"));
 				assert.ok(err.message.includes("github:user/repo"));
 				return true;
 			},

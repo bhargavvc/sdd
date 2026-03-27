@@ -11,7 +11,7 @@ import {
 } from "../resources/extensions/sdd/file-watcher.ts";
 
 function createTempAgentDir(): string {
-	const tmp = mkdtempSync(join(tmpdir(), "gsd-fw-test-"));
+	const tmp = mkdtempSync(join(tmpdir(), "sdd-fw-test-"));
 	mkdirSync(join(tmp, "extensions"), { recursive: true });
 	// Seed watched files so chokidar treats writes as "change" not "add"
 	writeFileSync(join(tmp, "settings.json"), "{}");

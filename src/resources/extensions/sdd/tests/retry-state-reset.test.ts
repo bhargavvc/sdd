@@ -1,4 +1,4 @@
-// GSD Extension — Regression tests for #1714: retry_on signal state reset
+// SDD Extension — Regression tests for #1714: retry_on signal state reset
 //
 // Verifies that when a post_unit_hook writes a retry_on artifact, the
 // consuming code properly resets all completion state so deriveState
@@ -21,14 +21,14 @@ import { parseUnitId } from "../unit-id.ts";
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createRetryFixture(): { base: string; cleanup: () => void } {
-  const base = mkdtempSync(join(tmpdir(), "gsd-retry-reset-"));
+  const base = mkdtempSync(join(tmpdir(), "sdd-retry-reset-"));
 
-  // Create the .gsd structure for M001/S01/T01
-  const milestonesTasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
+  // Create the .sdd structure for M001/S01/T01
+  const milestonesTasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
   mkdirSync(milestonesTasksDir, { recursive: true });
 
   // Write a PLAN.md with T01 checked [x] (as doctor would do)
-  const planFile = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+  const planFile = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
   writeFileSync(planFile, [
     "# S01: Test Slice",
     "",
@@ -46,7 +46,7 @@ function createRetryFixture(): { base: string; cleanup: () => void } {
 
   // Write completed-units.json with T01
   writeFileSync(
-    join(base, ".gsd", "completed-units.json"),
+    join(base, ".sdd", "completed-units.json"),
     JSON.stringify(["execute-task/M001/S01/T01"]),
     "utf-8",
   );
@@ -79,7 +79,7 @@ test('consumeRetryTrigger: returns null when no retry pending', () => {
 test('Retry reset step 1: uncheck [x] → [ ] in PLAN.md', () => {
   const { base, cleanup } = createRetryFixture();
   try {
-    const planFile = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+    const planFile = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
 
     // Precondition: T01 is checked
     const before = readFileSync(planFile, "utf-8");
@@ -107,7 +107,7 @@ test('Retry reset step 1: uncheck [x] → [ ] in PLAN.md', () => {
 test('Retry reset step 2: delete SUMMARY.md', () => {
   const { base, cleanup } = createRetryFixture();
   try {
-    const summaryFile = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks", "T01-SUMMARY.md");
+    const summaryFile = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks", "T01-SUMMARY.md");
 
     // Precondition: SUMMARY exists
     assert.ok(existsSync(summaryFile), "precondition: SUMMARY.md exists");
@@ -141,7 +141,7 @@ test('Retry reset step 3: remove from completedUnits', () => {
     assert.deepStrictEqual(filtered[0].id, "M001/S01/T02", "T02 still in completedUnits");
 
     // Flush to completed-units.json
-    const completedKeysPath = join(base, ".gsd", "completed-units.json");
+    const completedKeysPath = join(base, ".sdd", "completed-units.json");
     const keys = filtered.map(u => `${u.type}/${u.id}`);
     writeFileSync(completedKeysPath, JSON.stringify(keys, null, 2), "utf-8");
 
@@ -199,7 +199,7 @@ test('Full retry reset: all steps combined', () => {
     }
 
     // Step 2: Delete SUMMARY (in milestones path)
-    const tasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
+    const tasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
     const summaryFile = join(tasksDir, `${tid}-SUMMARY.md`);
     if (existsSync(summaryFile)) {
       unlinkSync(summaryFile);
@@ -209,7 +209,7 @@ test('Full retry reset: all steps combined', () => {
     completedUnits = completedUnits.filter(
       u => !(u.type === trigger.unitType && u.id === trigger.unitId),
     );
-    const completedKeysPath = join(base, ".gsd", "completed-units.json");
+    const completedKeysPath = join(base, ".sdd", "completed-units.json");
     writeFileSync(completedKeysPath, JSON.stringify(
       completedUnits.map(u => `${u.type}/${u.id}`),
       null, 2,
@@ -224,7 +224,7 @@ test('Full retry reset: all steps combined', () => {
     // ── Verify all state is reset ──
 
     // PLAN.md: T01 unchecked
-    const planFile = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+    const planFile = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
     const planContent = readFileSync(planFile, "utf-8");
     assert.ok(planContent.includes("- [ ] **T01:"), "after reset: T01 unchecked in PLAN");
     assert.ok(!planContent.includes("- [x] **T01:"), "after reset: T01 not checked in PLAN");
@@ -247,12 +247,12 @@ test('Full retry reset: all steps combined', () => {
 // Test: Reset is idempotent — no crash when artifacts are already missing
 // ═══════════════════════════════════════════════════════════════════════════
 test('Retry reset: idempotent when artifacts already missing', () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-retry-idempotent-"));
+  const base = mkdtempSync(join(tmpdir(), "sdd-retry-idempotent-"));
   try {
     // Create minimal structure — NO summary, NO retry artifact, NO plan
-    mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+    mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
     writeFileSync(
-      join(base, ".gsd", "completed-units.json"),
+      join(base, ".sdd", "completed-units.json"),
       JSON.stringify([]),
       "utf-8",
     );
@@ -271,7 +271,7 @@ test('Retry reset: idempotent when artifacts already missing', () => {
     assert.ok(!uncheckResult, "uncheck returns false when no PLAN exists");
 
     // Summary does not exist — no crash
-    const summaryFile = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks", `${tid}-SUMMARY.md`);
+    const summaryFile = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks", `${tid}-SUMMARY.md`);
     assert.ok(!existsSync(summaryFile), "no summary to delete — safe");
 
     // Retry artifact does not exist — no crash
@@ -297,7 +297,7 @@ test('resolveHookArtifactPath: correct path for retry artifacts', () => {
   const path = resolveHookArtifactPath(base, "M001/S01/T01", "NEEDS-REWORK.md");
   assert.deepStrictEqual(
     path,
-    join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks", "T01-NEEDS-REWORK.md"),
+    join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks", "T01-NEEDS-REWORK.md"),
     "retry artifact path resolves to task directory with task prefix",
   );
 });

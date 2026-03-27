@@ -8,19 +8,19 @@ import { deriveState, isSliceComplete, isMilestoneComplete, isGhostMilestone } f
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-state-test-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-state-test-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   const tasksDir = join(dir, 'tasks');
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
@@ -35,25 +35,25 @@ function writePlan(base: string, mid: string, sid: string, content: string): voi
 }
 
 function writeContinue(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-CONTINUE.md`), content);
 }
 
 function writeMilestoneSummary(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), content);
 }
 
 function writeMilestoneValidation(base: string, mid: string, verdict: string = 'pass'): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), `---\nverdict: ${verdict}\nremediation_round: 0\n---\n\n# Validation\nValidated.`);
 }
 
 function writeRequirements(base: string, content: string): void {
-  writeFileSync(join(base, '.gsd', 'REQUIREMENTS.md'), content);
+  writeFileSync(join(base, '.sdd', 'REQUIREMENTS.md'), content);
 }
 
 function cleanup(base: string): void {
@@ -89,8 +89,8 @@ describe('derive-state', async () => {
     const base = createFixtureBase();
     try {
       // Create M001 directory with CONTEXT but no roadmap file
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
-      writeFileSync(join(base, '.gsd', 'milestones', 'M001', 'M001-CONTEXT.md'), '# First Milestone\n\nContext for M001.');
+      mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
+      writeFileSync(join(base, '.sdd', 'milestones', 'M001', 'M001-CONTEXT.md'), '# First Milestone\n\nContext for M001.');
 
       const state = await deriveState(base);
 
@@ -484,8 +484,8 @@ Continue from step 2.
 `);
 
       // M003: dir with CONTEXT but no roadmap → pending since M002 is already active
-      mkdirSync(join(base, '.gsd', 'milestones', 'M003'), { recursive: true });
-      writeFileSync(join(base, '.gsd', 'milestones', 'M003', 'M003-CONTEXT.md'), '# Third Milestone\n\nContext for M003.');
+      mkdirSync(join(base, '.sdd', 'milestones', 'M003'), { recursive: true });
+      writeFileSync(join(base, '.sdd', 'milestones', 'M003', 'M003-CONTEXT.md'), '# Third Milestone\n\nContext for M003.');
 
       const state = await deriveState(base);
 
@@ -696,11 +696,11 @@ Continue from step 2.
     const base = createFixtureBase();
     try {
       // M001, M002: completed milestones with summaries but no roadmaps
-      const m1dir = join(base, '.gsd', 'milestones', 'M001');
+      const m1dir = join(base, '.sdd', 'milestones', 'M001');
       mkdirSync(m1dir, { recursive: true });
       writeFileSync(join(m1dir, 'M001-SUMMARY.md'), '---\nid: M001\n---\n# Bootstrap\nDone.');
 
-      const m2dir = join(base, '.gsd', 'milestones', 'M002');
+      const m2dir = join(base, '.sdd', 'milestones', 'M002');
       mkdirSync(m2dir, { recursive: true });
       writeFileSync(join(m2dir, 'M002-SUMMARY.md'), '---\nid: M002\n---\n# Core Features\nDone.');
 
@@ -729,7 +729,7 @@ Continue from step 2.
   {
     const base = createFixtureBase();
     try {
-      const m1dir = join(base, '.gsd', 'milestones', 'M001');
+      const m1dir = join(base, '.sdd', 'milestones', 'M001');
       mkdirSync(m1dir, { recursive: true });
       writeFileSync(join(m1dir, 'M001-SUMMARY.md'), '---\ntitle: Done\n---\nAll done.');
 
@@ -869,7 +869,7 @@ slice: S01
       writeMilestoneSummary(base, 'M001', '---\nid: M001\n---\n\n# M001: Foundation\n\n**Done.**');
       // M002: depends on M001 — should be active since M001 is complete
       writeRoadmap(base, 'M002', `# M002: Dependent\n\n**Vision:** Depends on M001.\n\n## Slices\n\n- [ ] **S01: Work** \`risk:low\` \`depends:[]\`\n  > Work.\n`);
-      const contextDir = join(base, '.gsd', 'milestones', 'M002');
+      const contextDir = join(base, '.sdd', 'milestones', 'M002');
       mkdirSync(contextDir, { recursive: true });
       writeFileSync(join(contextDir, 'M002-CONTEXT.md'), '---\ndepends_on:\n  - M001\n---\n\n# M002 Context\n\nDepends on M001.');
 
@@ -887,7 +887,7 @@ slice: S01
     const base = createFixtureBase();
     try {
       // Create a ghost milestone directory with only META.json
-      const ghostDir = join(base, '.gsd', 'milestones', 'M001');
+      const ghostDir = join(base, '.sdd', 'milestones', 'M001');
       mkdirSync(ghostDir, { recursive: true });
       writeFileSync(join(ghostDir, 'META.json'), JSON.stringify({ id: 'M001' }));
 
@@ -909,12 +909,12 @@ slice: S01
     const base = createFixtureBase();
     try {
       // M001: ghost (only META.json)
-      const ghostDir = join(base, '.gsd', 'milestones', 'M001');
+      const ghostDir = join(base, '.sdd', 'milestones', 'M001');
       mkdirSync(ghostDir, { recursive: true });
       writeFileSync(join(ghostDir, 'META.json'), JSON.stringify({ id: 'M001' }));
 
       // M002: real milestone with a CONTEXT file
-      const realDir = join(base, '.gsd', 'milestones', 'M002');
+      const realDir = join(base, '.sdd', 'milestones', 'M002');
       mkdirSync(realDir, { recursive: true });
       writeFileSync(join(realDir, 'M002-CONTEXT.md'), '# Real Milestone\n\nThis has content.');
 

@@ -50,7 +50,7 @@ import {
   transaction,
   isDbAvailable,
   _getAdapter,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 // ── Tool handlers ─────────────────────────────────────────────────────────
 import { handleCompleteTask } from "../tools/complete-task.ts";
@@ -82,7 +82,7 @@ import {
 import { detectRogueFileWrites } from "../auto-post-unit.ts";
 
 // ── Doctor ────────────────────────────────────────────────────────────────
-import { runGSDDoctor } from "../doctor.ts";
+import { runSDDDoctor } from "../doctor.ts";
 
 // ── Undo/reset ────────────────────────────────────────────────────────────
 import { handleUndoTask, handleResetSlice } from "../undo.ts";
@@ -95,7 +95,7 @@ import { invalidateAllCaches } from "../cache.ts";
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTempDir(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-integration-proof-"));
+  return mkdtempSync(join(tmpdir(), "sdd-integration-proof-"));
 }
 
 function makeCtx(): { notifications: Array<{ message: string; level: string }>; ctx: any } {
@@ -118,7 +118,7 @@ function makeCtx(): { notifications: Array<{ message: string; level: string }>; 
  */
 function createRealisticFixture(): string {
   const base = makeTempDir();
-  const gsdDir = join(base, ".gsd");
+  const gsdDir = join(base, ".sdd");
   const mDir = join(gsdDir, "milestones", "M001");
   const sliceDir = join(mDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
@@ -276,7 +276,7 @@ function makeCompleteSliceParams(): any {
 
 test("full lifecycle: migration through completion through doctor", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
 
   t.after(() => {
     closeDatabase();
@@ -336,7 +336,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
     }
 
     // Verify plan checkboxes toggled
-    const planPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+    const planPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
     const planAfterTasks = readFileSync(planPath, "utf-8");
     assert.match(planAfterTasks, /\[x\]\s+\*\*T01:/, "T01 should be checked in plan");
     assert.match(planAfterTasks, /\[x\]\s+\*\*T02:/, "T02 should be checked in plan");
@@ -357,7 +357,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
     }
 
     // Verify roadmap checkbox toggled
-    const roadmapPath = join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md");
+    const roadmapPath = join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md");
     const roadmapAfter = readFileSync(roadmapPath, "utf-8");
     assert.ok(roadmapAfter.includes("\u2705"), "S01 should be checked in roadmap (✅ emoji in table format)");
 
@@ -378,7 +378,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
     assert.ok(dbState.registry.length > 0, "DB registry should have entries");
 
     // ── (h) Doctor zero-fix (R009) ───────────────────────────────────
-    const doctorReport = await runGSDDoctor(base, {
+    const doctorReport = await runSDDDoctor(base, {
       fix: false,
       isolationMode: "none",
     });
@@ -396,7 +396,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
 
     // ── (i) Rogue file detection (R008) ──────────────────────────────
     // Write a fake summary for a non-DB-tracked task T99
-    const rogueDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
+    const rogueDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
     writeFileSync(join(rogueDir, "T99-SUMMARY.md"), "# Rogue Summary\n", "utf-8");
 
     // Clear path cache so resolveTaskFile sees the newly written file
@@ -415,7 +415,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
 
 test("recovery: DB loss → migrateFromMarkdown restores state, stale render detection", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
 
   t.after(() => {
     closeDatabase();
@@ -503,7 +503,7 @@ test("recovery: DB loss → migrateFromMarkdown restores state, stale render det
 
 test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
 
   t.after(() => {
     closeDatabase();
@@ -534,7 +534,7 @@ test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => 
     // T01 summary file should be deleted
     const t1SummaryPath = join(
       base,
-      ".gsd",
+      ".sdd",
       "milestones",
       "M001",
       "slices",
@@ -545,7 +545,7 @@ test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => 
     assert.equal(existsSync(t1SummaryPath), false, "T01 summary should be deleted after undo");
 
     // Plan checkbox should be unchecked
-    const planPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+    const planPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
     const planAfterUndo = readFileSync(planPath, "utf-8");
     assert.match(planAfterUndo, /\[ \]\s+\*\*T01:/, "T01 should be unchecked in plan after undo");
 
@@ -581,7 +581,7 @@ test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => 
     assert.equal(existsSync(t1SummaryPath), false, "T01 summary should be deleted after reset");
     const t2SummaryPath = join(
       base,
-      ".gsd",
+      ".sdd",
       "milestones",
       "M001",
       "slices",
@@ -594,7 +594,7 @@ test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => 
     // Slice summary and UAT should be deleted
     const sliceSummaryPath = join(
       base,
-      ".gsd",
+      ".sdd",
       "milestones",
       "M001",
       "slices",
@@ -603,7 +603,7 @@ test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => 
     );
     const sliceUatPath = join(
       base,
-      ".gsd",
+      ".sdd",
       "milestones",
       "M001",
       "slices",

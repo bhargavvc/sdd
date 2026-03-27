@@ -1,4 +1,4 @@
-// Migration transformer — converts parsed PlanningProject into GSDProject.
+// Migration transformer — converts parsed PlanningProject into SDDProject.
 // Pure function: no I/O, no side effects, no imports outside migrate/.
 
 import type {
@@ -10,14 +10,14 @@ import type {
   PlanningRoadmapMilestone,
   PlanningResearch,
   PlanningRequirement,
-  GSDProject,
-  GSDMilestone,
-  GSDSlice,
-  GSDTask,
-  GSDRequirement,
-  GSDSliceSummaryData,
-  GSDTaskSummaryData,
-  GSDBoundaryEntry,
+  SDDProject,
+  SDDMilestone,
+  SDDSlice,
+  SDDTask,
+  SDDRequirement,
+  SDDSliceSummaryData,
+  SDDTaskSummaryData,
+  SDDBoundaryEntry,
 } from './types.js';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function consolidateResearch(files: PlanningResearch[]): string | null {
 
 // ─── Task Mapping ──────────────────────────────────────────────────────────
 
-function buildTaskSummary(summary: PlanningSummary): GSDTaskSummaryData {
+function buildTaskSummary(summary: PlanningSummary): SDDTaskSummaryData {
   return {
     completedAt: summary.frontmatter.completed ?? '',
     provides: summary.frontmatter.provides ?? [],
@@ -76,7 +76,7 @@ function buildTaskSummary(summary: PlanningSummary): GSDTaskSummaryData {
   };
 }
 
-function mapTask(plan: PlanningPlan, index: number, summaries: Record<string, PlanningSummary>): GSDTask {
+function mapTask(plan: PlanningPlan, index: number, summaries: Record<string, PlanningSummary>): SDDTask {
   const summary = summaries[plan.planNumber];
   const done = summary !== undefined;
   return {
@@ -101,7 +101,7 @@ function buildTaskTitle(plan: PlanningPlan): string {
 
 // ─── Slice Mapping ─────────────────────────────────────────────────────────
 
-function buildSliceSummary(phase: PlanningPhase): GSDSliceSummaryData | null {
+function buildSliceSummary(phase: PlanningPhase): SDDSliceSummaryData | null {
   // Aggregate from all summaries in the phase
   const summaryEntries = Object.values(phase.summaries);
   if (summaryEntries.length === 0) return null;
@@ -152,12 +152,12 @@ function mapSlice(
   entry: PlanningRoadmapEntry,
   index: number,
   prevSliceId: string | null,
-): GSDSlice {
+): SDDSlice {
   const sliceId = padId('S', index + 1);
   const slug = phase?.slug ?? entry.title;
   const demo = phase ? deriveDemo(phase, slug) : `unit tests prove ${entry.title} works`;
 
-  let tasks: GSDTask[] = [];
+  let tasks: SDDTask[] = [];
   if (phase) {
     const planNumbers = Object.keys(phase.plans).sort((a, b) => Number(a) - Number(b));
     tasks = planNumbers.map((pn, i) => mapTask(phase.plans[pn], i, phase.summaries));
@@ -203,11 +203,11 @@ function buildMilestoneFromEntries(
   entries: PlanningRoadmapEntry[],
   phases: Record<string, PlanningPhase>,
   research: PlanningResearch[],
-): GSDMilestone {
+): SDDMilestone {
   // Sort entries by phase number (float sort)
   const sorted = [...entries].sort((a, b) => a.number - b.number);
 
-  const slices: GSDSlice[] = [];
+  const slices: SDDSlice[] = [];
   for (let i = 0; i < sorted.length; i++) {
     const entry = sorted[i];
     const phase = findPhase(phases, entry.number, entry.title);
@@ -238,7 +238,7 @@ function normalizeStatus(status: string): 'active' | 'validated' | 'deferred' {
   return 'active';
 }
 
-function mapRequirements(reqs: PlanningRequirement[]): GSDRequirement[] {
+function mapRequirements(reqs: PlanningRequirement[]): SDDRequirement[] {
   let autoId = 0;
   return reqs.map((req) => {
     autoId++;
@@ -291,15 +291,15 @@ function deriveDecisions(parsed: PlanningProject): string {
 
 // ─── Main Entry Point ──────────────────────────────────────────────────────
 
-export function transformToGSD(parsed: PlanningProject): GSDProject {
-  const milestones: GSDMilestone[] = [];
+export function transformToSDD(parsed: PlanningProject): SDDProject {
+  const milestones: SDDMilestone[] = [];
 
   const roadmap = parsed.roadmap;
   const isMultiMilestone = roadmap !== null && roadmap.milestones.length > 0;
   const hasFlatPhases = roadmap !== null && roadmap.phases.length > 0;
 
   if (isMultiMilestone) {
-    // Multi-milestone mode: each roadmap milestone section → one GSDMilestone
+    // Multi-milestone mode: each roadmap milestone section → one SDDMilestone
     for (let mi = 0; mi < roadmap!.milestones.length; mi++) {
       const rm = roadmap!.milestones[mi];
       milestones.push(

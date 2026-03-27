@@ -8,10 +8,10 @@ import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefi
 import type { ForensicReport } from "../../web/lib/diagnostics-types.ts"
 
 const FORENSICS_MAX_BUFFER = 2 * 1024 * 1024
-const FORENSICS_MODULE_ENV = "GSD_FORENSICS_MODULE"
+const FORENSICS_MODULE_ENV = "SDD_FORENSICS_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -43,7 +43,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${FORENSICS_MODULE_ENV}).href);`,
-    `const report = await mod.buildForensicReport(process.env.GSD_FORENSICS_BASE);`,
+    `const report = await mod.buildForensicReport(process.env.SDD_FORENSICS_BASE);`,
     // Simplify unitTraces: strip deep ExecutionTrace, keep file/unitType/unitId/seq/mtime
     'const unitTraces = (report.unitTraces || []).map(t => ({',
     '  file: t.file, unitType: t.unitType, unitId: t.unitId, seq: t.seq, mtime: t.mtime,',
@@ -91,7 +91,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
         env: {
           ...process.env,
           [FORENSICS_MODULE_ENV]: forensicsModulePath,
-          GSD_FORENSICS_BASE: projectCwd,
+          SDD_FORENSICS_BASE: projectCwd,
         },
         maxBuffer: FORENSICS_MAX_BUFFER,
       },

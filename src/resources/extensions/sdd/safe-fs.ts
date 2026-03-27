@@ -3,21 +3,21 @@ import { dirname } from "node:path"
 
 /**
  * Safely creates a directory. Returns true if successful, false on error.
- * Logs to stderr when GSD_DEBUG is set.
+ * Logs to stderr when SDD_DEBUG is set.
  */
 export function safeMkdir(dirPath: string): boolean {
   try {
     mkdirSync(dirPath, { recursive: true })
     return true
   } catch (err) {
-    if (process.env.GSD_DEBUG) console.error(`[gsd] mkdir failed: ${dirPath}`, err)
+    if (process.env.SDD_DEBUG) console.error(`[sdd] mkdir failed: ${dirPath}`, err)
     return false
   }
 }
 
 /**
  * Safely copies src to dst. Returns true if successful, false if src doesn't exist or copy fails.
- * Logs to stderr when GSD_DEBUG is set.
+ * Logs to stderr when SDD_DEBUG is set.
  */
 export function safeCopy(src: string, dst: string, opts?: CopySyncOptions): boolean {
   if (!existsSync(src)) return false
@@ -25,7 +25,7 @@ export function safeCopy(src: string, dst: string, opts?: CopySyncOptions): bool
     cpSync(src, dst, opts)
     return true
   } catch (err) {
-    if (process.env.GSD_DEBUG) console.error(`[gsd] copy failed: ${src} → ${dst}`, err)
+    if (process.env.SDD_DEBUG) console.error(`[sdd] copy failed: ${src} → ${dst}`, err)
     return false
   }
 }
@@ -41,7 +41,7 @@ export function safeCopyRecursive(src: string, dst: string, opts?: Omit<CopySync
     cpSync(src, dst, { ...opts, recursive: true })
     return true
   } catch (err) {
-    if (process.env.GSD_DEBUG) console.error(`[gsd] recursive copy failed: ${src} → ${dst}`, err)
+    if (process.env.SDD_DEBUG) console.error(`[sdd] recursive copy failed: ${src} → ${dst}`, err)
     return false
   }
 }

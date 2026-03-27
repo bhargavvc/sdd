@@ -1,4 +1,4 @@
-// GSD Extension — workflow-manifest unit tests
+// SDD Extension — workflow-manifest unit tests
 // Tests writeManifest, readManifest, snapshotState, bootstrapFromManifest.
 
 import test from 'node:test';
@@ -12,7 +12,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import {
   writeManifest,
   readManifest,
@@ -21,7 +21,7 @@ import {
 } from '../workflow-manifest.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-manifest-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-manifest-'));
 }
 
 function tempDbPath(base: string): string {
@@ -51,7 +51,7 @@ test('workflow-manifest: writeManifest creates state-manifest.json with version 
   openDatabase(tempDbPath(base));
   try {
     writeManifest(base);
-    const manifestPath = path.join(base, '.gsd', 'state-manifest.json');
+    const manifestPath = path.join(base, '.sdd', 'state-manifest.json');
     assert.ok(fs.existsSync(manifestPath), 'state-manifest.json should exist');
     const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
     assert.strictEqual(raw.version, 1);
@@ -170,9 +170,9 @@ test('workflow-manifest: bootstrapFromManifest restores DB from manifest (round-
 test('workflow-manifest: readManifest throws on unsupported version', () => {
   const base = tempDir();
   try {
-    fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+    fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
     fs.writeFileSync(
-      path.join(base, '.gsd', 'state-manifest.json'),
+      path.join(base, '.sdd', 'state-manifest.json'),
       JSON.stringify({ version: 99, exported_at: '', milestones: [], slices: [], tasks: [], decisions: [], verification_evidence: [] }),
     );
     assert.throws(

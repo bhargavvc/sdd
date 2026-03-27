@@ -8,7 +8,7 @@ Before asking "What do you want to add?", check the existing milestones context 
 
 1. Tell the user which milestones have draft contexts and briefly summarize what each draft contains (read the draft file).
 2. Use `ask_user_questions` to ask per-draft milestone:
-   - **"Discuss now"** — Treat this draft as the primary topic. Read the draft content, use it as seed material, and conduct a focused discussion following the standard discussion flow (reflection → investigation → questioning → depth verification → requirements → roadmap). After the discussion, call `gsd_summary_save` with the milestone ID and `artifact_type: "CONTEXT"` to write the full context — then delete the `CONTEXT-DRAFT.md` file. The milestone is then ready for auto-planning.
+   - **"Discuss now"** — Treat this draft as the primary topic. Read the draft content, use it as seed material, and conduct a focused discussion following the standard discussion flow (reflection → investigation → questioning → depth verification → requirements → roadmap). After the discussion, call `sdd_summary_save` with the milestone ID and `artifact_type: "CONTEXT"` to write the full context — then delete the `CONTEXT-DRAFT.md` file. The milestone is then ready for auto-planning.
    - **"Leave for later"** — Keep the draft as-is. The user will discuss it in a future session. Auto-mode will continue to pause when it reaches this milestone.
 3. Handle all draft discussions before proceeding to new queue work.
 4. If no drafts exist in the context, skip this section entirely and proceed to "What do you want to add?"
@@ -38,7 +38,7 @@ Don't go deep — just enough that your next question reflects what's actually t
 
 **Then use ask_user_questions** to dig into gray areas — scope boundaries, proof expectations, integration choices, tech preferences when they materially matter, and what's in vs out. 1-3 questions per round.
 
-If a `GSD Skill Preferences` block is present in system context, use it to decide which skills to load and follow during discuss/planning work, but do not let it override the required discuss flow or artifact requirements.
+If a `SDD Skill Preferences` block is present in system context, use it to decide which skills to load and follow during discuss/planning work, but do not let it override the required discuss flow or artifact requirements.
 
 **Self-regulate:** Do **not** ask a meta "ready to queue?" question after every round. Keep going until you have enough depth to write the context well, then use a single wrap-up prompt if needed. If the user clearly keeps adding detail instead of objecting, treat that as permission to continue.
 
@@ -107,8 +107,8 @@ The user confirms or corrects before you write. One depth verification per miles
 
 Once the user is satisfied, in a single pass for **each** new milestone:
 
-1. Call `gsd_milestone_generate_id` to get the milestone ID — never invent milestone IDs manually. Then `mkdir -p .sdd/milestones/<ID>/slices`.
-2. Call `gsd_summary_save` with `milestone_id: <ID>`, `artifact_type: "CONTEXT"`, and the full context markdown as `content` — the tool computes the file path and persists to both DB and disk. Capture intent, scope, risks, constraints, integration points, and relevant requirements in the content. Mark the status as "Queued — pending auto-mode execution." **If this milestone depends on other milestones, include YAML frontmatter with `depends_on` in the content:**
+1. Call `sdd_milestone_generate_id` to get the milestone ID — never invent milestone IDs manually. Then `mkdir -p .sdd/milestones/<ID>/slices`.
+2. Call `sdd_summary_save` with `milestone_id: <ID>`, `artifact_type: "CONTEXT"`, and the full context markdown as `content` — the tool computes the file path and persists to both DB and disk. Capture intent, scope, risks, constraints, integration points, and relevant requirements in the content. Mark the status as "Queued — pending auto-mode execution." **If this milestone depends on other milestones, include YAML frontmatter with `depends_on` in the content:**
    ```yaml
    ---
    depends_on: [M001, M002]

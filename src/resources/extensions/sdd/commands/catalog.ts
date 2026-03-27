@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { loadRegistry } from "../workflow-templates.js";
 import { resolveProjectRoot } from "../worktree.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 export interface GsdCommandDefinition {
   cmd: string;
@@ -14,15 +14,15 @@ export interface GsdCommandDefinition {
 
 type CompletionMap = Record<string, readonly GsdCommandDefinition[]>;
 
-export const GSD_COMMAND_DESCRIPTION =
-  "GSD — Get Shit Done: /gsd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
+export const SDD_COMMAND_DESCRIPTION =
+  "SDD — Get Shit Done: /sdd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
 
 export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
-  { cmd: "next", desc: "Explicit step mode (same as /gsd)" },
+  { cmd: "next", desc: "Explicit step mode (same as /sdd)" },
   { cmd: "auto", desc: "Autonomous mode — research, plan, execute, commit, repeat" },
   { cmd: "stop", desc: "Stop auto mode gracefully" },
-  { cmd: "pause", desc: "Pause auto-mode (preserves state, /gsd auto to resume)" },
+  { cmd: "pause", desc: "Pause auto-mode (preserves state, /sdd auto to resume)" },
   { cmd: "status", desc: "Progress dashboard" },
   { cmd: "widget", desc: "Cycle widget: full → small → min → off" },
   { cmd: "visualize", desc: "Open 10-tab workflow visualizer (progress, timeline, deps, metrics, health, agent, changes, knowledge, captures, export)" },
@@ -53,7 +53,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
   { cmd: "forensics", desc: "Examine execution logs" },
   { cmd: "init", desc: "Project init wizard — detect, configure, bootstrap .sdd/" },
   { cmd: "setup", desc: "Global setup status and configuration" },
-  { cmd: "migrate", desc: "Migrate a v1 .planning directory to .gsd format" },
+  { cmd: "migrate", desc: "Migrate a v1 .planning directory to .sdd format" },
   { cmd: "remote", desc: "Control remote auto-mode" },
   { cmd: "steer", desc: "Hard-steer plan documents during execution" },
   { cmd: "inspect", desc: "Show SQLite DB diagnostics" },
@@ -63,7 +63,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
   { cmd: "cmux", desc: "Manage cmux integration (status, sidebar, notifications, splits)" },
   { cmd: "park", desc: "Park a milestone — skip without deleting" },
   { cmd: "unpark", desc: "Reactivate a parked milestone" },
-  { cmd: "update", desc: "Update GSD to the latest version" },
+  { cmd: "update", desc: "Update SDD to the latest version" },
   { cmd: "start", desc: "Start a workflow template (bugfix, spike, feature, etc.)" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions (list, enable, disable, info)" },
@@ -169,7 +169,7 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "refactor", desc: "Inventory, plan waves, migrate, verify" },
     { cmd: "security-audit", desc: "Scan, triage, remediate, re-scan" },
     { cmd: "dep-upgrade", desc: "Assess, upgrade, fix breaks, verify" },
-    { cmd: "full-project", desc: "Complete GSD workflow with full ceremony" },
+    { cmd: "full-project", desc: "Complete SDD workflow with full ceremony" },
     { cmd: "resume", desc: "Resume an in-progress workflow" },
     { cmd: "--list", desc: "List all available templates" },
     { cmd: "--dry-run", desc: "Preview workflow without executing" },
@@ -330,7 +330,7 @@ export function getGsdArgumentCompletions(prefix: string) {
   // Workflow definition-name completion for `workflow run <name>` and `workflow validate <name>`
   if (command === "workflow" && (subcommand === "run" || subcommand === "validate") && parts.length <= 3) {
     try {
-      const defsDir = join(resolveProjectRoot(process.cwd()), ".gsd", "workflow-defs");
+      const defsDir = join(resolveProjectRoot(process.cwd()), ".sdd", "workflow-defs");
       if (existsSync(defsDir)) {
         return readdirSync(defsDir)
           .filter((f) => f.endsWith(".yaml") && f.startsWith(third))

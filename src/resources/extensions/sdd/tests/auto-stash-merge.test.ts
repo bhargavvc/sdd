@@ -25,8 +25,8 @@ function createTempRepo(): string {
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
   writeFileSync(join(dir, "README.md"), "# test\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -76,7 +76,7 @@ test("#2151 bug 1: auto-stash unblocks merge when unrelated files are dirty", ()
 
     // Should succeed — the dirty README.md is auto-stashed before merge.
     const result = mergeMilestoneToMain(repo, "M200", roadmap);
-    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M200"), "merge succeeds with dirty unrelated file");
+    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M200"), "merge succeeds with dirty unrelated file");
     assert.ok(existsSync(join(repo, "stash-test.ts")), "milestone code merged to main");
 
     // Verify the dirty file was restored (stash popped).

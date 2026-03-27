@@ -6,9 +6,9 @@ import { tmpdir } from "node:os";
 import { getSuggestedNextCommands, indexWorkspace, listDoctorScopeSuggestions } from "../workspace-index.ts";
 
 test("workspace index: indexes active milestone/slice/task and suggests commands", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-workspace-index-test-"));
-  const gsd = join(base, ".gsd");
-  const mDir = join(gsd, "milestones", "M001");
+  const base = mkdtempSync(join(tmpdir(), "sdd-workspace-index-test-"));
+  const sdd = join(base, ".sdd");
+  const mDir = join(sdd, "milestones", "M001");
   const sDir = join(mDir, "slices", "S01");
   mkdirSync(join(sDir, "tasks"), { recursive: true });
 
@@ -29,9 +29,9 @@ test("workspace index: indexes active milestone/slice/task and suggests commands
     assert.ok(suggestions.some(item => item.value === "M001/S01/T01"));
 
     const commands = await getSuggestedNextCommands(base);
-    assert.ok(commands.includes("/gsd auto"));
-    assert.ok(commands.includes("/gsd doctor M001/S01"));
-    assert.ok(commands.includes("/gsd status"));
+    assert.ok(commands.includes("/sdd auto"));
+    assert.ok(commands.includes("/sdd doctor M001/S01"));
+    assert.ok(commands.includes("/sdd status"));
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

@@ -21,7 +21,7 @@ let nativeTtsr: {
 
 try {
 	// Dynamic import to avoid hard dependency — gracefully degrades to JS.
-	const native = await import("@gsd/native");
+	const native = await import("@sdd/native");
 	if (native.ttsrCompileRules && native.ttsrCheckBuffer && native.ttsrFreeRules) {
 		nativeTtsr = {
 			ttsrCompileRules: native.ttsrCompileRules,

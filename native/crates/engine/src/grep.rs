@@ -1,13 +1,13 @@
 //! N-API bindings for the grep module.
 //!
-//! Wraps `gsd_grep` functions and exposes them as JS-callable N-API exports.
+//! Wraps `sdd_grep` functions and exposes them as JS-callable N-API exports.
 
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 
 use crate::task;
 
-// ── N-API types (mirroring gsd_grep types for the JS boundary) ────────
+// ── N-API types (mirroring sdd_grep types for the JS boundary) ────────
 
 #[napi(object)]
 pub struct NapiContextLine {
@@ -105,14 +105,14 @@ fn clamp_u32(value: u64) -> u32 {
     value.min(u32::MAX as u64) as u32
 }
 
-fn convert_context_line(cl: gsd_grep::ContextLine) -> NapiContextLine {
+fn convert_context_line(cl: sdd_grep::ContextLine) -> NapiContextLine {
     NapiContextLine {
         line_number: clamp_u32(cl.line_number),
         line: cl.line,
     }
 }
 
-fn convert_search_match(m: gsd_grep::SearchMatch) -> NapiSearchMatch {
+fn convert_search_match(m: sdd_grep::SearchMatch) -> NapiSearchMatch {
     NapiSearchMatch {
         line_number: clamp_u32(m.line_number),
         line: m.line,
@@ -130,7 +130,7 @@ fn convert_search_match(m: gsd_grep::SearchMatch) -> NapiSearchMatch {
     }
 }
 
-fn convert_file_match(m: gsd_grep::FileMatch) -> NapiGrepMatch {
+fn convert_file_match(m: sdd_grep::FileMatch) -> NapiGrepMatch {
     NapiGrepMatch {
         path: m.path,
         line_number: clamp_u32(m.line_number),
@@ -157,7 +157,7 @@ fn convert_file_match(m: gsd_grep::FileMatch) -> NapiGrepMatch {
 /// and optional context lines.
 #[napi(js_name = "search")]
 pub fn search(content: Buffer, options: NapiSearchOptions) -> Result<NapiSearchResult> {
-    let opts = gsd_grep::SearchOptions {
+    let opts = sdd_grep::SearchOptions {
         pattern: options.pattern,
         ignore_case: options.ignore_case.unwrap_or(false),
         multiline: options.multiline.unwrap_or(false),
@@ -167,7 +167,7 @@ pub fn search(content: Buffer, options: NapiSearchOptions) -> Result<NapiSearchR
         max_columns: options.max_columns.map(|v| v as usize),
     };
 
-    match gsd_grep::search_content(content.as_ref(), &opts) {
+    match sdd_grep::search_content(content.as_ref(), &opts) {
         Ok(result) => Ok(NapiSearchResult {
             matches: result
                 .matches
@@ -188,7 +188,7 @@ pub fn search(content: Buffer, options: NapiSearchOptions) -> Result<NapiSearchR
 #[napi(js_name = "grep")]
 pub fn grep(options: NapiGrepOptions) -> task::Async<NapiGrepResult> {
     task::blocking("grep", (), move |_ct| {
-        let opts = gsd_grep::GrepOptions {
+        let opts = sdd_grep::GrepOptions {
             pattern: options.pattern,
             path: options.path,
             glob: options.glob,
@@ -202,7 +202,7 @@ pub fn grep(options: NapiGrepOptions) -> task::Async<NapiGrepResult> {
             max_columns: options.max_columns.map(|v| v as usize),
         };
 
-        match gsd_grep::search_path(&opts) {
+        match sdd_grep::search_path(&opts) {
             Ok(result) => Ok(NapiGrepResult {
                 matches: result.matches.into_iter().map(convert_file_match).collect(),
                 total_matches: clamp_u32(result.total_matches),

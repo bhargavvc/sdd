@@ -5,7 +5,7 @@ import {
 	sliceWithWidth as nativeSliceWithWidth,
 	extractSegments as nativeExtractSegments,
 	EllipsisKind,
-} from "@gsd/native/text";
+} from "@sdd/native/text";
 
 // Grapheme segmenter (shared instance)
 const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });

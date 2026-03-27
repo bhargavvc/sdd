@@ -1,9 +1,9 @@
 import { execFileSync } from "child_process";
 
-const binary = process.env.GSD_SMOKE_BINARY || "npx";
-const args = process.env.GSD_SMOKE_BINARY
+const binary = process.env.SDD_SMOKE_BINARY || "npx";
+const args = process.env.SDD_SMOKE_BINARY
   ? ["--help"]
-  : ["gsd-pi", "--help"];
+  : ["sdd-pi", "--help"];
 
 const output = execFileSync(binary, args, {
   encoding: "utf8",
@@ -12,8 +12,8 @@ const output = execFileSync(binary, args, {
 
 const lower = output.toLowerCase();
 
-if (!lower.includes("gsd")) {
-  console.error(`Help output does not contain "gsd": "${output}"`);
+if (!lower.includes("sdd")) {
+  console.error(`Help output does not contain "sdd": "${output}"`);
   process.exit(1);
 }
 

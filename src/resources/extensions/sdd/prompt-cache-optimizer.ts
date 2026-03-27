@@ -70,7 +70,7 @@ const DYNAMIC_LABELS = new Set([
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Classify common GSD prompt sections by their caching potential.
+ * Classify common SDD prompt sections by their caching potential.
  * Returns the appropriate ContentRole for a section label.
  */
 export function classifySection(label: string): ContentRole {

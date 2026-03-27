@@ -25,8 +25,8 @@ const { assertEq, assertTrue, report } = createTestContext();
 
 // ═══ Setup ════════════════════════════════════════════════════════════════════
 
-const base = mkdtempSync(join(tmpdir(), "gsd-recovery-reset-test-"));
-mkdirSync(join(base, ".gsd", "runtime", "units"), { recursive: true });
+const base = mkdtempSync(join(tmpdir(), "sdd-recovery-reset-test-"));
+mkdirSync(join(base, ".sdd", "runtime", "units"), { recursive: true });
 
 try {
   // ═══ #2322: recoveryAttempts should reset on re-dispatch ═══════════════════

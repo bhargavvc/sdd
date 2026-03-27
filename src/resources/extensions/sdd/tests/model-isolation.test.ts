@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 // ─── Test helpers ─────────────────────────────────────────────────────────────
 
 function makeTmpDir(suffix: string): string {
-  const dir = join(tmpdir(), `gsd-test-650-${suffix}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(tmpdir(), `sdd-test-650-${suffix}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   mkdirSync(dir, { recursive: true });
   return dir;
 }

@@ -209,7 +209,7 @@ export function calculateImageRows(
  * Auto-detects format from byte content (PNG, JPEG, GIF, WebP).
  */
 export async function getImageDimensions(base64Data: string): Promise<ImageDimensions | null> {
-	const { parseImage: parse } = await import("@gsd/native/image");
+	const { parseImage: parse } = await import("@sdd/native/image");
 	try {
 		const bytes = new Uint8Array(Buffer.from(base64Data, "base64"));
 		const handle = await parse(bytes);

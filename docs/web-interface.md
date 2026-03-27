@@ -7,15 +7,15 @@ SDD includes a browser-based web interface for project management, real-time pro
 ## Quick Start
 
 ```bash
-gsd --web
+sdd --web
 ```
 
-This starts a local web server and opens the GSD dashboard in your default browser.
+This starts a local web server and opens the SDD dashboard in your default browser.
 
 ### CLI Flags (v2.42.0)
 
 ```bash
-gsd --web --host 0.0.0.0 --port 8080 --allowed-origins "https://example.com"
+sdd --web --host 0.0.0.0 --port 8080 --allowed-origins "https://example.com"
 ```
 
 | Flag | Default | Description |
@@ -35,12 +35,12 @@ gsd --web --host 0.0.0.0 --port 8080 --allowed-origins "https://example.com"
 
 ## Architecture
 
-The web interface is built with Next.js and communicates with the GSD backend via a bridge service. Each project gets its own bridge instance, providing isolation for concurrent sessions.
+The web interface is built with Next.js and communicates with the SDD backend via a bridge service. Each project gets its own bridge instance, providing isolation for concurrent sessions.
 
 Key components:
 - `ProjectBridgeService` — per-project command routing and SSE subscription
 - `getProjectBridgeServiceForCwd()` — registry returning distinct instances per project path
-- `resolveProjectCwd()` — reads `?project=` from request URL or falls back to `GSD_WEB_PROJECT_CWD`
+- `resolveProjectCwd()` — reads `?project=` from request URL or falls back to `SDD_WEB_PROJECT_CWD`
 
 ## Configuration
 
@@ -50,11 +50,11 @@ The web server binds to `localhost:3000` by default. Use `--host`, `--port`, and
 
 | Variable | Description |
 |----------|-------------|
-| `GSD_WEB_PROJECT_CWD` | Default project path when `?project=` is not specified |
+| `SDD_WEB_PROJECT_CWD` | Default project path when `?project=` is not specified |
 
 ## Node v24 Compatibility
 
-Node v24 introduced breaking changes to type stripping that caused `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` on web boot. This is fixed in v2.42.0+ (#1864). If you encounter this error, upgrade GSD.
+Node v24 introduced breaking changes to type stripping that caused `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` on web boot. This is fixed in v2.42.0+ (#1864). If you encounter this error, upgrade SDD.
 
 ## Auth Token Persistence
 

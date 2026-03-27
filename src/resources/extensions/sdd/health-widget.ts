@@ -1,14 +1,14 @@
 /**
- * GSD Health Widget — always-on ambient health signal rendered belowEditor.
+ * SDD Health Widget — always-on ambient health signal rendered belowEditor.
  *
  * Shows a compact 1-2 line summary: progress score, budget, provider key
  * status, and doctor/environment issue count. Refreshes every 60 seconds.
  * Quiet when everything is healthy; turns amber/red when issues arise.
  *
- * Widget key: "gsd-health", placement: "belowEditor"
+ * Widget key: "sdd-health", placement: "belowEditor"
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import type { SDDState } from "./types.js";
 import { runProviderChecks, summariseProviderIssues } from "./doctor-providers.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
@@ -74,7 +74,7 @@ function loadHealthWidgetData(basePath: string): HealthWidgetData {
 const REFRESH_INTERVAL_MS = 60_000;
 
 /**
- * Initialize the always-on gsd-health widget (belowEditor).
+ * Initialize the always-on sdd-health widget (belowEditor).
  * Call once from the extension entry point after context is available.
  */
 export function initHealthWidget(ctx: ExtensionContext): void {
@@ -84,10 +84,10 @@ export function initHealthWidget(ctx: ExtensionContext): void {
 
   // String-array fallback — used in RPC mode (factory is a no-op there)
   const initialData = loadHealthWidgetData(basePath);
-  ctx.ui.setWidget("gsd-health", buildHealthLines(initialData), { placement: "belowEditor" });
+  ctx.ui.setWidget("sdd-health", buildHealthLines(initialData), { placement: "belowEditor" });
 
   // Factory-based widget for TUI mode — replaces the string-array above
-  ctx.ui.setWidget("gsd-health", (_tui, _theme) => {
+  ctx.ui.setWidget("sdd-health", (_tui, _theme) => {
     let data = initialData;
     let cachedLines: string[] | undefined;
     let refreshInFlight = false;

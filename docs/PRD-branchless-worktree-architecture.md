@@ -9,7 +9,7 @@
 
 ## Problem Statement
 
-GSD's auto-mode is unreliable. Users experience:
+SDD's auto-mode is unreliable. Users experience:
 
 1. **Infinite loop detection failures** — the agent writes planning artifacts on slice branches that become invisible after branch switching, causing `verifyExpectedArtifact()` to fail repeatedly. Auto-mode burns budget retrying the same unit 3-6 times before hard-stopping. This is the #1 user complaint.
 
@@ -28,10 +28,10 @@ Auto-mode uses git worktrees for isolation and sequential commits for history. N
 | Criterion | Measurement |
 |-----------|-------------|
 | Zero loop detection failures from branch visibility | No `verifyExpectedArtifact()` failures caused by branch mismatch in 50 consecutive auto-mode runs |
-| Zero `.sdd/` state corruption | Manual worktrees created via `git worktree add` have correct `.sdd/` state without any GSD-specific initialization |
+| Zero `.sdd/` state corruption | Manual worktrees created via `git worktree add` have correct `.sdd/` state without any SDD-specific initialization |
 | Code deletion | Net removal of ≥500 lines of merge/conflict/branch-switching code |
 | Test simplification | Removal or simplification of ≥6 merge-specific test files |
-| Backwards compatibility | Existing projects with `gsd/M001/S01` slice branches continue to work (read-only; new work uses new model) |
+| Backwards compatibility | Existing projects with `sdd/M001/S01` slice branches continue to work (read-only; new work uses new model) |
 | No new git primitives | The implementation uses only: worktrees, commits, squash-merge. No new branch types, merge strategies, or conflict resolution. |
 
 ## Non-Goals
@@ -48,9 +48,9 @@ Auto-mode uses git worktrees for isolation and sequential commits for history. N
 ```
 main
   └─ milestone/M001 (worktree at .sdd/worktrees/M001/)
-       ├─ gsd/M001/S01 (slice branch — code + .sdd/ artifacts)
+       ├─ sdd/M001/S01 (slice branch — code + .sdd/ artifacts)
        │   └── merge --no-ff → milestone/M001
-       ├─ gsd/M001/S02
+       ├─ sdd/M001/S02
        │   └── merge --no-ff → milestone/M001
        └── squash merge → main
 ```
@@ -77,7 +77,7 @@ Agent writes file → on slice branch → handleAgentEnd → auto-commit on slic
 ### `.sdd/` Tracking (Current — Contradictory)
 
 - `.gitignore` line 52: `.sdd/` — ignores everything
-- `smartStage()` lines 338-349: force-adds `GSD_DURABLE_PATHS` — tracks milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md
+- `smartStage()` lines 338-349: force-adds `SDD_DURABLE_PATHS` — tracks milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md
 - Result: `.sdd/milestones/` is partially tracked on some branches, fully ignored on others. The code fights the config.
 
 ## Proposed Architecture
@@ -130,7 +130,7 @@ Agent writes file → on milestone branch → handleAgentEnd → auto-commit on 
 .sdd/completed-units.json
 .sdd/STATE.md
 .sdd/metrics.json
-.sdd/gsd.db
+.sdd/sdd.db
 .sdd/activity/
 .sdd/runtime/
 .sdd/worktrees/
@@ -146,7 +146,7 @@ Agent writes file → on milestone branch → handleAgentEnd → auto-commit on 
 | Artifact invisibility after branch switch | No branch switching. Artifacts commit on the one branch. |
 | `.sdd/` state clobbering | Artifacts tracked in git. Each branch carries its own `.sdd/`. `git worktree add` and `git checkout` give correct state. |
 | Merge conflict complexity | No merges within a worktree. Only merge is milestone→main (squash). |
-| Manual worktree initialization | Tracked artifacts are checked out with the branch. No GSD-specific bootstrap needed. |
+| Manual worktree initialization | Tracked artifacts are checked out with the branch. No SDD-specific bootstrap needed. |
 | Dual isolation mode maintenance | Single mode: worktree. Branch-mode (`git.isolation: "branch"`) deprecated. |
 
 ## Implementation Plan
@@ -171,7 +171,7 @@ Agent writes file → on milestone branch → handleAgentEnd → auto-commit on 
 
 4. Update README suggested `.gitignore` section
 
-5. Remove `smartStage()` force-add of `GSD_DURABLE_PATHS` — no longer needed since `.gitignore` doesn't block them
+5. Remove `smartStage()` force-add of `SDD_DURABLE_PATHS` — no longer needed since `.gitignore` doesn't block them
 
 **Verification:** `git status` shows planning artifacts tracked, runtime files untracked. `git worktree add` on a new worktree has correct `.sdd/milestones/` state.
 
@@ -221,7 +221,7 @@ The function becomes:
 
 No conflict categorization. No runtime file stripping (runtime files are gitignored, not in the merge). No `.sdd/` special handling.
 
-If squash-merge conflicts (parallel milestone edge case): stop auto-mode with clear error, user resolves manually or GSD dispatches a one-time resolution session.
+If squash-merge conflicts (parallel milestone edge case): stop auto-mode with clear error, user resolves manually or SDD dispatches a one-time resolution session.
 
 **Verification:** Complete a full milestone in auto-mode. `main` receives one squash commit with all code and planning artifacts.
 
@@ -254,10 +254,10 @@ If squash-merge conflicts (parallel milestone edge case): stop auto-mode with cl
 
 **Goal:** Existing projects with slice branches continue to work.
 
-1. State derivation (`deriveState()`) continues to read `gsd/M001/S01` branch naming for legacy detection
+1. State derivation (`deriveState()`) continues to read `sdd/M001/S01` branch naming for legacy detection
 2. On first run after upgrade:
    - Detect existing slice branches
-   - Notify user: "GSD no longer creates slice branches. Existing branches are preserved but new work commits directly to the milestone branch."
+   - Notify user: "SDD no longer creates slice branches. Existing branches are preserved but new work commits directly to the milestone branch."
    - No forced migration — legacy branches are read-only context
 3. Doctor check: `legacy_slice_branches` — informational, not auto-fix
 4. Update `shouldUseWorktreeIsolation()` preference handling:
@@ -265,7 +265,7 @@ If squash-merge conflicts (parallel milestone edge case): stop auto-mode with cl
    - `git.isolation: "branch"` → warning, treated as worktree
    - Remove preference UI for isolation mode
 
-**Verification:** Open a project with existing `gsd/M001/S01` branches. GSD reads state correctly, new work commits on milestone branch without slice branches.
+**Verification:** Open a project with existing `sdd/M001/S01` branches. SDD reads state correctly, new work commits on milestone branch without slice branches.
 
 ## Stress Test Results
 
@@ -298,7 +298,7 @@ Codex agreed on tracked artifacts and worktree-per-milestone, but pushed back on
 | Crash recovery for orphaned slice branches disappears | The failure mode (orphaned branch needing merge) is caused by slice branches. Removing branches removes the failure. Sequential commits on one branch need no orphan recovery. |
 | Concurrent edits to shared root docs (DECISIONS.md) from two terminals | Standard content conflict at squash-merge time. Not caused by or solved by slice branches. |
 | Continuous integration via slice→milestone merges | In sequential single-user work, there's nothing to integrate against within the worktree. Pre-flight rebase before squash-merge is more direct. |
-| Need a replacement slice-boundary primitive | Accepted: conventional commit tags (`feat(M001/S01):`) + optional git tags (`gsd/M001/S01-complete`) serve as boundaries. |
+| Need a replacement slice-boundary primitive | Accepted: conventional commit tags (`feat(M001/S01):`) + optional git tags (`sdd/M001/S01-complete`) serve as boundaries. |
 
 Codex's analysis confirms the tracked-artifact approach but recommends treating branchless as a deliberate redesign with explicit replacement primitives, not a casual deletion.
 
@@ -315,7 +315,7 @@ git rebase main
 # Then squash-merge
 ```
 
-This is standard git workflow. GSD can automate the rebase step as a pre-merge check.
+This is standard git workflow. SDD can automate the rebase step as a pre-merge check.
 
 ### Edge Case: Agent Crash Mid-Commit
 
@@ -340,7 +340,7 @@ Resolution: Worktree is on `milestone/M001` branch, independent of `main`. Manua
 |--------|-------|
 | Merge/conflict/branch code | 770+ lines across 4 files |
 | Merge-related test files | 11 files |
-| Branch types | 4 (main, milestone/*, gsd/*/*, worktree/*) |
+| Branch types | 4 (main, milestone/*, sdd/*/*, worktree/*) |
 | Merge strategies | 3 (--no-ff, --squash, conflict resolution) |
 | Dispatch unit types with merge logic | 2 (complete-slice, fix-merge) |
 | Isolation modes | 2 (branch, worktree) |
@@ -370,7 +370,7 @@ Resolution: Worktree is on `milestone/M001` branch, independent of `main`. Manua
 
 ## Dependencies
 
-- **M001 (Memory Database):** The SQLite database (`gsd.db`) must remain gitignored. The M001/S02 importer layer rebuilds it from tracked markdown. This PRD's `.gitignore` update explicitly ignores `gsd.db`.
+- **M001 (Memory Database):** The SQLite database (`sdd.db`) must remain gitignored. The M001/S02 importer layer rebuilds it from tracked markdown. This PRD's `.gitignore` update explicitly ignores `sdd.db`.
 
 - **PR #487:** Must be closed. The `resolveMainWorktreeRoot` approach (sharing `.sdd/` across worktrees) contradicts tracked-artifact architecture.
 
@@ -378,6 +378,6 @@ Resolution: Worktree is on `milestone/M001` branch, independent of `main`. Manua
 
 1. **Squash vs `--no-ff` for milestone→main merge?** Squash gives clean history on `main` but loses bisect granularity. `--no-ff` preserves granular commits but clutters `main`. Current proposal: squash (matching existing behavior), with option to preserve milestone branch for debugging.
 
-2. **Should `worktrees/` move outside `.sdd/`?** Having worktrees inside `.sdd/` creates a nesting-doll pattern (worktree contains `.sdd/` which is inside `.sdd/worktrees/`). Relocating to `.gsd-worktrees/` or `~/.sdd/worktrees/<repo-hash>/` is cleaner but changes the filesystem layout. Recommendation: defer, address separately if it causes issues.
+2. **Should `worktrees/` move outside `.sdd/`?** Having worktrees inside `.sdd/` creates a nesting-doll pattern (worktree contains `.sdd/` which is inside `.sdd/worktrees/`). Relocating to `.sdd-worktrees/` or `~/.sdd/worktrees/<repo-hash>/` is cleaner but changes the filesystem layout. Recommendation: defer, address separately if it causes issues.
 
-3. **Pre-flight rebase automation?** Before milestone→main squash-merge, should GSD automatically `git rebase main`? Gemini recommends yes. Risk: rebase can fail with conflicts, adding a code path. Recommendation: implement as a doctor check ("milestone branch is behind main by N commits") with manual resolution, automate later if needed.
+3. **Pre-flight rebase automation?** Before milestone→main squash-merge, should SDD automatically `git rebase main`? Gemini recommends yes. Risk: rebase can fail with conflicts, adding a code path. Recommendation: implement as a doctor check ("milestone branch is behind main by N commits") with manual resolution, automate later if needed.

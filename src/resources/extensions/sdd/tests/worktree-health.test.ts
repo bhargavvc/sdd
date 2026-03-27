@@ -1,7 +1,7 @@
 /**
  * worktree-health.test.ts — Unit tests for worktree health status computation.
  *
- * Creates real temp git repos with GSD worktrees in various states and verifies
+ * Creates real temp git repos with SDD worktrees in various states and verifies
  * that getWorktreeHealth and formatWorktreeStatusLine return correct results.
  */
 
@@ -48,9 +48,9 @@ describe('worktree-health', async () => {
       const dir = createBaseRepo();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/done-feature .sdd/worktrees/done-feature", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "done-feature");
+      const wtPath = join(dir, ".sdd", "worktrees", "done-feature");
       writeFileSync(join(wtPath, "done.txt"), "done\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"done\"", wtPath);
@@ -76,9 +76,9 @@ describe('worktree-health', async () => {
       const dir = createBaseRepo();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/dirty-wip .sdd/worktrees/dirty-wip", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "dirty-wip");
+      const wtPath = join(dir, ".sdd", "worktrees", "dirty-wip");
       // Make a commit so the branch diverges from main, then leave dirty state
       writeFileSync(join(wtPath, "committed.txt"), "committed\n");
       run("git add -A", wtPath);
@@ -103,9 +103,9 @@ describe('worktree-health', async () => {
       const dir = createBaseRepo();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/unpushed .sdd/worktrees/unpushed", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "unpushed");
+      const wtPath = join(dir, ".sdd", "worktrees", "unpushed");
       writeFileSync(join(wtPath, "feature.txt"), "feature\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"feature\"", wtPath);
@@ -126,10 +126,10 @@ describe('worktree-health', async () => {
       const dir = createBaseRepo();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/stale-test .sdd/worktrees/stale-test", dir);
       // Diverge from main so the branch is not "merged"
-      const wtPath = join(dir, ".gsd", "worktrees", "stale-test");
+      const wtPath = join(dir, ".sdd", "worktrees", "stale-test");
       writeFileSync(join(wtPath, "stale.txt"), "stale\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"stale work\"", wtPath);
@@ -155,10 +155,10 @@ describe('worktree-health', async () => {
       const dir = createBaseRepo();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/clean-active .sdd/worktrees/clean-active", dir);
       // Diverge from main so it's not "merged"
-      const wtPath = join(dir, ".gsd", "worktrees", "clean-active");
+      const wtPath = join(dir, ".sdd", "worktrees", "clean-active");
       writeFileSync(join(wtPath, "active.txt"), "active\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"active work\"", wtPath);

@@ -47,17 +47,17 @@ import {
 // ─── Fixture helpers ──────────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-e2e-parallel-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-e2e-parallel-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeMetricsLedger(base: string, ledger: MetricsLedger): void {
-  writeFileSync(join(base, '.gsd', 'metrics.json'), JSON.stringify(ledger, null, 2));
+  writeFileSync(join(base, '.sdd', 'metrics.json'), JSON.stringify(ledger, null, 2));
 }
 
 function readMetricsLedger(base: string): MetricsLedger {
-  return JSON.parse(readFileSync(join(base, '.gsd', 'metrics.json'), 'utf-8'));
+  return JSON.parse(readFileSync(join(base, '.sdd', 'metrics.json'), 'utf-8'));
 }
 
 function makeUnit(overrides: Partial<UnitMetrics> = {}): UnitMetrics {
@@ -89,8 +89,8 @@ test('E2E: Parallel workers across milestones', () => {
   const base = createFixtureBase();
 
   // Create milestone directories
-  mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
-  mkdirSync(join(base, '.gsd', 'milestones', 'M002'), { recursive: true });
+  mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
+  mkdirSync(join(base, '.sdd', 'milestones', 'M002'), { recursive: true });
 
   // Simulate M001 parallel workers (batch 1)
   const batch1Id = "batch-m001";

@@ -489,7 +489,7 @@ test("formatForTelegram single-question produces inline keyboard", () => {
 
   const msg = formatForTelegram(prompt);
   assert.equal(msg.parse_mode, "HTML");
-  assert.ok(msg.text.includes("<b>GSD needs your input</b>"));
+  assert.ok(msg.text.includes("<b>SDD needs your input</b>"));
   assert.ok(msg.text.includes("<b>Confirm</b>"));
   assert.ok(msg.reply_markup, "single-question should have inline keyboard");
   assert.equal(msg.reply_markup!.inline_keyboard.length, 2, "should have 2 button rows");
@@ -707,8 +707,8 @@ test("resolveRemoteConfig returns null when preferences are absent (no env side-
   const savedTelegram = process.env.TELEGRAM_BOT_TOKEN;
   try {
     // Point HOME to a nonexistent dir so auth.json lookup finds nothing.
-    process.env.HOME = "/tmp/gsd-no-such-home-for-test";
-    process.env.USERPROFILE = "/tmp/gsd-no-such-home-for-test";
+    process.env.HOME = "/tmp/sdd-no-such-home-for-test";
+    process.env.USERPROFILE = "/tmp/sdd-no-such-home-for-test";
     delete process.env.DISCORD_BOT_TOKEN;
     delete process.env.SLACK_BOT_TOKEN;
     delete process.env.TELEGRAM_BOT_TOKEN;

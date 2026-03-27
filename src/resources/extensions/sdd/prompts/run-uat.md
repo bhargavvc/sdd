@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing SDD auto-mode.
 
 ## UNIT: Run UAT — {{milestoneId}}/{{sliceId}}
 
@@ -55,7 +55,7 @@ After running all checks, compute the **overall verdict**:
 - `FAIL` — one or more automatable checks failed
 - `PARTIAL` — one or more automatable checks were skipped or returned inconclusive results (not the same as `NEEDS-HUMAN` — use PARTIAL only when the agent itself could not determine pass/fail for a check it was supposed to automate)
 
-Call `gsd_summary_save` with `milestone_id: {{milestoneId}}`, `slice_id: {{sliceId}}`, `artifact_type: "ASSESSMENT"`, and the full UAT result markdown as `content` — the tool computes the file path and persists to both DB and disk. The content should follow this format:
+Call `sdd_summary_save` with `milestone_id: {{milestoneId}}`, `slice_id: {{sliceId}}`, `artifact_type: "ASSESSMENT"`, and the full UAT result markdown as `content` — the tool computes the file path and persists to both DB and disk. The content should follow this format:
 
 ```markdown
 ---
@@ -84,6 +84,6 @@ date: <ISO 8601 timestamp>
 
 ---
 
-**You MUST call `gsd_summary_save` with the UAT result content before finishing.**
+**You MUST call `sdd_summary_save` with the UAT result content before finishing.**
 
 When done, say: "UAT {{sliceId}} complete."

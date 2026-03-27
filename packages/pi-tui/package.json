@@ -1,5 +1,5 @@
 {
-  "name": "@gsd/pi-tui",
+  "name": "@sdd/pi-tui",
   "version": "0.57.1",
   "description": "Terminal User Interface library (vendored from pi-mono)",
   "type": "module",

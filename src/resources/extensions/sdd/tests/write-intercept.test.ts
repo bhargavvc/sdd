@@ -1,4 +1,4 @@
-// GSD Extension — write-intercept unit tests
+// SDD Extension — write-intercept unit tests
 // Tests isBlockedStateFile() and BLOCKED_WRITE_ERROR constant.
 
 import test from 'node:test';
@@ -71,6 +71,6 @@ test('write-intercept: BLOCKED_WRITE_ERROR is a non-empty string', () => {
 });
 
 test('write-intercept: BLOCKED_WRITE_ERROR mentions engine tool calls', () => {
-  assert.ok(BLOCKED_WRITE_ERROR.includes('gsd_complete_task'), 'should mention gsd_complete_task');
+  assert.ok(BLOCKED_WRITE_ERROR.includes('sdd_complete_task'), 'should mention sdd_complete_task');
   assert.ok(BLOCKED_WRITE_ERROR.includes('engine tool calls'), 'should mention engine tool calls');
 });

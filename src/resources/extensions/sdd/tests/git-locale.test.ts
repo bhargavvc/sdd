@@ -20,7 +20,7 @@ function git(cwd: string, ...args: string[]): string {
 }
 
 function initTempRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-locale-"));
+  const dir = mkdtempSync(join(tmpdir(), "sdd-locale-"));
   git(dir, "init");
   git(dir, "config", "user.email", "test@test.com");
   git(dir, "config", "user.name", "Test");
@@ -55,12 +55,12 @@ describe('git-locale', async () => {
   // ─── nativeAddAllWithExclusions: non-English locale does not throw ───
 
   test('nativeAddAllWithExclusions: non-English locale does not throw', () => {
-    // Simulate what happens on a German system: .gsd is gitignored,
+    // Simulate what happens on a German system: .sdd is gitignored,
     // exclusion pathspecs trigger an advisory warning exit code 1.
     // With LC_ALL=C the English stderr guard should match and suppress.
     const repo = initTempRepo();
 
-    writeFileSync(join(repo, ".gitignore"), ".gsd\n");
+    writeFileSync(join(repo, ".gitignore"), ".sdd\n");
     createFile(repo, ".sdd/STATE.md", "# State");
     createFile(repo, "src/app.ts", "export const x = 1;");
 
@@ -86,7 +86,7 @@ describe('git-locale', async () => {
 
     assert.ok(
       !threw,
-      "nativeAddAllWithExclusions must not throw on non-English locale when .gsd is gitignored (#1997)"
+      "nativeAddAllWithExclusions must not throw on non-English locale when .sdd is gitignored (#1997)"
     );
 
     const staged = git(repo, "diff", "--cached", "--name-only");

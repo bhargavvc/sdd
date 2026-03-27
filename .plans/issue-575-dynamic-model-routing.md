@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-Users on capped plans (e.g., Claude Pro) exhaust weekly token limits in 15-20 hours of GSD usage. Currently, GSD uses a single model per phase (research/planning/execution/completion), configured statically in preferences. Simple tasks consume the same tokens as complex ones.
+Users on capped plans (e.g., Claude Pro) exhaust weekly token limits in 15-20 hours of SDD usage. Currently, SDD uses a single model per phase (research/planning/execution/completion), configured statically in preferences. Simple tasks consume the same tokens as complex ones.
 
 ## Current Architecture
 
@@ -281,7 +281,7 @@ dynamic_routing:
 
 ## Estimated Token Savings
 
-Based on typical GSD session patterns:
+Based on typical SDD session patterns:
 - ~30% of units are completion/summary (Tier 1 candidates)
 - ~40% are research/standard planning (Tier 2 candidates)
 - ~30% are complex execution (Tier 3, no downgrade)
@@ -317,19 +317,19 @@ When multiple providers are configured, the router should consider cost differen
 - `resolveModelForComplexity()` ranks available models by cost within a tier's capability range
 - Preference key: `dynamic_routing.cross_provider: true|false` (default: true when enabled)
 
-**Risk:** Cost data goes stale. Mitigate with a bundled cost table that gets updated with GSD releases + user override capability.
+**Risk:** Cost data goes stale. Mitigate with a bundled cost table that gets updated with SDD releases + user override capability.
 
 ### 4. User feedback loop — YES
 After each unit completes, users can flag the output quality to improve future classification.
 
 **Implementation (Phase 3 — Adaptive Learning):**
-- Post-unit prompt option: user can react with `/gsd:rate-unit [over|under|ok]`
+- Post-unit prompt option: user can react with `/sdd:rate-unit [over|under|ok]`
   - `over` = "this could have used a simpler model" → records downgrade signal
   - `under` = "this needed a better model" → records upgrade signal
   - `ok` = confirms current tier was appropriate
 - Feedback stored alongside outcome data in `.sdd/routing-history.json`
 - Classifier weights feedback signals 2x vs. automatic success/failure detection
-- Skill: `gsd:rate-unit` — simple command that tags the last completed unit
+- Skill: `sdd:rate-unit` — simple command that tags the last completed unit
 
 ### Updated Preference Configuration
 
@@ -360,5 +360,5 @@ dynamic_routing:
 |-------|-------|----------|
 | **1 — Foundation** | Classifier, router, dispatch, hook classification, budget pressure | Decisions 1 & 2 |
 | **2 — Observability** | Dashboard, tier badges, savings tracking, cost table | Decision 3 |
-| **3 — Adaptive Learning** | Outcome tracking, user feedback (`/gsd:rate-unit`), adaptive thresholds | Decision 4 |
+| **3 — Adaptive Learning** | Outcome tracking, user feedback (`/sdd:rate-unit`), adaptive thresholds | Decision 4 |
 | **4 — Task Introspection** | Parse task plans for deeper complexity signals | — |

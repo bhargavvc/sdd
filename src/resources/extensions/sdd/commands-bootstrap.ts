@@ -1,11 +1,11 @@
-import { importExtensionModule, type ExtensionAPI, type ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import { importExtensionModule, type ExtensionAPI, type ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 const TOP_LEVEL_SUBCOMMANDS = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
-  { cmd: "next", desc: "Explicit step mode (same as /gsd)" },
+  { cmd: "next", desc: "Explicit step mode (same as /sdd)" },
   { cmd: "auto", desc: "Autonomous mode — research, plan, execute, commit, repeat" },
   { cmd: "stop", desc: "Stop auto mode gracefully" },
-  { cmd: "pause", desc: "Pause auto-mode (preserves state, /gsd auto to resume)" },
+  { cmd: "pause", desc: "Pause auto-mode (preserves state, /sdd auto to resume)" },
   { cmd: "status", desc: "Progress dashboard" },
   { cmd: "visualize", desc: "Open workflow visualizer" },
   { cmd: "queue", desc: "Queue and reorder future milestones" },
@@ -32,7 +32,7 @@ const TOP_LEVEL_SUBCOMMANDS = [
   { cmd: "forensics", desc: "Examine execution logs" },
   { cmd: "init", desc: "Project init wizard" },
   { cmd: "setup", desc: "Global setup status and configuration" },
-  { cmd: "migrate", desc: "Migrate a v1 .planning directory to .gsd format" },
+  { cmd: "migrate", desc: "Migrate a v1 .planning directory to .sdd format" },
   { cmd: "remote", desc: "Control remote auto-mode" },
   { cmd: "steer", desc: "Hard-steer plan documents during execution" },
   { cmd: "inspect", desc: "Show SQLite DB diagnostics" },
@@ -41,7 +41,7 @@ const TOP_LEVEL_SUBCOMMANDS = [
   { cmd: "parallel", desc: "Parallel milestone orchestration" },
   { cmd: "park", desc: "Park a milestone" },
   { cmd: "unpark", desc: "Reactivate a parked milestone" },
-  { cmd: "update", desc: "Update GSD to the latest version" },
+  { cmd: "update", desc: "Update SDD to the latest version" },
   { cmd: "start", desc: "Start a workflow template" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions" },
@@ -196,7 +196,7 @@ function getGsdArgumentCompletions(prefix: string) {
       { cmd: "refactor", desc: "Inventory, plan waves, migrate, verify" },
       { cmd: "security-audit", desc: "Scan, triage, remediate, re-scan" },
       { cmd: "dep-upgrade", desc: "Assess, upgrade, fix breaks, verify" },
-      { cmd: "full-project", desc: "Complete GSD workflow with full ceremony" },
+      { cmd: "full-project", desc: "Complete SDD workflow with full ceremony" },
       { cmd: "resume", desc: "Resume an in-progress workflow" },
       { cmd: "--list", desc: "List all available templates" },
       { cmd: "--dry-run", desc: "Preview workflow without executing" },
@@ -241,13 +241,13 @@ function getGsdArgumentCompletions(prefix: string) {
   return null;
 }
 
-export function registerLazyGSDCommand(pi: ExtensionAPI): void {
-  pi.registerCommand("gsd", {
-    description: "GSD — Get Shit Done",
+export function registerLazySDDCommand(pi: ExtensionAPI): void {
+  pi.registerCommand("sdd", {
+    description: "SDD — Get Shit Done",
     getArgumentCompletions: getGsdArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
-      const { handleGSDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
-      await handleGSDCommand(args, ctx, pi);
+      const { handleSDDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
+      await handleSDDCommand(args, ctx, pi);
     },
   });
 }

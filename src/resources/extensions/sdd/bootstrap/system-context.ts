@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";
@@ -16,19 +16,19 @@ import { formatOverridesSection, loadActiveOverrides, loadFile, parseContinue, p
 import { toPosixPath } from "../../shared/mod.js";
 import { markCmuxPromptShown, shouldPromptToEnableCmux } from "../../cmux/index.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 function warnDeprecatedAgentInstructions(): void {
   const paths = [
     join(gsdHome, "agent-instructions.md"),
-    join(process.cwd(), ".gsd", "agent-instructions.md"),
+    join(process.cwd(), ".sdd", "agent-instructions.md"),
   ];
   for (const path of paths) {
     if (existsSync(path)) {
       console.warn(
-        `[GSD] DEPRECATED: ${path} is no longer loaded. ` +
+        `[SDD] DEPRECATED: ${path} is no longer loaded. ` +
         `Migrate your instructions to AGENTS.md (or CLAUDE.md) in the same directory. ` +
-        `See https://github.com/gsd-build/GSD-2/issues/1492`,
+        `See https://github.com/sdd-build/SDD-2/issues/1492`,
       );
     }
   }
@@ -38,7 +38,7 @@ export async function buildBeforeAgentStartResult(
   event: { prompt: string; systemPrompt: string },
   ctx: ExtensionContext,
 ): Promise<{ systemPrompt: string; message?: { customType: string; content: string; display: false } } | undefined> {
-  if (!existsSync(join(process.cwd(), ".gsd"))) return undefined;
+  if (!existsSync(join(process.cwd(), ".sdd"))) return undefined;
 
   const stopContextTimer = debugTime("context-inject");
   const systemContent = loadPrompt("system");
@@ -46,7 +46,7 @@ export async function buildBeforeAgentStartResult(
   if (shouldPromptToEnableCmux(loadedPreferences?.preferences)) {
     markCmuxPromptShown();
     ctx.ui.notify(
-      "cmux detected. Run /gsd cmux on to enable sidebar metadata, notifications, and visual subagent splits for this project.",
+      "cmux detected. Run /sdd cmux on to enable sidebar metadata, notifications, and visual subagent splits for this project.",
       "info",
     );
   }
@@ -58,7 +58,7 @@ export async function buildBeforeAgentStartResult(
     preferenceBlock = `\n\n${renderPreferencesForSystemPrompt(loadedPreferences.preferences, report.resolutions)}`;
     if (report.warnings.length > 0) {
       ctx.ui.notify(
-        `GSD skill preferences: ${report.warnings.length} unresolved skill${report.warnings.length === 1 ? "" : "s"}: ${report.warnings.join(", ")}`,
+        `SDD skill preferences: ${report.warnings.length} unresolved skill${report.warnings.length === 1 ? "" : "s"}: ${report.warnings.join(", ")}`,
         "warning",
       );
     }
@@ -67,7 +67,7 @@ export async function buildBeforeAgentStartResult(
   const { block: knowledgeBlock, globalSizeKb } = loadKnowledgeBlock(gsdHome, process.cwd());
   if (globalSizeKb > 4) {
     ctx.ui.notify(
-      `GSD: ~/.sdd/agent/KNOWLEDGE.md is ${globalSizeKb.toFixed(1)}KB — consider trimming to keep system prompt lean.`,
+      `SDD: ~/.sdd/agent/KNOWLEDGE.md is ${globalSizeKb.toFixed(1)}KB — consider trimming to keep system prompt lean.`,
       "warning",
     );
   }
@@ -98,7 +98,7 @@ export async function buildBeforeAgentStartResult(
 
   const injection = await buildGuidedExecuteContextInjection(event.prompt, process.cwd());
   const worktreeBlock = buildWorktreeContextBlock();
-  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — GSD]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
+  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — SDD]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
 
   stopContextTimer({
     systemPromptSize: fullSystem.length,
@@ -112,7 +112,7 @@ export async function buildBeforeAgentStartResult(
     ...(injection
       ? {
         message: {
-          customType: "gsd-guided-context",
+          customType: "sdd-guided-context",
           content: injection,
           display: false as const,
         },
@@ -176,13 +176,13 @@ function buildWorktreeContextBlock(): string {
       `IMPORTANT: Ignore the "Current working directory" shown earlier in this prompt.`,
       `The actual current working directory is: ${toPosixPath(process.cwd())}`,
       "",
-      `You are working inside a GSD worktree.`,
+      `You are working inside a SDD worktree.`,
       `- Worktree name: ${worktreeName}`,
       `- Worktree path (this is the real cwd): ${toPosixPath(process.cwd())}`,
       `- Main project: ${toPosixPath(worktreeMainCwd)}`,
       `- Branch: worktree/${worktreeName}`,
       "",
-      "All file operations, bash commands, and GSD state resolve against the worktree path above.",
+      "All file operations, bash commands, and SDD state resolve against the worktree path above.",
       "Use /worktree merge to merge changes back. Use /worktree return to switch back to the main tree.",
     ].join("\n");
   }
@@ -195,14 +195,14 @@ function buildWorktreeContextBlock(): string {
       `IMPORTANT: Ignore the "Current working directory" shown earlier in this prompt.`,
       `The actual current working directory is: ${toPosixPath(process.cwd())}`,
       "",
-      "You are working inside a GSD auto-worktree.",
+      "You are working inside a SDD auto-worktree.",
       `- Milestone worktree: ${autoWorktree.worktreeName}`,
       `- Worktree path (this is the real cwd): ${toPosixPath(process.cwd())}`,
       `- Main project: ${toPosixPath(autoWorktree.originalBase)}`,
       `- Branch: ${autoWorktree.branch}`,
       "",
-      "All file operations, bash commands, and GSD state resolve against the worktree path above.",
-      "Write every .gsd artifact in the worktree path above, never in the main project tree.",
+      "All file operations, bash commands, and SDD state resolve against the worktree path above.",
+      "Write every .sdd artifact in the worktree path above, never in the main project tree.",
     ].join("\n");
   }
 
@@ -252,7 +252,7 @@ async function buildTaskExecutionContextInjection(
   const overridesSection = formatOverridesSection(activeOverrides);
 
   return [
-    "[GSD Guided Execute Context]",
+    "[SDD Guided Execute Context]",
     "Use this injected context as startup context for guided task execution. Treat the inlined task plan as the authoritative local execution contract. Use source artifacts to verify details and run checks.",
     overridesSection, "",
     "",

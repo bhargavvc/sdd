@@ -34,7 +34,7 @@ in-process `workflow-logger` buffer to a persistent `.sdd/audit-log.jsonl`
 after every tool invocation, so "who did what and why" is durable.
 
 ### Stream 3 — Reversibility + Unit Ownership (P2)
-Add `gsd_task_reopen` and `gsd_slice_reopen` tools. Add a unit-ownership
+Add `sdd_task_reopen` and `sdd_slice_reopen` tools. Add a unit-ownership
 validation layer so an agent can only complete/reopen units it explicitly claimed.
 
 ---
@@ -45,9 +45,9 @@ validation layer so an agent can only complete/reopen units it explicitly claime
 
 ### Stream 1: State Machine Guards
 
-#### S1-T1: Add `getTask`, `getSlice`, `getMilestone` existence helpers to `gsd-db.ts`
+#### S1-T1: Add `getTask`, `getSlice`, `getMilestone` existence helpers to `sdd-db.ts`
 
-**Files:** `src/resources/extensions/sdd/gsd-db.ts`
+**Files:** `src/resources/extensions/sdd/sdd-db.ts`
 
 These are read-only DB helpers to confirm an entity exists and return its current
 `status` field before any mutation. Each returns `null` if not found.
@@ -170,9 +170,9 @@ export interface WorkflowEvent {
   ts: string;
   hash: string;
   actor: "agent" | "system";
-  actor_name?: string;       // ADD: e.g. "executor-agent-01", "gsd-orchestrator"
-  trigger_reason?: string;   // ADD: e.g. "plan-phase complete", "user invoked gsd_complete_task"
-  session_id?: string;       // ADD: process.env.GSD_SESSION_ID if set
+  actor_name?: string;       // ADD: e.g. "executor-agent-01", "sdd-orchestrator"
+  trigger_reason?: string;   // ADD: e.g. "plan-phase complete", "user invoked sdd_complete_task"
+  session_id?: string;       // ADD: process.env.SDD_SESSION_ID if set
 }
 ```
 
@@ -233,7 +233,7 @@ export function readAuditLog(basePath: string): LogEntry[]
 
 #### S3-T1: Add `updateTaskStatus` and `updateSliceStatus` DB helpers
 
-**File:** `src/resources/extensions/sdd/gsd-db.ts`
+**File:** `src/resources/extensions/sdd/sdd-db.ts`
 
 If they don't already exist (check first):
 ```ts
@@ -245,7 +245,7 @@ These are the write primitives needed by reopen tools.
 
 ---
 
-#### S3-T2: Implement `gsd_task_reopen` tool handler
+#### S3-T2: Implement `sdd_task_reopen` tool handler
 
 **New file:** `src/resources/extensions/sdd/tools/reopen-task.ts`
 
@@ -260,7 +260,7 @@ Logic:
 
 ---
 
-#### S3-T3: Implement `gsd_slice_reopen` tool handler
+#### S3-T3: Implement `sdd_slice_reopen` tool handler
 
 **New file:** `src/resources/extensions/sdd/tools/reopen-slice.ts`
 
@@ -314,7 +314,7 @@ Ownership is enforced only when claims are present, keeping the feature opt-in.
 
 | File | Change Type |
 |------|-------------|
-| `gsd-db.ts` | Add `getTask`, `getMilestoneById` existence helpers; add `updateTaskStatus`, `updateSliceStatus` |
+| `sdd-db.ts` | Add `getTask`, `getMilestoneById` existence helpers; add `updateTaskStatus`, `updateSliceStatus` |
 | `workflow-events.ts` | Extend `WorkflowEvent` with `actor_name`, `trigger_reason`, `session_id` |
 | `workflow-logger.ts` | Add persistent flush to `.sdd/audit-log.jsonl`; add `setLogBasePath`; add `readAuditLog` |
 | `tools/complete-task.ts` | State machine guards + ownership check + actor passthrough |
@@ -325,8 +325,8 @@ Ownership is enforced only when claims are present, keeping the feature opt-in.
 | `tools/plan-milestone.ts` | Block re-planning complete milestones + depends_on validation |
 | `tools/reassess-roadmap.ts` | Verify completedSliceId status + milestone status check |
 | `tools/replan-slice.ts` | Verify blockerTaskId exists + slice status check |
-| `tools/reopen-task.ts` | NEW — gsd_task_reopen handler |
-| `tools/reopen-slice.ts` | NEW — gsd_slice_reopen handler |
+| `tools/reopen-task.ts` | NEW — sdd_task_reopen handler |
+| `tools/reopen-slice.ts` | NEW — sdd_slice_reopen handler |
 | `unit-ownership.ts` | NEW — claim/release/check ownership |
 
 ---
@@ -370,7 +370,7 @@ After this phase:
 3. **Re-plan closed work** → returns `{ error: "Cannot re-plan: slice S01 is already complete" }`
 4. **Wrong agent completes task** → returns `{ error: "Unit M01/S01/T01 is owned by executor-01, not executor-02" }`
 5. **Post-mortem** → `.sdd/audit-log.jsonl` has full trace with actor_name + trigger_reason across context resets
-6. **Oops recovery** → `gsd_task_reopen` / `gsd_slice_reopen` without manual SQL surgery
+6. **Oops recovery** → `sdd_task_reopen` / `sdd_slice_reopen` without manual SQL surgery
 7. **depends_on enforcement** → cannot plan M02 if M01 is not yet complete
 
 ---
@@ -390,7 +390,7 @@ After this phase:
 ### Additional task from decision 5:
 #### S1-T10: Convert `insertAssessment` and `insertReplanHistory` to upserts
 
-**File:** `src/resources/extensions/sdd/gsd-db.ts`
+**File:** `src/resources/extensions/sdd/sdd-db.ts`
 
 - `insertAssessment`: upsert keyed on `(milestone_id, completed_slice_id)` — one assessment per completed slice per milestone
 - `insertReplanHistory`: upsert keyed on `(milestone_id, slice_id, blocker_task_id)` — one replan record per blocker per slice

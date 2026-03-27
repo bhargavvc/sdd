@@ -6,7 +6,7 @@ import { join } from "node:path"
 import type { Page, Request, Response } from "playwright"
 
 const projectRoot = process.cwd()
-const resolveTsPath = join(projectRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+const resolveTsPath = join(projectRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 const loaderPath = join(projectRoot, "src", "loader.ts")
 const builtAgentEntryPath = join(projectRoot, "packages", "pi-coding-agent", "dist", "index.js")
 const packagedWebHostPath = join(projectRoot, "dist", "web", "standalone", "server.js")
@@ -62,7 +62,7 @@ export type RuntimeReadyProof<TBoot = unknown> = {
 }
 
 export function writePreseededAuthFile(tempHome: string): void {
-  const agentDir = join(tempHome, ".gsd", "agent")
+  const agentDir = join(tempHome, ".sdd", "agent")
   mkdirSync(agentDir, { recursive: true, mode: 0o700 })
   const authPath = join(agentDir, "auth.json")
   const fakeCredential = { type: "api_key", key: "sk-ant-test-fake-key-for-runtime-test" }
@@ -109,7 +109,7 @@ export function ensureRuntimeArtifacts(): void {
 }
 
 export function parseStartedUrl(stderr: string): string {
-  const match = stderr.match(/\[gsd\] Web mode startup: status=started[^\n]*url=(http:\/\/[^\s]+)/)
+  const match = stderr.match(/\[sdd\] Web mode startup: status=started[^\n]*url=(http:\/\/[^\s]+)/)
   if (!match) {
     throw new Error(`Did not find successful web startup line in stderr:\n${stderr}`)
   }
@@ -117,7 +117,7 @@ export function parseStartedUrl(stderr: string): string {
 }
 
 function parseReadyAuthToken(stderr: string): string | null {
-  const match = stderr.match(/\[gsd\] Ready → http:\/\/[^\s]+\/#token=([a-f0-9]{64})/)
+  const match = stderr.match(/\[sdd\] Ready → http:\/\/[^\s]+\/#token=([a-f0-9]{64})/)
   return match?.[1] ?? null
 }
 
@@ -130,7 +130,7 @@ export async function launchPackagedWebHost(options: {
 }): Promise<RuntimeLaunchResult> {
   ensureRuntimeArtifacts()
 
-  mkdirSync(join(options.tempHome, ".gsd"), { recursive: true })
+  mkdirSync(join(options.tempHome, ".sdd"), { recursive: true })
   const browserLogPath = options.browserLogPath ?? join(options.tempHome, "browser-open.log")
   const fakeBin = join(options.tempHome, "fake-bin")
   mkdirSync(fakeBin, { recursive: true })
@@ -171,7 +171,7 @@ export async function launchPackagedWebHost(options: {
 
     const timeout = setTimeout(() => {
       child.kill("SIGTERM")
-      finish(new Error(`Timed out waiting for gsd --web to exit. stderr so far:\n${stderr}`))
+      finish(new Error(`Timed out waiting for sdd --web to exit. stderr so far:\n${stderr}`))
     }, options.timeoutMs ?? 180_000)
 
     child.stdout.on("data", (chunk: Buffer) => {

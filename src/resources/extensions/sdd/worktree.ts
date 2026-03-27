@@ -1,5 +1,5 @@
 /**
- * GSD Worktree Utilities
+ * SDD Worktree Utilities
  *
  * Pure utility functions for worktree name detection, legacy branch name
  * parsing, and integration branch capture.
@@ -55,7 +55,7 @@ export function setActiveMilestoneId(basePath: string, milestoneId: string | nul
  * Called once when auto-mode starts — captures where slice branches should
  * merge back to. No-op if the same branch is already recorded. Updates the
  * record when the user starts from a different branch (#300). Always a no-op
- * if on a GSD slice branch.
+ * if on a SDD slice branch.
  */
 export function captureIntegrationBranch(basePath: string, milestoneId: string): void {
   // In a worktree, the base branch is implicit (worktree/<name>).
@@ -71,7 +71,7 @@ export function captureIntegrationBranch(basePath: string, milestoneId: string):
 /**
  * Find the worktrees segment in a path, supporting both direct
  * (`/.sdd/worktrees/`) and symlink-resolved (`/.sdd/projects/<hash>/worktrees/`)
- * layouts.  When `.gsd` is a symlink to `~/.sdd/projects/<hash>`, resolved
+ * layouts.  When `.sdd` is a symlink to `~/.sdd/projects/<hash>`, resolved
  * paths contain the intermediate `projects/<hash>/` segment that the old
  * single-marker check missed.
  */
@@ -83,7 +83,7 @@ function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWor
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   // Symlink-resolved layout: /.sdd/projects/<hash>/worktrees/<name>
-  const symlinkRe = /\/\.gsd\/projects\/[a-f0-9]+\/worktrees\//;
+  const symlinkRe = /\/\.sdd\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
     return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
@@ -93,7 +93,7 @@ function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWor
 
 /**
  * Detect the active worktree name from the current working directory.
- * Returns null if not inside a GSD worktree (.sdd/worktrees/<name>/).
+ * Returns null if not inside a SDD worktree (.sdd/worktrees/<name>/).
  */
 export function detectWorktreeName(basePath: string): string | null {
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -109,11 +109,11 @@ export function detectWorktreeName(basePath: string): string | null {
  * If the path contains a worktrees segment, returns the portion before
  * `/.sdd/`. Otherwise returns the input unchanged.
  *
- * When the worker was spawned with GSD_PROJECT_ROOT set, use that directly —
+ * When the worker was spawned with SDD_PROJECT_ROOT set, use that directly —
  * the coordinator already knows the real project root unambiguously.
  *
  * When `/.sdd/` in the resolved path is actually the user-level `~/.sdd/`
- * (common when `.gsd` is a symlink into `~/.sdd/projects/<hash>`), the
+ * (common when `.sdd` is a symlink into `~/.sdd/projects/<hash>`), the
  * string-slice heuristic would return `~` — which is catastrophically wrong.
  * In that case, fall back to reading the worktree's `.git` file, which
  * contains a `gitdir:` pointer to the real project's `.git/worktrees/<name>`,
@@ -124,8 +124,8 @@ export function detectWorktreeName(basePath: string): string | null {
  */
 export function resolveProjectRoot(basePath: string): string {
   // Layer 1: If the coordinator passed the real project root, use it.
-  if (process.env.GSD_PROJECT_ROOT) {
-    return process.env.GSD_PROJECT_ROOT;
+  if (process.env.SDD_PROJECT_ROOT) {
+    return process.env.SDD_PROJECT_ROOT;
   }
 
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -134,21 +134,21 @@ export function resolveProjectRoot(basePath: string): string {
 
   // Candidate root via the string-slice heuristic
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.gsd${sepChar}`;
+  const gsdMarker = `${sepChar}.sdd${sepChar}`;
   const gsdIdx = basePath.indexOf(gsdMarker);
   const candidate = gsdIdx !== -1
     ? basePath.slice(0, gsdIdx)
     : basePath.slice(0, seg.gsdIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  // When .gsd is a symlink into ~/.sdd/projects/<hash>, the resolved path
+  // When .sdd is a symlink into ~/.sdd/projects/<hash>, the resolved path
   // contains /.sdd/ at the user-level boundary. Slicing there yields ~ — wrong.
-  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".gsd"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".gsd"));
+  const gsdHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
+  const candidateGsdPath = normalizePathForCompare(join(candidate, ".sdd"));
 
   if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
-    // The candidate is the home directory (or within it in a way that .gsd
-    // maps to the user-level GSD dir). Try to recover the real project root
+    // The candidate is the home directory (or within it in a way that .sdd
+    // maps to the user-level SDD dir). Try to recover the real project root
     // from the worktree's .git file.
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
@@ -221,8 +221,8 @@ function normalizePathForCompare(path: string): string {
 /**
  * Get the slice branch name, namespaced by worktree when inside one.
  *
- * In the main tree:     gsd/<milestoneId>/<sliceId>
- * In a worktree:        gsd/<worktreeName>/<milestoneId>/<sliceId>
+ * In the main tree:     sdd/<milestoneId>/<sliceId>
+ * In a worktree:        sdd/<worktreeName>/<milestoneId>/<sliceId>
  *
  * This prevents branch conflicts when multiple worktrees work on the
  * same milestone/slice IDs — git doesn't allow a branch to be checked
@@ -230,9 +230,9 @@ function normalizePathForCompare(path: string): string {
  */
 export function getSliceBranchName(milestoneId: string, sliceId: string, worktreeName?: string | null): string {
   if (worktreeName) {
-    return `gsd/${worktreeName}/${milestoneId}/${sliceId}`;
+    return `sdd/${worktreeName}/${milestoneId}/${sliceId}`;
   }
-  return `gsd/${milestoneId}/${sliceId}`;
+  return `sdd/${milestoneId}/${sliceId}`;
 }
 
 /** Re-export for backward compatibility — canonical definition in branch-patterns.ts */
@@ -241,7 +241,7 @@ import { SLICE_BRANCH_RE } from "./branch-patterns.js";
 
 /**
  * Parse a slice branch name into its components.
- * Handles both `gsd/M001/S01` and `gsd/myworktree/M001/S01`.
+ * Handles both `sdd/M001/S01` and `sdd/myworktree/M001/S01`.
  */
 export function parseSliceBranch(branchName: string): {
   worktreeName: string | null;
@@ -260,7 +260,7 @@ export function parseSliceBranch(branchName: string): {
 // ─── Git-Mutation Functions (delegate to GitServiceImpl) ───────────────────
 
 /**
- * Get the "main" branch for GSD slice operations.
+ * Get the "main" branch for SDD slice operations.
  *
  * In the main working tree: returns main/master (the repo's default branch).
  * In a worktree: returns worktree/<name> — the worktree's own base branch.

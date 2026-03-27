@@ -18,7 +18,7 @@ import {
   getPendingSliceGateCount,
   insertMilestone,
   insertSlice,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 describe("quality_gates CRUD", () => {
   let tmpDir: string;
@@ -26,7 +26,7 @@ describe("quality_gates CRUD", () => {
 
   beforeEach(() => {
     tmpDir = mkdtempSync(join(tmpdir(), "gate-test-"));
-    dbPath = join(tmpDir, "gsd.db");
+    dbPath = join(tmpDir, "sdd.db");
     openDatabase(dbPath);
     // Seed parent rows
     insertMilestone({

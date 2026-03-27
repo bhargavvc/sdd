@@ -21,8 +21,8 @@ import {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-journal-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  const base = join(tmpdir(), `sdd-journal-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   return base;
 }
 
@@ -55,7 +55,7 @@ describe("emitJournalEvent", () => {
     const entry = makeEntry();
     emitJournalEvent(base, entry);
 
-    const filePath = join(base, ".gsd", "journal", "2025-03-21.jsonl");
+    const filePath = join(base, ".sdd", "journal", "2025-03-21.jsonl");
     assert.ok(existsSync(filePath), "JSONL file should exist");
 
     const raw = readFileSync(filePath, "utf-8").trim();
@@ -71,7 +71,7 @@ describe("emitJournalEvent", () => {
     emitJournalEvent(base, makeEntry({ seq: 1, eventType: "dispatch-match" }));
     emitJournalEvent(base, makeEntry({ seq: 2, eventType: "unit-start" }));
 
-    const filePath = join(base, ".gsd", "journal", "2025-03-21.jsonl");
+    const filePath = join(base, ".sdd", "journal", "2025-03-21.jsonl");
     const lines = readFileSync(filePath, "utf-8").trim().split("\n");
     assert.equal(lines.length, 3, "Should have 3 lines");
 
@@ -90,7 +90,7 @@ describe("emitJournalEvent", () => {
     });
     emitJournalEvent(base, entry);
 
-    const filePath = join(base, ".gsd", "journal", "2025-03-21.jsonl");
+    const filePath = join(base, ".sdd", "journal", "2025-03-21.jsonl");
     const parsed = JSON.parse(readFileSync(filePath, "utf-8").trim());
     assert.equal(parsed.rule, "my-dispatch-rule");
     assert.deepEqual(parsed.causedBy, { flowId: "flow-prior", seq: 3 });
@@ -99,7 +99,7 @@ describe("emitJournalEvent", () => {
   });
 
   test("silently catches read-only directory errors", () => {
-    const journalDir = join(base, ".gsd", "journal");
+    const journalDir = join(base, ".sdd", "journal");
     mkdirSync(journalDir, { recursive: true });
 
     // Make the journal directory read-only
@@ -122,14 +122,14 @@ describe("emitJournalEvent", () => {
 describe("emitJournalEvent — auto-creates parent directory", () => {
   let base: string;
   beforeEach(() => {
-    base = join(tmpdir(), `gsd-journal-test-${randomUUID()}`);
+    base = join(tmpdir(), `sdd-journal-test-${randomUUID()}`);
     // Don't create .sdd/ — emitJournalEvent should handle it via mkdirSync recursive
   });
   afterEach(() => { cleanup(base); });
 
   test("auto-creates nonexistent parent directory", () => {
     emitJournalEvent(base, makeEntry());
-    const filePath = join(base, ".gsd", "journal", "2025-03-21.jsonl");
+    const filePath = join(base, ".sdd", "journal", "2025-03-21.jsonl");
     assert.ok(existsSync(filePath), "File should exist even when parent dirs did not");
   });
 });
@@ -153,7 +153,7 @@ describe("daily rotation", () => {
     emitJournalEvent(base, makeEntry({ ts: "2025-03-21T00:00:01.000Z" }));
     emitJournalEvent(base, makeEntry({ ts: "2025-03-22T12:00:00.000Z" }));
 
-    const journalDir = join(base, ".gsd", "journal");
+    const journalDir = join(base, ".sdd", "journal");
     assert.ok(existsSync(join(journalDir, "2025-03-20.jsonl")));
     assert.ok(existsSync(join(journalDir, "2025-03-21.jsonl")));
     assert.ok(existsSync(join(journalDir, "2025-03-22.jsonl")));
@@ -276,7 +276,7 @@ describe("queryJournal", () => {
   });
 
   test("skips malformed JSON lines gracefully", () => {
-    const journalDir = join(base, ".gsd", "journal");
+    const journalDir = join(base, ".sdd", "journal");
     mkdirSync(journalDir, { recursive: true });
 
     // Write a file with a mix of valid and invalid lines
@@ -329,7 +329,7 @@ describe("queryJournal", () => {
 describe("queryJournal — nonexistent directory", () => {
   let base: string;
   beforeEach(() => {
-    base = join(tmpdir(), `gsd-journal-test-${randomUUID()}`);
+    base = join(tmpdir(), `sdd-journal-test-${randomUUID()}`);
     // Don't create anything
   });
   afterEach(() => { cleanup(base); });

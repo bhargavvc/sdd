@@ -9,7 +9,7 @@ artifact_dir: .sdd/workflows/features/
 
 <purpose>
 Build a small-to-medium feature with lightweight planning. Designed for work that
-needs more structure than /gsd quick but doesn't warrant full milestone ceremony.
+needs more structure than /sdd quick but doesn't warrant full milestone ceremony.
 Typical scope: a new command, endpoint, component, or module.
 </purpose>
 

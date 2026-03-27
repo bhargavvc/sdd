@@ -19,77 +19,77 @@ function baseInput(overrides: Partial<Parameters<typeof deriveWorkflowAction>[0]
 }
 
 // ─── Group 1: Phase → action mapping ──────────────────────────────────
-test("planning + no auto → primary is /gsd with label Plan", () => {
+test("planning + no auto → primary is /sdd with label Plan", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "planning" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "Plan");
   assert.equal(result.primary.variant, "default");
   assert.equal(result.disabled, false);
 });
 
-test("executing + no auto → primary is /gsd auto with label Start Auto", () => {
+test("executing + no auto → primary is /sdd auto with label Start Auto", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "executing" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd auto");
+  assert.equal(result.primary.command, "/sdd auto");
   assert.equal(result.primary.label, "Start Auto");
 });
 
-test("summarizing + no auto → primary is /gsd auto with label Start Auto", () => {
+test("summarizing + no auto → primary is /sdd auto with label Start Auto", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "summarizing" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd auto");
+  assert.equal(result.primary.command, "/sdd auto");
   assert.equal(result.primary.label, "Start Auto");
 });
 
-test("auto active (not paused) → primary is /gsd stop with destructive variant", () => {
+test("auto active (not paused) → primary is /sdd stop with destructive variant", () => {
   const result = deriveWorkflowAction(baseInput({ autoActive: true, autoPaused: false }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd stop");
+  assert.equal(result.primary.command, "/sdd stop");
   assert.equal(result.primary.label, "Stop Auto");
   assert.equal(result.primary.variant, "destructive");
 });
 
-test("auto paused → primary is /gsd auto with label Resume Auto", () => {
+test("auto paused → primary is /sdd auto with label Resume Auto", () => {
   const result = deriveWorkflowAction(baseInput({ autoPaused: true }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd auto");
+  assert.equal(result.primary.command, "/sdd auto");
   assert.equal(result.primary.label, "Resume Auto");
   assert.equal(result.primary.variant, "default");
 });
 
-test("pre-planning + no milestones → primary is /gsd with label Initialize Project", () => {
+test("pre-planning + no milestones → primary is /sdd with label Initialize Project", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "pre-planning", hasMilestones: false }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "Initialize Project");
 });
 
-test("pre-planning + has milestones → primary is /gsd with label Continue", () => {
+test("pre-planning + has milestones → primary is /sdd with label Continue", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "pre-planning", hasMilestones: true }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "Continue");
 });
 
-test("other phases (e.g. researching) without auto → primary is Continue /gsd", () => {
+test("other phases (e.g. researching) without auto → primary is Continue /sdd", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "researching" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "Continue");
 });
 
-test("verifying phase without auto → primary is Continue /gsd", () => {
+test("verifying phase without auto → primary is Continue /sdd", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "verifying" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "Continue");
 });
 
-test("complete phase without auto → primary is New Milestone /gsd with no step secondary", () => {
+test("complete phase without auto → primary is New Milestone /sdd with no step secondary", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "complete" }));
   assert.ok(result.primary);
-  assert.equal(result.primary.command, "/gsd");
+  assert.equal(result.primary.command, "/sdd");
   assert.equal(result.primary.label, "New Milestone");
   assert.equal(result.isNewMilestone, true);
   assert.deepEqual(result.secondaries, []);
@@ -99,7 +99,7 @@ test("complete phase without auto → primary is New Milestone /gsd with no step
 test("secondaries include Step when auto is not active", () => {
   const result = deriveWorkflowAction(baseInput({ phase: "executing" }));
   assert.ok(result.secondaries.length > 0);
-  const step = result.secondaries.find((s) => s.command === "/gsd next");
+  const step = result.secondaries.find((s) => s.command === "/sdd next");
   assert.ok(step, "Expected a Step secondary action");
   assert.equal(step.label, "Step");
 });

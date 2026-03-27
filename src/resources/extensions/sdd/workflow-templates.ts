@@ -1,5 +1,5 @@
 /**
- * GSD Workflow Templates — Registry & Resolution
+ * SDD Workflow Templates — Registry & Resolution
  *
  * Loads the workflow template registry and resolves templates by name,
  * alias, or trigger-keyword matching against user input.
@@ -13,12 +13,12 @@ import { homedir } from "node:os";
 const __extensionDir = resolveGsdExtensionDir();
 const registryPath = join(__extensionDir, "workflow-templates", "registry.json");
 
-/** Resolve the GSD extension dir with fallback to ~/.sdd/agent/extensions/sdd/. */
+/** Resolve the SDD extension dir with fallback to ~/.sdd/agent/extensions/sdd/. */
 function resolveGsdExtensionDir(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
   if (existsSync(join(moduleDir, "workflow-templates"))) return moduleDir;
-  const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
-  const agentGsdDir = join(gsdHome, "agent", "extensions", "gsd");
+  const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+  const agentGsdDir = join(gsdHome, "agent", "extensions", "sdd");
   if (existsSync(join(agentGsdDir, "workflow-templates"))) return agentGsdDir;
   return moduleDir;
 }
@@ -196,8 +196,8 @@ export function listTemplates(): string {
     lines.push("");
   }
 
-  lines.push("Usage: /gsd start <template> [description]");
-  lines.push("       /gsd templates info <name>");
+  lines.push("Usage: /sdd start <template> [description]");
+  lines.push("       /sdd templates info <name>");
 
   return lines.join("\n");
 }

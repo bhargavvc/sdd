@@ -24,13 +24,13 @@ import { parkMilestone, unparkMilestone, discardMilestone } from '../milestone-a
 
 
 function createFixture(): string {
-  const b = mkdtempSync(join(tmpdir(), 'gsd-edge-'));
-  mkdirSync(join(b, '.gsd', 'milestones'), { recursive: true });
+  const b = mkdtempSync(join(tmpdir(), 'sdd-edge-'));
+  mkdirSync(join(b, '.sdd', 'milestones'), { recursive: true });
   return b;
 }
 
 function createM(b: string, mid: string, opts?: { roadmap?: boolean; summary?: boolean; dependsOn?: string[] }): void {
-  const d = join(b, '.gsd', 'milestones', mid);
+  const d = join(b, '.sdd', 'milestones', mid);
   mkdirSync(d, { recursive: true });
   if (opts?.dependsOn) {
     writeFileSync(join(d, `${mid}-CONTEXT.md`), `---\ndepends_on: [${opts.dependsOn.join(', ')}]\n---\n# ${mid}`, 'utf-8');
@@ -154,7 +154,7 @@ test('EDGE 6: Queue order after discard', async () => {
       createM(b, 'M002', { roadmap: true });
       createM(b, 'M003', { roadmap: true });
       writeFileSync(
-        join(b, '.gsd', 'QUEUE-ORDER.json'),
+        join(b, '.sdd', 'QUEUE-ORDER.json'),
         JSON.stringify({ order: ['M003', 'M001', 'M002'], updatedAt: new Date().toISOString() }),
         'utf-8',
       );
@@ -170,7 +170,7 @@ test('EDGE 6: Queue order after discard', async () => {
       assert.deepStrictEqual(s.activeMilestone?.id, 'M001', 'M001 active after M003 discarded');
 
       // Verify queue order file was updated
-      const order = JSON.parse(readFileSync(join(b, '.gsd', 'QUEUE-ORDER.json'), 'utf-8'));
+      const order = JSON.parse(readFileSync(join(b, '.sdd', 'QUEUE-ORDER.json'), 'utf-8'));
       assert.ok(!order.order.includes('M003'), 'M003 removed from QUEUE-ORDER.json');
     } finally {
       cleanup(b);

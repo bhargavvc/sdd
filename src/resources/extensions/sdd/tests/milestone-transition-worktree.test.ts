@@ -5,7 +5,7 @@
  * worktree lifecycle is handled: old worktree merged, new worktree created.
  *
  * Uses source-level checks since the full auto-mode dispatch loop
- * requires the @gsd/pi-coding-agent runtime.
+ * requires the @sdd/pi-coding-agent runtime.
  */
 
 import test from "node:test";
@@ -33,7 +33,7 @@ function run(command: string, cwd: string): string {
 }
 
 function createTempRepo(): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "gsd-mt-wt-test-")));
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdd-mt-wt-test-")));
   run("git init", dir);
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
@@ -45,7 +45,7 @@ function createTempRepo(): string {
 }
 
 function createMilestoneArtifacts(dir: string, mid: string): void {
-  const msDir = join(dir, ".gsd", "milestones", mid);
+  const msDir = join(dir, ".sdd", "milestones", mid);
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "CONTEXT.md"), `# ${mid} Context\n`);
   const roadmap = [
@@ -86,7 +86,7 @@ test("worktree swap on milestone transition: merge old, create new", () => {
     run("git commit -m \"feat(M001): add feature\"", wt1);
 
     // Phase 2: Simulate milestone transition — merge M001, exit worktree
-    const roadmapPath = join(tempDir, ".gsd", "milestones", "M001", "M001-ROADMAP.md");
+    const roadmapPath = join(tempDir, ".sdd", "milestones", "M001", "M001-ROADMAP.md");
     const roadmapContent = readFileSync(roadmapPath, "utf-8");
     mergeMilestoneToMain(tempDir, "M001", roadmapContent);
 

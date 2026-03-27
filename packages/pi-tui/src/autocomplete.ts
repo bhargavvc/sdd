@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from "fs";
 import { homedir } from "os";
 import { basename, dirname, join } from "path";
-import { fuzzyFind } from "@gsd/native/fd";
+import { fuzzyFind } from "@sdd/native/fd";
 import { fuzzyFilter } from "./fuzzy.js";
 
 const PATH_DELIMITERS = new Set([" ", "\t", '"', "'", "="]);

@@ -1,6 +1,6 @@
 /**
  * Service Tier — gating, status formatting, icon resolution, and
- * the /gsd fast command handler.
+ * the /sdd fast command handler.
  *
  * Service tiers (priority/flex) are an OpenAI feature that only applies
  * to gpt-5.4 variants. This module centralizes the model-gating logic
@@ -8,7 +8,7 @@
  * use a single source of truth.
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { existsSync, readFileSync } from "node:fs";
 import { saveFile } from "./files.js";
@@ -35,7 +35,7 @@ const SERVICE_TIER_SCOPE_NOTE = "Only affects gpt-5.4 models, regardless of prov
  * (set via CAPABILITY_PATCHES in packages/pi-ai/src/models.ts). When callers
  * have access to the full Model object, prefer reading capabilities directly.
  *
- * See: https://github.com/gsd-build/gsd-2/issues/2546
+ * See: https://github.com/sdd-build/sdd-2/issues/2546
  */
 const SERVICE_TIER_MODEL_PREFIXES = ["gpt-5.4"] as const;
 
@@ -61,9 +61,9 @@ export function formatServiceTierStatus(tier: ServiceTierSetting): string {
       "Service tier: disabled",
       "",
       "Usage:",
-      "  /gsd fast on     Set to priority (2x cost, faster)",
-      "  /gsd fast flex   Set to flex (0.5x cost, slower)",
-      "  /gsd fast off    Disable service tier",
+      "  /sdd fast on     Set to priority (2x cost, faster)",
+      "  /sdd fast flex   Set to flex (0.5x cost, slower)",
+      "  /sdd fast off    Disable service tier",
       "",
       SERVICE_TIER_SCOPE_NOTE,
     ].join("\n");
@@ -74,9 +74,9 @@ export function formatServiceTierStatus(tier: ServiceTierSetting): string {
     `Service tier: ${label}`,
     "",
     "Usage:",
-    "  /gsd fast on     Set to priority (2x cost, faster)",
-    "  /gsd fast flex   Set to flex (0.5x cost, slower)",
-    "  /gsd fast off    Disable service tier",
+    "  /sdd fast on     Set to priority (2x cost, faster)",
+    "  /sdd fast flex   Set to flex (0.5x cost, slower)",
+    "  /sdd fast off    Disable service tier",
     "",
     SERVICE_TIER_SCOPE_NOTE,
   ].join("\n");
@@ -143,7 +143,7 @@ async function writeGlobalServiceTier(
   }
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
   if (existsSync(path)) {
     const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
     if (preserved) body = preserved;
@@ -157,7 +157,7 @@ async function writeGlobalServiceTier(
 // ─── Command Handler ─────────────────────────────────────────────────────────
 
 /**
- * Handle `/gsd fast [on|off|flex|status]`.
+ * Handle `/sdd fast [on|off|flex|status]`.
  */
 export async function handleFast(args: string, ctx: ExtensionCommandContext): Promise<void> {
   const trimmed = args.trim().toLowerCase();
@@ -170,27 +170,27 @@ export async function handleFast(args: string, ctx: ExtensionCommandContext): Pr
 
   if (trimmed === "on") {
     await writeGlobalServiceTier(ctx, "priority");
-    ctx.ui.setStatus("gsd-fast", formatServiceTierFooterStatus("priority", ctx.model?.id));
+    ctx.ui.setStatus("sdd-fast", formatServiceTierFooterStatus("priority", ctx.model?.id));
     ctx.ui.notify("Service tier set to priority (2x cost, faster responses). Only affects gpt-5.4 models, regardless of provider.", "info");
     return;
   }
 
   if (trimmed === "off") {
     await writeGlobalServiceTier(ctx, undefined);
-    ctx.ui.setStatus("gsd-fast", undefined);
+    ctx.ui.setStatus("sdd-fast", undefined);
     ctx.ui.notify("Service tier disabled.", "info");
     return;
   }
 
   if (trimmed === "flex") {
     await writeGlobalServiceTier(ctx, "flex");
-    ctx.ui.setStatus("gsd-fast", formatServiceTierFooterStatus("flex", ctx.model?.id));
+    ctx.ui.setStatus("sdd-fast", formatServiceTierFooterStatus("flex", ctx.model?.id));
     ctx.ui.notify("Service tier set to flex (0.5x cost, slower responses). Only affects gpt-5.4 models, regardless of provider.", "info");
     return;
   }
 
   ctx.ui.notify(
-    "Usage: /gsd fast [on|off|flex|status]\n\n  on    Priority tier (2x cost, faster)\n  off   Disable service tier\n  flex  Flex tier (0.5x cost, slower)\n  status Show current setting",
+    "Usage: /sdd fast [on|off|flex|status]\n\n  on    Priority tier (2x cost, faster)\n  off   Disable service tier\n  flex  Flex tier (0.5x cost, slower)\n  status Show current setting",
     "warning",
   );
 }

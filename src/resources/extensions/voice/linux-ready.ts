@@ -14,7 +14,7 @@ import * as path from "node:path";
 
 export const VOICE_VENV_DIR = path.join(
 	process.env.HOME || process.env.USERPROFILE || os.homedir(),
-	".gsd",
+	".sdd",
 	"voice-venv",
 );
 export const VOICE_VENV_PYTHON = path.join(VOICE_VENV_DIR, "bin", "python3");

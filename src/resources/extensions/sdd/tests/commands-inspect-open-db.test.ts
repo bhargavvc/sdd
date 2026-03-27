@@ -5,12 +5,12 @@ import path from "node:path";
 import fs from "node:fs";
 
 import { handleInspect } from "../commands-inspect.ts";
-import { closeDatabase, openDatabase } from "../gsd-db.ts";
+import { closeDatabase, openDatabase } from "../sdd-db.ts";
 
-test("/gsd inspect opens existing database when it was not yet opened in session", async (t) => {
+test("/sdd inspect opens existing database when it was not yet opened in session", async (t) => {
   closeDatabase();
 
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-inspect-db-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-inspect-db-"));
   const prevCwd = process.cwd();
 
   t.after(() => {
@@ -19,9 +19,9 @@ test("/gsd inspect opens existing database when it was not yet opened in session
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
-  const gsdDir = path.join(tmp, ".gsd");
+  const gsdDir = path.join(tmp, ".sdd");
   fs.mkdirSync(gsdDir, { recursive: true });
-  const dbPath = path.join(gsdDir, "gsd.db");
+  const dbPath = path.join(gsdDir, "sdd.db");
 
   assert.equal(openDatabase(dbPath), true);
   closeDatabase();
@@ -41,6 +41,6 @@ test("/gsd inspect opens existing database when it was not yet opened in session
 
   assert.equal(notifications.length, 1);
   assert.equal(notifications[0].level, "info");
-  assert.match(notifications[0].message, /=== GSD Database Inspect ===/);
-  assert.doesNotMatch(notifications[0].message, /No GSD database available/);
+  assert.match(notifications[0].message, /=== SDD Database Inspect ===/);
+  assert.doesNotMatch(notifications[0].message, /No SDD database available/);
 });

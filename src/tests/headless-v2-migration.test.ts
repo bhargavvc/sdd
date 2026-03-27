@@ -388,7 +388,7 @@ test('v2 init success sets v2Enabled', async () => {
   const client = new MockRpcClient()
   let v2Enabled = false
   try {
-    await client.init({ clientId: 'gsd-headless' })
+    await client.init({ clientId: 'sdd-headless' })
     v2Enabled = true
   } catch {
     // fall back to v1
@@ -403,7 +403,7 @@ test('v2 init failure falls back gracefully (v1 mode)', async () => {
   client.initShouldFail = true
   let v2Enabled = false
   try {
-    await client.init({ clientId: 'gsd-headless' })
+    await client.init({ clientId: 'sdd-headless' })
     v2Enabled = true
   } catch {
     // fall back to v1 — this is expected

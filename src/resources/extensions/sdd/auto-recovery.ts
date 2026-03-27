@@ -7,12 +7,12 @@
  * globals or AutoContext dependency.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { parseUnitId } from "./unit-id.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { clearParseCache } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap, parsePlan as parseLegacyPlan } from "./parsers-legacy.js";
-import { isDbAvailable, getTask, getSlice, getSliceTasks, updateTaskStatus } from "./gsd-db.js";
+import { isDbAvailable, getTask, getSlice, getSliceTasks, updateTaskStatus } from "./sdd-db.js";
 import { isValidationTerminal } from "./state.js";
 import {
   nativeConflictFiles,
@@ -54,7 +54,7 @@ export { resolveExpectedArtifactPath, diagnoseExpectedArtifact };
 // ─── Artifact Resolution & Verification ───────────────────────────────────────
 
 /**
- * Check whether a milestone produced implementation artifacts (non-`.gsd/` files)
+ * Check whether a milestone produced implementation artifacts (non-`.sdd/` files)
  * in the git history. Uses `git log --name-only` to inspect all commits on the
  * current branch that touch files outside `.sdd/`.
  *
@@ -89,7 +89,7 @@ export function hasImplementationArtifacts(basePath: string): boolean {
     // Filter out .sdd/ files — only implementation files count.
     // If every changed file is under .sdd/, the milestone produced no
     // implementation code (#1703).
-    const implFiles = changedFiles.filter(f => !f.startsWith(".sdd/") && !f.startsWith(".gsd\\"));
+    const implFiles = changedFiles.filter(f => !f.startsWith(".sdd/") && !f.startsWith(".sdd\\"));
     return implFiles.length > 0;
   } catch {
     // Non-fatal — if git operations fail, don't block the pipeline
@@ -238,7 +238,7 @@ export function verifyExpectedArtifact(
     if (gateIds.length === 0) return true;
 
     try {
-      const { getPendingGates: getPending } = require("./gsd-db.js");
+      const { getPendingGates: getPending } = require("./sdd-db.js");
       const pending = getPending(mid, sid, "slice");
       const pendingIds = new Set(pending.map((g: any) => g.gate_id));
       // All dispatched gates must no longer be pending
@@ -545,9 +545,9 @@ export function buildLoopRemediationSteps(
     case "execute-task": {
       if (!mid || !sid || !tid) break;
       return [
-        `   1. Run \`gsd undo-task ${tid}\` to reset the task state`,
+        `   1. Run \`sdd undo-task ${tid}\` to reset the task state`,
         `   2. Resume auto-mode — it will re-execute the task`,
-        `   3. If the task keeps failing, run \`gsd recover\` to rebuild DB state from disk`,
+        `   3. If the task keeps failing, run \`sdd recover\` to rebuild DB state from disk`,
       ].join("\n");
     }
     case "plan-slice":
@@ -559,16 +559,16 @@ export function buildLoopRemediationSteps(
           : relSliceFile(base, mid, sid, "RESEARCH");
       return [
         `   1. Write ${artifactRel} manually (or with the LLM in interactive mode)`,
-        `   2. Run \`gsd recover\` to rebuild DB state from disk`,
+        `   2. Run \`sdd recover\` to rebuild DB state from disk`,
         `   3. Resume auto-mode`,
       ].join("\n");
     }
     case "complete-slice": {
       if (!mid || !sid) break;
       return [
-        `   1. Run \`gsd reset-slice ${sid}\` to reset the slice and all its tasks`,
+        `   1. Run \`sdd reset-slice ${sid}\` to reset the slice and all its tasks`,
         `   2. Resume auto-mode — it will re-execute incomplete tasks and re-complete the slice`,
-        `   3. If the slice keeps failing, run \`gsd recover\` to rebuild DB state from disk`,
+        `   3. If the slice keeps failing, run \`sdd recover\` to rebuild DB state from disk`,
       ].join("\n");
     }
     case "validate-milestone": {
@@ -576,7 +576,7 @@ export function buildLoopRemediationSteps(
       const artifactRel = relMilestoneFile(base, mid, "VALIDATION");
       return [
         `   1. Write ${artifactRel} with verdict: pass`,
-        `   2. Run \`gsd recover\` to rebuild DB state from disk`,
+        `   2. Run \`sdd recover\` to rebuild DB state from disk`,
         `   3. Resume auto-mode`,
       ].join("\n");
     }

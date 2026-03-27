@@ -18,19 +18,19 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { createTestContext } from "./test-helpers.ts";
 
 const { assertEq, assertTrue, report } = createTestContext();
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-disk-reconcile-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-disk-reconcile-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
 function writeFile(base: string, relativePath: string, content: string): void {
-  const full = join(base, ".gsd", relativePath);
+  const full = join(base, ".sdd", relativePath);
   mkdirSync(join(full, ".."), { recursive: true });
   writeFileSync(full, content);
 }
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
   // Set up: M001 in DB, M002 on disk only
   const base = createFixtureBase();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
 
   try {
     openDatabase(dbPath);

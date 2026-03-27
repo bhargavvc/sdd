@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { handleAutoCommand } from "./handlers/auto.js";
 import { handleCoreCommand } from "./handlers/core.js";
@@ -6,7 +6,7 @@ import { handleOpsCommand } from "./handlers/ops.js";
 import { handleParallelCommand } from "./handlers/parallel.js";
 import { handleWorkflowCommand } from "./handlers/workflow.js";
 
-export async function handleGSDCommand(
+export async function handleSDDCommand(
   args: string,
   ctx: ExtensionCommandContext,
   pi: ExtensionAPI,
@@ -27,6 +27,6 @@ export async function handleGSDCommand(
     }
   }
 
-  ctx.ui.notify(`Unknown: /gsd ${trimmed}. Run /gsd help for available commands.`, "warning");
+  ctx.ui.notify(`Unknown: /sdd ${trimmed}. Run /sdd help for available commands.`, "warning");
 }
 

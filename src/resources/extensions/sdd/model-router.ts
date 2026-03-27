@@ -1,4 +1,4 @@
-// GSD Extension — Dynamic Model Router
+// SDD Extension — Dynamic Model Router
 // Maps complexity tiers to models, enforcing downgrade-only semantics.
 // The user's configured model is always the ceiling.
 

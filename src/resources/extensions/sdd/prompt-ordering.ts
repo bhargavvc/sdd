@@ -16,7 +16,7 @@ export interface ExtractedSection {
 }
 
 /**
- * Known heading to role mappings for GSD prompts.
+ * Known heading to role mappings for SDD prompts.
  * Static: templates, executor constraints, system instructions
  * Semi-static: slice plan, decisions, requirements, prior summaries, overrides
  * Dynamic: task plan, resume state, carry-forward, verification

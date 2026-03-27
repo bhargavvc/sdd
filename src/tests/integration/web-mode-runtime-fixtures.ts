@@ -126,9 +126,9 @@ function writeSeededSessionFile(options: {
 }
 
 export function makeRuntimeWorkspaceFixture(): RuntimeWorkspaceFixture {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-runtime-fixture-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-runtime-fixture-"))
   const projectCwd = join(root, "project")
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001")
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001")
   const sliceDir = join(milestoneDir, "slices", "S02")
   const tasksDir = join(sliceDir, "tasks")
 
@@ -155,9 +155,9 @@ export function makeRuntimeWorkspaceFixture(): RuntimeWorkspaceFixture {
 }
 
 export function makeInterruptedRunRuntimeFixture(): RuntimeWorkspaceFixture {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-runtime-recovery-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-runtime-recovery-"))
   const projectCwd = join(root, "project")
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M002")
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M002")
   const sliceDir = join(milestoneDir, "slices", "S04")
   const tasksDir = join(sliceDir, "tasks")
 

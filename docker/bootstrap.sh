@@ -2,10 +2,10 @@
 set -e
 
 # ──────────────────────────────────────────────
-# GSD First-Boot Bootstrap
+# SDD First-Boot Bootstrap
 #
 # Runs once on initial container creation.
-# Called by entrypoint.sh as the gsd user.
+# Called by entrypoint.sh as the sdd user.
 #
 # This script is idempotent — safe to run multiple
 # times, but the sentinel in entrypoint.sh ensures

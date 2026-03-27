@@ -16,7 +16,7 @@ import assert from 'node:assert/strict';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  return mkdtempSync(join(tmpdir(), 'gsd-migrate-test-'));
+  return mkdtempSync(join(tmpdir(), 'sdd-migrate-test-'));
 }
 
 function createPlanningDir(base: string): string {

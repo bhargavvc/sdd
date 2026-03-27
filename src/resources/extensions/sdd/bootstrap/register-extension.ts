@@ -1,6 +1,6 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
-import { registerGSDCommand } from "../commands.js";
+import { registerSDDCommand } from "../commands.js";
 import { registerExitCommand } from "../exit-command.js";
 import { registerWorktreeCommand } from "../worktree-command.js";
 import { registerDbTools } from "./db-tools.js";
@@ -16,11 +16,11 @@ export function handleRecoverableExtensionProcessError(err: Error): boolean {
   if ((err as NodeJS.ErrnoException).code === "ENOENT") {
     const syscall = (err as NodeJS.ErrnoException).syscall;
     if (syscall?.startsWith("spawn")) {
-      process.stderr.write(`[gsd] spawn ENOENT: ${(err as any).path ?? "unknown"} — command not found\n`);
+      process.stderr.write(`[sdd] spawn ENOENT: ${(err as any).path ?? "unknown"} — command not found\n`);
       return true;
     }
     if (syscall === "uv_cwd") {
-      process.stderr.write(`[gsd] ENOENT (${syscall}): ${err.message}\n`);
+      process.stderr.write(`[sdd] ENOENT (${syscall}): ${err.message}\n`);
       return true;
     }
   }
@@ -28,26 +28,26 @@ export function handleRecoverableExtensionProcessError(err: Error): boolean {
 }
 
 function installEpipeGuard(): void {
-  if (!process.listeners("uncaughtException").some((listener) => listener.name === "_gsdEpipeGuard")) {
-    const _gsdEpipeGuard = (err: Error): void => {
+  if (!process.listeners("uncaughtException").some((listener) => listener.name === "_sddEpipeGuard")) {
+    const _sddEpipeGuard = (err: Error): void => {
       if (handleRecoverableExtensionProcessError(err)) {
         return;
       }
       throw err;
     };
-    process.on("uncaughtException", _gsdEpipeGuard);
+    process.on("uncaughtException", _sddEpipeGuard);
   }
 }
 
 export function registerGsdExtension(pi: ExtensionAPI): void {
-  registerGSDCommand(pi);
+  registerSDDCommand(pi);
   registerWorktreeCommand(pi);
   registerExitCommand(pi);
 
   installEpipeGuard();
 
   pi.registerCommand("kill", {
-    description: "Exit GSD immediately (no cleanup)",
+    description: "Exit SDD immediately (no cleanup)",
     handler: async (_args: string, _ctx: ExtensionCommandContext) => {
       process.exit(0);
     },

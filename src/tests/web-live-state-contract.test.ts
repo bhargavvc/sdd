@@ -10,7 +10,7 @@ import { StringDecoder } from "node:string_decoder";
 const repoRoot = process.cwd();
 const bridge = await import("../web/bridge-service.ts");
 const onboarding = await import("../web/onboarding-service.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@sdd/pi-coding-agent");
 const commandRoute = await import("../../web/app/api/session/command/route.ts");
 const manageRoute = await import("../../web/app/api/session/manage/route.ts");
 const eventsRoute = await import("../../web/app/api/session/events/route.ts");
@@ -54,10 +54,10 @@ function attachJsonLineReader(stream: PassThrough, onLine: (line: string) => voi
 }
 
 function makeWorkspaceFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-live-state-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-live-state-"));
   const projectCwd = join(root, "project");
   const sessionsDir = join(root, "sessions");
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001");
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
 
@@ -302,9 +302,9 @@ function setupBridge(
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),

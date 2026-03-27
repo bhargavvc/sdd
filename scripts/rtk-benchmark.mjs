@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 
 function getManagedRtkPath() {
-  return join(homedir(), '.gsd', 'agent', 'bin', process.platform === 'win32' ? 'rtk.exe' : 'rtk')
+  return join(homedir(), '.sdd', 'agent', 'bin', process.platform === 'win32' ? 'rtk.exe' : 'rtk')
 }
 
 function run(command, args, options = {}) {
@@ -29,7 +29,7 @@ function createFixture(projectDir) {
   mkdirSync(join(projectDir, 'src', 'components'), { recursive: true })
 
   writeFileSync(join(projectDir, 'package.json'), JSON.stringify({
-    name: 'gsd-rtk-benchmark',
+    name: 'sdd-rtk-benchmark',
     version: '1.0.0',
     scripts: {
       test: 'node test.js',
@@ -108,13 +108,13 @@ function renderMarkdown({ summary, history, binaryPath }) {
 function main() {
   const outputIndex = process.argv.indexOf('--output')
   const outputPath = outputIndex !== -1 ? process.argv[outputIndex + 1] : null
-  const binaryPath = process.env.GSD_RTK_PATH || getManagedRtkPath()
+  const binaryPath = process.env.SDD_RTK_PATH || getManagedRtkPath()
 
   if (!binaryPath) {
     throw new Error('RTK binary path not resolved')
   }
 
-  const workspace = mkdtempSync(join(tmpdir(), 'gsd-rtk-benchmark-'))
+  const workspace = mkdtempSync(join(tmpdir(), 'sdd-rtk-benchmark-'))
   const homeDir = join(workspace, 'home')
   const projectDir = join(workspace, 'project')
   mkdirSync(homeDir, { recursive: true })

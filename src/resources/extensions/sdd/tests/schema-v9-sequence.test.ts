@@ -14,10 +14,10 @@ import {
   getSliceTasks,
   getActiveSliceFromDb,
   getActiveTaskFromDb,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 
 function makeTmp(): string {
-  return mkdtempSync(join(tmpdir(), 'gsd-v9-'));
+  return mkdtempSync(join(tmpdir(), 'sdd-v9-'));
 }
 
 function cleanup(base: string): void {
@@ -27,7 +27,7 @@ function cleanup(base: string): void {
 
 test('schema v9: migration adds sequence column to slices and tasks', () => {
   const base = makeTmp();
-  const dbPath = join(base, 'gsd.db');
+  const dbPath = join(base, 'sdd.db');
   openDatabase(dbPath);
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
@@ -49,7 +49,7 @@ test('schema v9: migration adds sequence column to slices and tasks', () => {
 
 test('schema v9: getMilestoneSlices returns slices ordered by sequence then id', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
 
@@ -70,7 +70,7 @@ test('schema v9: getMilestoneSlices returns slices ordered by sequence then id',
 
 test('schema v9: getSliceTasks returns tasks ordered by sequence then id', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
     insertSlice({ id: 'S01', milestoneId: 'M001', title: 'Slice' });
@@ -92,7 +92,7 @@ test('schema v9: getSliceTasks returns tasks ordered by sequence then id', () =>
 
 test('schema v9: default sequence (0) falls back to id-based ordering', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
 
@@ -123,7 +123,7 @@ test('schema v9: default sequence (0) falls back to id-based ordering', () => {
 
 test('schema v9: getActiveSliceFromDb respects sequence ordering', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
 
@@ -141,7 +141,7 @@ test('schema v9: getActiveSliceFromDb respects sequence ordering', () => {
 
 test('schema v9: getActiveTaskFromDb respects sequence ordering', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
     insertSlice({ id: 'S01', milestoneId: 'M001', title: 'Slice' });
@@ -159,7 +159,7 @@ test('schema v9: getActiveTaskFromDb respects sequence ordering', () => {
 
 test('schema v9: sequence field defaults to 0 when not provided', () => {
   const base = makeTmp();
-  openDatabase(join(base, 'gsd.db'));
+  openDatabase(join(base, 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
     insertSlice({ id: 'S01', milestoneId: 'M001', title: 'No seq' });

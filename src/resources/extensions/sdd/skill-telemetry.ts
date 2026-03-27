@@ -1,5 +1,5 @@
 /**
- * GSD Skill Telemetry — Track which skills are loaded per unit (#599)
+ * SDD Skill Telemetry — Track which skills are loaded per unit (#599)
  *
  * Captures skill names at dispatch time for inclusion in UnitMetrics.
  * Distinguishes between "available" skills (in system prompt) and
@@ -31,7 +31,7 @@ const activelyLoadedSkills = new Set<string>();
  */
 export function captureAvailableSkills(): void {
   const skillsDir = join(homedir(), ".agents", "skills");
-  const legacyDir = join(homedir(), ".gsd", "agent", "skills");
+  const legacyDir = join(homedir(), ".sdd", "agent", "skills");
   const names = listSkillNames(skillsDir);
   // Include skills still in the legacy directory only if migration hasn't completed
   const legacyMigrated = existsSync(join(legacyDir, ".migrated-to-agents"));
@@ -106,7 +106,7 @@ export function detectStaleSkills(
 
   // Check all installed skills, not just those with usage data
   const skillsDir = join(homedir(), ".agents", "skills");
-  const legacyDir = join(homedir(), ".gsd", "agent", "skills");
+  const legacyDir = join(homedir(), ".sdd", "agent", "skills");
   const legacyMigrated = existsSync(join(legacyDir, ".migrated-to-agents"));
   const legacyNames = legacyMigrated ? [] : listSkillNames(legacyDir);
   const installedSet = new Set([...listSkillNames(skillsDir), ...legacyNames]);

@@ -1,7 +1,7 @@
 /**
  * Auto-mode Dispatch Table — declarative phase → unit mapping.
  *
- * Each rule maps a GSD state to the unit type, unit ID, and prompt builder
+ * Each rule maps a SDD state to the unit type, unit ID, and prompt builder
  * that should be dispatched. Rules are evaluated in order; the first match wins.
  *
  * This replaces the 130-line if-else chain in dispatchNextUnit with a
@@ -13,7 +13,7 @@ import type { SDDState } from "./types.js";
 import type { SDDPreferences } from "./preferences.js";
 import type { UatType } from "./files.js";
 import { loadFile, extractUatType, loadActiveOverrides } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted, getMilestone } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted, getMilestone } from "./sdd-db.js";
 import { extractVerdict, isAcceptableUatVerdict } from "./verdict-parser.js";
 
 import {
@@ -84,7 +84,7 @@ export interface DispatchRule {
 function missingSliceStop(mid: string, phase: string): DispatchAction {
   return {
     action: "stop",
-    reason: `${mid}: phase "${phase}" has no active slice — run /gsd doctor.`,
+    reason: `${mid}: phase "${phase}" has no active slice — run /sdd doctor.`,
     level: "error",
   };
 }
@@ -109,7 +109,7 @@ const MAX_REWRITE_ATTEMPTS = 3;
 // ─── Disk-persisted rewrite attempt counter ──────────────────────────────────
 // The counter must survive session restarts (crash recovery, pause/resume,
 // step-mode). Storing it on the in-memory session object caused the circuit
-// breaker to never trip — see https://github.com/gsd-build/gsd-2/issues/2203
+// breaker to never trip — see https://github.com/sdd-build/sdd-2/issues/2203
 function rewriteCountPath(basePath: string): string {
   return join(gsdRoot(basePath), "runtime", "rewrite-count.json");
 }
@@ -233,7 +233,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         if (verdict && !isAcceptableUatVerdict(verdict, uatType)) {
           return {
             action: "stop" as const,
-            reason: `UAT verdict for ${sliceId} is "${verdict}" — blocking progression until resolved.\nReview the UAT result and update the verdict to PASS, or re-run /gsd auto after fixing.`,
+            reason: `UAT verdict for ${sliceId} is "${verdict}" — blocking progression until resolved.\nReview the UAT result and update the verdict to PASS, or re-run /sdd auto after fixing.`,
             level: "warning" as const,
           };
         }
@@ -477,7 +477,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         // Log graph metrics for observability
         const metrics = graphMetrics(graph);
         process.stderr.write(
-          `gsd-reactive: ${mid}/${sid} graph — tasks:${metrics.taskCount} edges:${metrics.edgeCount} ` +
+          `sdd-reactive: ${mid}/${sid} graph — tasks:${metrics.taskCount} edges:${metrics.edgeCount} ` +
           `ready:${metrics.readySetSize} dispatching:${selected.length} ambiguous:${metrics.ambiguous}\n`,
         );
 
@@ -511,7 +511,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         };
       } catch (err) {
         // Non-fatal — fall through to sequential execution
-        process.stderr.write(`gsd-reactive: graph derivation failed: ${(err as Error).message}\n`);
+        process.stderr.write(`sdd-reactive: graph derivation failed: ${(err as Error).message}\n`);
         return null;
       }
     },
@@ -650,7 +650,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
       if (missingSlices.length > 0) {
         return {
           action: "stop",
-          reason: `Cannot complete milestone ${mid}: slices ${missingSlices.join(", ")} are missing SUMMARY files. Run /gsd doctor to diagnose.`,
+          reason: `Cannot complete milestone ${mid}: slices ${missingSlices.join(", ")} are missing SUMMARY files. Run /sdd doctor to diagnose.`,
           level: "error",
         };
       }
@@ -753,7 +753,7 @@ export async function resolveDispatch(
   // No rule matched — unhandled phase
   return {
     action: "stop",
-    reason: `Unhandled phase "${ctx.state.phase}" — run /gsd doctor to diagnose.`,
+    reason: `Unhandled phase "${ctx.state.phase}" — run /sdd doctor to diagnose.`,
     level: "info",
     matchedRule: "<no-match>",
   };

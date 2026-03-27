@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import { Agent, type AgentMessage, type ThinkingLevel } from "@gsd/pi-agent-core";
-import type { Message, Model } from "@gsd/pi-ai";
+import { Agent, type AgentMessage, type ThinkingLevel } from "@sdd/pi-agent-core";
+import type { Message, Model } from "@sdd/pi-ai";
 import { getAgentDir, getDocsPath } from "../config.js";
 import { AgentSession } from "./agent-session.js";
 import { AuthStorage } from "./auth-storage.js";
@@ -149,7 +149,7 @@ function getDefaultAgentDir(): string {
  * const { session } = await createAgentSession();
  *
  * // With explicit model
- * import { getModel } from '@gsd/pi-ai';
+ * import { getModel } from '@sdd/pi-ai';
  * const { session } = await createAgentSession({
  *   model: getModel('anthropic', 'claude-opus-4-5'),
  *   thinkingLevel: 'high',

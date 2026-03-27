@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { loadSkills } from "@gsd/pi-coding-agent";
+import { loadSkills } from "@sdd/pi-coding-agent";
 import { buildSkillActivationBlock } from "../auto-prompts.js";
 import type { SDDPreferences } from "../preferences.js";
 
 function makeTempBase(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-skill-activation-"));
+  return mkdtempSync(join(tmpdir(), "sdd-skill-activation-"));
 }
 
 function cleanup(base: string): void {

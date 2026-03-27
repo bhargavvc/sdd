@@ -1,5 +1,5 @@
 /**
- * GSD Detection — Project state and ecosystem detection.
+ * SDD Detection — Project state and ecosystem detection.
  *
  * Pure functions, zero UI dependencies, zero side effects.
  * Used by init-wizard.ts and guided-flow.ts to determine what onboarding
@@ -11,15 +11,15 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { gsdRoot } from "./paths.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
 export interface ProjectDetection {
-  /** What kind of GSD state exists in this directory */
-  state: "none" | "v1-planning" | "v2-gsd" | "v2-gsd-empty";
+  /** What kind of SDD state exists in this directory */
+  state: "none" | "v1-planning" | "v2-sdd" | "v2-sdd-empty";
 
-  /** Is this the first time GSD has been used on this machine? */
+  /** Is this the first time SDD has been used on this machine? */
   isFirstEverLaunch: boolean;
 
   /** Does ~/.sdd/ exist with preferences? */
@@ -28,7 +28,7 @@ export interface ProjectDetection {
   /** v1 details (only when state === 'v1-planning') */
   v1?: V1Detection;
 
-  /** v2 details (only when state === 'v2-gsd' or 'v2-gsd-empty') */
+  /** v2 details (only when state === 'v2-sdd' or 'v2-sdd-empty') */
   v2?: V2Detection;
 
   /** Detected project ecosystem signals */
@@ -292,9 +292,9 @@ export function detectProjectState(basePath: string): ProjectDetection {
 
   let state: ProjectDetection["state"];
   if (v2 && v2.milestoneCount > 0) {
-    state = "v2-gsd";
+    state = "v2-sdd";
   } else if (v2 && v2.milestoneCount === 0) {
-    state = "v2-gsd-empty";
+    state = "v2-sdd-empty";
   } else if (v1) {
     state = "v1-planning";
   } else {
@@ -314,7 +314,7 @@ export function detectProjectState(basePath: string): ProjectDetection {
 // ─── V1 Planning Detection ──────────────────────────────────────────────────────
 
 /**
- * Detect a v1 .planning/ directory with GSD v1 markers.
+ * Detect a v1 .planning/ directory with SDD v1 markers.
  * Returns null if no .planning/ directory found.
  */
 export function detectV1Planning(basePath: string): V1Detection | null {
@@ -351,7 +351,7 @@ export function detectV1Planning(basePath: string): V1Detection | null {
   };
 }
 
-// ─── V2 GSD Detection ──────────────────────────────────────────────────────────
+// ─── V2 SDD Detection ──────────────────────────────────────────────────────────
 
 function detectV2Gsd(basePath: string): V2Detection | null {
   const gsdPath = gsdRoot(basePath);
@@ -710,7 +710,7 @@ function detectVerificationCommands(
 // ─── Global Setup Detection ─────────────────────────────────────────────────────
 
 /**
- * Check if global GSD setup exists (has ~/.sdd/ with preferences).
+ * Check if global SDD setup exists (has ~/.sdd/ with preferences).
  */
 export function hasGlobalSetup(): boolean {
   return (
@@ -720,7 +720,7 @@ export function hasGlobalSetup(): boolean {
 }
 
 /**
- * Check if this is the very first time GSD has been used on this machine.
+ * Check if this is the very first time SDD has been used on this machine.
  * Returns true if ~/.sdd/ doesn't exist or has no preferences or auth.
  */
 export function isFirstEverLaunch(): boolean {
@@ -738,7 +738,7 @@ export function isFirstEverLaunch(): boolean {
   if (existsSync(join(gsdHome, "agent", "auth.json"))) return false;
 
   // Check legacy path too
-  const legacyPath = join(homedir(), ".pi", "agent", "gsd-preferences.md");
+  const legacyPath = join(homedir(), ".pi", "agent", "sdd-preferences.md");
   if (existsSync(legacyPath)) return false;
 
   return true;

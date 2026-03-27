@@ -4,7 +4,7 @@ import { join, sep } from "node:path";
 import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
 import { loadFile } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap } from "./parsers-legacy.js";
-import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices } from "./sdd-db.js";
 import { resolveMilestoneFile } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { listWorktrees, resolveGitDir, worktreesDir } from "./worktree-manager.js";
@@ -12,7 +12,7 @@ import { abortAndReset } from "./git-self-heal.js";
 import { RUNTIME_EXCLUSION_PATHS, resolveMilestoneIntegrationBranch, writeIntegrationBranch } from "./git-service.js";
 import { nativeIsRepo, nativeWorktreeList, nativeWorktreeRemove, nativeBranchList, nativeBranchDelete, nativeLsFiles, nativeRmCached } from "./native-git-bridge.js";
 import { getAllWorktreeHealth } from "./worktree-health.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveSDDPreferences } from "./preferences.js";
 
 export async function checkGitHealth(
   basePath: string,
@@ -219,8 +219,8 @@ export async function checkGitHealth(
 
   // ── Legacy slice branches ──────────────────────────────────────────────
   try {
-    const branchList = nativeBranchList(basePath, "gsd/*/*")
-      .filter((branch) => !branch.startsWith("gsd/quick/"));
+    const branchList = nativeBranchList(basePath, "sdd/*/*")
+      .filter((branch) => !branch.startsWith("sdd/quick/"));
     if (branchList.length > 0) {
       issues.push({
         severity: "info",
@@ -254,7 +254,7 @@ export async function checkGitHealth(
   // and causes the next merge operation to fail silently.
   try {
     const state = await deriveState(basePath);
-    const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+    const gitPrefs = loadEffectiveSDDPreferences()?.preferences?.git ?? {};
     for (const milestone of state.registry) {
       if (milestone.status === "complete") continue;
       const resolution = resolveMilestoneIntegrationBranch(basePath, milestone.id, gitPrefs);
@@ -297,8 +297,8 @@ export async function checkGitHealth(
   try {
     const wtDir = worktreesDir(basePath);
     if (existsSync(wtDir)) {
-      // Resolve symlinks and normalize separators so that symlinked .gsd
-      // paths (e.g. ~/.gsd/projects/<hash>/worktrees/…) match the paths
+      // Resolve symlinks and normalize separators so that symlinked .sdd
+      // paths (e.g. ~/.sdd/projects/<hash>/worktrees/…) match the paths
       // returned by `git worktree list`.
       const normalizePath = (p: string): string => {
         try { p = realpathSync(p); } catch { /* path may not exist */ }
@@ -338,8 +338,8 @@ export async function checkGitHealth(
   }
 
   // ── Worktree lifecycle checks ──────────────────────────────────────────
-  // Check GSD-managed worktrees for: merged branches, stale work, dirty
-  // state, and unpushed commits. Only worktrees under .gsd/worktrees/.
+  // Check SDD-managed worktrees for: merged branches, stale work, dirty
+  // state, and unpushed commits. Only worktrees under .sdd/worktrees/.
   try {
     const healthStatuses = getAllWorktreeHealth(basePath);
     const cwd = process.cwd();

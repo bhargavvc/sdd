@@ -1,4 +1,4 @@
-import type { ExtensionCommandContext, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext, ExtensionContext } from "@sdd/pi-coding-agent";
 import type { SDDState } from "../../types.js";
 
 import { computeProgressScore, formatProgressLine } from "../../progress-score.js";
@@ -11,59 +11,59 @@ import { projectRoot } from "../context.js";
 
 export function showHelp(ctx: ExtensionCommandContext): void {
   const lines = [
-    "GSD — Get Shit Done\n",
+    "SDD — Get Shit Done\n",
     "WORKFLOW",
-    "  /gsd start <tpl>   Start a workflow template (bugfix, spike, feature, hotfix, etc.)",
-    "  /gsd templates     List available workflow templates  [info <name>]",
-    "  /gsd               Run next unit in step mode (same as /gsd next)",
-    "  /gsd next           Execute next task, then pause  [--dry-run] [--verbose]",
-    "  /gsd auto           Run all queued units continuously  [--verbose]",
-    "  /gsd stop           Stop auto-mode gracefully",
-    "  /gsd pause          Pause auto-mode (preserves state, /gsd auto to resume)",
-    "  /gsd discuss        Start guided milestone/slice discussion",
-    "  /gsd new-milestone  Create milestone from headless context (used by gsd headless)",
+    "  /sdd start <tpl>   Start a workflow template (bugfix, spike, feature, hotfix, etc.)",
+    "  /sdd templates     List available workflow templates  [info <name>]",
+    "  /sdd               Run next unit in step mode (same as /sdd next)",
+    "  /sdd next           Execute next task, then pause  [--dry-run] [--verbose]",
+    "  /sdd auto           Run all queued units continuously  [--verbose]",
+    "  /sdd stop           Stop auto-mode gracefully",
+    "  /sdd pause          Pause auto-mode (preserves state, /sdd auto to resume)",
+    "  /sdd discuss        Start guided milestone/slice discussion",
+    "  /sdd new-milestone  Create milestone from headless context (used by sdd headless)",
     "",
     "VISIBILITY",
-    "  /gsd status         Show progress dashboard  (Ctrl+Alt+G)",
-    "  /gsd visualize      Interactive 10-tab TUI (progress, timeline, deps, metrics, health, agent, changes, knowledge, captures, export)",
-    "  /gsd queue          Show queued/dispatched units and execution order",
-    "  /gsd history        View execution history  [--cost] [--phase] [--model] [N]",
-    "  /gsd changelog      Show categorized release notes  [version]",
+    "  /sdd status         Show progress dashboard  (Ctrl+Alt+G)",
+    "  /sdd visualize      Interactive 10-tab TUI (progress, timeline, deps, metrics, health, agent, changes, knowledge, captures, export)",
+    "  /sdd queue          Show queued/dispatched units and execution order",
+    "  /sdd history        View execution history  [--cost] [--phase] [--model] [N]",
+    "  /sdd changelog      Show categorized release notes  [version]",
     "",
     "COURSE CORRECTION",
-    "  /gsd steer <desc>   Apply user override to active work",
-    "  /gsd capture <text> Quick-capture a thought to CAPTURES.md",
-    "  /gsd triage         Classify and route pending captures",
-    "  /gsd skip <unit>    Prevent a unit from auto-mode dispatch",
-    "  /gsd undo           Revert last completed unit  [--force]",
-    "  /gsd rethink        Conversational project reorganization — reorder, park, discard, add milestones",
-    "  /gsd park [id]      Park a milestone — skip without deleting  [reason]",
-    "  /gsd unpark [id]    Reactivate a parked milestone",
+    "  /sdd steer <desc>   Apply user override to active work",
+    "  /sdd capture <text> Quick-capture a thought to CAPTURES.md",
+    "  /sdd triage         Classify and route pending captures",
+    "  /sdd skip <unit>    Prevent a unit from auto-mode dispatch",
+    "  /sdd undo           Revert last completed unit  [--force]",
+    "  /sdd rethink        Conversational project reorganization — reorder, park, discard, add milestones",
+    "  /sdd park [id]      Park a milestone — skip without deleting  [reason]",
+    "  /sdd unpark [id]    Reactivate a parked milestone",
     "",
     "PROJECT KNOWLEDGE",
-    "  /gsd knowledge <type> <text>   Add rule, pattern, or lesson to KNOWLEDGE.md",
+    "  /sdd knowledge <type> <text>   Add rule, pattern, or lesson to KNOWLEDGE.md",
     "",
     "SETUP & CONFIGURATION",
-    "  /gsd init           Project init wizard — detect, configure, bootstrap .sdd/",
-    "  /gsd setup          Global setup status  [llm|search|remote|keys|prefs]",
-    "  /gsd mode           Set workflow mode (solo/team)  [global|project]",
-    "  /gsd prefs          Manage preferences  [global|project|status|wizard|setup|import-claude]",
-    "  /gsd cmux           Manage cmux integration  [status|on|off|notifications|sidebar|splits|browser]",
-    "  /gsd config         Set API keys for external tools",
-    "  /gsd keys           API key manager  [list|add|remove|test|rotate|doctor]",
-    "  /gsd hooks          Show post-unit hook configuration",
-    "  /gsd extensions     Manage extensions  [list|enable|disable|info]",
-    "  /gsd fast           Toggle OpenAI service tier  [on|off|flex|status]",
-    "  /gsd mcp            MCP server status and connectivity  [status|check <server>]",
+    "  /sdd init           Project init wizard — detect, configure, bootstrap .sdd/",
+    "  /sdd setup          Global setup status  [llm|search|remote|keys|prefs]",
+    "  /sdd mode           Set workflow mode (solo/team)  [global|project]",
+    "  /sdd prefs          Manage preferences  [global|project|status|wizard|setup|import-claude]",
+    "  /sdd cmux           Manage cmux integration  [status|on|off|notifications|sidebar|splits|browser]",
+    "  /sdd config         Set API keys for external tools",
+    "  /sdd keys           API key manager  [list|add|remove|test|rotate|doctor]",
+    "  /sdd hooks          Show post-unit hook configuration",
+    "  /sdd extensions     Manage extensions  [list|enable|disable|info]",
+    "  /sdd fast           Toggle OpenAI service tier  [on|off|flex|status]",
+    "  /sdd mcp            MCP server status and connectivity  [status|check <server>]",
     "",
     "MAINTENANCE",
-    "  /gsd doctor         Diagnose and repair .sdd/ state  [audit|fix|heal] [scope]",
-    "  /gsd export         Export milestone/slice results  [--json|--markdown|--html] [--all]",
-    "  /gsd cleanup        Remove merged branches or snapshots  [branches|snapshots]",
-    "  /gsd migrate        Migrate .planning/ (v1) to .sdd/ (v2) format",
-    "  /gsd remote         Control remote auto-mode  [slack|discord|status|disconnect]",
-    "  /gsd inspect        Show SQLite DB diagnostics (schema, row counts, recent entries)",
-    "  /gsd update         Update GSD to the latest version via npm",
+    "  /sdd doctor         Diagnose and repair .sdd/ state  [audit|fix|heal] [scope]",
+    "  /sdd export         Export milestone/slice results  [--json|--markdown|--html] [--all]",
+    "  /sdd cleanup        Remove merged branches or snapshots  [branches|snapshots]",
+    "  /sdd migrate        Migrate .planning/ (v1) to .sdd/ (v2) format",
+    "  /sdd remote         Control remote auto-mode  [slack|discord|status|disconnect]",
+    "  /sdd inspect        Show SQLite DB diagnostics (schema, row counts, recent entries)",
+    "  /sdd update         Update SDD to the latest version via npm",
   ];
   ctx.ui.notify(lines.join("\n"), "info");
 }
@@ -73,13 +73,13 @@ export async function handleStatus(ctx: ExtensionCommandContext): Promise<void> 
   const state = await deriveState(basePath);
 
   if (state.registry.length === 0) {
-    ctx.ui.notify("No GSD milestones found. Run /gsd to start.", "info");
+    ctx.ui.notify("No SDD milestones found. Run /sdd to start.", "info");
     return;
   }
 
-  const { GSDDashboardOverlay } = await import("../../dashboard-overlay.js");
+  const { SDDDashboardOverlay } = await import("../../dashboard-overlay.js");
   const result = await ctx.ui.custom<void>(
-    (tui, theme, _kb, done) => new GSDDashboardOverlay(tui, theme, () => done()),
+    (tui, theme, _kb, done) => new SDDDashboardOverlay(tui, theme, () => done()),
     {
       overlay: true,
       overlayOptions: {
@@ -106,9 +106,9 @@ export async function handleVisualize(ctx: ExtensionCommandContext): Promise<voi
     return;
   }
 
-  const { GSDVisualizerOverlay } = await import("../../visualizer-overlay.js");
+  const { SDDVisualizerOverlay } = await import("../../visualizer-overlay.js");
   const result = await ctx.ui.custom<void>(
-    (tui, theme, _kb, done) => new GSDVisualizerOverlay(tui, theme, () => done()),
+    (tui, theme, _kb, done) => new SDDVisualizerOverlay(tui, theme, () => done()),
     {
       overlay: true,
       overlayOptions: {
@@ -121,7 +121,7 @@ export async function handleVisualize(ctx: ExtensionCommandContext): Promise<voi
   );
 
   if (result === undefined) {
-    ctx.ui.notify("Visualizer requires an interactive terminal. Use /gsd status for a text-based overview.", "warning");
+    ctx.ui.notify("Visualizer requires an interactive terminal. Use /sdd status for a text-based overview.", "warning");
   }
 }
 
@@ -131,7 +131,7 @@ export async function handleSetup(args: string, ctx: ExtensionCommandContext): P
   const globalConfigured = hasGlobalSetup();
   const detection = detectProjectState(projectRoot());
 
-  const statusLines = ["GSD Setup Status\n"];
+  const statusLines = ["SDD Setup Status\n"];
   statusLines.push(`  Global preferences: ${globalConfigured ? "configured" : "not set"}`);
   statusLines.push(`  Project state: ${detection.state}`);
   if (detection.projectSignals.primaryLanguage) {
@@ -147,7 +147,7 @@ export async function handleSetup(args: string, ctx: ExtensionCommandContext): P
     return;
   }
   if (args === "remote") {
-    ctx.ui.notify("Use /gsd remote to configure remote questions.", "info");
+    ctx.ui.notify("Use /sdd remote to configure remote questions.", "info");
     return;
   }
   if (args === "keys") {
@@ -164,11 +164,11 @@ export async function handleSetup(args: string, ctx: ExtensionCommandContext): P
   ctx.ui.notify(statusLines.join("\n"), "info");
   ctx.ui.notify(
     "Available setup commands:\n" +
-    "  /gsd setup llm     — LLM authentication\n" +
-    "  /gsd setup search  — Web search provider\n" +
-    "  /gsd setup remote  — Remote questions (Discord/Slack/Telegram)\n" +
-    "  /gsd setup keys    — Tool API keys\n" +
-    "  /gsd setup prefs   — Global preferences wizard",
+    "  /sdd setup llm     — LLM authentication\n" +
+    "  /sdd setup search  — Web search provider\n" +
+    "  /sdd setup remote  — Remote questions (Discord/Slack/Telegram)\n" +
+    "  /sdd setup keys    — Tool API keys\n" +
+    "  /sdd setup prefs   — Global preferences wizard",
     "info",
   );
 }
@@ -221,7 +221,7 @@ export async function handleCoreCommand(trimmed: string, ctx: ExtensionCommandCo
 }
 
 export function formatTextStatus(state: SDDState): string {
-  const lines: string[] = ["GSD Status\n"];
+  const lines: string[] = ["SDD Status\n"];
   lines.push(formatProgressLine(computeProgressScore()));
   lines.push("");
   lines.push(`Phase: ${state.phase}`);

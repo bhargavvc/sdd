@@ -15,8 +15,8 @@ const workspaceStatus = await import("../../web/lib/workspace-status.ts");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 function makeGsdFixture(): { root: string; gsdDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-"));
-  const gsdDir = join(root, ".gsd");
+  const root = mkdtempSync(join(tmpdir(), "sdd-state-surfaces-"));
+  const gsdDir = join(root, ".sdd");
   mkdirSync(gsdDir, { recursive: true });
   return {
     root,
@@ -193,14 +193,14 @@ test("getTaskStatus returns correct statuses", () => {
 // ─── Group 3: Files API — tree listing ───────────────────────────────
 test("files API returns tree listing of .sdd/ directory", async (t) => {
   const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   // Create some files
   writeFileSync(join(gsdDir, "STATE.md"), "# State\nactive");
@@ -233,14 +233,14 @@ test("files API returns tree listing of .sdd/ directory", async (t) => {
 // ─── Group 4: Files API — file content ───────────────────────────────
 test("files API returns file content for valid path", async (t) => {
   const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const fileContent = "# State\n\nCurrent milestone: M001";
   writeFileSync(join(gsdDir, "STATE.md"), fileContent);
@@ -255,14 +255,14 @@ test("files API returns file content for valid path", async (t) => {
 
 test("files API returns content for nested files", async (t) => {
   const { root, gsdDir, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const msDir = join(gsdDir, "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
@@ -281,14 +281,14 @@ test("files API returns content for nested files", async (t) => {
 // ─── Group 5: Files API — security: path traversal rejection ─────────
 test("files API rejects path traversal with ../", async (t) => {
   const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const request = new Request(
     "http://localhost:3000/api/files?path=../etc/passwd",
@@ -302,14 +302,14 @@ test("files API rejects path traversal with ../", async (t) => {
 
 test("files API rejects absolute paths", async (t) => {
   const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const request = new Request(
     "http://localhost:3000/api/files?path=/etc/passwd",
@@ -323,14 +323,14 @@ test("files API rejects absolute paths", async (t) => {
 
 test("files API returns 404 for missing files", async (t) => {
   const { root, cleanup } = makeGsdFixture();
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     cleanup();
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const request = new Request(
     "http://localhost:3000/api/files?path=nonexistent.md",
@@ -343,15 +343,15 @@ test("files API returns 404 for missing files", async (t) => {
 });
 
 test("files API returns empty tree when .sdd/ does not exist", async (t) => {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-empty-"));
-  const origEnv = process.env.GSD_WEB_PROJECT_CWD;
+  const root = mkdtempSync(join(tmpdir(), "sdd-state-surfaces-empty-"));
+  const origEnv = process.env.SDD_WEB_PROJECT_CWD;
 
   t.after(() => {
-    process.env.GSD_WEB_PROJECT_CWD = origEnv;
+    process.env.SDD_WEB_PROJECT_CWD = origEnv;
     rmSync(root, { recursive: true, force: true });
   });
 
-  process.env.GSD_WEB_PROJECT_CWD = root;
+  process.env.SDD_WEB_PROJECT_CWD = root;
 
   const request = new Request("http://localhost:3000/api/files");
   const response = await filesRoute.GET(request);
@@ -419,8 +419,8 @@ test("view components read from real data sources (store or API)", () => {
     const fullPath = resolve(import.meta.dirname, "../..", filePath);
     const source = readFileSync(fullPath, "utf-8");
     assert.ok(
-      source.includes("gsd-workspace-store"),
-      `${filePath} does not import from gsd-workspace-store — store-backed views must read real store state`,
+      source.includes("sdd-workspace-store"),
+      `${filePath} does not import from sdd-workspace-store — store-backed views must read real store state`,
     );
   }
 
@@ -452,7 +452,7 @@ test("status bar consumes statusTexts from store", () => {
 });
 
 test("browser shell renders title overrides, widgets, and editor prefills from store-backed state", () => {
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
   const appShellPath = resolve(import.meta.dirname, "../../web/components/sdd/app-shell.tsx");
   const statusBarPath = resolve(import.meta.dirname, "../../web/components/sdd/status-bar.tsx");
   const terminalPath = resolve(import.meta.dirname, "../../web/components/sdd/terminal.tsx");
@@ -472,7 +472,7 @@ test("browser shell renders title overrides, widgets, and editor prefills from s
   assert.match(terminalSource, /MAX_VISIBLE_WIDGET_LINES = 6/, "terminal.tsx must bound widget rendering so extension widgets cannot grow without limit");
   assert.match(terminalSource, /widget\.placement \?\? "aboveEditor"/, "terminal.tsx must preserve the existing default above-editor placement semantics");
 
-  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "gsd-workspace-store.tsx must expose a consume-once editor prefill action");
+  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "sdd-workspace-store.tsx must expose a consume-once editor prefill action");
   assert.match(terminalSource, /consumeEditorTextBuffer/, "terminal.tsx must consume editor prefill state instead of replaying it forever");
   assert.match(terminalSource, /setInput\(buffer\)/, "terminal.tsx must visibly prefill the command input from editorTextBuffer");
 });
@@ -489,7 +489,7 @@ test("terminal consumes activeToolExecution from store", () => {
 
 test("live browser panels consume live selectors and expose inspectable freshness markers", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts")
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx")
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx")
   const dashboardPath = resolve(import.meta.dirname, "../../web/components/sdd/dashboard.tsx")
   const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx")
   const roadmapPath = resolve(import.meta.dirname, "../../web/components/sdd/roadmap.tsx")
@@ -503,13 +503,13 @@ test("live browser panels consume live selectors and expose inspectable freshnes
   const statusBarSource = readFileSync(statusBarPath, "utf-8")
 
   assert.match(contractSource, /export interface WorkspaceRecoverySummary/, "command-surface-contract.ts must expose a shared recovery summary shape for live panels")
-  assert.match(storeSource, /live_state_invalidation/, "gsd-workspace-store.tsx must handle typed live_state_invalidation events")
-  assert.match(storeSource, /\/api\/live-state/, "gsd-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
-  assert.match(storeSource, /softBootRefreshCount/, "gsd-workspace-store.tsx must expose a soft boot refresh counter for observability")
-  assert.match(storeSource, /targetedRefreshCount/, "gsd-workspace-store.tsx must expose a targeted refresh counter for observability")
-  assert.match(storeSource, /getLiveWorkspaceIndex/, "gsd-workspace-store.tsx must expose a live workspace selector")
-  assert.match(storeSource, /getLiveAutoDashboard/, "gsd-workspace-store.tsx must expose a live auto selector")
-  assert.match(storeSource, /getLiveResumableSessions/, "gsd-workspace-store.tsx must expose a live resumable-sessions selector")
+  assert.match(storeSource, /live_state_invalidation/, "sdd-workspace-store.tsx must handle typed live_state_invalidation events")
+  assert.match(storeSource, /\/api\/live-state/, "sdd-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
+  assert.match(storeSource, /softBootRefreshCount/, "sdd-workspace-store.tsx must expose a soft boot refresh counter for observability")
+  assert.match(storeSource, /targetedRefreshCount/, "sdd-workspace-store.tsx must expose a targeted refresh counter for observability")
+  assert.match(storeSource, /getLiveWorkspaceIndex/, "sdd-workspace-store.tsx must expose a live workspace selector")
+  assert.match(storeSource, /getLiveAutoDashboard/, "sdd-workspace-store.tsx must expose a live auto selector")
+  assert.match(storeSource, /getLiveResumableSessions/, "sdd-workspace-store.tsx must expose a live resumable-sessions selector")
 
   assert.match(dashboardSource, /getLiveWorkspaceIndex/, "dashboard.tsx must derive roadmap state from the live workspace selector")
   assert.match(dashboardSource, /getLiveAutoDashboard/, "dashboard.tsx must derive auto metrics from the live auto selector")
@@ -545,12 +545,12 @@ test("workflow action surfaces route new-milestone CTAs through the shared comma
   assert.doesNotMatch(dashboardSource, /NewMilestoneDialog/, "dashboard.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(sidebarSource, /NewMilestoneDialog/, "sidebar.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(chatSource, /NewMilestoneDialog/, "chat-mode.tsx must not import or render the deprecated new-milestone dialog")
-  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/gsd auto", bridge\)/, "chat-mode.tsx must not hardcode a special /gsd auto path for new-milestone CTA dispatch")
+  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/sdd auto", bridge\)/, "chat-mode.tsx must not hardcode a special /sdd auto path for new-milestone CTA dispatch")
 })
 
 test("sidebar Git affordance opens a real git-summary surface with visible repo/not-repo/error states", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
   const surfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx");
   const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx");
 
@@ -562,8 +562,8 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
   assert.match(contractSource, /gitSummary:/, "command-surface-contract.ts must retain git-summary state on the shared surface");
   assert.match(contractSource, /load_git_summary/, "command-surface-contract.ts must model git-summary loading as an explicit action");
 
-  assert.match(storeSource, /loadGitSummary/, "gsd-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
-  assert.match(storeSource, /\/api\/git/, "gsd-workspace-store.tsx must fetch the current-project git route for the Git surface");
+  assert.match(storeSource, /loadGitSummary/, "sdd-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
+  assert.match(storeSource, /\/api\/git/, "sdd-workspace-store.tsx must fetch the current-project git route for the Git surface");
 
   assert.match(surfaceSource, /data-testid="command-surface-git-summary"/, "command-surface.tsx must render a git-summary panel");
   assert.match(surfaceSource, /data-testid="command-surface-git-not-repo"/, "command-surface.tsx must keep not-a-repo state browser-visible");
@@ -574,7 +574,7 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
 
 test("recovery diagnostics surface stays on a dedicated route with explicit stale and action state", () => {
   const contractPath = resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx");
+  const storePath = resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx");
   const surfacePath = resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx");
   const dashboardPath = resolve(import.meta.dirname, "../../web/components/sdd/dashboard.tsx");
   const sidebarPath = resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx");
@@ -589,9 +589,9 @@ test("recovery diagnostics surface stays on a dedicated route with explicit stal
   assert.match(contractSource, /export interface CommandSurfaceRecoveryState/, "command-surface-contract.ts must expose explicit recovery load state");
   assert.match(contractSource, /load_recovery_diagnostics/, "command-surface-contract.ts must model recovery loading as an explicit action");
 
-  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "gsd-workspace-store.tsx must expose a recovery diagnostics loader");
-  assert.match(storeSource, /\/api\/recovery/, "gsd-workspace-store.tsx must call the dedicated recovery route");
-  assert.match(storeSource, /markRecoveryStateInvalidated/, "gsd-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
+  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "sdd-workspace-store.tsx must expose a recovery diagnostics loader");
+  assert.match(storeSource, /\/api\/recovery/, "sdd-workspace-store.tsx must call the dedicated recovery route");
+  assert.match(storeSource, /markRecoveryStateInvalidated/, "sdd-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
 
   assert.match(surfaceSource, /data-testid="command-surface-recovery"/, "command-surface.tsx must render a recovery diagnostics panel");
   assert.match(surfaceSource, /data-testid="command-surface-recovery-state"/, "command-surface.tsx must expose a recovery load-state marker");

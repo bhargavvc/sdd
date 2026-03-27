@@ -5,8 +5,8 @@ import { join } from "node:path"
  * Returns the correct Node.js type-stripping flag for subprocess spawning.
  *
  * Node v24 enforces ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING for files
- * resolved under `node_modules/`. When GSD is installed globally via npm,
- * all source files live under `node_modules/gsd-pi/src/...`, so
+ * resolved under `node_modules/`. When SDD is installed globally via npm,
+ * all source files live under `node_modules/sdd-pi/src/...`, so
  * `--experimental-strip-types` fails deterministically.
  *
  * `--experimental-transform-types` applies a full TypeScript transform that
@@ -43,7 +43,7 @@ export interface SubprocessModuleResolution {
  * package root is under `node_modules/`.
  *
  * Node v24 unconditionally refuses `.ts` files under `node_modules/` — even
- * with `--experimental-transform-types`.  When GSD is installed globally via
+ * with `--experimental-transform-types`.  When SDD is installed globally via
  * npm, every subprocess that loads a `.ts` extension module crashes with
  * `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`.
  *
@@ -51,7 +51,7 @@ export interface SubprocessModuleResolution {
  * `files` array in package.json) and are the correct artefacts to use when
  * running from a packaged install.
  *
- * @param packageRoot  Absolute path to the GSD package root.
+ * @param packageRoot  Absolute path to the SDD package root.
  * @param relPath      Path relative to `src/`, e.g.
  *                     `"resources/extensions/sdd/workspace-index.ts"`.
  * @param checkExists  Optional `existsSync` override (for testing).
@@ -76,7 +76,7 @@ export function resolveSubprocessModule(
 }
 
 /**
- * Builds the Node.js subprocess prefix args for running a GSD extension module.
+ * Builds the Node.js subprocess prefix args for running a SDD extension module.
  *
  * When the module resolved to compiled JS (`useCompiledJs === true`), returns
  * only `["--input-type=module"]` — no TS loader, no TS stripping flag.

@@ -4,7 +4,7 @@ import assert from "node:assert/strict"
 const {
   derivePendingWorkflowCommandLabel,
   executeWorkflowActionInPowerMode,
-  navigateToGSDView,
+  navigateToSDDView,
 } = await import("../../web/lib/workflow-action-execution.ts")
 
 test("derivePendingWorkflowCommandLabel prefers the latest input line while a command is in flight", () => {
@@ -12,12 +12,12 @@ test("derivePendingWorkflowCommandLabel prefers the latest input line while a co
     commandInFlight: "prompt",
     terminalLines: [
       { id: "1", timestamp: "12:00", type: "system", content: "Bridge ready" },
-      { id: "2", timestamp: "12:01", type: "input", content: "/gsd" },
+      { id: "2", timestamp: "12:01", type: "input", content: "/sdd" },
       { id: "3", timestamp: "12:02", type: "system", content: "Working…" },
     ],
   })
 
-  assert.equal(label, "/gsd")
+  assert.equal(label, "/sdd")
 })
 
 test("derivePendingWorkflowCommandLabel falls back to the command type when no input line exists", () => {
@@ -29,12 +29,12 @@ test("derivePendingWorkflowCommandLabel falls back to the command type when no i
   assert.equal(label, "/abort")
 })
 
-test("navigateToGSDView dispatches the shared browser navigation event", (t) => {
+test("navigateToSDDView dispatches the shared browser navigation event", (t) => {
   const originalWindow = (globalThis as { window?: EventTarget }).window
   const fakeWindow = new EventTarget()
   const seen: string[] = []
 
-  fakeWindow.addEventListener("gsd:navigate-view", (event: Event) => {
+  fakeWindow.addEventListener("sdd:navigate-view", (event: Event) => {
     seen.push((event as CustomEvent<{ view: string }>).detail.view)
   })
 
@@ -42,7 +42,7 @@ test("navigateToGSDView dispatches the shared browser navigation event", (t) => 
 
   t.after(() => { ;(globalThis as { window?: EventTarget }).window = originalWindow });
 
-  navigateToGSDView("power")
+  navigateToSDDView("power")
 
   assert.deepEqual(seen, ["power"])
 })
@@ -54,7 +54,7 @@ test("executeWorkflowActionInPowerMode calls dispatch and navigates to the appro
   const seenViews: string[] = []
   let dispatchCalled = false
 
-  fakeWindow.addEventListener("gsd:navigate-view", (event: Event) => {
+  fakeWindow.addEventListener("sdd:navigate-view", (event: Event) => {
     seenViews.push((event as CustomEvent<{ view: string }>).detail.view)
   })
 

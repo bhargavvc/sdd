@@ -3,52 +3,52 @@
 ## Install
 
 ```bash
-npm install -g gsd-pi
+npm install -g sdd-pi
 ```
 
 Requires Node.js ≥ 22.0.0 (24 LTS recommended) and Git.
 
-> **`command not found: gsd`?** Your shell may not have npm's global bin directory in `$PATH`. Run `npm prefix -g` to find it, then add `$(npm prefix -g)/bin` to your PATH. See [Troubleshooting](./troubleshooting.md#command-not-found-gsd-after-install) for details.
+> **`command not found: sdd`?** Your shell may not have npm's global bin directory in `$PATH`. Run `npm prefix -g` to find it, then add `$(npm prefix -g)/bin` to your PATH. See [Troubleshooting](./troubleshooting.md#command-not-found-sdd-after-install) for details.
 
-SDD checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/gsd update`.
+SDD checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/sdd update`.
 
 ### Set up API keys
 
-If you use a non-Anthropic model, you'll need a search API key for web search. Run `/gsd config` to set keys globally — they're saved to `~/.sdd/agent/auth.json` and apply to all projects:
+If you use a non-Anthropic model, you'll need a search API key for web search. Run `/sdd config` to set keys globally — they're saved to `~/.sdd/agent/auth.json` and apply to all projects:
 
 ```bash
-# Inside any GSD session:
-/gsd config
+# Inside any SDD session:
+/sdd config
 ```
 
-See [Global API Keys](./configuration.md#global-api-keys-gsd-config) for details on supported keys.
+See [Global API Keys](./configuration.md#global-api-keys-sdd-config) for details on supported keys.
 
 ### Set up custom MCP servers
 
-If you want GSD to call local or external MCP servers, add project-local config in `.mcp.json` or `.sdd/mcp.json`.
+If you want SDD to call local or external MCP servers, add project-local config in `.mcp.json` or `.sdd/mcp.json`.
 
 See [Configuration → MCP Servers](./configuration.md#mcp-servers) for examples and verification steps.
 
 ### VS Code Extension
 
-SDD is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "GSD" in VS Code extensions. The extension provides:
+SDD is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "SDD" in VS Code extensions. The extension provides:
 
-- **`@gsd` chat participant** — talk to the agent in VS Code Chat
+- **`@sdd` chat participant** — talk to the agent in VS Code Chat
 - **Sidebar dashboard** — connection status, model info, token usage, quick actions
 - **Full command palette** — start/stop agent, switch models, export sessions
 
-The CLI (`gsd-pi`) must be installed first — the extension connects to it via RPC.
+The CLI (`sdd-pi`) must be installed first — the extension connects to it via RPC.
 
 ### Web Interface
 
-SDD also has a browser-based interface. Run `gsd --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
+SDD also has a browser-based interface. Run `sdd --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
 
 ## First Launch
 
-Run `gsd` in any directory:
+Run `sdd` in any directory:
 
 ```bash
-gsd
+sdd
 ```
 
 SDD displays a welcome screen showing your version, active model, and available tool keys. Then on first launch, it runs a setup wizard:
@@ -61,7 +61,7 @@ If you have an existing Pi installation, provider credentials are imported autom
 Re-run the wizard anytime with:
 
 ```bash
-gsd config
+sdd config
 ```
 
 ## Choose a Model
@@ -76,9 +76,9 @@ Or configure per-phase models in preferences — see [Configuration](./configura
 
 ## Two Ways to Work
 
-### Step Mode — `/gsd`
+### Step Mode — `/sdd`
 
-Type `/gsd` inside a session. GSD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next.
+Type `/sdd` inside a session. SDD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next.
 
 - **No `.sdd/` directory** → starts a discussion flow to capture your project vision
 - **Milestone exists, no roadmap** → discuss or research the milestone
@@ -87,12 +87,12 @@ Type `/gsd` inside a session. GSD executes one unit of work at a time, pausing b
 
 Step mode is the on-ramp. You stay in the loop, reviewing output between each step.
 
-### Auto Mode — `/gsd auto`
+### Auto Mode — `/sdd auto`
 
-Type `/gsd auto` and walk away. GSD autonomously researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete.
+Type `/sdd auto` and walk away. SDD autonomously researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete.
 
 ```
-/gsd auto
+/sdd auto
 ```
 
 See [Auto Mode](./auto-mode.md) for full details.
@@ -104,17 +104,17 @@ The recommended workflow: auto mode in one terminal, steering from another.
 **Terminal 1 — let it build:**
 
 ```bash
-gsd
-/gsd auto
+sdd
+/sdd auto
 ```
 
 **Terminal 2 — steer while it works:**
 
 ```bash
-gsd
-/gsd discuss    # talk through architecture decisions
-/gsd status     # check progress
-/gsd queue      # queue the next milestone
+sdd
+/sdd discuss    # talk through architecture decisions
+/sdd status     # check progress
+/sdd queue      # queue the next milestone
 ```
 
 Both terminals read and write the same `.sdd/` files. Decisions in terminal 2 are picked up at the next phase boundary automatically.
@@ -158,7 +158,7 @@ All state lives on disk in `.sdd/`:
 ## Resume a Session
 
 ```bash
-gsd --continue    # or gsd -c
+sdd --continue    # or sdd -c
 ```
 
 Resumes the most recent session for the current directory.
@@ -166,7 +166,7 @@ Resumes the most recent session for the current directory.
 To browse and pick from all saved sessions:
 
 ```bash
-gsd sessions
+sdd sessions
 ```
 
 Shows each session's date, message count, and first-message preview so you can choose which one to resume.
@@ -179,20 +179,20 @@ Shows each session's date, message count, and first-message preview so you can c
 
 ## Troubleshooting
 
-### `gsd` command runs `git svn dcommit` instead of SDD
+### `sdd` command runs `git svn dcommit` instead of SDD
 
-The [oh-my-zsh git plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git) defines `alias gsd='git svn dcommit'`, which shadows the GSD binary.
+The [oh-my-zsh git plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git) defines `alias sdd='git svn dcommit'`, which shadows the SDD binary.
 
 **Option 1** — Remove the alias in your `~/.zshrc` (add after the `source $ZSH/oh-my-zsh.sh` line):
 
 ```bash
-unalias gsd 2>/dev/null
+unalias sdd 2>/dev/null
 ```
 
 **Option 2** — Use the alternative binary name:
 
 ```bash
-gsd-cli
+sdd-cli
 ```
 
-Both `gsd` and `gsd-cli` point to the same binary.
+Both `sdd` and `sdd-cli` point to the same binary.

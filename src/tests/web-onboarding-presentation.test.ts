@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 
-const { getOnboardingPresentation } = await import("../../web/lib/gsd-workspace-store.tsx")
+const { getOnboardingPresentation } = await import("../../web/lib/sdd-workspace-store.tsx")
 
 function makeOnboardingState(overrides: Record<string, unknown> = {}) {
   return {

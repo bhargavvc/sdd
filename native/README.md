@@ -1,6 +1,6 @@
-# GSD Native Engine
+# SDD Native Engine
 
-Rust N-API addon providing high-performance native modules for GSD.
+Rust N-API addon providing high-performance native modules for SDD.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ JS (packages/native) -> N-API -> Rust crates
                                   └── grep/    (ripgrep internals, pure Rust lib)
 ```
 
-Inspired by [Oh My Pi's pi-natives](https://github.com/can1357/oh-my-pi), adapted for GSD's Node.js runtime.
+Inspired by [Oh My Pi's pi-natives](https://github.com/can1357/oh-my-pi), adapted for SDD's Node.js runtime.
 
 ## Prerequisites
 
@@ -53,7 +53,7 @@ Ripgrep-backed regex search using the `grep-regex`, `grep-searcher`, and `grep-m
 **TypeScript usage:**
 
 ```typescript
-import { grep, searchContent } from "@gsd/native";
+import { grep, searchContent } from "@sdd/native";
 
 // Search files
 const result = grep({

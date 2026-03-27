@@ -3,9 +3,9 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
 
-const GSD_RTK_PATH_ENV = "GSD_RTK_PATH";
-const GSD_RTK_DISABLED_ENV = "GSD_RTK_DISABLED";
-const GSD_RTK_REWRITE_TIMEOUT_MS_ENV = "GSD_RTK_REWRITE_TIMEOUT_MS";
+const SDD_RTK_PATH_ENV = "SDD_RTK_PATH";
+const SDD_RTK_DISABLED_ENV = "SDD_RTK_DISABLED";
+const SDD_RTK_REWRITE_TIMEOUT_MS_ENV = "SDD_RTK_REWRITE_TIMEOUT_MS";
 const RTK_TELEMETRY_DISABLED_ENV = "RTK_TELEMETRY_DISABLED";
 const RTK_REWRITE_TIMEOUT_MS = 5_000;
 
@@ -16,7 +16,7 @@ function isTruthy(value: string | undefined): boolean {
 }
 
 function getRewriteTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
-  const configured = Number.parseInt(env[GSD_RTK_REWRITE_TIMEOUT_MS_ENV] ?? "", 10);
+  const configured = Number.parseInt(env[SDD_RTK_REWRITE_TIMEOUT_MS_ENV] ?? "", 10);
   if (Number.isFinite(configured) && configured > 0) {
     return configured;
   }
@@ -24,7 +24,7 @@ function getRewriteTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
 }
 
 export function isRtkEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return !isTruthy(env[GSD_RTK_DISABLED_ENV]);
+  return !isTruthy(env[SDD_RTK_DISABLED_ENV]);
 }
 
 export function buildRtkEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
@@ -35,7 +35,7 @@ export function buildRtkEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.Proces
 }
 
 function getManagedRtkDir(env: NodeJS.ProcessEnv = process.env): string {
-  return join(env.GSD_HOME || join(homedir(), ".gsd"), "agent", "bin");
+  return join(env.SDD_HOME || join(homedir(), ".sdd"), "agent", "bin");
 }
 
 function getRtkBinaryName(platform: NodeJS.Platform = process.platform): string {
@@ -83,7 +83,7 @@ export function resolveRtkBinaryPath(options: ResolveRtkBinaryPathOptions = {}):
   const env = options.env ?? process.env;
   const platform = options.platform ?? process.platform;
 
-  const explicitPath = options.binaryPath ?? env[GSD_RTK_PATH_ENV];
+  const explicitPath = options.binaryPath ?? env[SDD_RTK_PATH_ENV];
   if (explicitPath && existsSync(explicitPath)) {
     return explicitPath;
   }

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
 const srcLoaderPath = resolve(root, 'src', 'loader.ts')
-const resolveTsPath = resolve(root, 'src', 'resources', 'extensions', 'gsd', 'tests', 'resolve-ts.mjs')
+const resolveTsPath = resolve(root, 'src', 'resources', 'extensions', 'sdd', 'tests', 'resolve-ts.mjs')
 
 const child = spawn(
   process.execPath,
@@ -20,7 +20,7 @@ const child = spawn(
 )
 
 child.on('error', (error) => {
-  console.error(`[gsd] Failed to launch local dev CLI: ${error instanceof Error ? error.message : String(error)}`)
+  console.error(`[sdd] Failed to launch local dev CLI: ${error instanceof Error ? error.message : String(error)}`)
   process.exit(1)
 })
 

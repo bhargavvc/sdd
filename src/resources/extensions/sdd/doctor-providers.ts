@@ -1,5 +1,5 @@
 /**
- * GSD Doctor — Provider & Integration Health Checks
+ * SDD Doctor — Provider & Integration Health Checks
  *
  * Fast, deterministic checks for external service configuration.
  * Checks key presence in auth.json and environment variables — no HTTP calls,
@@ -13,8 +13,8 @@
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { AuthStorage } from "@gsd/pi-coding-agent";
-import { getEnvApiKey } from "@gsd/pi-ai";
+import { AuthStorage } from "@sdd/pi-coding-agent";
+import { getEnvApiKey } from "@sdd/pi-ai";
 import { loadEffectiveSDDPreferences } from "./preferences.js";
 import { getAuthPath, PROVIDER_REGISTRY, type ProviderCategory } from "./key-manager.js";
 
@@ -225,8 +225,8 @@ function checkLlmProviders(): ProviderCheckResult[] {
         detail: providerId === "anthropic-vertex"
           ? "Set ANTHROPIC_VERTEX_PROJECT_ID and authenticate with Google ADC"
           : info?.hasOAuth
-          ? `Run /gsd keys to authenticate`
-          : `Set ${envVar} or run /gsd keys`,
+          ? `Run /sdd keys to authenticate`
+          : `Set ${envVar} or run /sdd keys`,
         required: true,
       });
     } else if (lookup.backedOff) {
@@ -236,7 +236,7 @@ function checkLlmProviders(): ProviderCheckResult[] {
         category: "llm",
         status: "warning",
         message: `${label} — all credentials backed off (rate limited)`,
-        detail: `GSD will retry automatically`,
+        detail: `SDD will retry automatically`,
         required: true,
       });
     } else {
@@ -283,7 +283,7 @@ function checkRemoteQuestionsProvider(): ProviderCheckResult | null {
         category: "remote",
         status: "warning",
         message: `${label} — channel configured but token not found`,
-        detail: info?.envVar ? `Set ${info.envVar} or run /gsd keys` : `Run /gsd keys to configure`,
+        detail: info?.envVar ? `Set ${info.envVar} or run /sdd keys` : `Run /sdd keys to configure`,
         required: true,
       };
     }

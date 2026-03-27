@@ -47,7 +47,7 @@ import { exec } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 
 /** Matches AWS SDK / Bedrock / SSO credential and token errors. */
 const AWS_AUTH_ERROR_RE =
@@ -58,7 +58,7 @@ const AWS_AUTH_ERROR_RE =
  * Checks project-level first, then global (~/.sdd/agent/settings.json).
  */
 function getAwsAuthRefreshCommand(): string | undefined {
-	const configDir = process.env.PI_CONFIG_DIR || ".gsd";
+	const configDir = process.env.PI_CONFIG_DIR || ".sdd";
 	const paths = [
 		join(process.cwd(), configDir, "settings.json"),
 		join(homedir(), configDir, "agent", "settings.json"),

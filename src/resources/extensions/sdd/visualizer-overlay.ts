@@ -1,5 +1,5 @@
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@sdd/pi-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@sdd/pi-tui";
 import { loadVisualizerData, type VisualizerData } from "./visualizer-data.js";
 import {
   renderProgressView,
@@ -31,7 +31,7 @@ const TAB_LABELS = [
   "0 Export",
 ];
 
-export class GSDVisualizerOverlay {
+export class SDDVisualizerOverlay {
   private tui: { requestRender: () => void };
   private theme: Theme;
   private onClose: () => void;

@@ -2,11 +2,11 @@
  * inherited-repo-home-dir.test.ts — Regression test for #2393.
  *
  * When the user's home directory IS a git repo (common with dotfile
- * managers like yadm), isInheritedRepo() must not treat ~/.gsd (the
- * global GSD state directory) as a project .gsd belonging to the home
+ * managers like yadm), isInheritedRepo() must not treat ~/.sdd (the
+ * global SDD state directory) as a project .sdd belonging to the home
  * repo. Without the fix, isInheritedRepo() returns false for project
- * subdirectories because it sees ~/.gsd and concludes the parent repo
- * has already been initialised with GSD — causing the wrong project
+ * subdirectories because it sees ~/.sdd and concludes the parent repo
+ * has already been initialised with SDD — causing the wrong project
  * state to be loaded.
  */
 
@@ -42,7 +42,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
 
   beforeEach(() => {
     // Create a fake HOME that is itself a git repo (dotfile manager scenario).
-    fakeHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-home-repo-")));
+    fakeHome = realpathSync(mkdtempSync(join(tmpdir(), "sdd-home-repo-")));
     run("git", ["init", "-b", "main"], fakeHome);
     run("git", ["config", "user.name", "Test"], fakeHome);
     run("git", ["config", "user.email", "test@example.com"], fakeHome);
@@ -50,64 +50,64 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     run("git", ["add", ".bashrc"], fakeHome);
     run("git", ["commit", "-m", "init dotfiles"], fakeHome);
 
-    // Create a plain ~/.gsd directory at fakeHome — this simulates the
-    // global GSD home directory, NOT a project .gsd.
-    mkdirSync(join(fakeHome, ".gsd", "projects"), { recursive: true });
+    // Create a plain ~/.sdd directory at fakeHome — this simulates the
+    // global SDD home directory, NOT a project .sdd.
+    mkdirSync(join(fakeHome, ".sdd", "projects"), { recursive: true });
 
-    // Save and override env. Point GSD_HOME at fakeHome/.gsd so the
+    // Save and override env. Point SDD_HOME at fakeHome/.sdd so the
     // function recognizes it as the global state directory.
-    origGsdHome = process.env.GSD_HOME;
-    origSddStateDir = process.env.GSD_STATE_DIR;
-    process.env.GSD_HOME = join(fakeHome, ".gsd");
-    stateDir = mkdtempSync(join(tmpdir(), "gsd-state-"));
-    process.env.GSD_STATE_DIR = stateDir;
+    origGsdHome = process.env.SDD_HOME;
+    origSddStateDir = process.env.SDD_STATE_DIR;
+    process.env.SDD_HOME = join(fakeHome, ".sdd");
+    stateDir = mkdtempSync(join(tmpdir(), "sdd-state-"));
+    process.env.SDD_STATE_DIR = stateDir;
   });
 
   afterEach(() => {
-    if (origGsdHome !== undefined) process.env.GSD_HOME = origGsdHome;
-    else delete process.env.GSD_HOME;
-    if (origSddStateDir !== undefined) process.env.GSD_STATE_DIR = origSddStateDir;
-    else delete process.env.GSD_STATE_DIR;
+    if (origGsdHome !== undefined) process.env.SDD_HOME = origGsdHome;
+    else delete process.env.SDD_HOME;
+    if (origSddStateDir !== undefined) process.env.SDD_STATE_DIR = origSddStateDir;
+    else delete process.env.SDD_STATE_DIR;
 
     rmSync(fakeHome, { recursive: true, force: true });
     rmSync(stateDir, { recursive: true, force: true });
   });
 
-  test("subdirectory of home-as-git-root is detected as inherited even when ~/.gsd exists", () => {
+  test("subdirectory of home-as-git-root is detected as inherited even when ~/.sdd exists", () => {
     // Create a project directory inside fake HOME
     const projectDir = join(fakeHome, "projects", "my-app");
     mkdirSync(projectDir, { recursive: true });
 
-    // The bug: isInheritedRepo sees ~/.gsd and returns false, thinking
-    // the home repo is a legitimate GSD project. It should return true
-    // because ~/.gsd is the global state dir, not a project .gsd.
+    // The bug: isInheritedRepo sees ~/.sdd and returns false, thinking
+    // the home repo is a legitimate SDD project. It should return true
+    // because ~/.sdd is the global state dir, not a project .sdd.
     assert.strictEqual(
       isInheritedRepo(projectDir),
       true,
       "project inside home-as-git-root must be detected as inherited repo, " +
-      "even when ~/.gsd (global state dir) exists",
+      "even when ~/.sdd (global state dir) exists",
     );
   });
 
-  test("subdirectory with a real project .gsd symlink at git root is NOT inherited", () => {
-    // Simulate a legitimately initialised GSD project at the home repo root:
-    // .gsd is a symlink to an external state directory.
+  test("subdirectory with a real project .sdd symlink at git root is NOT inherited", () => {
+    // Simulate a legitimately initialised SDD project at the home repo root:
+    // .sdd is a symlink to an external state directory.
     const externalState = join(stateDir, "projects", "home-project");
     mkdirSync(externalState, { recursive: true });
-    const gsdDir = join(fakeHome, ".gsd");
+    const gsdDir = join(fakeHome, ".sdd");
 
-    // Remove the plain directory and replace with a symlink (real project .gsd)
+    // Remove the plain directory and replace with a symlink (real project .sdd)
     rmSync(gsdDir, { recursive: true, force: true });
     symlinkSync(externalState, gsdDir);
 
     const projectDir = join(fakeHome, "projects", "my-app");
     mkdirSync(projectDir, { recursive: true });
 
-    // When .gsd at root IS a project symlink, subdirectories are legitimate children
+    // When .sdd at root IS a project symlink, subdirectories are legitimate children
     assert.strictEqual(
       isInheritedRepo(projectDir),
       false,
-      "subdirectory of a legitimately-initialised GSD project should NOT be inherited",
+      "subdirectory of a legitimately-initialised SDD project should NOT be inherited",
     );
   });
 
@@ -120,11 +120,11 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
   });
 });
 
-describe("isInheritedRepo with stale .gsd at parent git root", () => {
+describe("isInheritedRepo with stale .sdd at parent git root", () => {
   let parentRepo: string;
 
   beforeEach(() => {
-    parentRepo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-stale-parent-")));
+    parentRepo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-stale-parent-")));
     run("git", ["init", "-b", "main"], parentRepo);
     run("git", ["config", "user.name", "Test"], parentRepo);
     run("git", ["config", "user.email", "test@example.com"], parentRepo);
@@ -137,20 +137,20 @@ describe("isInheritedRepo with stale .gsd at parent git root", () => {
     rmSync(parentRepo, { recursive: true, force: true });
   });
 
-  test("stale .gsd dir at parent git root does not suppress inherited detection", () => {
-    // Simulate a stale .gsd directory at the parent git root (e.g. from a
+  test("stale .sdd dir at parent git root does not suppress inherited detection", () => {
+    // Simulate a stale .sdd directory at the parent git root (e.g. from a
     // prior doctor run or accidental init). This is a real directory, NOT
-    // a symlink, and NOT the global GSD home.
-    mkdirSync(join(parentRepo, ".gsd"), { recursive: true });
+    // a symlink, and NOT the global SDD home.
+    mkdirSync(join(parentRepo, ".sdd"), { recursive: true });
 
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    // Without fix: isProjectGsd(join(root, ".gsd")) returns true because
-    // the stale .gsd is a real directory that isn't the global GSD home,
+    // Without fix: isProjectGsd(join(root, ".sdd")) returns true because
+    // the stale .sdd is a real directory that isn't the global SDD home,
     // causing isInheritedRepo to return false (false negative).
     //
-    // The stale .gsd at parent is still treated as a "project .gsd" by
+    // The stale .sdd at parent is still treated as a "project .sdd" by
     // isProjectGsd(), so the git root check at line 128 returns false.
     // This is the expected behavior for that check — the defense-in-depth
     // fix in auto-start.ts handles this case by checking for local .git.
@@ -159,31 +159,31 @@ describe("isInheritedRepo with stale .gsd at parent git root", () => {
     assert.strictEqual(
       isInheritedRepo(projectDir),
       false,
-      "stale .gsd dir at git root still causes isInheritedRepo to return false " +
+      "stale .sdd dir at git root still causes isInheritedRepo to return false " +
       "(defense-in-depth in auto-start.ts handles this case)",
     );
   });
 
-  test("basePath's own .gsd symlink does not suppress inherited detection", () => {
-    // Create a project subdir with its own .gsd symlink (set up during
+  test("basePath's own .sdd symlink does not suppress inherited detection", () => {
+    // Create a project subdir with its own .sdd symlink (set up during
     // the discuss phase, before auto-mode bootstrap runs).
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    const externalState = mkdtempSync(join(tmpdir(), "gsd-ext-state-"));
-    symlinkSync(externalState, join(projectDir, ".gsd"));
+    const externalState = mkdtempSync(join(tmpdir(), "sdd-ext-state-"));
+    symlinkSync(externalState, join(projectDir, ".sdd"));
 
     // Before fix: the walk-up loop started at normalizedBase (projectDir),
-    // found .gsd at projectDir, and returned false — even though projectDir
-    // has no .git of its own. The .gsd at basePath is irrelevant to whether
+    // found .sdd at projectDir, and returned false — even though projectDir
+    // has no .git of its own. The .sdd at basePath is irrelevant to whether
     // the git repo is inherited from a parent.
     //
     // After fix: the walk-up starts at dirname(normalizedBase), skipping
-    // basePath's own .gsd.
+    // basePath's own .sdd.
     assert.strictEqual(
       isInheritedRepo(projectDir),
       true,
-      "project's own .gsd symlink must not suppress inherited repo detection",
+      "project's own .sdd symlink must not suppress inherited repo detection",
     );
 
     rmSync(externalState, { recursive: true, force: true });

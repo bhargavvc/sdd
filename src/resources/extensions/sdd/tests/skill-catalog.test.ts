@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Skill Catalog — pack matching logic.
+ * Unit tests for SDD Skill Catalog — pack matching logic.
  *
  * Exercises matchPacksForProject() to verify that project signals
  * correctly map to skill packs.

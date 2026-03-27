@@ -9,8 +9,8 @@ import {
   createWorktree,
   listWorktrees,
   removeWorktree,
-  diffWorktreeGSD,
-  getWorktreeGSDDiff,
+  diffWorktreeSDD,
+  getWorktreeSDDDiff,
   getWorktreeLog,
   worktreeBranchName,
   worktreePath,
@@ -21,14 +21,14 @@ function run(command: string, cwd: string): string {
 }
 
 function makeBaseRepo(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-wt-test-"));
+  const base = mkdtempSync(join(tmpdir(), "sdd-wt-test-"));
   run("git init -b main", base);
   run('git config user.name "Test User"', base);
   run('git config user.email "test@example.com"', base);
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   writeFileSync(join(base, "README.md"), "# Test Project\n", "utf-8");
   writeFileSync(
-    join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+    join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
     "# M001: Demo\n\n## Slices\n- [ ] **S01: First** `risk:low` `depends:[]`\n  > After this: it works\n",
     "utf-8",
   );
@@ -45,14 +45,14 @@ function makeRepoWithWorktree(worktreeName: string): { base: string; wtPath: str
 
 function makeRepoWithChanges(worktreeName: string): { base: string; wtPath: string } {
   const { base, wtPath } = makeRepoWithWorktree(worktreeName);
-  mkdirSync(join(wtPath, ".gsd", "milestones", "M002"), { recursive: true });
+  mkdirSync(join(wtPath, ".sdd", "milestones", "M002"), { recursive: true });
   writeFileSync(
-    join(wtPath, ".gsd", "milestones", "M002", "M002-ROADMAP.md"),
+    join(wtPath, ".sdd", "milestones", "M002", "M002-ROADMAP.md"),
     "# M002: New Feature\n\n## Slices\n- [ ] **S01: Setup** `risk:low` `depends:[]`\n  > After this: new feature ready\n",
     "utf-8",
   );
   writeFileSync(
-    join(wtPath, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+    join(wtPath, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
     "# M001: Demo (updated)\n\n## Slices\n- [x] **S01: First** `risk:low` `depends:[]`\n  > Done\n",
     "utf-8",
   );
@@ -86,8 +86,8 @@ describe("createWorktree", () => {
     assert.ok(existsSync(info.path), "worktree path should exist on disk");
     assert.ok(existsSync(join(info.path, "README.md")), "README.md should be in worktree");
     assert.ok(
-      existsSync(join(info.path, ".gsd", "milestones", "M001", "M001-ROADMAP.md")),
-      ".gsd files should be in worktree",
+      existsSync(join(info.path, ".sdd", "milestones", "M001", "M001-ROADMAP.md")),
+      ".sdd files should be in worktree",
     );
     const branches = run("git branch", base);
     assert.ok(branches.includes("worktree/feature-x"), "branch should be created in base repo");
@@ -156,9 +156,9 @@ describe("listWorktrees", () => {
   });
 });
 
-// ─── diffWorktreeGSD ─────────────────────────────────────────────────────────
+// ─── diffWorktreeSDD ─────────────────────────────────────────────────────────
 
-describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
+describe("diffWorktreeSDD and getWorktreeSDDDiff", () => {
   let base: string;
   beforeEach(() => {
     const repo = makeRepoWithChanges("feature-x");
@@ -166,8 +166,8 @@ describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
   });
   afterEach(() => { rmSync(base, { recursive: true, force: true }); });
 
-  test("detects added and modified GSD files", () => {
-    const diff = diffWorktreeGSD(base, "feature-x");
+  test("detects added and modified SDD files", () => {
+    const diff = diffWorktreeSDD(base, "feature-x");
     assert.ok(diff.added.length > 0, "should have added files");
     assert.ok(
       diff.added.some((f) => f.includes("M002")),
@@ -182,7 +182,7 @@ describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
   });
 
   test("returns patch content", () => {
-    const fullDiff = getWorktreeGSDDiff(base, "feature-x");
+    const fullDiff = getWorktreeSDDDiff(base, "feature-x");
     assert.ok(fullDiff.includes("M002"), "diff should mention M002");
     assert.ok(fullDiff.includes("updated"), "diff should mention the update");
   });

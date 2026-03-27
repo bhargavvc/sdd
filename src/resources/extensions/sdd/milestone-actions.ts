@@ -1,5 +1,5 @@
 /**
- * GSD Milestone Actions — Park, Unpark, and Discard operations.
+ * SDD Milestone Actions — Park, Unpark, and Discard operations.
  *
  * Park: Creates a PARKED.md marker file. deriveState() skips parked milestones
  * when finding the active milestone, but keeps them in the registry.
@@ -20,7 +20,7 @@ import {
 } from "./paths.js";
 import { invalidateAllCaches } from "./cache.js";
 import { loadQueueOrder, saveQueueOrder } from "./queue-order.js";
-import { isDbAvailable, updateMilestoneStatus } from "./gsd-db.js";
+import { isDbAvailable, updateMilestoneStatus } from "./sdd-db.js";
 
 // ─── Park ──────────────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ export function parkMilestone(basePath: string, milestoneId: string, reason: str
     try {
       updateMilestoneStatus(milestoneId, "parked");
     } catch (err) {
-      process.stderr.write(`gsd: parkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
+      process.stderr.write(`sdd: parkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
     }
   }
   invalidateAllCaches();
@@ -84,7 +84,7 @@ export function unparkMilestone(basePath: string, milestoneId: string): boolean 
     try {
       updateMilestoneStatus(milestoneId, "active");
     } catch (err) {
-      process.stderr.write(`gsd: unparkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
+      process.stderr.write(`sdd: unparkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
     }
   }
   invalidateAllCaches();

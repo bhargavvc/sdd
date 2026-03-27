@@ -1,4 +1,4 @@
-// GSD — unit-ownership tests
+// SDD — unit-ownership tests
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import test from 'node:test';
@@ -17,7 +17,7 @@ import {
 } from '../unit-ownership.ts';
 
 function makeTmpBase(): string {
-  return mkdtempSync(join(tmpdir(), 'gsd-ownership-'));
+  return mkdtempSync(join(tmpdir(), 'sdd-ownership-'));
 }
 
 function cleanup(base: string): void {
@@ -41,7 +41,7 @@ test('claimUnit: creates claim file and records agent', () => {
   try {
     claimUnit(base, 'M001/S01/T01', 'executor-01');
 
-    assert.ok(existsSync(join(base, '.gsd', 'unit-claims.json')), 'claim file should exist');
+    assert.ok(existsSync(join(base, '.sdd', 'unit-claims.json')), 'claim file should exist');
     assert.equal(getOwner(base, 'M001/S01/T01'), 'executor-01');
   } finally {
     cleanup(base);

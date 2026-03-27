@@ -14,7 +14,7 @@
  *
  * TUI detection patterns (after ANSI stripping):
  * - Select list: lines starting with "  › N." (selected) or "    N." (unselected)
- *   Uses GSD's shared UI cursor glyph "›"
+ *   Uses SDD's shared UI cursor glyph "›"
  * - Checkbox: lines starting with "  › [x]" or "  › [ ]" (multi-select)
  * - Password/text: @clack/prompts "◆  " or "?" prefix + label ending with ":"
  * - Completion: main prompt (❯ / › / > / $) reappears after ≥2s of no output
@@ -108,8 +108,8 @@ export function stripAnsi(s: string): string {
 // ─── Role / Boundary Heuristics ───────────────────────────────────────────────
 
 /**
- * GSD prompt markers that signal the boundary between turns.
- * After ANSI stripping, GSD's Pi agent shows one of these at the start
+ * SDD prompt markers that signal the boundary between turns.
+ * After ANSI stripping, SDD's Pi agent shows one of these at the start
  * of a line when waiting for user input.
  */
 const PROMPT_MARKERS = [
@@ -120,7 +120,7 @@ const PROMPT_MARKERS = [
 ]
 
 /**
- * System/status lines: short, bracket-wrapped messages that GSD emits
+ * System/status lines: short, bracket-wrapped messages that SDD emits
  * at well-known lifecycle points.
  */
 const SYSTEM_LINE_PATTERNS = [
@@ -132,12 +132,12 @@ const SYSTEM_LINE_PATTERNS = [
   /^\[thinking[.\u2026]*/i,
   /^\[done\]/i,
   /^\[error/i,
-  /^gsd\s+v[\d.]+/i,       // version banner
+  /^sdd\s+v[\d.]+/i,       // version banner
   /^✓\s/,                   // short success lines
   /^✗\s/,                   // short failure lines
 ]
 
-/** Returns true if the (stripped) line looks like a GSD input prompt */
+/** Returns true if the (stripped) line looks like a SDD input prompt */
 function isPromptLine(line: string): boolean {
   const trimmed = line.trim()
   return PROMPT_MARKERS.some((r) => r.test(trimmed))
@@ -155,7 +155,7 @@ function isSystemLine(line: string): boolean {
 // ─── TUI Prompt Detection ─────────────────────────────────────────────────────
 
 /**
- * GSD's shared UI uses "›" as cursor glyph (GLYPH.cursor = "›")
+ * SDD's shared UI uses "›" as cursor glyph (GLYPH.cursor = "›")
  * After ANSI stripping, a selected option renders as:
  *   "  › N. Label"  (with leading spaces from INDENT.option)
  * An unselected option renders as:
@@ -169,16 +169,16 @@ function isSystemLine(line: string): boolean {
  * contains ≥2 numbered option lines within a short time window.
  */
 
-/** Matches a GSD selected option line: "  › N. Label" */
+/** Matches a SDD selected option line: "  › N. Label" */
 const SELECT_OPTION_SELECTED_RE = /^\s{0,4}›\s+(\d+)\.\s+(.+)/
 
-/** Matches a GSD unselected option line: "    N. Label" */
+/** Matches a SDD unselected option line: "    N. Label" */
 const SELECT_OPTION_UNSELECTED_RE = /^\s{3,6}(\d+)\.\s+(.+)/
 
-/** Matches a GSD checkbox option: "  › [x] Label" or "  › [ ] Label" */
+/** Matches a SDD checkbox option: "  › [x] Label" or "  › [ ] Label" */
 const CHECKBOX_SELECTED_RE = /^\s{0,4}›\s+\[([x ])\]\s+(.+)/i
 
-/** Matches a GSD separator bar line: all ─ characters */
+/** Matches a SDD separator bar line: all ─ characters */
 const BAR_LINE_RE = /^[─━─\-─]+$/
 
 /**
@@ -190,14 +190,14 @@ const BAR_LINE_RE = /^[─━─\-─]+$/
 const CLACK_PASSWORD_RE = /^[◆▲?]\s{1,3}(.+(?:API\s*key|password|token|secret)[^:]*):?\s*$/i
 
 /**
- * Matches GSD text input prompts — @clack style or bare labeled prompts:
+ * Matches SDD text input prompts — @clack style or bare labeled prompts:
  * - "◆  Enter project name:"
  * - "?  What is your name?"
  */
 const CLACK_TEXT_RE = /^[◆▲?]\s{1,3}(.+[?:])\s*$/
 
 /**
- * Matches hints line rendered by GSD's shared UI:
+ * Matches hints line rendered by SDD's shared UI:
  * "  ↑/↓ to move  |  enter to select"
  * These appear below select lists and help confirm a select block is active.
  */
@@ -356,7 +356,7 @@ export class PtyChatParser {
   }
 
   /**
-   * Subscribe to completion signals (GSD returned to idle prompt after ≥2s silence).
+   * Subscribe to completion signals (SDD returned to idle prompt after ≥2s silence).
    * Returns an unsubscribe function.
    */
   onCompletionSignal(cb: CompletionCallback): Unsubscribe {
@@ -425,7 +425,7 @@ export class PtyChatParser {
     }
 
     // ── TUI option lines — must be checked BEFORE isPromptLine ─────────────
-    // Reason: the GSD UI cursor glyph "›" is also a PROMPT_MARKER, so a
+    // Reason: the SDD UI cursor glyph "›" is also a PROMPT_MARKER, so a
     // selected-option line like "  › 1. Describe it now" would be mistakenly
     // handled as a prompt boundary if isPromptLine ran first.
 
@@ -527,7 +527,7 @@ export class PtyChatParser {
     }
 
     // ── Question/header line (before options) ────────────────────────────────
-    // GSD renders a header line or question text above select options.
+    // SDD renders a header line or question text above select options.
     // Capture it so we can use it as the TuiPrompt.label when options arrive.
     if (this._looksLikeQuestionHeader(line)) {
       this._lastHeaderText = trimmed

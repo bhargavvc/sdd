@@ -12,26 +12,26 @@ import {
 // ---------------------------------------------------------------------------
 
 test("isUnderNodeModules returns false for paths outside node_modules", () => {
-  assert.equal(isUnderNodeModules("/home/user/projects/gsd"), false)
+  assert.equal(isUnderNodeModules("/home/user/projects/sdd"), false)
 })
 
 test("isUnderNodeModules returns true for Unix paths under node_modules/", () => {
   assert.equal(
-    isUnderNodeModules("/usr/lib/node_modules/gsd-pi"),
+    isUnderNodeModules("/usr/lib/node_modules/sdd-pi"),
     true,
   )
 })
 
 test("isUnderNodeModules returns true for Windows paths under node_modules/", () => {
   assert.equal(
-    isUnderNodeModules("C:\\Users\\dev\\AppData\\node_modules\\gsd-pi"),
+    isUnderNodeModules("C:\\Users\\dev\\AppData\\node_modules\\sdd-pi"),
     true,
   )
 })
 
 test("isUnderNodeModules returns false for substring match without trailing slash", () => {
   assert.equal(
-    isUnderNodeModules("/home/user/my_node_modules_backup/gsd"),
+    isUnderNodeModules("/home/user/my_node_modules_backup/sdd"),
     false,
   )
 })
@@ -41,7 +41,7 @@ test("isUnderNodeModules returns false for substring match without trailing slas
 // ---------------------------------------------------------------------------
 
 test("resolveSubprocessModule returns source .ts path when NOT under node_modules", () => {
-  const packageRoot = "/home/user/projects/gsd"
+  const packageRoot = "/home/user/projects/sdd"
   const result = resolveSubprocessModule(
     packageRoot,
     "resources/extensions/sdd/workspace-index.ts",
@@ -55,7 +55,7 @@ test("resolveSubprocessModule returns source .ts path when NOT under node_module
 })
 
 test("resolveSubprocessModule returns compiled .js path when under node_modules and dist file exists", () => {
-  const packageRoot = "/usr/lib/node_modules/gsd-pi"
+  const packageRoot = "/usr/lib/node_modules/sdd-pi"
   const distPath = join(packageRoot, "dist", "resources/extensions/sdd/workspace-index.js")
   const result = resolveSubprocessModule(
     packageRoot,
@@ -70,7 +70,7 @@ test("resolveSubprocessModule returns compiled .js path when under node_modules 
 })
 
 test("resolveSubprocessModule falls back to source .ts when under node_modules but dist file missing", () => {
-  const packageRoot = "/usr/lib/node_modules/gsd-pi"
+  const packageRoot = "/usr/lib/node_modules/sdd-pi"
   const result = resolveSubprocessModule(
     packageRoot,
     "resources/extensions/sdd/workspace-index.ts",
@@ -84,7 +84,7 @@ test("resolveSubprocessModule falls back to source .ts when under node_modules b
 })
 
 test("resolveSubprocessModule handles Windows paths under node_modules", () => {
-  const packageRoot = "C:\\Users\\dev\\AppData\\node_modules\\gsd-pi"
+  const packageRoot = "C:\\Users\\dev\\AppData\\node_modules\\sdd-pi"
   const distPath = join(packageRoot, "dist", "resources/extensions/sdd/auto.js")
   const result = resolveSubprocessModule(
     packageRoot,
@@ -99,7 +99,7 @@ test("resolveSubprocessModule handles Windows paths under node_modules", () => {
 })
 
 test("resolveSubprocessModule strips .ts extension when building dist .js path", () => {
-  const packageRoot = "/usr/lib/node_modules/gsd-pi"
+  const packageRoot = "/usr/lib/node_modules/sdd-pi"
   let checkedPath = ""
   resolveSubprocessModule(
     packageRoot,

@@ -15,8 +15,8 @@ import {
 } from "../crash-recovery.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  const base = join(tmpdir(), `sdd-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   return base;
 }
 

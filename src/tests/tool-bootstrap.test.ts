@@ -17,7 +17,7 @@ function makeExecutable(dir: string, name: string, content = "#!/bin/sh\nexit 0\
 }
 
 test("resolveToolFromPath finds fd via fdfind fallback", (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-tool-bootstrap-resolve-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-tool-bootstrap-resolve-"));
   t.after(() => { rmSync(tmp, { recursive: true, force: true }); });
 
   makeExecutable(tmp, "fdfind");
@@ -26,7 +26,7 @@ test("resolveToolFromPath finds fd via fdfind fallback", (t) => {
 });
 
 test("ensureManagedTools provisions fd and rg into managed bin dir", (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-tool-bootstrap-provision-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-tool-bootstrap-provision-"));
   const sourceBin = join(tmp, "source-bin");
   const targetBin = join(tmp, "target-bin");
 
@@ -48,7 +48,7 @@ test("ensureManagedTools provisions fd and rg into managed bin dir", (t) => {
 });
 
 test("ensureManagedTools copies executable when symlink target already exists as a broken link", (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-tool-bootstrap-copy-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-tool-bootstrap-copy-"));
   const sourceBin = join(tmp, "source-bin");
   const targetBin = join(tmp, "target-bin");
   const targetFd = join(targetBin, FD_TARGET);

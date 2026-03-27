@@ -1,2 +1,2 @@
-//! Forces the linker to include gsd_ast napi registrations.
-use gsd_ast as _;
+//! Forces the linker to include sdd_ast napi registrations.
+use sdd_ast as _;

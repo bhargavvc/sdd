@@ -2,7 +2,7 @@
  * Content-block mapping helpers and streaming state tracker.
  *
  * Translates the Claude Agent SDK's `BetaRawMessageStreamEvent` sequence
- * into GSD's `AssistantMessageEvent` deltas for incremental TUI rendering.
+ * into SDD's `AssistantMessageEvent` deltas for incremental TUI rendering.
  */
 
 import type {
@@ -15,7 +15,7 @@ import type {
 	ToolCall,
 	Usage,
 	WebSearchResultContent,
-} from "@gsd/pi-ai";
+} from "@sdd/pi-ai";
 import type { BetaContentBlock, BetaRawMessageStreamEvent, NonNullableUsage } from "./sdk-types.js";
 
 // ---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ import type { BetaContentBlock, BetaRawMessageStreamEvent, NonNullableUsage } fr
 // ---------------------------------------------------------------------------
 
 /**
- * Convert a single BetaContentBlock to the corresponding GSD content type.
+ * Convert a single BetaContentBlock to the corresponding SDD content type.
  */
 export function mapContentBlock(
 	block: BetaContentBlock,
@@ -84,7 +84,7 @@ export function mapStopReason(reason: string | null): StopReason {
 }
 
 /**
- * Convert SDK usage + total_cost_usd into GSD's Usage shape.
+ * Convert SDK usage + total_cost_usd into SDD's Usage shape.
  *
  * The SDK does not break cost down per-bucket, so all cost is
  * attributed to `cost.total`.

@@ -1,4 +1,4 @@
-// GSD — reopen-slice handler tests
+// SDD — reopen-slice handler tests
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import test from 'node:test';
@@ -15,12 +15,12 @@ import {
   insertTask,
   getSlice,
   getSliceTasks,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import { handleReopenSlice } from '../tools/reopen-slice.ts';
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-reopen-slice-'));
-  mkdirSync(join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-reopen-slice-'));
+  mkdirSync(join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks'), { recursive: true });
   return base;
 }
 
@@ -40,7 +40,7 @@ function seedCompleteSlice(): void {
 
 test('handleReopenSlice: resets a complete slice to in_progress and all tasks to pending', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     seedCompleteSlice();
 
@@ -68,7 +68,7 @@ test('handleReopenSlice: resets a complete slice to in_progress and all tasks to
 
 test('handleReopenSlice: works with a single task', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
     insertSlice({ id: 'S01', milestoneId: 'M001', status: 'complete' });
@@ -87,7 +87,7 @@ test('handleReopenSlice: works with a single task', async () => {
 
 test('handleReopenSlice: rejects empty sliceId', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     const result = await handleReopenSlice({ milestoneId: 'M001', sliceId: '' }, base);
     assert.ok('error' in result);
@@ -99,7 +99,7 @@ test('handleReopenSlice: rejects empty sliceId', async () => {
 
 test('handleReopenSlice: rejects non-existent milestone', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     const result = await handleReopenSlice({ milestoneId: 'M999', sliceId: 'S01' }, base);
     assert.ok('error' in result);
@@ -111,7 +111,7 @@ test('handleReopenSlice: rejects non-existent milestone', async () => {
 
 test('handleReopenSlice: rejects slice in a closed milestone', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Done', status: 'complete' });
     insertSlice({ id: 'S01', milestoneId: 'M001', status: 'complete' });
@@ -127,7 +127,7 @@ test('handleReopenSlice: rejects slice in a closed milestone', async () => {
 
 test('handleReopenSlice: rejects reopening a slice that is not complete', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Active', status: 'active' });
     insertSlice({ id: 'S01', milestoneId: 'M001', status: 'in_progress' });
@@ -142,7 +142,7 @@ test('handleReopenSlice: rejects reopening a slice that is not complete', async 
 
 test('handleReopenSlice: rejects non-existent slice', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
   try {
     insertMilestone({ id: 'M001', title: 'Active', status: 'active' });
 

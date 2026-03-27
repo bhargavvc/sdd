@@ -8,7 +8,7 @@
 
 import { execFileSync, execFile } from "node:child_process";
 import { resolve } from "node:path";
-import { GSDError, GSD_PARSE_ERROR } from "./errors.js";
+import { SDDError, SDD_PARSE_ERROR } from "./errors.js";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -76,7 +76,7 @@ export async function getRecentlyChangedFiles(
 
   try {
     const days = Math.max(1, Math.floor(Number(sinceDays)));
-    if (!Number.isFinite(days)) throw new GSDError(GSD_PARSE_ERROR, "invalid sinceDays");
+    if (!Number.isFinite(days)) throw new SDDError(SDD_PARSE_ERROR, "invalid sinceDays");
 
     // Run all three queries concurrently — they read independent git state
     const [logRaw, stagedRaw, statusRaw] = await Promise.all([

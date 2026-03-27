@@ -44,7 +44,7 @@ export function loadJsonFileOrNull<T>(
  * Non-fatal — swallows errors to prevent persistence from breaking operations.
  *
  * Uses atomic write-tmp-rename to prevent partial/corrupt files on crash.
- * This is the canonical way to persist JSON state in GSD — all callers
+ * This is the canonical way to persist JSON state in SDD — all callers
  * (queue-order, metrics, routing-history, reactive-graph) benefit from
  * crash-safety without code changes.
  */

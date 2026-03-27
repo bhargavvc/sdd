@@ -8,7 +8,7 @@ import { homedir } from "node:os";
 import { readPromptRecord } from "./store.js";
 
 function getGsdHome(): string {
-  return process.env.GSD_HOME || join(homedir(), ".gsd");
+  return process.env.SDD_HOME || join(homedir(), ".sdd");
 }
 
 export interface LatestPromptSummary {

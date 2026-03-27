@@ -1,5 +1,5 @@
 /**
- * complete-milestone handler — the core operation behind gsd_complete_milestone.
+ * complete-milestone handler — the core operation behind sdd_complete_milestone.
  *
  * Validates all slices are complete, updates milestone status in DB,
  * renders MILESTONE-SUMMARY.md to disk, stores rendered markdown in DB
@@ -15,7 +15,7 @@ import {
   getMilestoneSlices,
   getSliceTasks,
   updateMilestoneStatus,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { resolveMilestonePath, clearPathCache } from "../paths.js";
 import { isClosedStatus } from "../status-guards.js";
 import { saveFile, clearParseCache } from "../files.js";
@@ -181,7 +181,7 @@ export async function handleCompleteMilestone(
   if (milestoneDir) {
     summaryPath = join(milestoneDir, `${params.milestoneId}-SUMMARY.md`);
   } else {
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".sdd");
     const manualDir = join(gsdDir, "milestones", params.milestoneId);
     mkdirSync(manualDir, { recursive: true });
     summaryPath = join(manualDir, `${params.milestoneId}-SUMMARY.md`);
@@ -192,7 +192,7 @@ export async function handleCompleteMilestone(
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_milestone — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `sdd-db: complete_milestone — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     updateMilestoneStatus(params.milestoneId, 'active', null);
     invalidateStateCache();
@@ -218,7 +218,7 @@ export async function handleCompleteMilestone(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: complete-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `sdd: complete-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

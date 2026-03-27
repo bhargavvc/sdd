@@ -4,7 +4,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { deriveState } from './state.js';
 import { parseSummary, loadFile } from './files.js';
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from './gsd-db.js';
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from './sdd-db.js';
 import { parseRoadmap, parsePlan } from './parsers-legacy.js';
 import { findMilestoneIds } from './milestone-ids.js';
 import { resolveMilestoneFile, resolveSliceFile, resolveGsdRootFile, gsdRoot } from './paths.js';

@@ -7,7 +7,7 @@ import { resolveBridgeRuntimeConfig } from "./bridge-service.ts"
 import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefixArgs } from "./ts-subprocess-flags.ts"
 
 const VISUALIZER_MAX_BUFFER = 2 * 1024 * 1024
-const VISUALIZER_MODULE_ENV = "GSD_VISUALIZER_MODULE"
+const VISUALIZER_MODULE_ENV = "SDD_VISUALIZER_MODULE"
 
 /**
  * Browser-safe version of VisualizerData where Map fields are converted to
@@ -36,7 +36,7 @@ export interface SerializedVisualizerData {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -67,7 +67,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${VISUALIZER_MODULE_ENV}).href);`,
-    `const data = await mod.loadVisualizerData(process.env.GSD_VISUALIZER_BASE);`,
+    `const data = await mod.loadVisualizerData(process.env.SDD_VISUALIZER_BASE);`,
     'const result = {',
     '  ...data,',
     '  criticalPath: {',
@@ -95,7 +95,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
         env: {
           ...process.env,
           [VISUALIZER_MODULE_ENV]: visualizerModulePath,
-          GSD_VISUALIZER_BASE: projectCwd,
+          SDD_VISUALIZER_BASE: projectCwd,
         },
         maxBuffer: VISUALIZER_MAX_BUFFER,
       },

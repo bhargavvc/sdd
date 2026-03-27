@@ -1,6 +1,6 @@
 ---
 name: create-skill
-description: Expert guidance for creating, writing, building, and refining GSD skills. Use when working with SKILL.md files, authoring new skills, improving existing skills, or understanding skill structure and best practices.
+description: Expert guidance for creating, writing, building, and refining SDD skills. Use when working with SKILL.md files, authoring new skills, improving existing skills, or understanding skill structure and best practices.
 ---
 
 <essential_principles>
@@ -137,7 +137,7 @@ All in `references/`:
 **Patterns:** common-patterns.md, workflows-and-validation.md
 **Assets:** using-templates.md, using-scripts.md
 **Advanced:** executable-code.md, api-security.md, iteration-and-testing.md
-**GSD-specific:** gsd-skill-ecosystem.md
+**SDD-specific:** sdd-skill-ecosystem.md
 </reference_index>
 
 <workflows_index>

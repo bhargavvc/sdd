@@ -1,4 +1,4 @@
-Discuss milestone {{milestoneId}} ("{{milestoneTitle}}"). Identify gray areas, ask the user about them, and write `{{milestoneId}}-CONTEXT.md` in the milestone directory with the decisions. Use the **Context** output template below. If a `GSD Skill Preferences` block is present in system context, use it to decide which skills to load and follow; do not override required artifact rules.
+Discuss milestone {{milestoneId}} ("{{milestoneTitle}}"). Identify gray areas, ask the user about them, and write `{{milestoneId}}-CONTEXT.md` in the milestone directory with the decisions. Use the **Context** output template below. If a `SDD Skill Preferences` block is present in system context, use it to decide which skills to load and follow; do not override required artifact rules.
 
 **Structured questions available: {{structuredQuestionsAvailable}}**
 
@@ -105,6 +105,6 @@ Once the user confirms depth:
 
 1. Use the **Context** output template below
 2. `mkdir -p` the milestone directory if needed
-3. Call `gsd_summary_save` with `milestone_id: {{milestoneId}}`, `artifact_type: "CONTEXT"`, and the full context markdown as `content` — the tool writes the file to disk and persists to DB. Preserve the user's exact terminology, emphasis, and framing in the content. Do not paraphrase nuance into generic summaries. The context file is downstream agents' only window into this conversation.
+3. Call `sdd_summary_save` with `milestone_id: {{milestoneId}}`, `artifact_type: "CONTEXT"`, and the full context markdown as `content` — the tool writes the file to disk and persists to DB. Preserve the user's exact terminology, emphasis, and framing in the content. Do not paraphrase nuance into generic summaries. The context file is downstream agents' only window into this conversation.
 4. {{commitInstruction}}
 5. Say exactly: `"{{milestoneId}} context written."` — nothing else.

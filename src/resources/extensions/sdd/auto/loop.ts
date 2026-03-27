@@ -7,7 +7,7 @@
  * Imports from: auto/types, auto/resolve, auto/phases
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
 
 import { randomUUID } from "node:crypto";
 import type { AutoSession, SidecarItem } from "./session.js";
@@ -124,9 +124,9 @@ export async function autoLoop(
       // GRAPH.yaml. Shares runGuards and runUnitPhase with the dev path.
       // After unit execution, verifies then reconciles via the engine layer.
       //
-      // GSD_ENGINE_BYPASS=1 skips the engine layer entirely — falls through
+      // SDD_ENGINE_BYPASS=1 skips the engine layer entirely — falls through
       // to the dev path below.
-      if (s.activeEngineId != null && s.activeEngineId !== "dev" && !sidecarItem && process.env.GSD_ENGINE_BYPASS !== "1") {
+      if (s.activeEngineId != null && s.activeEngineId !== "dev" && !sidecarItem && process.env.SDD_ENGINE_BYPASS !== "1") {
         debugLog("autoLoop", { phase: "custom-engine-derive", iteration, engineId: s.activeEngineId });
 
         const { engine, policy } = resolveEngine({

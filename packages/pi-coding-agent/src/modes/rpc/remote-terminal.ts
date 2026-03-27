@@ -1,4 +1,4 @@
-import type { Terminal } from "@gsd/pi-tui";
+import type { Terminal } from "@sdd/pi-tui";
 
 export interface RemoteTerminalOptions {
 	onWrite: (data: string) => void;

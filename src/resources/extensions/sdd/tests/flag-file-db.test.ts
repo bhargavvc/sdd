@@ -25,17 +25,17 @@ import {
   insertTask,
   insertReplanHistory,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-flag-file-db-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-flag-file-db-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeFile(base: string, relativePath: string, content: string): void {
-  const full = join(base, '.gsd', relativePath);
+  const full = join(base, '.sdd', relativePath);
   mkdirSync(join(full, '..'), { recursive: true });
   writeFileSync(full, content);
 }

@@ -1,15 +1,15 @@
 /**
- * GSD Quick Mode — /gsd quick <task>
+ * SDD Quick Mode — /sdd quick <task>
  * Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
  *
- * Lightweight task execution with GSD guarantees (atomic commits, state
+ * Lightweight task execution with SDD guarantees (atomic commits, state
  * tracking) but without the full milestone/slice ceremony.
  *
  * Quick tasks live in `.sdd/quick/` and are tracked in STATE.md's
  * "Quick Tasks Completed" table.
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadPrompt } from "./prompt-loader.js";
@@ -168,7 +168,7 @@ export async function handleQuick(
   // Validate: .sdd/ must exist
   if (!existsSync(root)) {
     ctx.ui.notify(
-      "No .sdd/ directory found. Run /gsd to initialize a project first.",
+      "No .sdd/ directory found. Run /sdd to initialize a project first.",
       "error",
     );
     return;
@@ -178,7 +178,7 @@ export async function handleQuick(
   let description = args.trim();
   if (!description) {
     ctx.ui.notify(
-      "Usage: /gsd quick <task description>\n\nExample: /gsd quick fix login button not responding on mobile",
+      "Usage: /sdd quick <task description>\n\nExample: /sdd quick fix login button not responding on mobile",
       "info",
     );
     return;
@@ -195,7 +195,7 @@ export async function handleQuick(
   // Create git branch for the quick task
   const gitPrefs = loadEffectiveSDDPreferences()?.preferences?.git ?? {};
   const git = new GitServiceImpl(basePath, gitPrefs);
-  const branchName = `gsd/quick/${taskNum}-${slug}`;
+  const branchName = `sdd/quick/${taskNum}-${slug}`;
   let originalBranch = git.getCurrentBranch();
 
   let branchCreated = false;
@@ -248,7 +248,7 @@ export async function handleQuick(
 
   pi.sendMessage(
     {
-      customType: "gsd-quick-task",
+      customType: "sdd-quick-task",
       content: prompt,
       display: false,
     },

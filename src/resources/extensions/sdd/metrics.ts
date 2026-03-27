@@ -1,5 +1,5 @@
 /**
- * GSD Metrics — Token & Cost Tracking
+ * SDD Metrics — Token & Cost Tracking
  *
  * Accumulates per-unit usage data across auto-mode sessions.
  * Data is extracted from session entries before each context wipe,
@@ -14,14 +14,14 @@
  */
 
 import { join } from "node:path";
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { gsdRoot } from "./paths.js";
 import { getAndClearSkills } from "./skill-telemetry.js";
 import { loadJsonFile, loadJsonFileOrNull, saveJsonFile } from "./json-persistence.js";
 import { parseUnitId } from "./unit-id.js";
 
 // Re-export from shared — import directly from format-utils to avoid pulling
-// in the full barrel (mod.js → ui.js → @gsd/pi-tui) which breaks when loaded
+// in the full barrel (mod.js → ui.js → @sdd/pi-tui) which breaks when loaded
 // outside jiti's alias resolution (e.g. dynamic import in auto-loop reports).
 export { formatTokenCount } from "../shared/format-utils.js";
 

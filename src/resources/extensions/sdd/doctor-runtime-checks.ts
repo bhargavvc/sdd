@@ -32,7 +32,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `Stale auto.lock from PID ${lock.pid} (started ${lock.startedAt}, was executing ${lock.unitType} ${lock.unitId}) — process is no longer running`,
-          file: ".gsd/auto.lock",
+          file: ".sdd/auto.lock",
           fixable: true,
         });
 
@@ -47,7 +47,7 @@ export async function checkRuntimeHealth(
   }
 
   // ── Stranded lock directory ────────────────────────────────────────────
-  // proper-lockfile creates a `.gsd.lock/` directory as the OS-level lock
+  // proper-lockfile creates a `.sdd.lock/` directory as the OS-level lock
   // mechanism. If the process was SIGKILLed or crashed hard, this directory
   // can remain on disk without any live process holding it. The next session
   // fails to acquire the lock until the directory is removed (#1245).
@@ -95,7 +95,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: status.milestoneId,
           message: `Stale parallel session for ${status.milestoneId} (PID ${status.pid}, started ${new Date(status.startedAt).toISOString()}, last heartbeat ${new Date(status.lastHeartbeat).toISOString()}) — process is no longer running`,
-          file: `.gsd/parallel/${status.milestoneId}.status.json`,
+          file: `.sdd/parallel/${status.milestoneId}.status.json`,
           fixable: true,
         });
 
@@ -138,7 +138,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `${orphaned.length} completed-unit key(s) reference missing artifacts: ${orphaned.slice(0, 3).join(", ")}${orphaned.length > 3 ? "..." : ""}`,
-          file: ".gsd/completed-units.json",
+          file: ".sdd/completed-units.json",
           fixable: true,
         });
 
@@ -175,7 +175,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: `hook-state.json has ${Object.keys(state.cycleCounts).length} residual cycle count(s) from a previous session`,
-            file: ".gsd/hook-state.json",
+            file: ".sdd/hook-state.json",
             fixable: true,
           });
 
@@ -216,7 +216,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `Activity logs: ${files.length} files, ${totalMB.toFixed(1)}MB (thresholds: ${BLOAT_FILE_THRESHOLD} files / ${BLOAT_SIZE_MB}MB)`,
-          file: ".gsd/activity/",
+          file: ".sdd/activity/",
           fixable: true,
         });
 
@@ -244,7 +244,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: "STATE.md is missing — state display will not work",
-          file: ".gsd/STATE.md",
+          file: ".sdd/STATE.md",
           fixable: true,
         });
 
@@ -278,7 +278,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: `STATE.md is stale — shows "${current.phase}" but derived state is "${fresh.phase}"`,
-            file: ".gsd/STATE.md",
+            file: ".sdd/STATE.md",
             fixable: true,
           });
 
@@ -304,15 +304,15 @@ export async function checkRuntimeHealth(
 
       // Check for critical runtime patterns that must be present
       const criticalPatterns = [
-        ".gsd/activity/",
-        ".gsd/runtime/",
-        ".gsd/auto.lock",
-        ".gsd/gsd.db",
-        ".gsd/completed-units.json",
+        ".sdd/activity/",
+        ".sdd/runtime/",
+        ".sdd/auto.lock",
+        ".sdd/sdd.db",
+        ".sdd/completed-units.json",
       ];
 
-      // If blanket .gsd/ or .gsd is present, all patterns are covered
-      const hasBlanketIgnore = existingLines.has(".gsd/") || existingLines.has(".gsd");
+      // If blanket .sdd/ or .sdd is present, all patterns are covered
+      const hasBlanketIgnore = existingLines.has(".sdd/") || existingLines.has(".sdd");
 
       if (!hasBlanketIgnore) {
         const missing = criticalPatterns.filter(p => !existingLines.has(p));
@@ -322,14 +322,14 @@ export async function checkRuntimeHealth(
             code: "gitignore_missing_patterns",
             scope: "project",
             unitId: "project",
-            message: `${missing.length} critical GSD runtime pattern(s) missing from .gitignore: ${missing.join(", ")}`,
+            message: `${missing.length} critical SDD runtime pattern(s) missing from .gitignore: ${missing.join(", ")}`,
             file: ".gitignore",
             fixable: true,
           });
 
           if (shouldFix("gitignore_missing_patterns")) {
             ensureGitignore(basePath);
-            fixesApplied.push("added missing GSD runtime patterns to .gitignore");
+            fixesApplied.push("added missing SDD runtime patterns to .gitignore");
           }
         }
       }
@@ -340,26 +340,26 @@ export async function checkRuntimeHealth(
 
   // ── External state symlink health ──────────────────────────────────────
   try {
-    const localGsd = join(basePath, ".gsd");
+    const localGsd = join(basePath, ".sdd");
     if (existsSync(localGsd)) {
       const stat = lstatSync(localGsd);
 
-      // Check for .gsd.migrating (failed migration)
-      const migratingPath = join(basePath, ".gsd.migrating");
+      // Check for .sdd.migrating (failed migration)
+      const migratingPath = join(basePath, ".sdd.migrating");
       if (existsSync(migratingPath)) {
         issues.push({
           severity: "error",
           code: "failed_migration",
           scope: "project",
           unitId: "project",
-          message: "Found .gsd.migrating — a previous external state migration failed. State may be incomplete.",
-          file: ".gsd.migrating",
+          message: "Found .sdd.migrating — a previous external state migration failed. State may be incomplete.",
+          file: ".sdd.migrating",
           fixable: true,
         });
 
         if (shouldFix("failed_migration")) {
           if (recoverFailedMigration(basePath)) {
-            fixesApplied.push("recovered failed migration (.gsd.migrating → .gsd)");
+            fixesApplied.push("recovered failed migration (.sdd.migrating → .sdd)");
           }
         }
       }
@@ -374,8 +374,8 @@ export async function checkRuntimeHealth(
             code: "broken_symlink",
             scope: "project",
             unitId: "project",
-            message: ".gsd symlink target does not exist. External state directory may have been deleted.",
-            file: ".gsd",
+            message: ".sdd symlink target does not exist. External state directory may have been deleted.",
+            file: ".sdd",
             fixable: false,
           });
         }
@@ -385,30 +385,30 @@ export async function checkRuntimeHealth(
     // Non-fatal — external state check failed
   }
 
-  // ── Numbered .gsd collision variants (#2205) ───────────────────────────
-  // macOS APFS can create ".gsd 2", ".gsd 3" etc. when a directory blocks
-  // symlink creation. These must be removed so the canonical .gsd is used.
+  // ── Numbered .sdd collision variants (#2205) ───────────────────────────
+  // macOS APFS can create ".sdd 2", ".sdd 3" etc. when a directory blocks
+  // symlink creation. These must be removed so the canonical .sdd is used.
   try {
-    const variantPattern = /^\.gsd \d+$/;
+    const variantPattern = /^\.sdd \d+$/;
     const entries = readdirSync(basePath);
     const variants = entries.filter(e => variantPattern.test(e));
     if (variants.length > 0) {
       for (const v of variants) {
         issues.push({
           severity: "warning",
-          code: "numbered_gsd_variant",
+          code: "numbered_sdd_variant",
           scope: "project",
           unitId: "project",
-          message: `Found macOS collision variant "${v}" — this can cause GSD state to appear deleted.`,
+          message: `Found macOS collision variant "${v}" — this can cause SDD state to appear deleted.`,
           file: v,
           fixable: true,
         });
       }
 
-      if (shouldFix("numbered_gsd_variant")) {
+      if (shouldFix("numbered_sdd_variant")) {
         const removed = cleanNumberedGsdVariants(basePath);
         for (const name of removed) {
-          fixesApplied.push(`removed numbered .gsd variant: ${name}`);
+          fixesApplied.push(`removed numbered .sdd variant: ${name}`);
         }
       }
     }
@@ -430,7 +430,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: "metrics.json has an unexpected structure (version !== 1 or units is not an array) — metrics data may be unreliable",
-            file: ".gsd/metrics.json",
+            file: ".sdd/metrics.json",
             fixable: false,
           });
         }
@@ -441,7 +441,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: "metrics.json is not valid JSON — metrics data may be corrupt",
-          file: ".gsd/metrics.json",
+          file: ".sdd/metrics.json",
           fixable: false,
         });
       }
@@ -468,8 +468,8 @@ export async function checkRuntimeHealth(
             code: "metrics_ledger_bloat",
             scope: "project",
             unitId: "project",
-            message: `metrics.json has ${parsed.units.length} unit entries (${fileSizeMB}MB) — threshold is ${BLOAT_UNITS_THRESHOLD}. Run /gsd doctor --fix to prune to the newest 1500 entries.`,
-            file: ".gsd/metrics.json",
+            message: `metrics.json has ${parsed.units.length} unit entries (${fileSizeMB}MB) — threshold is ${BLOAT_UNITS_THRESHOLD}. Run /sdd doctor --fix to prune to the newest 1500 entries.`,
+            file: ".sdd/metrics.json",
             fixable: true,
           });
           if (shouldFix("metrics_ledger_bloat")) {
@@ -528,18 +528,18 @@ export async function checkRuntimeHealth(
   }
 
   // ── Snapshot ref bloat ────────────────────────────────────────────────
-  // refs/gsd/snapshots/ accumulate over time. Prune to newest 5 per label
+  // refs/sdd/snapshots/ accumulate over time. Prune to newest 5 per label
   // when total count exceeds threshold.
   try {
     if (nativeIsRepo(basePath)) {
-      const refs = nativeForEachRef(basePath, "refs/gsd/snapshots/");
+      const refs = nativeForEachRef(basePath, "refs/sdd/snapshots/");
       if (refs.length > 50) {
         issues.push({
           severity: "warning",
           code: "snapshot_ref_bloat",
           scope: "project",
           unitId: "project",
-          message: `${refs.length} snapshot refs found under refs/gsd/snapshots/ — pruning to newest 5 per label will reclaim git storage`,
+          message: `${refs.length} snapshot refs found under refs/sdd/snapshots/ — pruning to newest 5 per label will reclaim git storage`,
           fixable: true,
         });
 
@@ -578,7 +578,7 @@ export async function checkRuntimeHealth(
  */
 function buildStateMarkdownForCheck(state: Awaited<ReturnType<typeof deriveState>>): string {
   const lines: string[] = [];
-  lines.push("# GSD State", "");
+  lines.push("# SDD State", "");
 
   const activeMilestone = state.activeMilestone
     ? `${state.activeMilestone.id}: ${state.activeMilestone.title}`

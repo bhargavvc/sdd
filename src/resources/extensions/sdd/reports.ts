@@ -1,5 +1,5 @@
 /**
- * GSD Reports Registry
+ * SDD Reports Registry
  *
  * Manages .sdd/reports/ — the persistent progression log of HTML snapshots.
  *
@@ -11,7 +11,7 @@
  *     final-20260201T090000.html   full-project final snapshot
  *
  * Auto-triggered: after each milestone completion (when auto_report: true).
- * Manual: /gsd export --html
+ * Manual: /sdd export --html
  */
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -277,14 +277,14 @@ function buildIndexHtml(index: ReportsIndex): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GSD Reports — ${esc(projectName)}</title>
+<title>SDD Reports — ${esc(projectName)}</title>
 <style>${INDEX_CSS}</style>
 </head>
 <body>
 <header>
   <div class="hdr-inner">
     <div class="branding">
-      <span class="logo">GSD</span>
+      <span class="logo">SDD</span>
       <span class="ver">v${esc(gsdVersion)}</span>
     </div>
     <div class="hdr-meta">
@@ -317,14 +317,14 @@ function buildIndexHtml(index: ReportsIndex): string {
       <h2>Progression <span class="sec-count">${entries.length}</span></h2>
       ${sorted.length > 0
         ? `<div class="cards-grid">${cardHtml}</div>`
-        : '<p class="empty">No reports generated yet. Run <code>/gsd export --html</code> or enable <code>auto_report: true</code>.</p>'}
+        : '<p class="empty">No reports generated yet. Run <code>/sdd export --html</code> or enable <code>auto_report: true</code>.</p>'}
     </section>
   </main>
 </div>
 
 <footer>
   <div class="ftr-inner">
-    <span class="ftr-brand">GSD v${esc(gsdVersion)}</span>
+    <span class="ftr-brand">SDD v${esc(gsdVersion)}</span>
     <span class="ftr-sep">—</span>
     <span>${esc(projectName)}</span>
     <span class="ftr-sep">—</span>

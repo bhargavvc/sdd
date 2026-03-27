@@ -27,7 +27,7 @@ test("/exit requests graceful shutdown instead of process.exit", async (t) => {
 
   const exit = commands.get("exit");
   assert.ok(exit, "registerExitCommand should register /exit");
-  assert.equal(exit.description, "Exit GSD gracefully");
+  assert.equal(exit.description, "Exit SDD gracefully");
 
   let shutdownCalls = 0;
   const originalExit = process.exit;

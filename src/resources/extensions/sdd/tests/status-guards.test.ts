@@ -1,4 +1,4 @@
-// GSD — status-guards unit tests
+// SDD — status-guards unit tests
 
 import test from 'node:test';
 import assert from 'node:assert/strict';

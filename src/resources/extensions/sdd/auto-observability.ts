@@ -4,7 +4,7 @@
  * for the agent to fix gaps before proceeding with the unit.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import {
   validatePlanBoundary,
   validateExecuteBoundary,

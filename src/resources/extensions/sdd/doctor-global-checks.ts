@@ -5,7 +5,7 @@ import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
 import { readRepoMeta, externalProjectsRoot } from "./repo-identity.js";
 
 /**
- * Check for orphaned project state directories in ~/.gsd/projects/.
+ * Check for orphaned project state directories in ~/.sdd/projects/.
  *
  * A project directory is orphaned when its recorded gitRoot no longer exists
  * on disk — the repo was deleted, moved, or the external drive was unmounted.
@@ -61,7 +61,7 @@ export async function checkGlobalHealth(
       code: "orphaned_project_state",
       scope: "project",
       unitId: "global",
-      message: `${orphaned.length} orphaned GSD project state director${orphaned.length === 1 ? "y" : "ies"} in ${projectsDir} whose git root no longer exists: ${labels}${overflow}${unknownNote}. Run /gsd cleanup projects to audit or /gsd cleanup projects --fix to reclaim disk space.`,
+      message: `${orphaned.length} orphaned SDD project state director${orphaned.length === 1 ? "y" : "ies"} in ${projectsDir} whose git root no longer exists: ${labels}${overflow}${unknownNote}. Run /sdd cleanup projects to audit or /sdd cleanup projects --fix to reclaim disk space.`,
       file: projectsDir,
       fixable: true,
     });

@@ -1,5 +1,5 @@
 /**
- * Shared input-validation primitives for GSD tool handlers.
+ * Shared input-validation primitives for SDD tool handlers.
  */
 
 /** Type guard: value is a string with at least one non-whitespace character. */

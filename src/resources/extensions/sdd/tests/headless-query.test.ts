@@ -1,5 +1,5 @@
 /**
- * Tests for `gsd headless query` — single JSON snapshot command.
+ * Tests for `sdd headless query` — single JSON snapshot command.
  *
  * Validates that the snapshot contains state, next dispatch preview,
  * and parallel worker costs in one response.
@@ -18,37 +18,37 @@ import { invalidateStateCache } from '../state.ts'
 // ─── Fixture Helpers ────────────────────────────────────────────────────────
 
 function createFixture(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-query-test-'))
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true })
+  const base = mkdtempSync(join(tmpdir(), 'sdd-query-test-'))
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true })
   return base
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid)
+  const dir = join(base, '.sdd', 'milestones', mid)
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content)
 }
 
 function writeContext(base: string, mid: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid)
+  const dir = join(base, '.sdd', 'milestones', mid)
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, `${mid}-CONTEXT.md`), `---\ntitle: Test Milestone\n---\n\n# Context\nTest.`)
 }
 
 function writeSlicePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid)
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid)
   mkdirSync(join(dir, 'tasks'), { recursive: true })
   writeFileSync(join(dir, `${sid}-PLAN.md`), content)
 }
 
 function writeTaskPlan(base: string, mid: string, sid: string, tid: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid, 'tasks')
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid, 'tasks')
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, `${tid}-PLAN.md`), `---\nestimated_steps: 3\nestimated_files: 2\n---\n\n# ${tid}: Test Task\nDo something.`)
 }
 
 function writeParallelStatus(base: string, mid: string, cost: number): void {
-  const dir = join(base, '.gsd', 'parallel')
+  const dir = join(base, '.sdd', 'parallel')
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, `${mid}.status.json`), JSON.stringify({
     milestoneId: mid,
@@ -169,7 +169,7 @@ describe('headless query', () => {
   > Done.
 `)
     writeFileSync(
-      join(base, '.gsd', 'milestones', 'M001', 'M001-SUMMARY.md'),
+      join(base, '.sdd', 'milestones', 'M001', 'M001-SUMMARY.md'),
       '# M001 Summary\n\nComplete.',
     )
 

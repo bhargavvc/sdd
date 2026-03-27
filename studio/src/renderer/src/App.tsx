@@ -19,7 +19,7 @@ export default function App() {
             </div>
 
             <h1 className="max-w-3xl text-[clamp(3.4rem,9vw,6.8rem)] font-semibold leading-[0.92] tracking-[-0.06em] text-balance text-text-primary">
-              GSD Studio ships with a dark shell that actually feels deliberate.
+              SDD Studio ships with a dark shell that actually feels deliberate.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-text-secondary">

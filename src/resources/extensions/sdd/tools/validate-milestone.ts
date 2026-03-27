@@ -1,5 +1,5 @@
 /**
- * validate-milestone handler — the core operation behind gsd_validate_milestone.
+ * validate-milestone handler — the core operation behind sdd_validate_milestone.
  *
  * Persists milestone validation results to the assessments table,
  * renders VALIDATION.md to disk, and invalidates caches.
@@ -11,7 +11,7 @@ import {
   transaction,
   insertAssessment,
   deleteAssessmentByScope,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { resolveMilestonePath, clearPathCache } from "../paths.js";
 import { saveFile, clearParseCache } from "../files.js";
 import { invalidateStateCache } from "../state.js";
@@ -85,7 +85,7 @@ export async function handleValidateMilestone(
   if (milestoneDir) {
     validationPath = join(milestoneDir, `${params.milestoneId}-VALIDATION.md`);
   } else {
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".sdd");
     const manualDir = join(gsdDir, "milestones", params.milestoneId);
     validationPath = join(manualDir, `${params.milestoneId}-VALIDATION.md`);
   }
@@ -115,7 +115,7 @@ export async function handleValidateMilestone(
     await saveFile(validationPath, validationMd);
   } catch (renderErr) {
     process.stderr.write(
-      `gsd-db: validate_milestone — disk render failed, rolling back DB row: ${(renderErr as Error).message}\n`,
+      `sdd-db: validate_milestone — disk render failed, rolling back DB row: ${(renderErr as Error).message}\n`,
     );
     deleteAssessmentByScope(params.milestoneId, 'milestone-validation');
     return { error: `disk render failed: ${(renderErr as Error).message}` };

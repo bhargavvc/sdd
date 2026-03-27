@@ -11,7 +11,7 @@
  * Extracted from handleAgentEnd() in auto.ts.
  */
 
-import type { ExtensionContext, ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionContext, ExtensionAPI } from "@sdd/pi-coding-agent";
 import { deriveState } from "./state.js";
 import { loadFile, parseSummary, resolveAllOverrides } from "./files.js";
 import { loadPrompt } from "./prompt-loader.js";
@@ -35,7 +35,7 @@ import {
 } from "./auto-recovery.js";
 import { regenerateIfMissing } from "./workflow-projections.js";
 import { syncStateToProjectRoot } from "./auto-worktree.js";
-import { isDbAvailable, getTask, getSlice, getMilestone, updateTaskStatus, _getAdapter } from "./gsd-db.js";
+import { isDbAvailable, getTask, getSlice, getMilestone, updateTaskStatus, _getAdapter } from "./sdd-db.js";
 import { renderPlanCheckboxes } from "./markdown-renderer.js";
 import { consumeSignal } from "./session-status-io.js";
 import {
@@ -70,7 +70,7 @@ function enqueueSidecar(
   if (notification) ctx.ui.notify(notification, "info");
   return "continue";
 }
-/** Unit types that only touch `.gsd/` internal state files (no code changes).
+/** Unit types that only touch `.sdd/` internal state files (no code changes).
  *  Auto-commit is skipped for these — their state files are picked up by the
  *  next actual task commit via `smartStage()`. */
 const LIFECYCLE_ONLY_UNITS = new Set([
@@ -235,7 +235,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
   const { s, ctx, pi, buildSnapshotOpts, stopAuto, pauseAuto } = pctx;
 
   // ── Parallel worker signal check ──
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.SDD_MILESTONE_LOCK;
   if (milestoneLock) {
     const signal = consumeSignal(s.basePath, milestoneLock);
     if (signal) {
@@ -305,7 +305,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
       _resetHasChangesCache();
 
       // Skip auto-commit for lifecycle-only units (#2553) — they only touch
-      // `.gsd/` internal state files. Those files are picked up by the next
+      // `.sdd/` internal state files. Those files are picked up by the next
       // actual task commit via smartStage().
       if (!LIFECYCLE_ONLY_UNITS.has(s.currentUnit.type)) {
         const commitMsg = autoCommitCurrentBranch(s.basePath, s.currentUnit.type, s.currentUnit.id, taskContext);
@@ -412,10 +412,10 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
           );
         }
         for (const action of triageResult.actions) {
-          process.stderr.write(`gsd-triage: ${action}\n`);
+          process.stderr.write(`sdd-triage: ${action}\n`);
         }
       } catch (err) {
-        process.stderr.write(`gsd-triage: resolution execution failed: ${(err as Error).message}\n`);
+        process.stderr.write(`sdd-triage: resolution execution failed: ${(err as Error).message}\n`);
       }
     }
 
@@ -423,7 +423,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
     try {
       const rogueFiles = detectRogueFileWrites(s.currentUnit.type, s.currentUnit.id, s.basePath);
       for (const rogue of rogueFiles) {
-        process.stderr.write(`gsd-rogue: detected rogue file write: ${rogue.path} (unit: ${rogue.unitId})\n`);
+        process.stderr.write(`sdd-rogue: detected rogue file write: ${rogue.path} (unit: ${rogue.unitId})\n`);
         ctx.ui.notify(`Rogue file write detected: ${rogue.path}`, "warning");
       }
     } catch (e) {
@@ -543,9 +543,9 @@ export async function postUnitPostVerification(pctx: PostUnitContext): Promise<"
               await renderPlanCheckboxes(s.basePath, mid, sid);
             } catch (dbErr) {
               // DB unavailable — fail explicitly rather than silently reverting to markdown mutation.
-              // Use 'gsd recover' to rebuild DB state from disk if needed.
+              // Use 'sdd recover' to rebuild DB state from disk if needed.
               process.stderr.write(
-                `gsd: retry state-reset failed (DB unavailable): ${(dbErr as Error).message}. Run 'gsd recover' to reconcile.\n`,
+                `sdd: retry state-reset failed (DB unavailable): ${(dbErr as Error).message}. Run 'sdd recover' to reconcile.\n`,
               );
             }
           }

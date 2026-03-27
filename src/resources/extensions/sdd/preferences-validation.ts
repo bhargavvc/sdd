@@ -1,5 +1,5 @@
 /**
- * Validation logic for GSD preferences.
+ * Validation logic for SDD preferences.
  *
  * Pure validation -- no filesystem access, no loading, no merging.
  * Accepts a raw SDDPreferences object and returns a sanitized copy
@@ -19,7 +19,7 @@ import {
   SKILL_ACTIONS,
   type WorkflowMode,
   type SDDPreferences,
-  type GSDSkillRule,
+  type SDDSkillRule,
 } from "./preferences-types.js";
 
 const VALID_TOKEN_PROFILES = new Set<TokenProfile>(["budget", "balanced", "quality"]);
@@ -34,7 +34,7 @@ export function validatePreferences(preferences: SDDPreferences): {
   const validated: SDDPreferences = {};
 
   // ─── Unknown Key Detection ──────────────────────────────────────────
-  // Common key migration hints for pi-level settings that don't map to GSD prefs
+  // Common key migration hints for pi-level settings that don't map to SDD prefs
   const KEY_MIGRATION_HINTS: Record<string, string> = {
     taskIsolation: 'use "git.isolation" instead (values: worktree, branch, none)',
     task_isolation: 'use "git.isolation" instead (values: worktree, branch, none)',
@@ -97,7 +97,7 @@ export function validatePreferences(preferences: SDDPreferences): {
   validated.custom_instructions = normalizeStringArray(preferences.custom_instructions);
 
   if (preferences.skill_rules) {
-    const validRules: GSDSkillRule[] = [];
+    const validRules: SDDSkillRule[] = [];
     for (const rule of preferences.skill_rules) {
       if (!rule || typeof rule !== "object") {
         errors.push("invalid skill_rules entry");
@@ -108,11 +108,11 @@ export function validatePreferences(preferences: SDDPreferences): {
         errors.push("skill_rules entry missing when");
         continue;
       }
-      const validatedRule: GSDSkillRule = { when };
+      const validatedRule: SDDSkillRule = { when };
       for (const action of SKILL_ACTIONS) {
         const values = normalizeStringArray((rule as unknown as Record<string, unknown>)[action]);
         if (values.length > 0) {
-          validatedRule[action as keyof GSDSkillRule] = values as never;
+          validatedRule[action as keyof SDDSkillRule] = values as never;
         }
       }
       if (!validatedRule.use && !validatedRule.prefer && !validatedRule.avoid) {

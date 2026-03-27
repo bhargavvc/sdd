@@ -14,7 +14,7 @@ import {
   getTask,
   getSliceTasks,
   insertVerificationEvidence,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import { handleCompleteTask } from '../tools/complete-task.ts';
 
 const { assertEq, assertTrue, assertMatch, report } = createTestContext();
@@ -24,7 +24,7 @@ const { assertEq, assertTrue, assertMatch, report } = createTestContext();
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDbPath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-complete-task-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-complete-task-'));
   return path.join(dir, 'test.db');
 }
 
@@ -50,14 +50,14 @@ function cleanupDir(dirPath: string): void {
 }
 
 /**
- * Create a temp project directory with .gsd structure for handler tests.
+ * Create a temp project directory with .sdd structure for handler tests.
  */
 function createTempProject(): { basePath: string; planPath: string } {
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-handler-'));
-  const tasksDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-handler-'));
+  const tasksDir = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
 
-  const planPath = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
+  const planPath = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
   fs.writeFileSync(planPath, `# S01: Test Slice
 
 ## Tasks
@@ -226,15 +226,15 @@ console.log('\n=== complete-task: accessor CRUD ===');
 
 console.log('\n=== complete-task: accessor stale-state error ===');
 {
-  // No DB open — accessors should throw GSD_STALE_STATE
+  // No DB open — accessors should throw SDD_STALE_STATE
   closeDatabase();
   let threw = false;
   try {
     insertMilestone({ id: 'M001' });
   } catch (err: any) {
     threw = true;
-    assertTrue(err.code === 'GSD_STALE_STATE' || err.message.includes('No database open'),
-      'should throw GSD_STALE_STATE when no DB open');
+    assertTrue(err.code === 'SDD_STALE_STATE' || err.message.includes('No database open'),
+      'should throw SDD_STALE_STATE when no DB open');
   }
   assertTrue(threw, 'insertMilestone should throw when no DB open');
 
@@ -243,8 +243,8 @@ console.log('\n=== complete-task: accessor stale-state error ===');
     insertSlice({ id: 'S01', milestoneId: 'M001' });
   } catch (err: any) {
     threw = true;
-    assertTrue(err.code === 'GSD_STALE_STATE' || err.message.includes('No database open'),
-      'insertSlice should throw GSD_STALE_STATE');
+    assertTrue(err.code === 'SDD_STALE_STATE' || err.message.includes('No database open'),
+      'insertSlice should throw SDD_STALE_STATE');
   }
   assertTrue(threw, 'insertSlice should throw when no DB open');
 
@@ -253,8 +253,8 @@ console.log('\n=== complete-task: accessor stale-state error ===');
     insertTask({ id: 'T01', sliceId: 'S01', milestoneId: 'M001' });
   } catch (err: any) {
     threw = true;
-    assertTrue(err.code === 'GSD_STALE_STATE' || err.message.includes('No database open'),
-      'insertTask should throw GSD_STALE_STATE');
+    assertTrue(err.code === 'SDD_STALE_STATE' || err.message.includes('No database open'),
+      'insertTask should throw SDD_STALE_STATE');
   }
   assertTrue(threw, 'insertTask should throw when no DB open');
 
@@ -266,8 +266,8 @@ console.log('\n=== complete-task: accessor stale-state error ===');
     });
   } catch (err: any) {
     threw = true;
-    assertTrue(err.code === 'GSD_STALE_STATE' || err.message.includes('No database open'),
-      'insertVerificationEvidence should throw GSD_STALE_STATE');
+    assertTrue(err.code === 'SDD_STALE_STATE' || err.message.includes('No database open'),
+      'insertVerificationEvidence should throw SDD_STALE_STATE');
   }
   assertTrue(threw, 'insertVerificationEvidence should throw when no DB open');
 }
@@ -428,8 +428,8 @@ console.log('\n=== complete-task: handler with missing plan file ===');
   openDatabase(dbPath);
 
   // Create a temp dir WITHOUT a plan file
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-no-plan-'));
-  const tasksDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-no-plan-'));
+  const tasksDir = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
 
   // Seed milestone + slice so state machine guards pass

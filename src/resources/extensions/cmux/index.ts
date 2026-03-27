@@ -8,7 +8,7 @@ import type { SDDState, Phase } from "../sdd/types.js";
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_SOCKET_PATH = "/tmp/cmux.sock";
-const STATUS_KEY = "gsd";
+const STATUS_KEY = "sdd";
 const lastSidebarSnapshots = new Map<string, string>();
 let cmuxPromptedThisSession = false;
 let cachedCliAvailability: boolean | null = null;
@@ -264,7 +264,7 @@ export class CmuxClient {
     ]));
   }
 
-  log(message: string, level: CmuxLogLevel = "info", source = "gsd"): void {
+  log(message: string, level: CmuxLogLevel = "info", source = "sdd"): void {
     if (!this.config.sidebar) return;
     this.runSync(this.appendWorkspace([
       "log",
@@ -313,13 +313,13 @@ export class CmuxClient {
   /**
    * Create a grid of surfaces for parallel agent execution.
    *
-   * Layout strategy (gsd stays in the original surface):
-   *   1 agent:  [gsd | A]
-   *   2 agents: [gsd | A]
+   * Layout strategy (sdd stays in the original surface):
+   *   1 agent:  [sdd | A]
+   *   2 agents: [sdd | A]
    *             [    | B]
-   *   3 agents: [gsd | A]
+   *   3 agents: [sdd | A]
    *             [ C  | B]
-   *   4 agents: [gsd | A]
+   *   4 agents: [sdd | A]
    *             [ C  | B]  (D splits from B downward)
    *             [    | D]
    *
@@ -329,7 +329,7 @@ export class CmuxClient {
     if (!this.config.splits || count <= 0) return [];
     const surfaces: string[] = [];
 
-    // First split: create right column from the gsd surface
+    // First split: create right column from the sdd surface
     const rightCol = await this.createSplitFrom(this.config.surfaceId, "right");
     if (!rightCol) return [];
     surfaces.push(rightCol);
@@ -341,7 +341,7 @@ export class CmuxClient {
     surfaces.push(bottomRight);
     if (count === 2) return surfaces;
 
-    // Third split: split gsd surface down → bottom-left
+    // Third split: split sdd surface down → bottom-left
     const bottomLeft = await this.createSplitFrom(this.config.surfaceId, "down");
     if (!bottomLeft) return surfaces;
     surfaces.push(bottomLeft);

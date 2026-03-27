@@ -5,7 +5,7 @@ This document covers the part that the extension docs, SDK docs, RPC docs, and p
 **How do you build your own product on top of pi** so users run **your** app, **your** command, and **your** UI rather than installing and managing pi directly?
 
 Examples:
-- a branded CLI like `gsd`
+- a branded CLI like `sdd`
 - a desktop app that uses pi as its backend engine
 - a web or Electron app that uses pi sessions, tools, and event streaming
 - an internal company agent product built on pi primitives
@@ -14,7 +14,7 @@ The short answer is:
 
 - **Yes, you can build your own branded app on top of pi**
 - **No, end users do not need to install pi globally** if you ship your own app that depends on pi packages
-- **No, you do not have to rely on `~/.gsd`** if you embed pi with custom paths and storage
+- **No, you do not have to rely on `~/.sdd`** if you embed pi with custom paths and storage
 - **Yes, you can bundle your own extensions, prompts, themes, skills, and providers** inside your app
 
 The rest of this document explains the architecture choices, storage choices, packaging strategies, and practical tradeoffs.
@@ -59,7 +59,7 @@ You can ship your own app that depends on:
 That means a branded command like:
 
 ```bash
-gsd
+sdd
 ```
 
 can be **your** executable, backed by pi internals, without asking users to separately install and run `pi`.
@@ -76,17 +76,17 @@ pi
 you can ship:
 
 ```bash
-npm install -g my-gsd
+npm install -g my-sdd
 # or a standalone binary / packaged desktop app
 
-gsd
+sdd
 ```
 
-And inside `gsd`, you import pi packages and create your own session, UI, storage, and resource loading behavior.
+And inside `sdd`, you import pi packages and create your own session, UI, storage, and resource loading behavior.
 
 ---
 
-## 19.3 The Second Biggest Misconception: `~/.gsd` Is a Default, Not a Requirement
+## 19.3 The Second Biggest Misconception: `~/.sdd` Is a Default, Not a Requirement
 
 Pi CLI defaults to `~/.sdd/agent`, but embedded applications are not forced to use it.
 
@@ -103,12 +103,12 @@ When you use `createAgentSession()`, you can control:
 That means your app can store state under:
 
 - `~/.sdd/agent`
-- `~/Library/Application Support/GSD`
-- `%APPDATA%/GSD`
+- `~/Library/Application Support/SDD`
+- `%APPDATA%/SDD`
 - an app-local portable directory
 - a project-local directory
 
-instead of `~/.gsd`.
+instead of `~/.sdd`.
 
 ### Things you can relocate
 
@@ -138,7 +138,7 @@ Before writing code, decide which of these architectures you actually want.
 
 ### Architecture A: Branded Node CLI or TUI using the SDK
 
-This is the most natural fit for tools like `gsd`.
+This is the most natural fit for tools like `sdd`.
 
 You create your own executable and call `createAgentSession()` directly.
 
@@ -152,7 +152,7 @@ You create your own executable and call `createAgentSession()` directly.
 - type-safe
 - no subprocess management
 - easy to customize storage and discovery
-- easiest way to remove dependency on `~/.gsd`
+- easiest way to remove dependency on `~/.sdd`
 - easiest way to bundle built-in resources
 
 #### Typical stack
@@ -211,7 +211,7 @@ Use this decision table.
 
 | Goal | Best Starting Point |
 |------|---------------------|
-| Branded CLI like `gsd` | `@mariozechner/pi-coding-agent` SDK |
+| Branded CLI like `sdd` | `@mariozechner/pi-coding-agent` SDK |
 | Branded TUI with coding tools | `@mariozechner/pi-coding-agent` SDK |
 | Desktop app with subprocess boundary | pi RPC mode |
 | Non-Node integration | pi RPC mode |
@@ -234,12 +234,12 @@ Use this decision table.
 
 ---
 
-## 19.6 The Recommended Path for a Branded CLI Like `gsd`
+## 19.6 The Recommended Path for a Branded CLI Like `sdd`
 
 If you want users to run:
 
 ```bash
-gsd
+sdd
 ```
 
 and you want it to feel like your product rather than "pi but renamed," the default recommendation is:
@@ -284,14 +284,14 @@ Example:
 Or on macOS:
 
 ```text
-~/Library/Application Support/GSD/
+~/Library/Application Support/SDD/
   agent/
   sessions/
 ```
 
 ### Why this matters
 
-If your product uses `~/.gsd`, then:
+If your product uses `~/.sdd`, then:
 - it shares state with the user's pi installation
 - branding becomes muddy
 - support/debugging becomes more confusing
@@ -312,7 +312,7 @@ import {
   SettingsManager,
 } from "@mariozechner/pi-coding-agent";
 
-const appRoot = path.join(os.homedir(), ".gsd");
+const appRoot = path.join(os.homedir(), ".sdd");
 const agentDir = path.join(appRoot, "agent");
 const sessionsDir = path.join(appRoot, "sessions");
 
@@ -337,7 +337,7 @@ This is the core pattern for “my app uses pi, but not as global pi.”
 
 ## 19.8 Bundling Resources Inside Your App
 
-This is another place where people often assume they must rely on discovery from `~/.gsd` or `.sdd/`.
+This is another place where people often assume they must rely on discovery from `~/.sdd` or `.sdd/`.
 
 You do not.
 
@@ -377,7 +377,7 @@ const loader = new DefaultResourceLoader({
     (pi) => {
       pi.registerCommand("hello", {
         description: "My branded command",
-        handler: async (_args, ctx) => ctx.ui.notify("Hello from GSD", "info"),
+        handler: async (_args, ctx) => ctx.ui.notify("Hello from SDD", "info"),
       });
     },
   ],
@@ -393,7 +393,7 @@ const loader = new DefaultResourceLoader({
   promptsOverride: () => ({ prompts: [], diagnostics: [] }),
   skillsOverride: () => ({ skills: [], diagnostics: [] }),
   agentsFilesOverride: () => ({ agentsFiles: [] }),
-  systemPromptOverride: () => "You are GSD, a specialized software delivery agent.",
+  systemPromptOverride: () => "You are SDD, a specialized software delivery agent.",
 });
 ```
 
@@ -432,7 +432,7 @@ You intentionally ship your own resources and avoid implicit user-level discover
 - you do not want random user extensions affecting behavior
 
 ### Recommendation
-For a branded tool like `gsd`, default to **bundled-app product** behavior.
+For a branded tool like `sdd`, default to **bundled-app product** behavior.
 
 If you later add plugin support, make it explicit.
 
@@ -688,12 +688,12 @@ That keeps the app experience aligned with your branding and infrastructure.
 
 ---
 
-## 19.18 Building a Branded `gsd` CLI: Recommended Shape
+## 19.18 Building a Branded `sdd` CLI: Recommended Shape
 
 A practical architecture looks like this:
 
 ```text
-my-gsd/
+my-sdd/
   package.json
   src/
     cli.ts
@@ -742,7 +742,7 @@ import {
   SettingsManager,
 } from "@mariozechner/pi-coding-agent";
 
-const appRoot = path.join(os.homedir(), ".gsd");
+const appRoot = path.join(os.homedir(), ".sdd");
 const agentDir = path.join(appRoot, "agent");
 const sessionsDir = path.join(appRoot, "sessions");
 
@@ -756,7 +756,7 @@ const resourceLoader = new DefaultResourceLoader({
   agentDir,
   settingsManager,
   systemPromptOverride: () =>
-    "You are GSD, a branded software delivery agent. Prefer project-specific workflows and terminology.",
+    "You are SDD, a branded software delivery agent. Prefer project-specific workflows and terminology.",
   additionalExtensionPaths: [
     path.resolve("resources/extensions/index.ts"),
   ],
@@ -809,14 +809,14 @@ For a white-labeled product, `InteractiveMode` is a good prototyping step, not a
 ## 19.21 What to Avoid in a Branded Product
 
 ### Avoid accidental dependence on ambient user state
-If your app silently loads from a user's `~/.gsd`, you may get:
+If your app silently loads from a user's `~/.sdd`, you may get:
 - surprising extensions
 - strange prompts
 - odd themes
 - hard-to-debug behavior differences
 
 ### Avoid mixing branding and storage casually
-If your app is called `gsd`, but state lives in `~/.gsd`, users will notice.
+If your app is called `sdd`, but state lives in `~/.sdd`, users will notice.
 
 ### Avoid choosing RPC just because it sounds generic
 If your app is already Node/TypeScript, SDK embedding is usually simpler and more powerful.
@@ -842,7 +842,7 @@ You do not need to expose:
 - Uses pi internally
 - App-owned directories and resources
 - Explicit plugins only
-- Good for productized tools like `gsd`
+- Good for productized tools like `sdd`
 
 ### Posture C: “Custom agent product using pi primitives”
 - Uses `pi-agent-core` or selective libraries
@@ -880,7 +880,7 @@ Then read the source package docs for exact API details:
 
 If your goal is:
 
-> “I want users to download and run `gsd`, and have it use pi internally without requiring a separate pi install or `~/.gsd` setup.”
+> “I want users to download and run `sdd`, and have it use pi internally without requiring a separate pi install or `~/.sdd` setup.”
 
 Then the answer is:
 

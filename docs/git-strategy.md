@@ -26,7 +26,7 @@ Use this when worktrees cause problems — submodule-heavy repos, repos with har
 
 ### `none` Mode
 
-Work happens directly on your current branch. No worktree, no milestone branch. GSD still commits sequentially with conventional commit messages, but there's no branch isolation.
+Work happens directly on your current branch. No worktree, no milestone branch. SDD still commits sequentially with conventional commit messages, but there's no branch isolation.
 
 Use this for hot-reload workflows where file isolation breaks dev tooling (e.g., file watchers that only see the project root), or for small projects where branch overhead isn't worth it.
 
@@ -75,16 +75,16 @@ Each worktree operates on its own branch with its own commit history. Merges hap
 
 ### Commit Format
 
-Commits use conventional commit format with GSD metadata in trailers:
+Commits use conventional commit format with SDD metadata in trailers:
 
 ```
 feat: core type definitions
 
-GSD-Task: M001/S01/T01
+SDD-Task: M001/S01/T01
 
 feat: markdown parser for plan files
 
-GSD-Task: M001/S01/T02
+SDD-Task: M001/S01/T02
 ```
 
 ## Worktree Management
@@ -156,7 +156,7 @@ git:
 
 ### Automatic Pull Requests
 
-For teams using Gitflow or branch-based workflows, GSD can automatically create a pull request when a milestone completes:
+For teams using Gitflow or branch-based workflows, SDD can automatically create a pull request when a milestone completes:
 
 ```yaml
 git:
@@ -170,7 +170,7 @@ This pushes the milestone branch and creates a PR targeting `develop` (or whiche
 
 ### `commit_docs: false`
 
-When set to `false`, GSD adds `.sdd/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use GSD, or when company policy requires a clean repository.
+When set to `false`, SDD adds `.sdd/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use SDD, or when company policy requires a clean repository.
 
 ## Self-Healing
 
@@ -180,8 +180,8 @@ SDD includes automatic recovery for common git issues:
 - **Stale lock files** — removes `index.lock` files from crashed processes
 - **Orphaned worktrees** — detects and offers to clean up abandoned worktrees (worktree mode only)
 
-Run `/gsd doctor` to check git health manually.
+Run `/sdd doctor` to check git health manually.
 
 ## Native Git Operations
 
-Since v2.16, GSD uses libgit2 via native bindings for read-heavy operations in the dispatch hot path. This eliminates ~70 process spawns per dispatch cycle, improving auto-mode throughput.
+Since v2.16, SDD uses libgit2 via native bindings for read-heavy operations in the dispatch hot path. This eliminates ~70 process spawns per dispatch cycle, improving auto-mode throughput.

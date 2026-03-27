@@ -1,4 +1,4 @@
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { clearCmuxSidebar, CmuxClient, detectCmuxEnvironment, resolveCmuxConfig } from "../cmux/index.js";
 import { saveFile } from "./files.js";
@@ -31,7 +31,7 @@ async function writeProjectCmuxPreferences(
   prefs.version = prefs.version || 1;
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
   if (existsSync(path)) {
     const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
     if (preserved) body = preserved;
@@ -72,7 +72,7 @@ function ensureCmuxAvailableForEnable(ctx: ExtensionCommandContext): boolean {
   const detected = detectCmuxEnvironment();
   if (detected.available) return true;
   ctx.ui.notify(
-    "cmux not detected. Install it from https://cmux.com and run gsd inside a cmux terminal.",
+    "cmux not detected. Install it from https://cmux.com and run sdd inside a cmux terminal.",
     "warning",
   );
   return false;
@@ -137,7 +137,7 @@ export async function handleCmux(args: string, ctx: ExtensionCommandContext): Pr
   }
 
   ctx.ui.notify(
-    "Usage: /gsd cmux <status|on|off|notifications on|notifications off|sidebar on|sidebar off|splits on|splits off|browser on|browser off>",
+    "Usage: /sdd cmux <status|on|off|notifications on|notifications off|sidebar on|sidebar off|splits on|splits off|browser on|browser off>",
     "info",
   );
 }

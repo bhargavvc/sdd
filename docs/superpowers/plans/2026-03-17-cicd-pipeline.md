@@ -23,12 +23,12 @@
 | `.github/workflows/cleanup-dev-versions.yml` | Weekly scheduled cleanup of old `-dev.` npm versions |
 | `scripts/version-stamp.mjs` | Reads `package.json` version, appends `-dev.<sha>`, writes back |
 | `tests/smoke/run.ts` | Smoke test runner — discovers and executes all smoke tests |
-| `tests/smoke/test-version.ts` | Verify `gsd --version` outputs valid semver |
-| `tests/smoke/test-help.ts` | Verify `gsd --help` exits 0 and contains expected output |
-| `tests/smoke/test-init.ts` | Verify `gsd init` creates expected files in a temp dir |
+| `tests/smoke/test-version.ts` | Verify `sdd --version` outputs valid semver |
+| `tests/smoke/test-help.ts` | Verify `sdd --help` exits 0 and contains expected output |
+| `tests/smoke/test-init.ts` | Verify `sdd init` creates expected files in a temp dir |
 | `tests/fixtures/provider.ts` | `FixtureProvider` — wraps `ApiProvider`, records/replays turns |
 | `tests/fixtures/run.ts` | Fixture test runner — loads recordings, replays via `FixtureProvider` |
-| `tests/fixtures/record.ts` | Recording helper — runs a session with `GSD_FIXTURE_MODE=record` |
+| `tests/fixtures/record.ts` | Recording helper — runs a session with `SDD_FIXTURE_MODE=record` |
 | `tests/fixtures/recordings/agent-creates-file.json` | Sample fixture: single-turn file creation |
 | `tests/fixtures/recordings/agent-reads-and-edits.json` | Fixture: multi-turn read + edit flow |
 | `tests/fixtures/recordings/agent-handles-error.json` | Fixture: error response handling |
@@ -103,7 +103,7 @@ git commit -m "feat(ci): add version stamp script for dev publishes"
 ```dockerfile
 # ──────────────────────────────────────────────
 # Stage 1: CI Builder
-# Image: ghcr.io/gsd-build/gsd-ci-builder
+# Image: ghcr.io/sdd-build/sdd-ci-builder
 # Used by: pipeline.yml Dev stage
 # ──────────────────────────────────────────────
 FROM node:22-bookworm AS builder
@@ -124,40 +124,40 @@ RUN node --version && rustc --version && cargo --version
 
 # ──────────────────────────────────────────────
 # Stage 2: Runtime
-# Image: ghcr.io/gsd-build/gsd-pi
+# Image: ghcr.io/sdd-build/sdd-pi
 # Used by: end users via docker run
 # ──────────────────────────────────────────────
 FROM node:22-slim AS runtime
 
-# Git is required for GSD's git operations
+# Git is required for SDD's git operations
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install GSD globally — version is controlled by the build arg
-ARG GSD_VERSION=latest
-RUN npm install -g gsd-pi@${GSD_VERSION}
+# Install SDD globally — version is controlled by the build arg
+ARG SDD_VERSION=latest
+RUN npm install -g sdd-pi@${SDD_VERSION}
 
 # Default working directory for user projects
 WORKDIR /workspace
 
-ENTRYPOINT ["gsd"]
+ENTRYPOINT ["sdd"]
 CMD ["--help"]
 ```
 
 - [ ] **Step 2: Verify builder stage builds**
 
-Run: `docker build --target builder -t gsd-ci-builder-test .`
+Run: `docker build --target builder -t sdd-ci-builder-test .`
 Expected: Completes successfully (may take 5-10 min first time)
 
 - [ ] **Step 3: Verify runtime stage builds**
 
-Run: `docker build --target runtime -t gsd-pi-test .`
+Run: `docker build --target runtime -t sdd-pi-test .`
 Expected: Completes successfully
 
 - [ ] **Step 4: Verify runtime image works**
 
-Run: `docker run --rm gsd-pi-test --version`
+Run: `docker run --rm sdd-pi-test --version`
 Expected: Outputs a version string
 
 - [ ] **Step 5: Commit**
@@ -225,16 +225,16 @@ if (failed > 0) process.exit(1);
 
 ```typescript
 // tests/smoke/test-version.ts
-// Verifies that `gsd --version` outputs valid semver-like string.
-// When GSD_SMOKE_BINARY is set (CI), uses that binary directly.
-// Otherwise falls back to npx gsd-pi.
+// Verifies that `sdd --version` outputs valid semver-like string.
+// When SDD_SMOKE_BINARY is set (CI), uses that binary directly.
+// Otherwise falls back to npx sdd-pi.
 
 import { execFileSync } from "child_process";
 
-const bin = process.env.GSD_SMOKE_BINARY;
+const bin = process.env.SDD_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--version"], { encoding: "utf8", timeout: 30_000 }).trim()
-  : execFileSync("npx", ["gsd-pi", "--version"], { encoding: "utf8", timeout: 30_000 }).trim();
+  : execFileSync("npx", ["sdd-pi", "--version"], { encoding: "utf8", timeout: 30_000 }).trim();
 
 if (!/^\d+\.\d+\.\d+/.test(output)) {
   console.error(`Unexpected version output: "${output}"`);
@@ -248,16 +248,16 @@ console.log(`version: ${output}`);
 
 ```typescript
 // tests/smoke/test-help.ts
-// Verifies that `gsd --help` exits 0 and contains expected keywords.
+// Verifies that `sdd --help` exits 0 and contains expected keywords.
 
 import { execFileSync } from "child_process";
 
-const bin = process.env.GSD_SMOKE_BINARY;
+const bin = process.env.SDD_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--help"], { encoding: "utf8", timeout: 30_000 })
-  : execFileSync("npx", ["gsd-pi", "--help"], { encoding: "utf8", timeout: 30_000 });
+  : execFileSync("npx", ["sdd-pi", "--help"], { encoding: "utf8", timeout: 30_000 });
 
-const requiredKeywords = ["gsd", "usage"];
+const requiredKeywords = ["sdd", "usage"];
 for (const keyword of requiredKeywords) {
   if (!output.toLowerCase().includes(keyword)) {
     console.error(`Missing keyword "${keyword}" in help output`);
@@ -272,27 +272,27 @@ console.log("help output OK");
 
 ```typescript
 // tests/smoke/test-init.ts
-// Verifies that `gsd init` creates expected files in a temp directory.
+// Verifies that `sdd init` creates expected files in a temp directory.
 
 import { execFileSync } from "child_process";
 import { mkdtempSync, existsSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
-const tmp = mkdtempSync(join(tmpdir(), "gsd-smoke-init-"));
+const tmp = mkdtempSync(join(tmpdir(), "sdd-smoke-init-"));
 
 try {
-  const bin = process.env.GSD_SMOKE_BINARY;
-  const args = bin ? [bin, "init"] : ["npx", "gsd-pi", "init"];
+  const bin = process.env.SDD_SMOKE_BINARY;
+  const args = bin ? [bin, "init"] : ["npx", "sdd-pi", "init"];
   execFileSync(args[0], args.slice(1), {
     encoding: "utf8",
     cwd: tmp,
     timeout: 30_000,
-    env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
+    env: { ...process.env, SDD_NON_INTERACTIVE: "1" },
   });
 
-  // Check that .gsd directory was created
-  if (!existsSync(join(tmp, ".gsd"))) {
+  // Check that .sdd directory was created
+  if (!existsSync(join(tmp, ".sdd"))) {
     console.error("Expected .sdd/ directory not found after init");
     process.exit(1);
   }
@@ -353,8 +353,8 @@ The provider is registered via `registerApiProvider()` from `packages/pi-ai/src/
 // Replay mode: loads saved JSON, serves responses by turn index.
 //
 // Controlled via environment variables:
-//   GSD_FIXTURE_MODE=record|replay
-//   GSD_FIXTURE_DIR=./tests/fixtures/recordings
+//   SDD_FIXTURE_MODE=record|replay
+//   SDD_FIXTURE_DIR=./tests/fixtures/recordings
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
@@ -383,13 +383,13 @@ export interface FixtureFile {
 export type FixtureMode = "record" | "replay" | "off";
 
 export function getFixtureMode(): FixtureMode {
-  const mode = process.env.GSD_FIXTURE_MODE;
+  const mode = process.env.SDD_FIXTURE_MODE;
   if (mode === "record" || mode === "replay") return mode;
   return "off";
 }
 
 export function getFixtureDir(): string {
-  return process.env.GSD_FIXTURE_DIR || join(process.cwd(), "tests/fixtures/recordings");
+  return process.env.SDD_FIXTURE_DIR || join(process.cwd(), "tests/fixtures/recordings");
 }
 
 export function loadFixture(filepath: string): FixtureFile {
@@ -484,7 +484,7 @@ export class FixtureReplayer {
 }
 ```
 
-Note: This provider implements the core recording/replay data structures and utilities. Wiring it into the `pi-ai` registry as a drop-in `ApiProvider` (via `registerApiProvider()` from `packages/pi-ai/src/api-registry.ts`) requires importing `@gsd/pi-ai` internals, which couples tests to the build output. This integration is deferred to a follow-up task after the pipeline is operational. The current implementation validates fixture format, turn sequencing, and replay correctness independently.
+Note: This provider implements the core recording/replay data structures and utilities. Wiring it into the `pi-ai` registry as a drop-in `ApiProvider` (via `registerApiProvider()` from `packages/pi-ai/src/api-registry.ts`) requires importing `@sdd/pi-ai` internals, which couples tests to the build output. This integration is deferred to a follow-up task after the pipeline is operational. The current implementation validates fixture format, turn sequencing, and replay correctness independently.
 
 - [ ] **Step 2: Verify the file has no syntax errors**
 
@@ -809,13 +809,13 @@ git commit -m "feat(ci): add additional fixture recordings for multi-turn and er
 
 ```typescript
 // tests/live/run.ts
-// Runs real LLM integration tests. Only executes when GSD_LIVE_TESTS=1.
+// Runs real LLM integration tests. Only executes when SDD_LIVE_TESTS=1.
 // These tests cost real money — used in the Prod gate only.
 //
-// Usage: GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts
+// Usage: SDD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts
 
-if (process.env.GSD_LIVE_TESTS !== "1") {
-  console.log("Skipping live tests (set GSD_LIVE_TESTS=1 to enable)");
+if (process.env.SDD_LIVE_TESTS !== "1") {
+  console.log("Skipping live tests (set SDD_LIVE_TESTS=1 to enable)");
   process.exit(0);
 }
 
@@ -944,17 +944,17 @@ console.log(`OpenAI roundtrip OK: "${text.substring(0, 50)}"`);
 
 Add to `package.json` `scripts`:
 ```json
-"test:fixtures:record": "GSD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
-"test:live": "GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
+"test:fixtures:record": "SDD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
+"test:live": "SDD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
 "pipeline:version-stamp": "node scripts/version-stamp.mjs",
-"docker:build-runtime": "docker build --target runtime -t ghcr.io/gsd-build/gsd-pi .",
-"docker:build-builder": "docker build --target builder -t ghcr.io/gsd-build/gsd-ci-builder ."
+"docker:build-runtime": "docker build --target runtime -t ghcr.io/sdd-build/sdd-pi .",
+"docker:build-builder": "docker build --target builder -t ghcr.io/sdd-build/sdd-ci-builder ."
 ```
 
 - [ ] **Step 5: Verify live tests skip without env var**
 
 Run: `npm run test:live`
-Expected: `Skipping live tests (set GSD_LIVE_TESTS=1 to enable)` and exit 0
+Expected: `Skipping live tests (set SDD_LIVE_TESTS=1 to enable)` and exit 0
 
 - [ ] **Step 6: Commit**
 
@@ -997,7 +997,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/gsd-build/gsd-ci-builder:latest  # Pin to date tag after first build
+      image: ghcr.io/sdd-build/sdd-ci-builder:latest  # Pin to date tag after first build
     environment: dev
     outputs:
       dev-version: ${{ steps.stamp.outputs.version }}
@@ -1037,8 +1037,8 @@ jobs:
         run: |
           mkdir /tmp/smoke-test && cd /tmp/smoke-test
           npm init -y
-          npm install gsd-pi@dev
-          npx gsd --version
+          npm install sdd-pi@dev
+          npx sdd --version
 
   # ─── TEST STAGE ────────────────────────────────────────────
   test-verify:
@@ -1059,7 +1059,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install published dev package globally
-        run: npm install -g gsd-pi@dev
+        run: npm install -g sdd-pi@dev
 
       - name: Install dev dependencies for test runners
         run: npm ci
@@ -1067,13 +1067,13 @@ jobs:
       - name: Run CLI smoke tests
         run: npm run test:smoke
         env:
-          GSD_SMOKE_BINARY: gsd  # Use globally installed binary, not npx
+          SDD_SMOKE_BINARY: sdd  # Use globally installed binary, not npx
 
       - name: Run fixture replay tests
         run: npm run test:fixtures
 
       - name: Promote to @next
-        run: npm dist-tag add gsd-pi@${{ needs.dev-publish.outputs.dev-version }} next
+        run: npm dist-tag add sdd-pi@${{ needs.dev-publish.outputs.dev-version }} next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -1081,12 +1081,12 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build --target runtime \
-            --build-arg GSD_VERSION=${{ needs.dev-publish.outputs.dev-version }} \
-            -t ghcr.io/gsd-build/gsd-pi:next \
-            -t ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }} \
+            --build-arg SDD_VERSION=${{ needs.dev-publish.outputs.dev-version }} \
+            -t ghcr.io/sdd-build/sdd-pi:next \
+            -t ghcr.io/sdd-build/sdd-pi:${{ needs.dev-publish.outputs.dev-version }} \
             .
-          docker push ghcr.io/gsd-build/gsd-pi:next
-          docker push ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }}
+          docker push ghcr.io/sdd-build/sdd-pi:next
+          docker push ghcr.io/sdd-build/sdd-pi:${{ needs.dev-publish.outputs.dev-version }}
 
   # ─── PROD STAGE ────────────────────────────────────────────
   prod-release:
@@ -1111,22 +1111,22 @@ jobs:
         run: |
           npm ci
           npm run build
-          GSD_LIVE_TESTS=1 npm run test:live
+          SDD_LIVE_TESTS=1 npm run test:live
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Promote to @latest
-        run: npm dist-tag add gsd-pi@${{ needs.dev-publish.outputs.dev-version }} latest
+        run: npm dist-tag add sdd-pi@${{ needs.dev-publish.outputs.dev-version }} latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag and push Docker images
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker pull ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }}
-          docker tag ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }} ghcr.io/gsd-build/gsd-pi:latest
-          docker push ghcr.io/gsd-build/gsd-pi:latest
+          docker pull ghcr.io/sdd-build/sdd-pi:${{ needs.dev-publish.outputs.dev-version }}
+          docker tag ghcr.io/sdd-build/sdd-pi:${{ needs.dev-publish.outputs.dev-version }} ghcr.io/sdd-build/sdd-pi:latest
+          docker push ghcr.io/sdd-build/sdd-pi:latest
 
       - name: Create GitHub Release
         run: |
@@ -1140,8 +1140,8 @@ jobs:
         run: |
           mkdir /tmp/prod-smoke && cd /tmp/prod-smoke
           npm init -y
-          npm install gsd-pi@latest
-          npx gsd --version
+          npm install sdd-pi@latest
+          npx sdd --version
 
   # ─── CI BUILDER IMAGE (conditional) ────────────────────────
   update-builder:
@@ -1164,16 +1164,16 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build --target builder \
-            -t ghcr.io/gsd-build/gsd-ci-builder:latest \
-            -t ghcr.io/gsd-build/gsd-ci-builder:${{ steps.tag.outputs.date }} \
+            -t ghcr.io/sdd-build/sdd-ci-builder:latest \
+            -t ghcr.io/sdd-build/sdd-ci-builder:${{ steps.tag.outputs.date }} \
             .
-          docker push ghcr.io/gsd-build/gsd-ci-builder:latest
-          docker push ghcr.io/gsd-build/gsd-ci-builder:${{ steps.tag.outputs.date }}
+          docker push ghcr.io/sdd-build/sdd-ci-builder:latest
+          docker push ghcr.io/sdd-build/sdd-ci-builder:${{ steps.tag.outputs.date }}
 
       - name: Verify builder image
         run: |
-          docker run --rm ghcr.io/gsd-build/gsd-ci-builder:latest node --version
-          docker run --rm ghcr.io/gsd-build/gsd-ci-builder:latest rustc --version
+          docker run --rm ghcr.io/sdd-build/sdd-ci-builder:latest node --version
+          docker run --rm ghcr.io/sdd-build/sdd-ci-builder:latest rustc --version
 ```
 
 - [ ] **Step 2: Validate YAML syntax**
@@ -1222,7 +1222,7 @@ jobs:
 
       - name: Remove old dev versions
         run: |
-          VERSIONS=$(npm view gsd-pi versions --json 2>/dev/null || echo "[]")
+          VERSIONS=$(npm view sdd-pi versions --json 2>/dev/null || echo "[]")
 
           DEV_VERSIONS=$(echo "$VERSIONS" | node -e "
             const stdin = require('fs').readFileSync('/dev/stdin', 'utf8');
@@ -1242,7 +1242,7 @@ jobs:
           THIRTY_DAYS_MS=2592000000
 
           for VERSION in $DEV_VERSIONS; do
-            PUBLISH_TIME=$(npm view "gsd-pi@$VERSION" time --json 2>/dev/null || echo "")
+            PUBLISH_TIME=$(npm view "sdd-pi@$VERSION" time --json 2>/dev/null || echo "")
 
             if [ -n "$PUBLISH_TIME" ]; then
               AGE_MS=$(node -e "
@@ -1251,10 +1251,10 @@ jobs:
               " 2>/dev/null || echo "0")
 
               if [ "$AGE_MS" -gt "$THIRTY_DAYS_MS" ]; then
-                echo "Unpublishing gsd-pi@$VERSION"
-                npm unpublish "gsd-pi@$VERSION" || echo "Failed to unpublish $VERSION"
+                echo "Unpublishing sdd-pi@$VERSION"
+                npm unpublish "sdd-pi@$VERSION" || echo "Failed to unpublish $VERSION"
               else
-                echo "Keeping gsd-pi@$VERSION (within 30 days)"
+                echo "Keeping sdd-pi@$VERSION (within 30 days)"
               fi
             fi
           done
@@ -1290,8 +1290,8 @@ git commit -m "feat(ci): add weekly dev version cleanup workflow"
 // Helper for recording new LLM fixtures.
 //
 // Usage:
-//   GSD_FIXTURE_MODE=record \
-//   GSD_FIXTURE_DIR=./tests/fixtures/recordings \
+//   SDD_FIXTURE_MODE=record \
+//   SDD_FIXTURE_DIR=./tests/fixtures/recordings \
 //   node --experimental-strip-types tests/fixtures/record.ts
 //
 // This is a developer tool, not used in CI.
@@ -1303,10 +1303,10 @@ const mode = getFixtureMode();
 const dir = getFixtureDir();
 
 if (mode !== "record") {
-  console.error("Recording requires GSD_FIXTURE_MODE=record");
+  console.error("Recording requires SDD_FIXTURE_MODE=record");
   console.error("");
   console.error("Usage:");
-  console.error("  GSD_FIXTURE_MODE=record GSD_FIXTURE_DIR=./tests/fixtures/recordings \\");
+  console.error("  SDD_FIXTURE_MODE=record SDD_FIXTURE_DIR=./tests/fixtures/recordings \\");
   console.error("  node --experimental-strip-types tests/fixtures/record.ts");
   process.exit(1);
 }
@@ -1315,8 +1315,8 @@ console.log("Fixture recording mode enabled");
 console.log(`Recordings will be saved to: ${dir}`);
 console.log("");
 console.log("To record a fixture:");
-console.log("1. Set GSD_FIXTURE_MODE=record in your environment");
-console.log("2. Run your GSD session normally");
+console.log("1. Set SDD_FIXTURE_MODE=record in your environment");
+console.log("2. Run your SDD session normally");
 console.log("3. The FixtureProvider will intercept and save all LLM calls");
 console.log("4. Review the generated JSON in the recordings directory");
 console.log("5. Commit the fixture to version control");
@@ -1350,7 +1350,7 @@ npm run test:live
 Expected:
 - Smoke tests: 3 passed
 - Fixture tests: 1 passed
-- Live tests: Skipped (no `GSD_LIVE_TESTS=1`)
+- Live tests: Skipped (no `SDD_LIVE_TESTS=1`)
 
 - [ ] **Step 2: Validate all workflow YAML files**
 
@@ -1395,7 +1395,7 @@ These steps require repo admin access and cannot be automated:
    - `RUN_LIVE_TESTS` → `false` by default on `prod` (set to `true` to enable)
 
 4. **Enable GHCR:**
-   - Ensure GitHub Container Registry is enabled for the `gsd-build` org
+   - Ensure GitHub Container Registry is enabled for the `sdd-build` org
 
 5. **Test the pipeline end-to-end:**
    - Merge a test PR to `main`

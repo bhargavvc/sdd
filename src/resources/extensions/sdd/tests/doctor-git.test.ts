@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 /**
  * doctor-git.test.ts — Integration tests for doctor git health checks.
  *
- * Creates real temp git repos with deliberate broken state, runs runGSDDoctor,
+ * Creates real temp git repos with deliberate broken state, runs runSDDDoctor,
  * and asserts correct detection and fixing of git issue codes:
  *   orphaned_auto_worktree, stale_milestone_branch,
  *   corrupt_merge_state, tracked_runtime_files,
@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 
-import { runGSDDoctor } from "../doctor.ts";
+import { runSDDDoctor } from "../doctor.ts";
 function run(cmd: string, cwd: string): string {
   return execSync(cmd, { cwd, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" }).trim();
 }
@@ -33,8 +33,8 @@ function createRepoWithCompletedMilestone(): string {
   run("git commit -m init", dir);
   run("git branch -M main", dir);
 
-  // Create .gsd structure with milestone M001 — all slices done → complete
-  const msDir = join(dir, ".gsd", "milestones", "M001");
+  // Create .sdd structure with milestone M001 — all slices done → complete
+  const msDir = join(dir, ".sdd", "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "ROADMAP.md"), `---
 id: M001
@@ -57,16 +57,16 @@ Test
 _None_
 `);
 
-  // Commit .gsd files
+  // Commit .sdd files
   run("git add -A", dir);
   run("git commit -m \"add milestone\"", dir);
 
   return dir;
 }
 
-/** Write a .gsd/PREFERENCES.md with the given git isolation mode. */
+/** Write a .sdd/PREFERENCES.md with the given git isolation mode. */
 function writePreferencesFile(dir: string, isolation: "none" | "worktree" | "branch"): void {
-  const gsdDir = join(dir, ".gsd");
+  const gsdDir = join(dir, ".sdd");
   mkdirSync(gsdDir, { recursive: true });
   writeFileSync(join(gsdDir, "PREFERENCES.md"), `---\ngit:\n  isolation: "${isolation}"\n---\n`);
 }
@@ -83,7 +83,7 @@ function createRepoWithActiveMilestone(): string {
   run("git commit -m init", dir);
   run("git branch -M main", dir);
 
-  const msDir = join(dir, ".gsd", "milestones", "M001");
+  const msDir = join(dir, ".sdd", "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "ROADMAP.md"), `---
 id: M001
@@ -127,15 +127,15 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Create worktree with milestone/M001 branch under .sdd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b milestone/M001 .sdd/worktrees/M001", dir);
 
-      const detect = await runGSDDoctor(dir, { isolationMode: "worktree" });
+      const detect = await runSDDDoctor(dir, { isolationMode: "worktree" });
       const orphanIssues = detect.issues.filter(i => i.code === "orphaned_auto_worktree");
       assert.ok(orphanIssues.length > 0, "detects orphaned worktree");
       assert.deepStrictEqual(orphanIssues[0]?.unitId, "M001", "orphaned worktree unitId is M001");
 
-      const fixed = await runGSDDoctor(dir, { fix: true, isolationMode: "worktree" });
+      const fixed = await runSDDDoctor(dir, { fix: true, isolationMode: "worktree" });
       assert.ok(fixed.fixesApplied.some(f => f.includes("removed orphaned worktree")), "fix removes orphaned worktree");
 
       // Verify worktree is gone
@@ -154,17 +154,17 @@ describe('doctor-git', async () => {
       const dir = createRepoWithCompletedMilestone();
       cleanups.push(dir);
 
-      // Create worktree with milestone/M001 branch under .gsd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
-      run("git worktree add -b milestone/M001 .gsd/worktrees/M001", dir);
+      // Create worktree with milestone/M001 branch under .sdd/worktrees/
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
+      run("git worktree add -b milestone/M001 .sdd/worktrees/M001", dir);
 
-      const wtPath = realpathSync(join(dir, ".gsd", "worktrees", "M001"));
+      const wtPath = realpathSync(join(dir, ".sdd", "worktrees", "M001"));
 
       // Simulate the deadlock: set cwd inside the orphaned worktree
       const previousCwd = process.cwd();
       process.chdir(wtPath);
       try {
-        const fixed = await runGSDDoctor(dir, { fix: true, isolationMode: "worktree" });
+        const fixed = await runSDDDoctor(dir, { fix: true, isolationMode: "worktree" });
 
         // The fix must NOT skip removal — it should chdir out and remove
         assert.ok(
@@ -206,12 +206,12 @@ describe('doctor-git', async () => {
       // Create a milestone/M001 branch (no worktree)
       run("git branch milestone/M001", dir);
 
-      const detect = await runGSDDoctor(dir, { isolationMode: "worktree" });
+      const detect = await runSDDDoctor(dir, { isolationMode: "worktree" });
       const staleIssues = detect.issues.filter(i => i.code === "stale_milestone_branch");
       assert.ok(staleIssues.length > 0, "detects stale milestone branch");
       assert.deepStrictEqual(staleIssues[0]?.unitId, "M001", "stale branch unitId is M001");
 
-      const fixed = await runGSDDoctor(dir, { fix: true, isolationMode: "worktree" });
+      const fixed = await runSDDDoctor(dir, { fix: true, isolationMode: "worktree" });
       assert.ok(fixed.fixesApplied.some(f => f.includes("deleted stale branch")), "fix deletes stale branch");
 
       // Verify branch is gone
@@ -230,11 +230,11 @@ describe('doctor-git', async () => {
       const headHash = run("git rev-parse HEAD", dir);
       writeFileSync(join(dir, ".git", "MERGE_HEAD"), headHash + "\n");
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const mergeIssues = detect.issues.filter(i => i.code === "corrupt_merge_state");
       assert.ok(mergeIssues.length > 0, "detects corrupt merge state");
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("cleaned merge state")), "fix cleans merge state");
 
       // Verify MERGE_HEAD is gone
@@ -247,17 +247,17 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Force-add a runtime file
-      const activityDir = join(dir, ".gsd", "activity");
+      const activityDir = join(dir, ".sdd", "activity");
       mkdirSync(activityDir, { recursive: true });
       writeFileSync(join(activityDir, "test.log"), "log data\n");
       run("git add -f .sdd/activity/test.log", dir);
       run("git commit -m \"track runtime file\"", dir);
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const trackedIssues = detect.issues.filter(i => i.code === "tracked_runtime_files");
       assert.ok(trackedIssues.length > 0, "detects tracked runtime files");
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("untracked")), "fix untracks runtime files");
 
       // Verify file is no longer tracked
@@ -270,10 +270,10 @@ describe('doctor-git', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-git-test-")));
       cleanups.push(dir);
 
-      // Create minimal .gsd structure (no git)
-      mkdirSync(join(dir, ".gsd"), { recursive: true });
+      // Create minimal .sdd structure (no git)
+      mkdirSync(join(dir, ".sdd"), { recursive: true });
 
-      const result = await runGSDDoctor(dir);
+      const result = await runSDDDoctor(dir);
       const gitIssues = result.issues.filter(i =>
         ["orphaned_auto_worktree", "stale_milestone_branch", "corrupt_merge_state", "tracked_runtime_files"].includes(i.code)
       );
@@ -289,10 +289,10 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Create worktree for in-progress milestone under .sdd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b milestone/M001 .sdd/worktrees/M001", dir);
 
-      const detect = await runGSDDoctor(dir, { isolationMode: "worktree" });
+      const detect = await runSDDDoctor(dir, { isolationMode: "worktree" });
       const orphanIssues = detect.issues.filter(i => i.code === "orphaned_auto_worktree");
       assert.deepStrictEqual(orphanIssues.length, 0, "active worktree NOT flagged as orphaned");
     });
@@ -302,17 +302,17 @@ describe('doctor-git', async () => {
     // ─── Test 7: none-mode skips orphaned worktree check ───────────────
     // NOTE: loadEffectiveSDDPreferences() resolves PROJECT_PREFERENCES_PATH
     // at module load time from process.cwd(). We write the prefs file to
-    // the test runner's cwd .gsd/PREFERENCES.md and clean up afterwards.
+    // the test runner's cwd .sdd/PREFERENCES.md and clean up afterwards.
     if (process.platform !== "win32") {
     test('none-mode skips orphaned worktree', async () => {
       const dir = createRepoWithCompletedMilestone();
       cleanups.push(dir);
 
       // Create worktree with milestone/M001 branch under .sdd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b milestone/M001 .sdd/worktrees/M001", dir);
 
-      const result = await runGSDDoctor(dir, { isolationMode: "none" });
+      const result = await runSDDDoctor(dir, { isolationMode: "none" });
       const orphanIssues = result.issues.filter(i => i.code === "orphaned_auto_worktree");
       assert.deepStrictEqual(orphanIssues.length, 0, "none-mode: orphaned worktree NOT detected");
     });
@@ -328,7 +328,7 @@ describe('doctor-git', async () => {
       // Create a milestone/M001 branch (no worktree)
       run("git branch milestone/M001", dir);
 
-      const result = await runGSDDoctor(dir, { isolationMode: "none" });
+      const result = await runSDDDoctor(dir, { isolationMode: "none" });
       const staleIssues = result.issues.filter(i => i.code === "stale_milestone_branch");
       assert.deepStrictEqual(staleIssues.length, 0, "none-mode: stale branch NOT detected");
     });
@@ -342,10 +342,10 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Write integration branch metadata for M001 pointing to a non-existent branch
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "feat/does-not-exist" }, null, 2));
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const missingBranchIssues = detect.issues.filter(i => i.code === "integration_branch_missing");
       assert.ok(missingBranchIssues.length > 0, "detects missing integration branch");
       assert.ok(
@@ -365,10 +365,10 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Write integration branch metadata for M001 pointing to "main" (which exists)
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "main" }, null, 2));
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const missingBranchIssues = detect.issues.filter(i => i.code === "integration_branch_missing");
       assert.deepStrictEqual(missingBranchIssues.length, 0, "existing integration branch NOT flagged");
     });
@@ -380,10 +380,10 @@ describe('doctor-git', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "feat/does-not-exist" }, null, 2));
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const missingBranchIssues = detect.issues.filter(i => i.code === "integration_branch_missing");
       assert.deepStrictEqual(missingBranchIssues.length, 1, "reports one stale integration branch issue");
       assert.deepStrictEqual(missingBranchIssues[0]?.severity, "warning", "stale metadata is warning when a fallback branch exists");
@@ -394,7 +394,7 @@ describe('doctor-git', async () => {
         "warning mentions stale recorded branch and detected fallback branch",
       );
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(
         fixed.fixesApplied.some(f => f.includes('updated integration branch for M001 to "main"')),
         "doctor fix rewrites stale integration branch metadata to detected fallback branch",
@@ -409,15 +409,15 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       run("git branch trunk", dir);
-      writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), `---\ngit:\n  isolation: "worktree"\n  main_branch: "trunk"\n---\n`);
+      writeFileSync(join(dir, ".sdd", "PREFERENCES.md"), `---\ngit:\n  isolation: "worktree"\n  main_branch: "trunk"\n---\n`);
 
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "feat/does-not-exist" }, null, 2));
 
       const previousCwd = process.cwd();
       process.chdir(dir);
       try {
-        const detect = await runGSDDoctor(dir);
+        const detect = await runSDDDoctor(dir);
         const missingBranchIssues = detect.issues.filter(i => i.code === "integration_branch_missing");
         assert.deepStrictEqual(missingBranchIssues.length, 1, "configured fallback still reports one stale integration branch issue");
         assert.deepStrictEqual(missingBranchIssues[0]?.severity, "warning", "configured fallback keeps stale metadata at warning severity");
@@ -428,7 +428,7 @@ describe('doctor-git', async () => {
           "warning mentions stale recorded branch and configured fallback branch",
         );
 
-        const fixed = await runGSDDoctor(dir, { fix: true });
+        const fixed = await runSDDDoctor(dir, { fix: true });
         assert.ok(
           fixed.fixesApplied.some(f => f.includes('updated integration branch for M001 to "trunk"')),
           "doctor fix rewrites stale metadata to configured fallback branch",
@@ -447,11 +447,11 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Create a worktrees/ dir with an entry that is NOT in git worktree list
-      const orphanDir = join(dir, ".gsd", "worktrees", "orphan-feature");
+      const orphanDir = join(dir, ".sdd", "worktrees", "orphan-feature");
       mkdirSync(orphanDir, { recursive: true });
       writeFileSync(join(orphanDir, "some-file.txt"), "leftover content\n");
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const orphanDirIssues = detect.issues.filter(i => i.code === "worktree_directory_orphaned");
       assert.ok(orphanDirIssues.length > 0, "detects orphaned worktree directory");
       assert.ok(
@@ -460,7 +460,7 @@ describe('doctor-git', async () => {
       );
       assert.ok(orphanDirIssues[0]?.fixable === true, "worktree_directory_orphaned is fixable");
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(
         fixed.fixesApplied.some(f => f.includes("removed orphaned worktree directory")),
         "fix removes orphaned worktree directory",
@@ -477,10 +477,10 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Create a real registered worktree under .sdd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/feature-1 .sdd/worktrees/feature-1", dir);
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const orphanDirIssues = detect.issues.filter(i => i.code === "worktree_directory_orphaned");
       assert.deepStrictEqual(orphanDirIssues.length, 0, "registered worktree NOT flagged as orphaned");
     });
@@ -496,7 +496,7 @@ describe('doctor-git', async () => {
       const headHash = run("git rev-parse HEAD", dir);
       writeFileSync(join(dir, ".git", "MERGE_HEAD"), headHash + "\n");
 
-      const result = await runGSDDoctor(dir, { isolationMode: "none" });
+      const result = await runSDDDoctor(dir, { isolationMode: "none" });
       const mergeIssues = result.issues.filter(i => i.code === "corrupt_merge_state");
       assert.ok(mergeIssues.length > 0, "none-mode: corrupt merge state IS detected");
     });
@@ -507,37 +507,37 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Force-add a runtime file
-      const activityDir = join(dir, ".gsd", "activity");
+      const activityDir = join(dir, ".sdd", "activity");
       mkdirSync(activityDir, { recursive: true });
       writeFileSync(join(activityDir, "test.log"), "log data\n");
       run("git add -f .sdd/activity/test.log", dir);
       run("git commit -m \"track runtime file\"", dir);
 
-      const result = await runGSDDoctor(dir, { isolationMode: "none" });
+      const result = await runSDDDoctor(dir, { isolationMode: "none" });
       const trackedIssues = result.issues.filter(i => i.code === "tracked_runtime_files");
       assert.ok(trackedIssues.length > 0, "none-mode: tracked runtime files IS detected");
     });
 
-    // ─── Test: Symlinked .gsd does not cause false orphan detection ────
+    // ─── Test: Symlinked .sdd does not cause false orphan detection ────
     if (process.platform !== "win32") {
-    test('worktree_directory_orphaned (symlinked .gsd not false-positive)', async () => {
+    test('worktree_directory_orphaned (symlinked .sdd not false-positive)', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      // Move .gsd to an external location and replace with a symlink.
-      // This simulates the ~/.sdd/projects/<hash> layout where .gsd is a symlink.
-      const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "gsd-data");
+      // Move .sdd to an external location and replace with a symlink.
+      // This simulates the ~/.sdd/projects/<hash> layout where .sdd is a symlink.
+      const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "sdd-data");
       cleanups.push(externalGsd);
-      renameSync(join(dir, ".gsd"), externalGsd);
-      symlinkSync(externalGsd, join(dir, ".gsd"));
+      renameSync(join(dir, ".sdd"), externalGsd);
+      symlinkSync(externalGsd, join(dir, ".sdd"));
 
       // Create a real registered worktree under the (now symlinked) .sdd/worktrees/
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/symlink-test .sdd/worktrees/symlink-test", dir);
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const orphanDirIssues = detect.issues.filter(i => i.code === "worktree_directory_orphaned");
-      assert.deepStrictEqual(orphanDirIssues.length, 0, "registered worktree via symlinked .gsd NOT flagged as orphaned");
+      assert.deepStrictEqual(orphanDirIssues.length, 0, "registered worktree via symlinked .sdd NOT flagged as orphaned");
     });
     } else {
     }
@@ -549,9 +549,9 @@ describe('doctor-git', async () => {
       cleanups.push(dir);
 
       // Create a worktree, make a commit, then merge the branch into main
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/merged-feature .sdd/worktrees/merged-feature", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "merged-feature");
+      const wtPath = join(dir, ".sdd", "worktrees", "merged-feature");
       writeFileSync(join(wtPath, "feature.txt"), "feature\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"feature work\"", wtPath);
@@ -559,14 +559,14 @@ describe('doctor-git', async () => {
       // Merge the worktree branch into main
       run("git merge worktree/merged-feature --no-edit", dir);
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const mergedIssues = detect.issues.filter(i => i.code === "worktree_branch_merged");
       assert.ok(mergedIssues.length > 0, "detects merged worktree branch");
       assert.ok(mergedIssues[0]?.message.includes("safe to remove"), "message says safe to remove");
       assert.ok(mergedIssues[0]?.fixable === true, "merged worktree is fixable");
 
       // Fix should remove the worktree
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("removed merged worktree")), "fix removes merged worktree");
       assert.ok(!existsSync(wtPath), "worktree directory removed after fix");
     });
@@ -579,15 +579,15 @@ describe('doctor-git', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b milestone/M001 .sdd/worktrees/M001", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "M001");
+      const wtPath = join(dir, ".sdd", "worktrees", "M001");
       writeFileSync(join(wtPath, "feature.txt"), "feature\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"feature work\"", wtPath);
       run("git merge milestone/M001 --no-edit", dir);
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("removed merged worktree")), "fix removes merged milestone worktree");
       assert.ok(!existsSync(wtPath), "milestone worktree directory removed after fix");
 
@@ -603,15 +603,15 @@ describe('doctor-git', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      mkdirSync(join(dir, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b worktree/active-feature .sdd/worktrees/active-feature", dir);
-      const wtPath = join(dir, ".gsd", "worktrees", "active-feature");
+      const wtPath = join(dir, ".sdd", "worktrees", "active-feature");
       writeFileSync(join(wtPath, "wip.txt"), "work in progress\n");
       run("git add -A", wtPath);
       run("git -c user.email=test@test.com -c user.name=Test commit -m \"wip\"", wtPath);
 
       // Do NOT merge — branch is ahead of main
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const mergedIssues = detect.issues.filter(i => i.code === "worktree_branch_merged");
       assert.deepStrictEqual(mergedIssues.length, 0, "unmerged worktree NOT flagged as merged");
     });
@@ -624,23 +624,23 @@ describe('doctor-git', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      // Create legacy gsd/M001/S01 branches
-      run("git branch gsd/M001/S01", dir);
-      run("git branch gsd/M001/S02", dir);
-      // Active quick branches share gsd/*/* shape and must NOT be deleted.
-      run("git branch gsd/quick/1-fix-typo", dir);
+      // Create legacy sdd/M001/S01 branches
+      run("git branch sdd/M001/S01", dir);
+      run("git branch sdd/M001/S02", dir);
+      // Active quick branches share sdd/*/* shape and must NOT be deleted.
+      run("git branch sdd/quick/1-fix-typo", dir);
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const legacyIssues = detect.issues.filter(i => i.code === "legacy_slice_branches");
       assert.ok(legacyIssues.length > 0, "detects legacy slice branches");
       assert.ok(legacyIssues[0]?.fixable === true, "legacy branches are fixable");
 
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("legacy slice branch")), "fix deletes legacy branches");
 
       // Verify branches are gone
-      const remaining = run("git branch --list gsd/*/*", dir);
-      assert.deepStrictEqual(remaining, "gsd/quick/1-fix-typo", "quick branch preserved; legacy branches removed");
+      const remaining = run("git branch --list sdd/*/*", dir);
+      assert.deepStrictEqual(remaining, "sdd/quick/1-fix-typo", "quick branch preserved; legacy branches removed");
     });
     } else {
     }

@@ -2,8 +2,8 @@
  * TUI: Background Process Manager Overlay.
  */
 
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@sdd/pi-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@sdd/pi-tui";
 import type { BgProcess, ProcessStatus } from "./types.js";
 import { ERROR_PATTERNS, WARNING_PATTERNS } from "./types.js";
 import { formatUptime, formatTimeAgo } from "./utilities.js";
@@ -126,7 +126,7 @@ export class BgManagerOverlay {
 					this.invalidate();
 					this.tui.requestRender();
 				}).catch((err) => {
-					if (process.env.GSD_DEBUG) console.error('[bg-shell] restart failed:', err);
+					if (process.env.SDD_DEBUG) console.error('[bg-shell] restart failed:', err);
 					this.invalidate();
 					this.tui.requestRender();
 				});

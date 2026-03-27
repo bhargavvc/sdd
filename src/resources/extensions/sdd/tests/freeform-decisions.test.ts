@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import {
   openDatabase,
   closeDatabase,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import {
   parseDecisionsTable,
 } from '../md-importer.ts';
@@ -19,8 +19,8 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-freeform-'));
-  fs.mkdirSync(path.join(dir, '.gsd'), { recursive: true });
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-freeform-'));
+  fs.mkdirSync(path.join(dir, '.sdd'), { recursive: true });
   return dir;
 }
 
@@ -55,8 +55,8 @@ describe('freeform-decisions', () => {
 
   test('saveDecisionToDb destroys freeform DECISIONS.md content', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
-    const mdPath = path.join(tmpDir, '.gsd', 'DECISIONS.md');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
+    const mdPath = path.join(tmpDir, '.sdd', 'DECISIONS.md');
     openDatabase(dbPath);
 
     const freeformContent = `# Project Decisions
@@ -151,8 +151,8 @@ describe('freeform-decisions', () => {
 
   test('saveDecisionToDb with table-format DECISIONS.md still regenerates normally', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
-    const mdPath = path.join(tmpDir, '.gsd', 'DECISIONS.md');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
+    const mdPath = path.join(tmpDir, '.sdd', 'DECISIONS.md');
     openDatabase(dbPath);
 
     // Pre-populate with canonical table format
@@ -200,8 +200,8 @@ describe('freeform-decisions', () => {
 
   test('saveDecisionToDb with no existing DECISIONS.md creates table', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
-    const mdPath = path.join(tmpDir, '.gsd', 'DECISIONS.md');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
+    const mdPath = path.join(tmpDir, '.sdd', 'DECISIONS.md');
     openDatabase(dbPath);
 
     // No DECISIONS.md exists at all

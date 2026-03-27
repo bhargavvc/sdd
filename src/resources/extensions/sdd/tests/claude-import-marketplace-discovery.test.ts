@@ -8,7 +8,7 @@
  *
  * Uses temp-dir fixtures — no real marketplace repos required.
  *
- * Fixes: https://github.com/gsd-build/gsd-2/issues/2717
+ * Fixes: https://github.com/sdd-build/sdd-2/issues/2717
  */
 
 import { describe, it, beforeEach, afterEach } from "node:test";
@@ -22,7 +22,7 @@ describe("categorizePluginRoots", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "gsd-mktplace-test-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "sdd-mktplace-test-"));
   });
 
   afterEach(() => {
@@ -159,7 +159,7 @@ describe("discoverClaudePlugins — Claude plugin.json recognition", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "gsd-plugin-disc-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "sdd-plugin-disc-"));
   });
 
   afterEach(() => {

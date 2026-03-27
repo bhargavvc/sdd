@@ -1,33 +1,33 @@
 /**
- * GSD Maintenance — cleanup, skip, dry-run, and recover handlers.
+ * SDD Maintenance — cleanup, skip, dry-run, and recover handlers.
  *
  * Contains: handleCleanupBranches, handleCleanupSnapshots, handleCleanupWorktrees, handleSkip, handleDryRun, handleRecover
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { deriveState } from "./state.js";
 import { nativeBranchList, nativeDetectMainBranch, nativeBranchListMerged, nativeBranchDelete, nativeForEachRef, nativeUpdateRef } from "./native-git-bridge.js";
 
 export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePath: string): Promise<void> {
   let branches: string[];
   try {
-    branches = nativeBranchList(basePath, "gsd/*");
+    branches = nativeBranchList(basePath, "sdd/*");
   } catch {
-    ctx.ui.notify("No GSD branches to clean up.", "info");
+    ctx.ui.notify("No SDD branches to clean up.", "info");
     return;
   }
 
-  const quickBranches = branches.filter((b) => b.startsWith("gsd/quick/"));
+  const quickBranches = branches.filter((b) => b.startsWith("sdd/quick/"));
 
   const mainBranch = nativeDetectMainBranch(basePath);
   let merged: string[];
   try {
-    merged = nativeBranchListMerged(basePath, mainBranch, "gsd/*");
+    merged = nativeBranchListMerged(basePath, mainBranch, "sdd/*");
   } catch {
     merged = [];
   }
 
-  const mergedNonQuick = merged.filter((b) => !b.startsWith("gsd/quick/"));
+  const mergedNonQuick = merged.filter((b) => !b.startsWith("sdd/quick/"));
   let deletedMerged = 0;
   for (const branch of mergedNonQuick) {
     try {
@@ -47,7 +47,7 @@ export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePa
     const { loadFile } = await import("./files.js");
     const { parseRoadmap } = await import("./parsers-legacy.js");
     const { isMilestoneComplete } = await import("./state.js");
-    const { isDbAvailable, getMilestone } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestone } = await import("./sdd-db.js");
 
     const attachedBranches = new Set(
       listWorktrees(basePath).map((wt) => wt.branch),
@@ -101,15 +101,15 @@ export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePa
     summary.push(`Deleted ${deletedStaleMilestones} stale milestone branch${deletedStaleMilestones === 1 ? "" : "es"}.`);
   }
   if (quickBranches.length > 0) {
-    summary.push(`Skipped ${quickBranches.length} quick branch${quickBranches.length === 1 ? "" : "es"} (gsd/quick/*).`);
+    summary.push(`Skipped ${quickBranches.length} quick branch${quickBranches.length === 1 ? "" : "es"} (sdd/quick/*).`);
   }
 
   if (summary.length === 0) {
-    const nonQuickCount = branches.filter((b) => !b.startsWith("gsd/quick/")).length;
+    const nonQuickCount = branches.filter((b) => !b.startsWith("sdd/quick/")).length;
     ctx.ui.notify(
       nonQuickCount > 0
-        ? `${nonQuickCount} GSD branch${nonQuickCount === 1 ? "" : "es"} found, none merged into ${mainBranch} yet.`
-        : "No non-quick GSD branches to clean up.",
+        ? `${nonQuickCount} SDD branch${nonQuickCount === 1 ? "" : "es"} found, none merged into ${mainBranch} yet.`
+        : "No non-quick SDD branches to clean up.",
       "info",
     );
     return;
@@ -170,7 +170,7 @@ export async function handleCleanupWorktrees(ctx: ExtensionCommandContext, baseP
   }
 
   if (statuses.length === 0) {
-    ctx.ui.notify("No GSD worktrees found.", "info");
+    ctx.ui.notify("No SDD worktrees found.", "info");
     return;
   }
 
@@ -233,14 +233,14 @@ export async function handleCleanupWorktrees(ctx: ExtensionCommandContext, baseP
 
 export async function handleSkip(unitArg: string, ctx: ExtensionCommandContext, basePath: string): Promise<void> {
   if (!unitArg) {
-    ctx.ui.notify("Usage: /gsd skip <unit-id>  (e.g., /gsd skip execute-task/M001/S01/T03 or /gsd skip T03)", "info");
+    ctx.ui.notify("Usage: /sdd skip <unit-id>  (e.g., /sdd skip execute-task/M001/S01/T03 or /sdd skip T03)", "info");
     return;
   }
 
   const { existsSync: fileExists, writeFileSync: writeFile, mkdirSync: mkDir, readFileSync: readFile } = await import("node:fs");
   const { join: pathJoin } = await import("node:path");
 
-  const completedKeysFile = pathJoin(basePath, ".gsd", "completed-units.json");
+  const completedKeysFile = pathJoin(basePath, ".sdd", "completed-units.json");
   let keys: string[] = [];
   try {
     if (fileExists(completedKeysFile)) {
@@ -271,7 +271,7 @@ export async function handleSkip(unitArg: string, ctx: ExtensionCommandContext, 
   }
 
   keys.push(skipKey);
-  mkDir(pathJoin(basePath, ".gsd"), { recursive: true });
+  mkDir(pathJoin(basePath, ".sdd"), { recursive: true });
   writeFile(completedKeysFile, JSON.stringify(keys), "utf-8");
 
   ctx.ui.notify(`Skipped: ${skipKey}. Will not be dispatched in auto-mode.`, "success");
@@ -428,7 +428,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
   if (unknown.length > 0) {
     lines.push(`Unknown (${unknown.length}) — no metadata yet:`);
     for (const h of unknown) {
-      lines.push(`  ? ${h}  (open that project in GSD once to register metadata)`);
+      lines.push(`  ? ${h}  (open that project in SDD once to register metadata)`);
     }
     lines.push("");
   }
@@ -442,7 +442,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
   }
 
   if (!fix && orphaned.length > 0) {
-    lines.push(`Run /gsd cleanup projects --fix to permanently delete ${pl(orphaned.length, "orphaned director")}${orphaned.length === 1 ? "y" : "ies"}.`);
+    lines.push(`Run /sdd cleanup projects --fix to permanently delete ${pl(orphaned.length, "orphaned director")}${orphaned.length === 1 ? "y" : "ies"}.`);
     ctx.ui.notify(lines.join("\n"), "warning");
     return;
   }
@@ -470,7 +470,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
 }
 
 /**
- * `gsd recover` — Reconstruct DB hierarchy state from rendered markdown on disk.
+ * `sdd recover` — Reconstruct DB hierarchy state from rendered markdown on disk.
  *
  * Deletes milestones, slices, and tasks table rows (preserves decisions,
  * requirements, artifacts, memories), re-runs `migrateHierarchyToDb()` to
@@ -479,12 +479,12 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
  * Prints counts of recovered items and the resulting project phase.
  */
 export async function handleRecover(ctx: ExtensionCommandContext, basePath: string): Promise<void> {
-  const { isDbAvailable: dbAvailable, _getAdapter, transaction: dbTransaction } = await import("./gsd-db.js");
+  const { isDbAvailable: dbAvailable, _getAdapter, transaction: dbTransaction } = await import("./sdd-db.js");
   const { migrateHierarchyToDb } = await import("./md-importer.js");
   const { invalidateStateCache } = await import("./state.js");
 
   if (!dbAvailable()) {
-    ctx.ui.notify("gsd recover: No database open. Run a GSD command first to initialize the DB.", "error");
+    ctx.ui.notify("sdd recover: No database open. Run a SDD command first to initialize the DB.", "error");
     return;
   }
 
@@ -506,7 +506,7 @@ export async function handleRecover(ctx: ExtensionCommandContext, basePath: stri
 
     // 5. Report
     const lines = [
-      `gsd recover: reconstructed hierarchy from markdown`,
+      `sdd recover: reconstructed hierarchy from markdown`,
       `  Milestones: ${counts.milestones}`,
       `  Slices:     ${counts.slices}`,
       `  Tasks:      ${counts.tasks}`,
@@ -524,12 +524,12 @@ export async function handleRecover(ctx: ExtensionCommandContext, basePath: stri
     }
 
     process.stderr.write(
-      `gsd-recover: recovered ${counts.milestones}M/${counts.slices}S/${counts.tasks}T hierarchy\n`,
+      `sdd-recover: recovered ${counts.milestones}M/${counts.slices}S/${counts.tasks}T hierarchy\n`,
     );
     ctx.ui.notify(lines.join("\n"), "success");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`gsd-recover: failed: ${msg}\n`);
-    ctx.ui.notify(`gsd recover failed: ${msg}`, "error");
+    process.stderr.write(`sdd-recover: failed: ${msg}\n`);
+    ctx.ui.notify(`sdd recover failed: ${msg}`, "error");
   }
 }

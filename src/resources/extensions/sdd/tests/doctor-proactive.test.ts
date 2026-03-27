@@ -37,13 +37,13 @@ function createGitRepo(): string {
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
   return dir;
 }
 
 function createRepoWithActiveMilestone(): string {
   const dir = createGitRepo();
-  const msDir = join(dir, ".gsd", "milestones", "M001");
+  const msDir = join(dir, ".sdd", "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "ROADMAP.md"), `---
 id: M001
@@ -199,7 +199,7 @@ describe('doctor-proactive', async () => {
     test('health gate: clean state', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-proactive-")));
       cleanups.push(dir);
-      mkdirSync(join(dir, ".gsd"), { recursive: true });
+      mkdirSync(join(dir, ".sdd"), { recursive: true });
 
       const result = await preDispatchHealthGate(dir);
       assert.ok(result.proceed, "gate passes on clean state");
@@ -210,8 +210,8 @@ describe('doctor-proactive', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-proactive-")));
       cleanups.push(dir);
       // Create milestones dir but no STATE.md — mimics fresh worktree
-      mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
-      writeFileSync(join(dir, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap\n");
+      mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
+      writeFileSync(join(dir, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap\n");
 
       const result = await preDispatchHealthGate(dir);
       assert.ok(result.proceed, "gate must NOT block when STATE.md is missing (deadlock #889)");
@@ -222,10 +222,10 @@ describe('doctor-proactive', async () => {
     test('health gate: stale crash lock auto-cleared', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-proactive-")));
       cleanups.push(dir);
-      mkdirSync(join(dir, ".gsd"), { recursive: true });
+      mkdirSync(join(dir, ".sdd"), { recursive: true });
 
       // Write a stale lock
-      writeFileSync(join(dir, ".gsd", "auto.lock"), JSON.stringify({
+      writeFileSync(join(dir, ".sdd", "auto.lock"), JSON.stringify({
         pid: 9999999, startedAt: "2026-03-10T00:00:00Z",
         unitType: "execute-task", unitId: "M001/S01/T01",
         unitStartedAt: "2026-03-10T00:01:00Z", completedUnits: 3,
@@ -234,7 +234,7 @@ describe('doctor-proactive', async () => {
       const result = await preDispatchHealthGate(dir);
       assert.ok(result.proceed, "gate passes after auto-clearing stale lock");
       assert.ok(result.fixesApplied.some(f => f.includes("cleared stale auto.lock")), "reports lock cleared");
-      assert.ok(!existsSync(join(dir, ".gsd", "auto.lock")), "lock file removed");
+      assert.ok(!existsSync(join(dir, ".sdd", "auto.lock")), "lock file removed");
     });
 
     test('health gate: corrupt merge state auto-healed', async () => {
@@ -260,10 +260,10 @@ describe('doctor-proactive', async () => {
     test('health gate: STATE.md missing — auto-healed', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-proactive-")));
       cleanups.push(dir);
-      // Minimal .gsd structure: milestones dir exists but no STATE.md
-      mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
+      // Minimal .sdd structure: milestones dir exists but no STATE.md
+      mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
 
-      const stateFile = join(dir, ".gsd", "STATE.md");
+      const stateFile = join(dir, ".sdd", "STATE.md");
       assert.ok(!existsSync(stateFile), "STATE.md does not exist before gate");
 
       const result = await preDispatchHealthGate(dir);
@@ -280,7 +280,7 @@ describe('doctor-proactive', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "feature/missing" }, null, 2));
 
       const result = await preDispatchHealthGate(dir);
@@ -297,8 +297,8 @@ describe('doctor-proactive', async () => {
       cleanups.push(dir);
 
       run("git branch trunk", dir);
-      writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), `---\ngit:\n  main_branch: "trunk"\n---\n`);
-      const metaPath = join(dir, ".gsd", "milestones", "M001", "M001-META.json");
+      writeFileSync(join(dir, ".sdd", "PREFERENCES.md"), `---\ngit:\n  main_branch: "trunk"\n---\n`);
+      const metaPath = join(dir, ".sdd", "milestones", "M001", "M001-META.json");
       writeFileSync(metaPath, JSON.stringify({ integrationBranch: "feature/missing" }, null, 2));
 
       const previousCwd = process.cwd();

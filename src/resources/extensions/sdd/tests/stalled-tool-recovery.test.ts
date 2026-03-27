@@ -47,7 +47,7 @@ function makeMockPi() {
   const pi = makeMockPi();
 
   // Simulate the bug: buildRecoveryContext returns {} (empty object).
-  // basePath is undefined, which causes join(undefined, ".gsd") to throw.
+  // basePath is undefined, which causes join(undefined, ".sdd") to throw.
   const emptyRctx = {} as RecoveryContext;
 
   let crashed = false;
@@ -67,9 +67,9 @@ function makeMockPi() {
 
 {
   console.log("\n=== #1855: recoverTimedOutUnit succeeds with valid RecoveryContext ===");
-  const base = mkdtempSync(join(tmpdir(), "gsd-stalled-tool-test-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
-  mkdirSync(join(base, ".gsd", "runtime", "units"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-stalled-tool-test-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "runtime", "units"), { recursive: true });
 
   try {
     const ctx = makeMockCtx();

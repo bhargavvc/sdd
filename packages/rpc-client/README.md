@@ -1,6 +1,6 @@
 # @gsd-build/rpc-client
 
-Standalone RPC client SDK for GSD. Spawn the agent process, perform a v2 protocol handshake, send commands, and consume typed events via an async generator — all in a few lines of TypeScript.
+Standalone RPC client SDK for SDD. Spawn the agent process, perform a v2 protocol handshake, send commands, and consume typed events via an async generator — all in a few lines of TypeScript.
 
 Zero internal dependencies. Ships its own inlined types.
 

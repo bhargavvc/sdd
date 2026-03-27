@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { checkRemoteAutoSession, isAutoActive, isAutoPaused, stopAutoRemote } from "../auto.js";
 import { assertSafeDirectory } from "../validate-directory.js";
@@ -38,10 +38,10 @@ export async function guardRemoteSession(
 
   // In RPC/web bridge mode, interactive TUI prompts (showNextAction) block
   // forever because there is no terminal to answer them. Notify and bail.
-  if (process.env.GSD_WEB_BRIDGE_TUI === "1") {
+  if (process.env.SDD_WEB_BRIDGE_TUI === "1") {
     ctx.ui.notify(
       `Another auto-mode session (PID ${remote.pid}) is running on this project (${unitLabel}). ` +
-      `Stop it first with /gsd stop, or use /gsd steer to redirect it.`,
+      `Stop it first with /sdd stop, or use /sdd steer to redirect it.`,
       "warning",
     );
     return false;
@@ -57,13 +57,13 @@ export async function guardRemoteSession(
       {
         id: "status",
         label: "View status",
-        description: "Show the current GSD progress dashboard.",
+        description: "Show the current SDD progress dashboard.",
         recommended: true,
       },
       {
         id: "steer",
         label: "Steer the session",
-        description: "Use /gsd steer <instruction> to redirect the running session.",
+        description: "Use /sdd steer <instruction> to redirect the running session.",
       },
       {
         id: "stop",
@@ -76,7 +76,7 @@ export async function guardRemoteSession(
         description: "Start a new session, terminating the existing one.",
       },
     ],
-    notYetMessage: "Run /gsd when ready.",
+    notYetMessage: "Run /sdd when ready.",
   });
 
   if (choice === "status") {
@@ -85,8 +85,8 @@ export async function guardRemoteSession(
   }
   if (choice === "steer") {
     ctx.ui.notify(
-      "Use /gsd steer <instruction> to redirect the running auto-mode session.\n" +
-      "Example: /gsd steer Use Postgres instead of SQLite",
+      "Use /sdd steer <instruction> to redirect the running auto-mode session.\n" +
+      "Example: /sdd steer Use Postgres instead of SQLite",
       "info",
     );
     return false;

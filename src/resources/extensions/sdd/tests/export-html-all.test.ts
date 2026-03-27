@@ -11,8 +11,8 @@ test("handleExport --html --all generates reports for milestones missing from th
   // and the deduplication logic via loadReportsIndex + milestone filtering
   const { loadReportsIndex } = await import("../reports.js");
 
-  const tmp = join(tmpdir(), `gsd-export-all-test-${Date.now()}`);
-  const gsdDir = join(tmp, ".gsd");
+  const tmp = join(tmpdir(), `sdd-export-all-test-${Date.now()}`);
+  const gsdDir = join(tmp, ".sdd");
   const reportsDir = join(gsdDir, "reports");
   mkdirSync(reportsDir, { recursive: true });
 
@@ -83,7 +83,7 @@ test("handleExport --html --all sets milestone kind based on status", async () =
 });
 
 test("export completions include --html and --html --all", async () => {
-  const { registerGSDCommand } = await import("../commands.js");
+  const { registerSDDCommand } = await import("../commands.js");
 
   const commands = new Map<string, any>();
   const pi = {
@@ -94,11 +94,11 @@ test("export completions include --html and --html --all", async () => {
     sendMessage() {},
   };
 
-  registerGSDCommand(pi as any);
-  const gsd = commands.get("gsd");
-  assert.ok(gsd, "should register /gsd command");
+  registerSDDCommand(pi as any);
+  const sdd = commands.get("sdd");
+  assert.ok(sdd, "should register /sdd command");
 
-  const completions = gsd.getArgumentCompletions("export --");
+  const completions = sdd.getArgumentCompletions("export --");
   const labels = completions.map((c: any) => c.label);
   assert.ok(labels.includes("--html"), "completions should include --html");
   assert.ok(labels.includes("--html --all"), "completions should include --html --all");

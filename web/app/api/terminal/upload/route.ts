@@ -5,7 +5,7 @@
  * Body: multipart/form-data with a single `file` field
  *
  * Returns:
- *   200 { ok: true, path: "/tmp/gsd-upload-..." }
+ *   200 { ok: true, path: "/tmp/sdd-upload-..." }
  *   400 { error: "No file provided" }
  *   413 { error: "File too large (...)" }
  *   415 { error: "Unsupported image type: ..." }
@@ -79,7 +79,7 @@ export async function POST(request: Request): Promise<Response> {
   // Generate unique filename and write to temp dir
   const ext = MIME_TO_EXT[file.type] ?? "bin";
   const hex = randomBytes(4).toString("hex");
-  const filename = `gsd-upload-${Date.now()}-${hex}.${ext}`;
+  const filename = `sdd-upload-${Date.now()}-${hex}.${ext}`;
   const filePath = join(tmpdir(), filename);
 
   try {

@@ -383,7 +383,7 @@ mod tests {
 	impl Drop for TempTree { fn drop(&mut self) { let _ = fs::remove_dir_all(&self.root); } }
 	fn make_temp_tree() -> TempTree {
 		let unique = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-		let root = std::env::temp_dir().join(format!("gsd-ast-test-{unique}"));
+		let root = std::env::temp_dir().join(format!("sdd-ast-test-{unique}"));
 		fs::create_dir_all(root.join("nested")).unwrap();
 		fs::write(root.join("a.ts"), "const a = 1;\n").unwrap();
 		fs::write(root.join("nested").join("b.ts"), "const b = 2;\n").unwrap();
@@ -421,7 +421,7 @@ mod tests {
 	#[test]
 	fn rejects_mixed_replace_lang() {
 		let unique = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-		let root = std::env::temp_dir().join(format!("gsd-ast-mixed-{unique}"));
+		let root = std::env::temp_dir().join(format!("sdd-ast-mixed-{unique}"));
 		fs::create_dir_all(&root).unwrap();
 		fs::write(root.join("a.ts"), "const a = 1;\n").unwrap();
 		fs::write(root.join("b.rs"), "fn main() {}\n").unwrap();

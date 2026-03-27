@@ -12,7 +12,7 @@
  *      so the phase fell through to auto-mode which immediately stopped
  *      with "needs its own discussion before planning."
  *
- * Together these created an infinite loop: /gsd creates worktree + branch,
+ * Together these created an infinite loop: /sdd creates worktree + branch,
  * stops immediately, next run detects the branch and skips entry, auto-mode
  * dispatches needs-discussion → stop, repeat.
  *
@@ -36,8 +36,8 @@ import { invalidateAllCaches } from "../cache.ts";
 // ─── Fixture Helpers ─────────────────────────────────────────────────────────
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-needs-discussion-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-needs-discussion-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
@@ -46,19 +46,19 @@ function cleanup(base: string): void {
 }
 
 function writeContextDraft(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT-DRAFT.md`), content);
 }
 
 function writeContext(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT.md`), content);
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }

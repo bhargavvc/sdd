@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
-import { isToolCallEventType } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
+import { isToolCallEventType } from "@sdd/pi-coding-agent";
 
 import { buildMilestoneFileName, resolveMilestonePath, resolveSliceFile, resolveSlicePath } from "../paths.js";
 import { buildBeforeAgentStartResult } from "./system-context.js";
@@ -25,7 +25,7 @@ let isFirstSession = true;
 
 async function syncServiceTierStatus(ctx: ExtensionContext): Promise<void> {
   const { getEffectiveServiceTier, formatServiceTierFooterStatus } = await import("../service-tier.js");
-  ctx.ui.setStatus("gsd-fast", formatServiceTierFooterStatus(getEffectiveServiceTier(), ctx.model?.id));
+  ctx.ui.setStatus("sdd-fast", formatServiceTierFooterStatus(getEffectiveServiceTier(), ctx.model?.id));
 }
 
 export function registerHooks(pi: ExtensionAPI): void {
@@ -47,19 +47,19 @@ export function registerHooks(pi: ExtensionAPI): void {
     try {
       const { loadEffectiveSDDPreferences } = await import("../preferences.js");
       const prefs = loadEffectiveSDDPreferences();
-      process.env.GSD_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
+      process.env.SDD_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
     } catch { /* non-fatal */ }
     if (isFirstSession) {
       isFirstSession = false;
     } else {
       try {
-        const gsdBinPath = process.env.GSD_BIN_PATH;
+        const gsdBinPath = process.env.SDD_BIN_PATH;
         if (gsdBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
             join(dirname(gsdBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string }) => void };
-          printWelcomeScreen({ version: process.env.GSD_VERSION || "0.0.0" });
+          printWelcomeScreen({ version: process.env.SDD_VERSION || "0.0.0" });
         }
       } catch { /* non-fatal */ }
     }
@@ -133,7 +133,7 @@ export function registerHooks(pi: ExtensionAPI): void {
       completedWork: `Task ${state.activeTask.id} (${state.activeTask.title}) was in progress when compaction occurred.`,
       remainingWork: "Check the task plan for remaining steps.",
       decisions: "Check task summary files for prior decisions.",
-      context: "Session was auto-compacted by Pi. Resume with /gsd.",
+      context: "Session was auto-compacted by Pi. Resume with /sdd.",
       nextAction: `Resume task ${state.activeTask.id}: ${state.activeTask.title}.`,
     }));
   });

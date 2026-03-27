@@ -1,9 +1,9 @@
 /**
- * GSD Repo Identity — external state directory primitives.
+ * SDD Repo Identity — external state directory primitives.
  *
  * Computes a stable per-repo identity hash, resolves the external
  * `~/.sdd/projects/<hash>/` state directory, and manages the
- * `<project>/.gsd → external` symlink.
+ * `<project>/.sdd → external` symlink.
  */
 
 import { createHash } from "node:crypto";
@@ -12,7 +12,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSy
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 // ─── Repo Metadata ───────────────────────────────────────────────────────────
 
@@ -104,16 +104,16 @@ export function readRepoMeta(externalPath: string): RepoMeta | null {
  * Returns true when ALL of:
  *   1. basePath is inside a git repo (git rev-parse succeeds)
  *   2. The resolved git root is a proper ancestor of basePath
- *   3. There is no *project* `.gsd` directory at the git root or any
+ *   3. There is no *project* `.sdd` directory at the git root or any
  *      intermediate ancestor (the parent project has not been
- *      initialised with GSD)
+ *      initialised with SDD)
  *
  * When true, the caller should run `git init` at basePath so that
  * `repoIdentity()` produces a hash unique to this directory, preventing
  * cross-project state leaks (#1639).
  *
- * When the git root already has a project `.gsd`, the directory is a
- * legitimate subdirectory of an existing GSD project — `cd src/ && /gsd`
+ * When the git root already has a project `.sdd`, the directory is a
+ * legitimate subdirectory of an existing SDD project — `cd src/ && /sdd`
  * should still load the parent project's milestones.
  */
 export function isInheritedRepo(basePath: string): boolean {
@@ -123,17 +123,17 @@ export function isInheritedRepo(basePath: string): boolean {
     const normalizedRoot = canonicalizeExistingPath(root);
     if (normalizedBase === normalizedRoot) return false; // basePath IS the root
 
-    // The git root is a proper ancestor. Check whether it already has .gsd
-    // (i.e. the parent project was initialised with GSD).
-    if (isProjectGsd(join(root, ".gsd"))) return false;
+    // The git root is a proper ancestor. Check whether it already has .sdd
+    // (i.e. the parent project was initialised with SDD).
+    if (isProjectGsd(join(root, ".sdd"))) return false;
 
-    // Walk up from basePath's parent to the git root checking for .gsd.
+    // Walk up from basePath's parent to the git root checking for .sdd.
     // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
-    // .gsd at basePath means GSD state is set up for THIS project, which
+    // .sdd at basePath means SDD state is set up for THIS project, which
     // says nothing about whether the git repo is inherited from an ancestor.
     let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
-      if (isProjectGsd(join(dir, ".gsd"))) return false;
+      if (isProjectGsd(join(dir, ".sdd"))) return false;
       dir = dirname(dir);
     }
 
@@ -144,15 +144,15 @@ export function isInheritedRepo(basePath: string): boolean {
 }
 
 /**
- * Distinguish a *project* `.gsd` from the global `~/.gsd` state directory.
+ * Distinguish a *project* `.sdd` from the global `~/.sdd` state directory.
  *
- * A project `.gsd` is either:
+ * A project `.sdd` is either:
  *   - A symlink to an external state directory (normal post-migration layout)
- *   - A legacy real directory that is NOT the global GSD home
+ *   - A legacy real directory that is NOT the global SDD home
  *
  * When the user's home directory is itself a git repo (e.g. dotfile managers),
- * `~/.gsd` exists but is the global state directory — not a project `.gsd`.
- * Treating it as a project `.gsd` would cause isInheritedRepo() to wrongly
+ * `~/.sdd` exists but is the global state directory — not a project `.sdd`.
+ * Treating it as a project `.sdd` would cause isInheritedRepo() to wrongly
  * conclude that subdirectories are part of the home "project" (#2393).
  */
 function isProjectGsd(gsdPath: string): boolean {
@@ -161,21 +161,21 @@ function isProjectGsd(gsdPath: string): boolean {
   try {
     const stat = lstatSync(gsdPath);
 
-    // Symlinks are always project .gsd (created by ensureGsdSymlink).
+    // Symlinks are always project .sdd (created by ensureGsdSymlink).
     if (stat.isSymbolicLink()) return true;
 
-    // For real directories, check that this isn't the global GSD home.
-    // Recompute gsdHome dynamically so env overrides (GSD_HOME) are
+    // For real directories, check that this isn't the global SDD home.
+    // Recompute gsdHome dynamically so env overrides (SDD_HOME) are
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
-      const currentGsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+      const currentGsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
       const normalizedGsdPath = canonicalizeExistingPath(gsdPath);
       const normalizedGsdHome = canonicalizeExistingPath(currentGsdHome);
       if (normalizedGsdPath === normalizedGsdHome) return false;
       return true;
     }
   } catch {
-    // lstat failed — treat as no .gsd present
+    // lstat failed — treat as no .sdd present
   }
 
   return false;
@@ -261,7 +261,7 @@ function resolveGitRoot(basePath: string): string {
 }
 
 /**
- * Validate a GSD_PROJECT_ID value.
+ * Validate a SDD_PROJECT_ID value.
  *
  * Must contain only alphanumeric characters, hyphens, and underscores.
  * Call this once at startup so the user gets immediate feedback on bad values.
@@ -273,7 +273,7 @@ export function validateProjectId(id: string): boolean {
 /**
  * Compute a stable identity for a repository.
  *
- * If `GSD_PROJECT_ID` is set, returns it directly (validation is expected
+ * If `SDD_PROJECT_ID` is set, returns it directly (validation is expected
  * to have already happened at startup via `validateProjectId`).
  *
  * Otherwise returns SHA-256 of `${remoteUrl}\n${resolvedRoot}`, truncated
@@ -281,7 +281,7 @@ export function validateProjectId(id: string): boolean {
  * regardless of which worktree the caller is inside.
  */
 export function repoIdentity(basePath: string): string {
-  const projectId = process.env.GSD_PROJECT_ID;
+  const projectId = process.env.SDD_PROJECT_ID;
   if (projectId) {
     return projectId;
   }
@@ -294,48 +294,48 @@ export function repoIdentity(basePath: string): string {
 // ─── External State Directory ───────────────────────────────────────────────
 
 /**
- * Compute the external GSD state directory for a repository.
+ * Compute the external SDD state directory for a repository.
  *
- * Returns `$GSD_STATE_DIR/projects/<hash>` if `GSD_STATE_DIR` is set,
+ * Returns `$SDD_STATE_DIR/projects/<hash>` if `SDD_STATE_DIR` is set,
  * otherwise `~/.sdd/projects/<hash>`.
  */
 export function externalGsdRoot(basePath: string): string {
-  const base = process.env.GSD_STATE_DIR || gsdHome;
+  const base = process.env.SDD_STATE_DIR || gsdHome;
   return join(base, "projects", repoIdentity(basePath));
 }
 
 /**
  * Resolve the root directory that stores project-scoped external state.
- * Honors GSD_STATE_DIR override before falling back to GSD_HOME.
+ * Honors SDD_STATE_DIR override before falling back to SDD_HOME.
  */
 export function externalProjectsRoot(): string {
-  const base = process.env.GSD_STATE_DIR || gsdHome;
+  const base = process.env.SDD_STATE_DIR || gsdHome;
   return join(base, "projects");
 }
 
 // ─── Numbered Variant Cleanup ────────────────────────────────────────────────
 
 /**
- * macOS collision pattern: `.gsd 2`, `.gsd 3`, `.gsd 4`, etc.
+ * macOS collision pattern: `.sdd 2`, `.sdd 3`, `.sdd 4`, etc.
  *
- * When `symlinkSync` (or Finder) tries to create `.gsd` but a real directory
+ * When `symlinkSync` (or Finder) tries to create `.sdd` but a real directory
  * already exists at that path, macOS APFS silently renames the new entry to
- * `.gsd 2`, then `.gsd 3`, and so on. These numbered variants confuse SDD
- * because the canonical `.gsd` path no longer resolves to the external state
+ * `.sdd 2`, then `.sdd 3`, and so on. These numbered variants confuse SDD
+ * because the canonical `.sdd` path no longer resolves to the external state
  * directory, making tracked planning files appear deleted.
  *
- * This helper scans the project root for entries matching `.gsd <digits>` and
+ * This helper scans the project root for entries matching `.sdd <digits>` and
  * removes them. It is called early in `ensureGsdSymlink()` so that the
- * canonical `.gsd` path is always the one in use.
+ * canonical `.sdd` path is always the one in use.
  */
-const GSD_NUMBERED_VARIANT_RE = /^\.gsd \d+$/;
+const SDD_NUMBERED_VARIANT_RE = /^\.sdd \d+$/;
 
 export function cleanNumberedGsdVariants(projectPath: string): string[] {
   const removed: string[] = [];
   try {
     const entries = readdirSync(projectPath);
     for (const entry of entries) {
-      if (GSD_NUMBERED_VARIANT_RE.test(entry)) {
+      if (SDD_NUMBERED_VARIANT_RE.test(entry)) {
         const fullPath = join(projectPath, entry);
         try {
           rmSync(fullPath, { recursive: true, force: true });
@@ -354,23 +354,23 @@ export function cleanNumberedGsdVariants(projectPath: string): string[] {
 // ─── Symlink Management ─────────────────────────────────────────────────────
 
 /**
- * Ensure the `<project>/.gsd` symlink points to the external state directory.
+ * Ensure the `<project>/.sdd` symlink points to the external state directory.
  *
- * 1. Clean up any macOS numbered collision variants (`.gsd 2`, `.gsd 3`, etc.)
+ * 1. Clean up any macOS numbered collision variants (`.sdd 2`, `.sdd 3`, etc.)
  * 2. mkdir -p the external dir
- * 3. If `<project>/.gsd` doesn't exist → create symlink
- * 4. If `<project>/.gsd` is already the correct symlink → no-op
- * 5. If `<project>/.gsd` is a real directory → return as-is (migration handles later)
+ * 3. If `<project>/.sdd` doesn't exist → create symlink
+ * 4. If `<project>/.sdd` is already the correct symlink → no-op
+ * 5. If `<project>/.sdd` is a real directory → return as-is (migration handles later)
  *
  * Returns the resolved external path.
  */
 export function ensureGsdSymlink(projectPath: string): string {
   const externalPath = externalGsdRoot(projectPath);
-  const localGsd = join(projectPath, ".gsd");
+  const localGsd = join(projectPath, ".sdd");
   const inWorktree = isInsideWorktree(projectPath);
 
-  // Guard: Never create a symlink at ~/.gsd — that's the user-level GSD home,
-  // not a project .gsd. This can happen if resolveProjectRoot() or
+  // Guard: Never create a symlink at ~/.sdd — that's the user-level SDD home,
+  // not a project .sdd. This can happen if resolveProjectRoot() or
   // escapeStaleWorktree() returned ~ as the project root (#1676).
   const localGsdNormalized = localGsd.replaceAll("\\", "/");
   const gsdHomePath = gsdHome.replaceAll("\\", "/");
@@ -379,17 +379,17 @@ export function ensureGsdSymlink(projectPath: string): string {
   }
 
   // Guard: If projectPath is a plain subdirectory (not a worktree) of a git
-  // repo that already has a .gsd at the git root, do not create a duplicate
-  // symlink in the subdirectory — that causes `.gsd 2` collision variants on
+  // repo that already has a .sdd at the git root, do not create a duplicate
+  // symlink in the subdirectory — that causes `.sdd 2` collision variants on
   // macOS (#2380). Worktrees are excluded because they legitimately need their
-  // own .gsd symlink pointing at the shared external state dir.
+  // own .sdd symlink pointing at the shared external state dir.
   if (!inWorktree) {
     try {
       const gitRoot = resolveGitRoot(projectPath);
       const normalizedProject = canonicalizeExistingPath(projectPath);
       const normalizedRoot = canonicalizeExistingPath(gitRoot);
       if (normalizedProject !== normalizedRoot) {
-        const rootGsd = join(gitRoot, ".gsd");
+        const rootGsd = join(gitRoot, ".sdd");
         if (existsSync(rootGsd)) {
           try {
             const rootStat = lstatSync(rootGsd);
@@ -397,7 +397,7 @@ export function ensureGsdSymlink(projectPath: string): string {
               return rootStat.isSymbolicLink() ? realpathSync(rootGsd) : rootGsd;
             }
           } catch {
-            // Fall through to normal logic if we can't stat root .gsd
+            // Fall through to normal logic if we can't stat root .sdd
           }
         }
       }
@@ -406,7 +406,7 @@ export function ensureGsdSymlink(projectPath: string): string {
     }
   }
 
-  // Clean up macOS numbered collision variants (.gsd 2, .gsd 3, etc.) before
+  // Clean up macOS numbered collision variants (.sdd 2, .sdd 3, etc.) before
   // any existence checks — otherwise they accumulate and confuse state (#2205).
   cleanNumberedGsdVariants(projectPath);
 
@@ -449,7 +449,7 @@ export function ensureGsdSymlink(projectPath: string): string {
     if (stat.isDirectory()) {
       // Real directory in the main repo — migration will handle this later.
       // In worktrees, keep the directory in place and let syncSddStateToWorktree
-      // refresh its contents. Replacing a git-tracked .gsd directory with a
+      // refresh its contents. Replacing a git-tracked .sdd directory with a
       // symlink makes git think tracked planning files were deleted.
       return localGsd;
     }

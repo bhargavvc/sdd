@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 export default function auditCommand(pi: ExtensionAPI) {
 	pi.registerCommand("audit", {
@@ -72,7 +72,7 @@ ${goal}
 <!-- What's missing, incomplete, or problematic relative to this goal? Be specific: file paths, patterns, missing abstractions. -->
 
 ## Next Steps
-<!-- Concrete, prioritised actions. These should be directly usable as input to /gsd-roadmap. -->
+<!-- Concrete, prioritised actions. These should be directly usable as input to /sdd-roadmap. -->
 
 ---
 

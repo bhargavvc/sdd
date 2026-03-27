@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { deriveState } from "../state.ts";
-import { runGSDDoctor } from "../doctor.ts";
+import { runSDDDoctor } from "../doctor.ts";
 
 describe('requirements', () => {
   test('requirement counts parser', () => {
@@ -41,13 +41,13 @@ describe('requirements', () => {
     assert.deepStrictEqual(counts.blocked, 1, "counts blocked statuses");
   });
 
-  const base = mkdtempSync(join(tmpdir(), "gsd-requirements-test-"));
-  const gsd = join(base, ".gsd");
-  const mDir = join(gsd, "milestones", "M001");
+  const base = mkdtempSync(join(tmpdir(), "sdd-requirements-test-"));
+  const sdd = join(base, ".sdd");
+  const mDir = join(sdd, "milestones", "M001");
   const sDir = join(mDir, "slices", "S01");
   const tDir = join(sDir, "tasks");
   mkdirSync(tDir, { recursive: true });
-  writeFileSync(join(gsd, "REQUIREMENTS.md"), [
+  writeFileSync(join(sdd, "REQUIREMENTS.md"), [
     "# Requirements",
     "## Active",
     "### R001 — Missing owner",
@@ -91,7 +91,7 @@ describe('requirements', () => {
   });
 
   test('doctor flags orphaned active requirement', async () => {
-    const report = await runGSDDoctor(base);
+    const report = await runSDDDoctor(base);
     assert.ok(report.issues.some(issue => issue.code === "active_requirement_missing_owner"), "doctor flags missing owner");
   });
 

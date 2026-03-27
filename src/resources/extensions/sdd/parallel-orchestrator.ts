@@ -1,9 +1,9 @@
 /**
- * GSD Parallel Orchestrator — Core engine for parallel milestone orchestration.
+ * SDD Parallel Orchestrator — Core engine for parallel milestone orchestration.
  *
  * Manages worker lifecycle, budget tracking, and coordination. Workers are
  * separate processes spawned via child_process, each running in its own git
- * worktree with GSD_MILESTONE_LOCK env var set. The coordinator monitors
+ * worktree with SDD_MILESTONE_LOCK env var set. The coordinator monitors
  * workers via session status files (see session-status-io.ts).
  */
 
@@ -357,7 +357,7 @@ export async function startParallel(
   prefs: SDDPreferences | undefined,
 ): Promise<{ started: string[]; errors: Array<{ mid: string; error: string }> }> {
   // Prevent workers from spawning nested parallel sessions
-  if (process.env.GSD_PARALLEL_WORKER) {
+  if (process.env.SDD_PARALLEL_WORKER) {
     return { started: [], errors: [{ mid: "all", error: "Cannot start parallel from within a parallel worker" }] };
   }
 
@@ -514,8 +514,8 @@ function createMilestoneWorktree(basePath: string, milestoneId: string): string 
 
 /**
  * Spawn a worker process for a milestone.
- * The worker runs `gsd --print "/gsd auto"` in the milestone's worktree
- * with GSD_MILESTONE_LOCK set to isolate state derivation.
+ * The worker runs `sdd --print "/sdd auto"` in the milestone's worktree
+ * with SDD_MILESTONE_LOCK set to isolate state derivation.
  */
 export function spawnWorker(
   basePath: string,
@@ -526,24 +526,24 @@ export function spawnWorker(
   if (!worker) return false;
   if (worker.process) return true; // already spawned
 
-  // Resolve the GSD CLI binary path
+  // Resolve the SDD CLI binary path
   const binPath = resolveGsdBin();
   if (!binPath) return false;
 
   let child: ChildProcess;
   try {
-    child = spawn(process.execPath, [binPath, "--mode", "json", "--print", "/gsd auto"], {
+    child = spawn(process.execPath, [binPath, "--mode", "json", "--print", "/sdd auto"], {
       cwd: worker.worktreePath,
       env: {
         ...process.env,
-        GSD_MILESTONE_LOCK: milestoneId,
+        SDD_MILESTONE_LOCK: milestoneId,
         // Pass the real project root so workers don't need to re-derive it.
         // Without this, process.cwd() resolves symlinks and the worktree
-        // path heuristic can match the user-level ~/.gsd instead of the
-        // project .gsd, causing writes to ~ and corrupting user config.
-        GSD_PROJECT_ROOT: basePath,
+        // path heuristic can match the user-level ~/.sdd instead of the
+        // project .sdd, causing writes to ~ and corrupting user config.
+        SDD_PROJECT_ROOT: basePath,
         // Prevent workers from spawning their own parallel sessions
-        GSD_PARALLEL_WORKER: "1",
+        SDD_PARALLEL_WORKER: "1",
       },
       stdio: ["ignore", "pipe", "pipe"],
       detached: false,
@@ -661,14 +661,14 @@ export function spawnWorker(
 }
 
 /**
- * Resolve the GSD CLI binary path.
- * Uses GSD_BIN_PATH env var (set by loader.ts) or falls back to
+ * Resolve the SDD CLI binary path.
+ * Uses SDD_BIN_PATH env var (set by loader.ts) or falls back to
  * finding the binary relative to the current module.
  */
 function resolveGsdBin(): string | null {
-  // GSD_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
-  if (process.env.GSD_BIN_PATH && existsSync(process.env.GSD_BIN_PATH)) {
-    return process.env.GSD_BIN_PATH;
+  // SDD_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
+  if (process.env.SDD_BIN_PATH && existsSync(process.env.SDD_BIN_PATH)) {
+    return process.env.SDD_BIN_PATH;
   }
 
   // Fallback: try to find loader.js relative to this file
@@ -749,7 +749,7 @@ function processWorkerLine(basePath: string, milestoneId: string, line: string):
 
   // tool_execution_start can track current unit
   if (type === "extension_ui_request" && event.method === "notify") {
-    // GSD auto-mode sends notifications about current unit
+    // SDD auto-mode sends notifications about current unit
     const worker = state.workers.get(milestoneId);
     if (worker) {
       writeSessionStatus(basePath, {

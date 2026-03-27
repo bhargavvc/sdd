@@ -1,4 +1,4 @@
-// GSD Extension — Projection Renderers (DB -> Markdown)
+// SDD Extension — Projection Renderers (DB -> Markdown)
 // Renders PLAN.md, ROADMAP.md, SUMMARY.md, and STATE.md from database rows.
 // Projections are read-only views of engine state (Layer 3 of the architecture).
 
@@ -9,8 +9,8 @@ import {
   getMilestone,
   getMilestoneSlices,
   getSliceTasks,
-} from "./gsd-db.js";
-import type { MilestoneRow, SliceRow, TaskRow } from "./gsd-db.js";
+} from "./sdd-db.js";
+import type { MilestoneRow, SliceRow, TaskRow } from "./sdd-db.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { join } from "node:path";
 import { mkdirSync, existsSync } from "node:fs";
@@ -80,7 +80,7 @@ export function renderPlanProjection(basePath: string, milestoneId: string, slic
   const taskRows = getSliceTasks(milestoneId, sliceId);
 
   const content = renderPlanContent(sliceRow, taskRows);
-  const dir = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId);
+  const dir = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId);
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, `${sliceId}-PLAN.md`), content);
 }
@@ -133,7 +133,7 @@ export function renderRoadmapProjection(basePath: string, milestoneId: string): 
   const sliceRows = getMilestoneSlices(milestoneId);
 
   const content = renderRoadmapContent(milestoneRow, sliceRows);
-  const dir = join(basePath, ".gsd", "milestones", milestoneId);
+  const dir = join(basePath, ".sdd", "milestones", milestoneId);
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, `${milestoneId}-ROADMAP.md`), content);
 }
@@ -219,7 +219,7 @@ export function renderSummaryProjection(basePath: string, milestoneId: string, s
   if (!taskRow) return;
 
   const content = renderSummaryContent(taskRow, sliceId, milestoneId);
-  const dir = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId, "tasks");
+  const dir = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId, "tasks");
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, `${taskId}-SUMMARY.md`), content);
 }
@@ -233,7 +233,7 @@ export function renderSummaryProjection(basePath: string, milestoneId: string, s
  */
 export function renderStateContent(state: SDDState): string {
   const lines: string[] = [];
-  lines.push("# GSD State", "");
+  lines.push("# SDD State", "");
 
   const activeMilestone = state.activeMilestone
     ? `${state.activeMilestone.id}: ${state.activeMilestone.title}`
@@ -293,7 +293,7 @@ export async function renderStateProjection(basePath: string): Promise<void> {
     try { adapter.prepare("SELECT 1").get(); } catch { return; }
     const state = await deriveState(basePath);
     const content = renderStateContent(state);
-    const dir = join(basePath, ".gsd");
+    const dir = join(basePath, ".sdd");
     mkdirSync(dir, { recursive: true });
     atomicWriteSync(join(dir, "STATE.md"), content);
   } catch (err) {
@@ -364,17 +364,17 @@ export function regenerateIfMissing(
 
   switch (fileType) {
     case "PLAN":
-      filePath = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId, `${sliceId}-PLAN.md`);
+      filePath = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId, `${sliceId}-PLAN.md`);
       break;
     case "ROADMAP":
-      filePath = join(basePath, ".gsd", "milestones", milestoneId, `${milestoneId}-ROADMAP.md`);
+      filePath = join(basePath, ".sdd", "milestones", milestoneId, `${milestoneId}-ROADMAP.md`);
       break;
     case "SUMMARY":
       // For SUMMARY, we regenerate all task summaries in the slice
-      filePath = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId, "tasks");
+      filePath = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId, "tasks");
       break;
     case "STATE":
-      filePath = join(basePath, ".gsd", "STATE.md");
+      filePath = join(basePath, ".sdd", "STATE.md");
       break;
   }
 
@@ -384,7 +384,7 @@ export function regenerateIfMissing(
     const doneTasks = taskRows.filter(t => t.status === "done" || t.status === "complete");
     let regenerated = 0;
     for (const task of doneTasks) {
-      const summaryPath = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId, "tasks", `${task.id}-SUMMARY.md`);
+      const summaryPath = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId, "tasks", `${task.id}-SUMMARY.md`);
       if (!existsSync(summaryPath)) {
         try {
           renderSummaryProjection(basePath, milestoneId, sliceId, task.id);

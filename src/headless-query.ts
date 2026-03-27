@@ -1,5 +1,5 @@
 /**
- * Headless Query — `gsd headless query`
+ * Headless Query — `sdd headless query`
  *
  * Single read-only command that returns the full project snapshot as JSON
  * to stdout, without spawning an LLM session. Instant (~50ms).
@@ -21,7 +21,7 @@ import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
 const gsdExtensionPath = (...segments: string[]) =>
-  resolveBundledSourceResource(import.meta.url, 'extensions', 'gsd', ...segments)
+  resolveBundledSourceResource(import.meta.url, 'extensions', 'sdd', ...segments)
 
 async function loadExtensionModules() {
   const stateModule = await jiti.import(gsdExtensionPath('state.ts'), {}) as any

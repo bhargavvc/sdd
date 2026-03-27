@@ -8,7 +8,7 @@ import {
   upsertTaskPlanning,
   insertReplanHistory,
   deleteTask,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { invalidateStateCache } from "../state.js";
 import { isClosedStatus } from "../status-guards.js";
 import { isNonEmptyString } from "../validation.js";
@@ -227,7 +227,7 @@ export async function handleReplanSlice(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: replan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `sdd: replan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

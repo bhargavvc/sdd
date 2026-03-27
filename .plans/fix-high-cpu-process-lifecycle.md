@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-Long-running `/gsd auto` sessions exhibit high CPU usage due to multiple compounding issues:
+Long-running `/sdd auto` sessions exhibit high CPU usage due to multiple compounding issues:
 process leaks, unguarded async intervals, synchronous git process spawning on hot paths,
 and unbounded file I/O. These issues compound over time, making multi-hour sessions
 progressively slower.

@@ -1,7 +1,7 @@
 import { clearParseCache } from "../files.js";
 import { isClosedStatus } from "../status-guards.js";
 import { isNonEmptyString, validateStringArray } from "../validation.js";
-import { transaction, getSlice, getTask, insertTask, upsertTaskPlanning } from "../gsd-db.js";
+import { transaction, getSlice, getTask, insertTask, upsertTaskPlanning } from "../sdd-db.js";
 import { invalidateStateCache } from "../state.js";
 import { renderTaskPlanFromDb } from "../markdown-renderer.js";
 import { renderAllProjections } from "../workflow-projections.js";
@@ -84,7 +84,7 @@ export async function handlePlanTask(
 
       const existingTask = getTask(params.milestoneId, params.sliceId, params.taskId);
       if (existingTask && isClosedStatus(existingTask.status)) {
-        guardError = `cannot re-plan task ${params.taskId}: it is already complete — use gsd_task_reopen first`;
+        guardError = `cannot re-plan task ${params.taskId}: it is already complete — use sdd_task_reopen first`;
         return;
       }
 
@@ -136,7 +136,7 @@ export async function handlePlanTask(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: plan-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `sdd: plan-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

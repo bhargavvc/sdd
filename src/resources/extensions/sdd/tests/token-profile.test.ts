@@ -6,7 +6,7 @@
  * table guard clauses (source-level structural verification).
  *
  * Uses source-level checks (readFileSync + string matching) to avoid
- * @gsd/pi-coding-agent import resolution issues in dev environments.
+ * @sdd/pi-coding-agent import resolution issues in dev environments.
  */
 
 import test from "node:test";
@@ -74,12 +74,12 @@ test("preferences: SDDPreferences includes phases field", () => {
   );
 });
 
-test("preferences: GSDModelConfig includes subagent field", () => {
+test("preferences: SDDModelConfig includes subagent field", () => {
   // Check both v1 and v2 configs
-  const v1Match = preferencesSrc.match(/interface GSDModelConfig\s*\{[^}]*subagent/);
-  assert.ok(v1Match, "GSDModelConfig should have subagent field");
-  const v2Match = preferencesSrc.match(/interface GSDModelConfigV2\s*\{[^}]*subagent/);
-  assert.ok(v2Match, "GSDModelConfigV2 should have subagent field");
+  const v1Match = preferencesSrc.match(/interface SDDModelConfig\s*\{[^}]*subagent/);
+  assert.ok(v1Match, "SDDModelConfig should have subagent field");
+  const v2Match = preferencesSrc.match(/interface SDDModelConfigV2\s*\{[^}]*subagent/);
+  assert.ok(v2Match, "SDDModelConfigV2 should have subagent field");
 });
 
 test("preferences: KNOWN_PREFERENCE_KEYS includes token_profile and phases", () => {

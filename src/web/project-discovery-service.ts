@@ -34,7 +34,7 @@ const EXCLUDED_DIRS = new Set(["node_modules", ".git"]);
  */
 export function readProjectProgress(projectPath: string): ProjectProgressInfo | null {
   try {
-    const content = readFileSync(join(projectPath, ".gsd", "STATE.md"), "utf-8");
+    const content = readFileSync(join(projectPath, ".sdd", "STATE.md"), "utf-8");
     const lines = content.split("\n");
 
     let activeMilestone: string | null = null;
@@ -86,7 +86,7 @@ export function discoverProjects(devRootPath: string, includeProgress?: boolean)
     // ── Check if the root itself is a project/monorepo ──────────────
     // If the devRoot has a .git repo AND looks like a monorepo (pnpm-workspace,
     // lerna, workspaces, etc.) or looks like a standalone project root (has
-    // .gsd, or is a recognizable project), return it as a single entry.
+    // .sdd, or is a recognizable project), return it as a single entry.
     const rootDetection = detectProjectKind(devRootPath);
     if (rootDetection.signals.isMonorepo) {
       const stat = statSync(devRootPath);

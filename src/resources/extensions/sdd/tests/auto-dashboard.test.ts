@@ -13,8 +13,8 @@ import {
   extractUatSliceId,
 } from "../auto-dashboard.ts";
 
-const autoSource = readFileSync(join(process.cwd(), "src", "resources", "extensions", "gsd", "auto.ts"), "utf-8");
-const dashboardSource = readFileSync(join(process.cwd(), "src", "resources", "extensions", "gsd", "auto-dashboard.ts"), "utf-8");
+const autoSource = readFileSync(join(process.cwd(), "src", "resources", "extensions", "sdd", "auto.ts"), "utf-8");
+const dashboardSource = readFileSync(join(process.cwd(), "src", "resources", "extensions", "sdd", "auto-dashboard.ts"), "utf-8");
 
 // ─── unitVerb ─────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ import {
 	truncateHead,
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
-} from "@gsd/pi-coding-agent";
+} from "@sdd/pi-coding-agent";
 import type { BgProcess, OutputDigest, OutputLine, GetOutputOptions } from "./types.js";
 import {
 	ERROR_PATTERNS,

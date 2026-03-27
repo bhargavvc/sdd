@@ -8,12 +8,12 @@ artifact_dir: .sdd/
 </template_meta>
 
 <purpose>
-The complete GSD workflow with full ceremony: roadmap, milestones, slices, tasks,
+The complete SDD workflow with full ceremony: roadmap, milestones, slices, tasks,
 research, planning, execution, and verification. Use for greenfield projects or
 major features that need the full planning apparatus.
 
-This template wraps the existing GSD workflow for registry completeness.
-When selected, it routes to the standard /gsd init → /gsd auto pipeline.
+This template wraps the existing SDD workflow for registry completeness.
+When selected, it routes to the standard /sdd init → /sdd auto pipeline.
 </purpose>
 
 <phases>
@@ -28,14 +28,14 @@ When selected, it routes to the standard /gsd init → /gsd auto pipeline.
 
 ## Routing to Standard SDD
 
-This template is a convenience entry point. When selected via `/gsd start full-project`,
-it should route to the standard GSD workflow:
+This template is a convenience entry point. When selected via `/sdd start full-project`,
+it should route to the standard SDD workflow:
 
-1. If `.sdd/` doesn't exist: Run `/gsd init` to bootstrap the project
-2. If `.sdd/` exists but no milestones: Start the discuss phase via `/gsd discuss`
-3. If milestones exist: Resume via `/gsd auto` or `/gsd next`
+1. If `.sdd/` doesn't exist: Run `/sdd init` to bootstrap the project
+2. If `.sdd/` exists but no milestones: Start the discuss phase via `/sdd discuss`
+3. If milestones exist: Resume via `/sdd auto` or `/sdd next`
 
-The full GSD workflow protocol is defined in `GSD-WORKFLOW.md` and handles all
+The full SDD workflow protocol is defined in `SDD-WORKFLOW.md` and handles all
 phases, state tracking, and agent orchestration.
 
 </process>

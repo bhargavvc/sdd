@@ -11,7 +11,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, isDbAvailable, _resetProvider } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, isDbAvailable, _resetProvider } from '../sdd-db.ts';
 import { migrateFromMarkdown } from '../md-importer.ts';
 import {
   queryDecisions,
@@ -48,8 +48,8 @@ function generateDecisionsMarkdown(count: number): string {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('integration-edge: empty project', () => {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-int-edge-empty-'));
-  const gsdDir = join(base, '.gsd');
+  const base = mkdtempSync(join(tmpdir(), 'sdd-int-edge-empty-'));
+  const gsdDir = join(base, '.sdd');
   mkdirSync(gsdDir, { recursive: true });
 
   const dbPath = join(gsdDir, 'test-edge-empty.db');
@@ -105,8 +105,8 @@ test('integration-edge: empty project', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('integration-edge: partial migration', () => {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-int-edge-partial-'));
-  const gsdDir = join(base, '.gsd');
+  const base = mkdtempSync(join(tmpdir(), 'sdd-int-edge-partial-'));
+  const gsdDir = join(base, '.sdd');
   mkdirSync(gsdDir, { recursive: true });
 
   // Write DECISIONS.md but NOT REQUIREMENTS.md
@@ -159,8 +159,8 @@ test('integration-edge: partial migration', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('integration-edge: fallback mode', () => {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-int-edge-fallback-'));
-  const gsdDir = join(base, '.gsd');
+  const base = mkdtempSync(join(tmpdir(), 'sdd-int-edge-fallback-'));
+  const gsdDir = join(base, '.sdd');
   mkdirSync(gsdDir, { recursive: true });
 
   const decisionsMarkdown = generateDecisionsMarkdown(4);

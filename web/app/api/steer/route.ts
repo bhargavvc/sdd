@@ -11,7 +11,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const projectCwd = requireProjectCwd(request);
     const config = resolveBridgeRuntimeConfig(undefined, projectCwd)
-    const overridesPath = join(config.projectCwd, ".gsd", "OVERRIDES.md")
+    const overridesPath = join(config.projectCwd, ".sdd", "OVERRIDES.md")
 
     let overridesContent: string | null = null
     if (existsSync(overridesPath)) {

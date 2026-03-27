@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { runWorktreePostCreateHook } from "../auto-worktree.ts";
 
 function makeTmpDir(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-wt-hook-test-"));
+  return mkdtempSync(join(tmpdir(), "sdd-wt-hook-test-"));
 }
 
 const isWin = process.platform === "win32";
@@ -71,7 +71,7 @@ test("executes hook script with correct SOURCE_DIR and WORKTREE_DIR env vars", (
   const src = makeTmpDir();
   const wt = makeTmpDir();
   try {
-    const hooksDir = join(src, ".gsd", "hooks");
+    const hooksDir = join(src, ".sdd", "hooks");
     mkdirSync(hooksDir, { recursive: true });
     const hookFile = hookPath(join(hooksDir, "post-create"));
     const code = [
@@ -101,7 +101,7 @@ test("returns error message when hook script fails", () => {
   const src = makeTmpDir();
   const wt = makeTmpDir();
   try {
-    const hooksDir = join(src, ".gsd", "hooks");
+    const hooksDir = join(src, ".sdd", "hooks");
     mkdirSync(hooksDir, { recursive: true });
     const hookFile = hookPath(join(hooksDir, "failing-hook"));
     writeNodeHookScript(hookFile, `process.exit(1);`);

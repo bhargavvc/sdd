@@ -1,7 +1,7 @@
 /**
- * GSD Extension — Shared Constants
+ * SDD Extension — Shared Constants
  *
- * Centralized timeout and cache-size constants used across the GSD extension.
+ * Centralized timeout and cache-size constants used across the SDD extension.
  */
 
 // ─── Timeouts ─────────────────────────────────────────────────────────────────

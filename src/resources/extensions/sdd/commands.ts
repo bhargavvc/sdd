@@ -1,9 +1,9 @@
-export { registerGSDCommand } from "./commands/index.js";
+export { registerSDDCommand } from "./commands/index.js";
 
-export async function handleGSDCommand(
-  ...args: Parameters<typeof import("./commands/dispatcher.js").handleGSDCommand>
+export async function handleSDDCommand(
+  ...args: Parameters<typeof import("./commands/dispatcher.js").handleSDDCommand>
 ) {
-  const { handleGSDCommand: dispatch } = await import("./commands/dispatcher.js");
+  const { handleSDDCommand: dispatch } = await import("./commands/dispatcher.js");
   return dispatch(...args);
 }
 

@@ -1,7 +1,7 @@
 // Agent activeInferenceModel regression tests
 // Verifies that activeInferenceModel is set/cleared correctly in _runLoop,
 // and that the footer reads activeInferenceModel instead of state.model.
-// Regression test for https://github.com/gsd-build/gsd-2/issues/1844 Bug 2
+// Regression test for https://github.com/sdd-build/sdd-2/issues/1844 Bug 2
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";

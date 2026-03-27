@@ -9,7 +9,7 @@ import {
   upsertSlicePlanning,
   upsertTaskPlanning,
   insertGateRow,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import type { GateId } from "../types.js";
 import { invalidateStateCache } from "../state.js";
 import { renderPlanFromDb } from "../markdown-renderer.js";
@@ -156,7 +156,7 @@ export async function handlePlanSlice(
         return;
       }
       if (isClosedStatus(parentSlice.status)) {
-        guardError = `cannot re-plan slice ${params.sliceId}: it is already complete — use gsd_slice_reopen first`;
+        guardError = `cannot re-plan slice ${params.sliceId}: it is already complete — use sdd_slice_reopen first`;
         return;
       }
 
@@ -230,7 +230,7 @@ export async function handlePlanSlice(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: plan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `sdd: plan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 
@@ -242,7 +242,7 @@ export async function handlePlanSlice(
     };
   } catch (renderErr) {
     process.stderr.write(
-      `gsd-db: plan_slice — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
+      `sdd-db: plan_slice — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
     );
     invalidateStateCache();
     return { error: `render failed: ${(renderErr as Error).message}` };

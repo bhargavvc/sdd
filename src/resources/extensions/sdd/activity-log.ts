@@ -1,5 +1,5 @@
 /**
- * GSD Activity Log — Save raw chat sessions to .sdd/activity/
+ * SDD Activity Log — Save raw chat sessions to .sdd/activity/
  *
  * Before each context wipe in auto-mode, dumps the full session
  * as JSONL. No formatting, no truncation, no information loss.
@@ -11,10 +11,10 @@
 import { writeFileSync, writeSync, mkdirSync, readdirSync, unlinkSync, statSync, openSync, closeSync, constants } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { GSDError, GSD_IO_ERROR } from "./errors.js";
+import { SDDError, SDD_IO_ERROR } from "./errors.js";
 
 const SEQ_PREFIX_RE = /^(\d+)-/;
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { gsdRoot } from "./paths.js";
 
 interface ActivityLogState {
@@ -96,7 +96,7 @@ function nextActivityFilePath(
     }
   }
   // Fallback: should never reach here in practice
-  throw new GSDError(GSD_IO_ERROR, `Failed to find available activity log sequence in ${activityDir}`);
+  throw new SDDError(SDD_IO_ERROR, `Failed to find available activity log sequence in ${activityDir}`);
 }
 
 export function saveActivityLog(

@@ -19,8 +19,8 @@ function makeMockPi() {
 }
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-journal-tool-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  const base = join(tmpdir(), `sdd-journal-tool-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   return base;
 }
 
@@ -54,16 +54,16 @@ async function executeToolInDir(tool: any, params: Record<string, unknown>, dir:
 
 // ─── Registration ─────────────────────────────────────────────────────────────
 
-test("registerJournalTools registers gsd_journal_query tool", () => {
+test("registerJournalTools registers sdd_journal_query tool", () => {
   const pi = makeMockPi();
   registerJournalTools(pi);
   assert.equal(pi.tools.length, 1, "Should register exactly one tool");
-  assert.equal(pi.tools[0].name, "gsd_journal_query");
+  assert.equal(pi.tools[0].name, "sdd_journal_query");
 });
 
 // ─── Filtering ────────────────────────────────────────────────────────────────
 
-test("gsd_journal_query returns filtered entries", async () => {
+test("sdd_journal_query returns filtered entries", async () => {
   const base = makeTmpBase();
   try {
     emitJournalEvent(base, makeEntry({ seq: 0, flowId: "flow-aaa", data: { unitId: "M001/S01/T01" } }));
@@ -89,7 +89,7 @@ test("gsd_journal_query returns filtered entries", async () => {
 
 // ─── Empty Results ────────────────────────────────────────────────────────────
 
-test("gsd_journal_query returns 'no entries' message for empty results", async () => {
+test("sdd_journal_query returns 'no entries' message for empty results", async () => {
   const base = makeTmpBase();
   try {
     emitJournalEvent(base, makeEntry({ seq: 0, flowId: "flow-aaa" }));
@@ -107,7 +107,7 @@ test("gsd_journal_query returns 'no entries' message for empty results", async (
 
 // ─── Limit ────────────────────────────────────────────────────────────────────
 
-test("gsd_journal_query respects limit parameter", async () => {
+test("sdd_journal_query respects limit parameter", async () => {
   const base = makeTmpBase();
   try {
     for (let i = 0; i < 5; i++) {
@@ -128,7 +128,7 @@ test("gsd_journal_query respects limit parameter", async () => {
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 
-test("gsd_journal_query handles errors gracefully", async () => {
+test("sdd_journal_query handles errors gracefully", async () => {
   const pi = makeMockPi();
   registerJournalTools(pi);
   const tool = pi.tools[0];
@@ -136,7 +136,7 @@ test("gsd_journal_query handles errors gracefully", async () => {
   // queryJournal returns [] for missing journal dirs (never throws), so empty
   // result is the expected behavior. This confirms the tool doesn't crash and
   // returns the "no entries" message when there's no journal data.
-  const base = join(tmpdir(), `gsd-journal-tool-test-${randomUUID()}`);
+  const base = join(tmpdir(), `sdd-journal-tool-test-${randomUUID()}`);
   mkdirSync(base, { recursive: true }); // dir must exist for process.chdir
   try {
     const result = await executeToolInDir(tool, {}, base);

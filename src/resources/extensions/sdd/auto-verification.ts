@@ -10,10 +10,10 @@
  * checks the result and handles control flow.
  */
 
-import type { ExtensionContext, ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionContext, ExtensionAPI } from "@sdd/pi-coding-agent";
 import { resolveSliceFile, resolveSlicePath } from "./paths.js";
 import { parseUnitId } from "./unit-id.js";
-import { isDbAvailable, getTask } from "./gsd-db.js";
+import { isDbAvailable, getTask } from "./sdd-db.js";
 import { loadEffectiveSDDPreferences } from "./preferences.js";
 import {
   runVerificationGate,

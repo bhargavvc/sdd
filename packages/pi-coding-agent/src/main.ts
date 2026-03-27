@@ -5,7 +5,7 @@
  * createAgentSession() options. The SDK does the heavy lifting.
  */
 
-import { type ImageContent, modelsAreEqual, supportsXhigh } from "@gsd/pi-ai";
+import { type ImageContent, modelsAreEqual, supportsXhigh } from "@sdd/pi-ai";
 import chalk from "chalk";
 import { createInterface } from "readline";
 import { type Args, parseArgs, printHelp } from "./cli/args.js";
@@ -407,7 +407,7 @@ export async function main(args: string[]) {
 		// Auto-detect: all models are local, enable offline mode
 		process.env.PI_OFFLINE = "1";
 		process.env.PI_SKIP_VERSION_CHECK = "1";
-		console.log("[gsd] All configured models are local \u2014 enabling offline mode automatically.");
+		console.log("[sdd] All configured models are local \u2014 enabling offline mode automatically.");
 	}
 
 	const resourceLoader = new DefaultResourceLoader({

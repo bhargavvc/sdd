@@ -1,12 +1,12 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 
-import { load as loadWithTestLoader, resolve as resolveWithTestLoader } from "../resources/extensions/gsd/tests/dist-redirect.mjs"
+import { load as loadWithTestLoader, resolve as resolveWithTestLoader } from "../resources/extensions/sdd/tests/dist-redirect.mjs"
 
 const nextResolve = async (specifier: string) => ({ url: specifier })
 
 const cases = [
-  ["@gsd/pi-coding-agent", "../../packages/pi-coding-agent/src/index.ts"],
+  ["@sdd/pi-coding-agent", "../../packages/pi-coding-agent/src/index.ts"],
 ] as const
 
 test("resolve-ts loader redirects pi-coding-agent bare imports to the workspace source entrypoint", async () => {

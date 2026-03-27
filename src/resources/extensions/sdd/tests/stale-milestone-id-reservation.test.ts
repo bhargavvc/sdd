@@ -1,8 +1,8 @@
 /**
  * Regression test for #2488: Stale milestone ID reservations inflate next ID
- * after cancelled /gsd sessions.
+ * after cancelled /sdd sessions.
  *
- * The module-level `reservedMilestoneIds` Set persists across /gsd invocations
+ * The module-level `reservedMilestoneIds` Set persists across /sdd invocations
  * within the same Node process. Without clearReservedMilestoneIds() at session
  * start, each cancelled session permanently bumps the counter by 1.
  */
@@ -24,13 +24,13 @@ describe("stale milestone ID reservation cleanup (#2488)", () => {
   test("without cleanup, cancelled sessions inflate the next ID", () => {
     const diskIds = ["M001", "M002", "M003"];
 
-    // Session 1: user starts /gsd, ID is previewed and reserved, then cancelled
+    // Session 1: user starts /sdd, ID is previewed and reserved, then cancelled
     const allIds1 = [...new Set([...diskIds, ...getReservedMilestoneIds()])];
     const preview1 = nextMilestoneId(allIds1);
     reserveMilestoneId(preview1);
     assert.equal(preview1, "M004");
 
-    // Session 2: user starts /gsd again — stale reservation still in Set
+    // Session 2: user starts /sdd again — stale reservation still in Set
     // WITHOUT clearing, the next ID skips M004 (reserved) and goes to M005
     const allIds2 = [...new Set([...diskIds, ...getReservedMilestoneIds()])];
     const preview2 = nextMilestoneId(allIds2);
@@ -40,7 +40,7 @@ describe("stale milestone ID reservation cleanup (#2488)", () => {
   test("with cleanup at session start, next ID is correct", () => {
     const diskIds = ["M001", "M002", "M003"];
 
-    // Session 1: user starts /gsd, ID is previewed and reserved, then cancelled
+    // Session 1: user starts /sdd, ID is previewed and reserved, then cancelled
     const allIds1 = [...new Set([...diskIds, ...getReservedMilestoneIds()])];
     const preview1 = nextMilestoneId(allIds1);
     reserveMilestoneId(preview1);

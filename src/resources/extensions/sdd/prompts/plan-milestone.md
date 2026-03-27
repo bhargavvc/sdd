@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing SDD auto-mode.
 
 ## UNIT: Plan Milestone {{milestoneId}} ("{{milestoneTitle}}")
 
@@ -47,8 +47,8 @@ Then:
 2. {{skillActivation}}
 3. Create the roadmap: decompose into demoable vertical slices — as many as the work genuinely needs, no more. A simple feature might be 1 slice. Don't decompose for decomposition's sake.
 4. Order by risk (high-risk first)
-5. Call `gsd_plan_milestone` to persist the milestone planning fields, slice rows, and **horizontal checklist** in the DB-backed planning path. Do **not** write `{{outputPath}}`, `ROADMAP.md`, or other planning artifacts manually — the planning tool owns roadmap rendering and persistence.
-6. If planning produced structural decisions (e.g. slice ordering rationale, technology choices, scope exclusions), call `gsd_decision_save` for each decision — the tool auto-assigns IDs and regenerates `.gsd/DECISIONS.md` automatically.
+5. Call `sdd_plan_milestone` to persist the milestone planning fields, slice rows, and **horizontal checklist** in the DB-backed planning path. Do **not** write `{{outputPath}}`, `ROADMAP.md`, or other planning artifacts manually — the planning tool owns roadmap rendering and persistence.
+6. If planning produced structural decisions (e.g. slice ordering rationale, technology choices, scope exclusions), call `sdd_decision_save` for each decision — the tool auto-assigns IDs and regenerates `.sdd/DECISIONS.md` automatically.
 
 ## Requirement Mapping Rules
 
@@ -82,7 +82,7 @@ Apply these when decomposing and ordering slices:
 
 If the roadmap has only one slice, also plan the slice and its tasks inline during this unit — don't leave them for a separate planning session.
 
-1. After `gsd_plan_milestone` returns, immediately call `gsd_plan_slice` for S01 with the full task breakdown
+1. After `sdd_plan_milestone` returns, immediately call `sdd_plan_slice` for S01 with the full task breakdown
 2. Use the **Slice Plan** and **Task Plan** output templates from the inlined context above to structure the tool call parameters
 3. For simple slices, keep the plan lean — omit Proof Level, Integration Closure, and Observability sections if they would all be "none". Executable verification commands are sufficient.
 

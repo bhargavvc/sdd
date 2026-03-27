@@ -11,14 +11,14 @@
  *   mcp_call      — Call a tool on an MCP server (lazy connect)
  */
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import {
 	truncateHead,
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
 	formatSize,
-} from "@gsd/pi-coding-agent";
-import { Text } from "@gsd/pi-tui";
+} from "@sdd/pi-coding-agent";
+import { Text } from "@sdd/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { Client } from "@modelcontextprotocol/sdk/client";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -62,7 +62,7 @@ function readConfigs(): McpServerConfig[] {
 	const seen = new Set<string>();
 	const configPaths = [
 		join(process.cwd(), ".mcp.json"),
-		join(process.cwd(), ".gsd", "mcp.json"),
+		join(process.cwd(), ".sdd", "mcp.json"),
 	];
 
 	for (const configPath of configPaths) {
@@ -137,7 +137,7 @@ async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client>
 	const config = getServerConfig(name);
 	if (!config) throw new Error(`Unknown MCP server: "${name}". Use mcp_servers to list available servers.`);
 
-	const client = new Client({ name: "gsd", version: "1.0.0" });
+	const client = new Client({ name: "sdd", version: "1.0.0" });
 	let transport: StdioClientTransport | StreamableHTTPClientTransport;
 
 	if (config.transport === "stdio" && config.command) {
@@ -213,7 +213,7 @@ function formatToolList(serverName: string, tools: McpToolSchema[]): string {
 	return lines.join("\n");
 }
 
-// ─── Status helper (consumed by /gsd mcp) ─────────────────────────────────────
+// ─── Status helper (consumed by /sdd mcp) ─────────────────────────────────────
 
 /**
  * Return the live connection status for a named MCP server.

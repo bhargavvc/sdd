@@ -41,27 +41,27 @@ export type CommandSurfaceSection =
   | "workspace"
   | "integrations"
   | "experimental"
-  // GSD subcommand surfaces (S02)
-  | "gsd-status"
-  | "gsd-visualize"
-  | "gsd-forensics"
-  | "gsd-doctor"
-  | "gsd-skill-health"
-  | "gsd-knowledge"
-  | "gsd-capture"
-  | "gsd-triage"
-  | "gsd-quick"
-  | "gsd-history"
-  | "gsd-undo"
-  | "gsd-inspect"
-  | "gsd-prefs"
-  | "gsd-config"
-  | "gsd-hooks"
-  | "gsd-mode"
-  | "gsd-steer"
-  | "gsd-export"
-  | "gsd-cleanup"
-  | "gsd-queue"
+  // SDD subcommand surfaces (S02)
+  | "sdd-status"
+  | "sdd-visualize"
+  | "sdd-forensics"
+  | "sdd-doctor"
+  | "sdd-skill-health"
+  | "sdd-knowledge"
+  | "sdd-capture"
+  | "sdd-triage"
+  | "sdd-quick"
+  | "sdd-history"
+  | "sdd-undo"
+  | "sdd-inspect"
+  | "sdd-prefs"
+  | "sdd-config"
+  | "sdd-hooks"
+  | "sdd-mode"
+  | "sdd-steer"
+  | "sdd-export"
+  | "sdd-cleanup"
+  | "sdd-queue"
 export type CommandSurfaceSource = "slash" | "sidebar" | "surface"
 export type CommandSurfacePendingAction =
   | "loading_models"
@@ -347,7 +347,7 @@ export type CommandSurfaceTarget =
   | { kind: "fork"; entryId?: string }
   | { kind: "session"; outputPath?: string }
   | { kind: "compact"; customInstructions: string }
-  | { kind: "gsd"; surface: string; subcommand: string; args: string }
+  | { kind: "sdd"; surface: string; subcommand: string; args: string }
 
 // ─── Diagnostics panel state ──────────────────────────────────────────────────
 
@@ -671,27 +671,27 @@ export function commandSurfaceSectionForRequest(request: CommandSurfaceOpenReque
       return "session"
     case "compact":
       return "compact"
-    // GSD subcommand surfaces (S02)
-    case "gsd-status": return "gsd-status"
-    case "gsd-visualize": return "gsd-visualize"
-    case "gsd-forensics": return "gsd-forensics"
-    case "gsd-doctor": return "gsd-doctor"
-    case "gsd-skill-health": return "gsd-skill-health"
-    case "gsd-knowledge": return "gsd-knowledge"
-    case "gsd-capture": return "gsd-capture"
-    case "gsd-triage": return "gsd-triage"
-    case "gsd-quick": return "gsd-quick"
-    case "gsd-history": return "gsd-history"
-    case "gsd-undo": return "gsd-undo"
-    case "gsd-inspect": return "gsd-inspect"
-    case "gsd-prefs": return "gsd-prefs"
-    case "gsd-config": return "gsd-config"
-    case "gsd-hooks": return "gsd-hooks"
-    case "gsd-mode": return "gsd-mode"
-    case "gsd-steer": return "gsd-steer"
-    case "gsd-export": return "gsd-export"
-    case "gsd-cleanup": return "gsd-cleanup"
-    case "gsd-queue": return "gsd-queue"
+    // SDD subcommand surfaces (S02)
+    case "sdd-status": return "sdd-status"
+    case "sdd-visualize": return "sdd-visualize"
+    case "sdd-forensics": return "sdd-forensics"
+    case "sdd-doctor": return "sdd-doctor"
+    case "sdd-skill-health": return "sdd-skill-health"
+    case "sdd-knowledge": return "sdd-knowledge"
+    case "sdd-capture": return "sdd-capture"
+    case "sdd-triage": return "sdd-triage"
+    case "sdd-quick": return "sdd-quick"
+    case "sdd-history": return "sdd-history"
+    case "sdd-undo": return "sdd-undo"
+    case "sdd-inspect": return "sdd-inspect"
+    case "sdd-prefs": return "sdd-prefs"
+    case "sdd-config": return "sdd-config"
+    case "sdd-hooks": return "sdd-hooks"
+    case "sdd-mode": return "sdd-mode"
+    case "sdd-steer": return "sdd-steer"
+    case "sdd-export": return "sdd-export"
+    case "sdd-cleanup": return "sdd-cleanup"
+    case "sdd-queue": return "sdd-queue"
     default:
       return null
   }
@@ -818,10 +818,10 @@ export function buildCommandSurfaceTarget(request: CommandSurfaceOpenRequest): C
     return buildCompactTarget(request)
   }
 
-  // GSD subcommand surfaces — generic target (S02)
-  if (request.surface?.startsWith("gsd-")) {
-    const subcommand = request.surface.slice(4) // "gsd-forensics" -> "forensics"
-    return { kind: "gsd", surface: request.surface, subcommand, args: request.args ?? "" }
+  // SDD subcommand surfaces — generic target (S02)
+  if (request.surface?.startsWith("sdd-")) {
+    const subcommand = request.surface.slice(4) // "sdd-forensics" -> "forensics"
+    return { kind: "sdd", surface: request.surface, subcommand, args: request.args ?? "" }
   }
 
   return buildSettingsTarget(section)

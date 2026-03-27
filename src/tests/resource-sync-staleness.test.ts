@@ -22,7 +22,7 @@ test("resource manifest includes contentHash", async (t) => {
     contentHash: "abc123def456",
   };
 
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-resource-test-"));
+  const tmpDir = mkdtempSync(join(tmpdir(), "sdd-resource-test-"));
   const manifestPath = join(tmpDir, "managed-resources.json");
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });

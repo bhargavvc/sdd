@@ -14,7 +14,7 @@ import {
 	type SimpleStreamOptions,
 	type StopReason,
 	type ToolCall,
-} from "@gsd/pi-ai";
+} from "@sdd/pi-ai";
 import { ZERO_USAGE } from "./agent-loop.js";
 
 // Create stream class matching ProxyMessageEventStream

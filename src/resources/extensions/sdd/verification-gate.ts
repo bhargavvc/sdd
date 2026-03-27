@@ -1,4 +1,4 @@
-// GSD Extension — Verification Gate
+// SDD Extension — Verification Gate
 // Pure functions for discovering and running verification commands.
 // Discovery order (D003): preference → task plan verify → package.json scripts.
 // First non-empty source wins.

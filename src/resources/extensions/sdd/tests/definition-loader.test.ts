@@ -24,7 +24,7 @@ import type { WorkflowDefinition } from "../definition-loader.ts";
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
 function makeTmpDir(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-defloader-test-"));
+  return mkdtempSync(join(tmpdir(), "sdd-defloader-test-"));
 }
 
 /** Write a YAML string into a temp definitions directory. Returns the dir path. */

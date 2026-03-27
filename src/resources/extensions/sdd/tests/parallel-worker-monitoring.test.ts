@@ -134,7 +134,7 @@ describe("parallel-worker-monitoring", () => {
   it("worker spawn args include --mode json", () => {
     // Verify the spawn command includes JSON mode for NDJSON output.
     // We can't easily test the actual spawn, but we verify the args pattern.
-    const expectedArgs = ["--mode", "json", "--print", "/gsd auto"];
+    const expectedArgs = ["--mode", "json", "--print", "/sdd auto"];
     assert.ok(expectedArgs.includes("--mode"), "args include --mode");
     assert.ok(expectedArgs.includes("json"), "args include json");
     assert.ok(expectedArgs.indexOf("--mode") < expectedArgs.indexOf("json"),
@@ -142,10 +142,10 @@ describe("parallel-worker-monitoring", () => {
   });
 
   it("refreshWorkerStatuses restores persisted workers from disk", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-parallel-monitoring-"));
+    const base = mkdtempSync(join(tmpdir(), "sdd-parallel-monitoring-"));
     try {
-      mkdirSync(join(base, ".gsd"), { recursive: true });
-      writeFileSync(join(base, ".gsd", "orchestrator.json"), JSON.stringify({
+      mkdirSync(join(base, ".sdd"), { recursive: true });
+      writeFileSync(join(base, ".sdd", "orchestrator.json"), JSON.stringify({
         active: true,
         workers: [
           {
@@ -173,10 +173,10 @@ describe("parallel-worker-monitoring", () => {
   });
 
   it("refreshWorkerStatuses restores persisted workers from live session status files", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-parallel-stderr-"));
+    const base = mkdtempSync(join(tmpdir(), "sdd-parallel-stderr-"));
     try {
-      mkdirSync(join(base, ".gsd", "parallel"), { recursive: true });
-      writeFileSync(join(base, ".gsd", "parallel", "M009.status.json"), JSON.stringify({
+      mkdirSync(join(base, ".sdd", "parallel"), { recursive: true });
+      writeFileSync(join(base, ".sdd", "parallel", "M009.status.json"), JSON.stringify({
         milestoneId: "M009",
         pid: process.pid,
         state: "running",

@@ -1,4 +1,4 @@
-// Tests for GSD visualizer overlay.
+// Tests for SDD visualizer overlay.
 // Verifies filter mode, tab switching, mouse support, page scroll, help overlay, and 10-tab config.
 
 import { readFileSync } from "node:fs";

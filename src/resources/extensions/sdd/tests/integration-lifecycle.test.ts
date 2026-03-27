@@ -5,14 +5,14 @@
 // formatted prompt output → token savings validation → re-import after changes →
 // structured tool write-back → DB consistency verification.
 //
-// Crosses ≥4 module boundaries: gsd-db, md-importer, context-store, db-writer.
+// Crosses ≥4 module boundaries: sdd-db, md-importer, context-store, db-writer.
 // Uses file-backed DB (not :memory:) for WAL fidelity.
 
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, appendFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, isDbAvailable, _getAdapter } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, isDbAvailable, _getAdapter } from '../sdd-db.ts';
 import { migrateFromMarkdown, parseDecisionsTable } from '../md-importer.ts';
 import {
   queryDecisions,
@@ -120,8 +120,8 @@ const ROADMAP_CONTENT = `# M001: Test Milestone\n\n**Vision:** Integration test 
 
 test('integration-lifecycle: full pipeline', async () => {
     // ── Step 1: Set up temp dir with realistic .sdd/ structure ──────────
-    const base = mkdtempSync(join(tmpdir(), 'gsd-int-lifecycle-'));
-    const gsdDir = join(base, '.gsd');
+    const base = mkdtempSync(join(tmpdir(), 'sdd-int-lifecycle-'));
+    const gsdDir = join(base, '.sdd');
     mkdirSync(gsdDir, { recursive: true });
     mkdirSync(join(gsdDir, 'milestones', 'M001'), { recursive: true });
     mkdirSync(join(gsdDir, 'milestones', 'M002'), { recursive: true });

@@ -16,7 +16,7 @@ describe("PartialMessageBuilder — malformed tool arguments (#2574)", () => {
 		builder.handleEvent({
 			type: "content_block_start",
 			index: 0,
-			content_block: { type: "tool_use", id: "tool_1", name: "gsd_plan_slice", input: {} },
+			content_block: { type: "tool_use", id: "tool_1", name: "sdd_plan_slice", input: {} },
 		} as BetaRawMessageStreamEvent);
 
 		// Feed JSON fragments as input_json_delta

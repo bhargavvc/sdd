@@ -9,7 +9,7 @@ import { parseTaskPlanFile, parseSummary, parseContinue, parseRequirementCounts,
 
 describe('parsers', () => {
 test('parseRoadmap: full roadmap', () => {
-  const content = `# M001: GSD Extension — Hierarchical Planning
+  const content = `# M001: SDD Extension — Hierarchical Planning
 
 **Vision:** Build a structured planning system for coding agents.
 
@@ -57,7 +57,7 @@ Consumes from S03:
 
   const r = parseRoadmap(content);
 
-  assert.deepStrictEqual(r.title, 'M001: GSD Extension — Hierarchical Planning', 'roadmap title');
+  assert.deepStrictEqual(r.title, 'M001: SDD Extension — Hierarchical Planning', 'roadmap title');
   assert.deepStrictEqual(r.vision, 'Build a structured planning system for coding agents.', 'roadmap vision');
   assert.deepStrictEqual(r.successCriteria.length, 3, 'success criteria count');
   assert.deepStrictEqual(r.successCriteria[0], 'All parsers have test coverage', 'first success criterion');
@@ -1003,7 +1003,7 @@ Used manual assert pattern instead of node:assert.
 
 ## Context
 
-Working in the gsd-s01 worktree. All imports use .ts extensions.
+Working in the sdd-s01 worktree. All imports use .ts extensions.
 
 ## Next Action
 
@@ -1025,7 +1025,7 @@ Run the full test suite with node --test.
   assert.ok(c.completedWork.includes('Steps 1-3 are done'), 'completedWork content');
   assert.ok(c.remainingWork.includes('Steps 4-5'), 'remainingWork content');
   assert.ok(c.decisions.includes('manual assert pattern'), 'decisions content');
-  assert.ok(c.context.includes('gsd-s01 worktree'), 'context content');
+  assert.ok(c.context.includes('sdd-s01 worktree'), 'context content');
   assert.ok(c.nextAction.includes('node --test'), 'nextAction content');
 });
 

@@ -1,5 +1,5 @@
 /**
- * GSD Event Journal — structured JSONL event log for auto-mode iterations.
+ * SDD Event Journal — structured JSONL event log for auto-mode iterations.
  *
  * Writes daily-rotated JSONL files to `.sdd/journal/YYYY-MM-DD.jsonl`.
  * Zero imports from `auto/` — depends only on node:fs, node:path, and paths.ts.

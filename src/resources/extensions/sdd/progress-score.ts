@@ -1,5 +1,5 @@
 /**
- * GSD Progress Score — Traffic Light Status Indicator (#1221)
+ * SDD Progress Score — Traffic Light Status Indicator (#1221)
  *
  * Combines existing health signals into a single at-a-glance status:
  *   - Green: progressing well

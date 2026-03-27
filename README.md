@@ -19,7 +19,7 @@ One command. Walk away. Come back to a built project with clean git history.
 
 <pre><code>npm install -g sdd-pi@latest</code></pre>
 
-> GSD now provisions a managed [RTK](https://github.com/rtk-ai/rtk) binary on supported macOS, Linux, and Windows installs to compress shell-command output in `bash`, `async_bash`, `bg_shell`, and verification flows. GSD forces `RTK_TELEMETRY_DISABLED=1` for all managed invocations. Set `GSD_RTK_DISABLED=1` to disable the integration.
+> SDD now provisions a managed [RTK](https://github.com/rtk-ai/rtk) binary on supported macOS, Linux, and Windows installs to compress shell-command output in `bash`, `async_bash`, `bg_shell`, and verification flows. SDD forces `RTK_TELEMETRY_DISABLED=1` for all managed invocations. Set `SDD_RTK_DISABLED=1` to disable the integration.
 
 > **📋 NOTICE: New to Node on Mac?** If you installed Node.js via Homebrew, you may be running a development release instead of LTS. **[Read this guide](./docs/node-lts-macos.md)** to pin Node 24 LTS and avoid compatibility issues.
 
@@ -44,7 +44,7 @@ One command. Walk away. Come back to a built project with clean git history.
 - **`--bare` mode** — wired across headless, pi-coding-agent, and resource-loader for minimal-output operation.
 - **RPC protocol v2** — new types, init handshake with version detection, and runId generation on prompt/steer/follow_up commands.
 - **PREFERENCES.md rename** — `preferences.md` renamed to `PREFERENCES.md` for consistency. (#2700, #2738)
-- **Comprehensive SQLite audit** — indexes, caching, safety, and reconciliation fixes across gsd-db.
+- **Comprehensive SQLite audit** — indexes, caching, safety, and reconciliation fixes across sdd-db.
 - **Unified error classifier** — three overlapping error classifiers consolidated into a single classify-decide-act pipeline.
 
 ### Key Fixes
@@ -72,13 +72,13 @@ One command. Walk away. Come back to a built project with clean git history.
 
 ### v2.49.0 — Git Trailers & Yolo Mode
 
-- **`--yolo` flag** — `/gsd auto --yolo` for non-interactive project init.
-- **Git trailers** — GSD metadata moved from commit subject scopes to git trailers.
+- **`--yolo` flag** — `/sdd auto --yolo` for non-interactive project init.
+- **Git trailers** — SDD metadata moved from commit subject scopes to git trailers.
 
 ### v2.48.0 — Forensics & Discussion
 
-- **`/gsd discuss` for queued milestones** — target milestones still in the queue. (#2349)
-- **Enhanced forensics** — journal and activity log awareness added to `/gsd forensics`.
+- **`/sdd discuss` for queued milestones** — target milestones still in the queue. (#2349)
+- **Enhanced forensics** — journal and activity log awareness added to `/sdd forensics`.
 
 ### v2.47.0 — External Providers
 
@@ -88,17 +88,17 @@ One command. Walk away. Come back to a built project with clean git history.
 ### Previous highlights (v2.42–v2.46)
 
 - **Single-writer state engine** — disciplined state transitions with machine guards, actor identity, reversibility, and TOCTOU hardening. (#2494)
-- **`/gsd rethink`** — conversational project reorganization. (#2459)
-- **`/gsd mcp`** — MCP server status and connectivity. (#2362)
+- **`/sdd rethink`** — conversational project reorganization. (#2459)
+- **`/sdd mcp`** — MCP server status and connectivity. (#2362)
 - **Complete offline mode** — fully offline with local models. (#2429)
-- **Global KNOWLEDGE.md injection** — cross-project knowledge via `~/.gsd/agent/KNOWLEDGE.md`. (#2331)
+- **Global KNOWLEDGE.md injection** — cross-project knowledge via `~/.sdd/agent/KNOWLEDGE.md`. (#2331)
 - **Mobile-responsive web UI** — browser interface works on phones and tablets. (#2354)
 - **Default isolation mode changed to `none`** — set `git.isolation: worktree` explicitly if needed. (#2481)
 - **Non-API-key provider extensions** — support for Claude Code CLI and similar providers. (#2382)
 - **Docker sandbox template** — official Docker template for isolated auto mode. (#2360)
 - **DB-backed planning tools** — write-side state transitions use atomic SQLite tool calls. (#2141)
 - **Declarative workflow engine** — YAML workflows through auto-loop. (#2024)
-- **`/gsd fast`** — toggle service tier for prioritized API routing. (#1862)
+- **`/sdd fast`** — toggle service tier for prioritized API routing. (#1862)
 
 ---
 
@@ -178,7 +178,7 @@ See the full [Changelog](./CHANGELOG.md) for all 70+ fixes in this release.
 
 ## Documentation
 
-Full documentation is available at **[gsd.build](https://gsd.build)** (powered by Mintlify) and in the [`docs/`](./docs/) directory:
+Full documentation is available at **[sdd.build](https://sdd.build)** (powered by Mintlify) and in the [`docs/`](./docs/) directory:
 
 - **[Getting Started](./docs/getting-started.md)** — install, first run, basic usage
 - **[Auto Mode](./docs/auto-mode.md)** — autonomous execution deep-dive
@@ -429,27 +429,27 @@ On first run, SDD launches a branded setup wizard that walks you through LLM pro
 
 | Command                 | What it does                                                    |
 | ----------------------- | --------------------------------------------------------------- |
-| `/gsd`                  | Step mode — executes one unit at a time, pauses between each    |
-| `/gsd next`             | Explicit step mode (same as bare `/gsd`)                        |
-| `/gsd auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
-| `/gsd quick`            | Execute a quick task with GSD guarantees, skip planning overhead |
-| `/gsd stop`             | Stop auto mode gracefully                                       |
-| `/gsd steer`            | Hard-steer plan documents during execution                      |
-| `/gsd discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
-| `/gsd rethink`          | Conversational project reorganization                           |
-| `/gsd mcp`              | MCP server status and connectivity                              |
-| `/gsd status`           | Progress dashboard                                              |
-| `/gsd queue`            | Queue future milestones (safe during auto mode)                 |
-| `/gsd prefs`            | Model selection, timeouts, budget ceiling                       |
-| `/gsd migrate`          | Migrate a v1 `.planning` directory to `.gsd` format             |
-| `/gsd help`             | Categorized command reference for all GSD subcommands           |
-| `/gsd mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
-| `/gsd forensics`        | Full-access GSD debugger for auto-mode failure investigation    |
-| `/gsd cleanup`          | Archive phase directories from completed milestones             |
-| `/gsd doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
-| `/gsd keys`             | API key manager — list, add, remove, test, rotate, doctor       |
-| `/gsd logs`             | Browse activity, debug, and metrics logs                        |
-| `/gsd export --html`    | Generate HTML report for current or completed milestone         |
+| `/sdd`                  | Step mode — executes one unit at a time, pauses between each    |
+| `/sdd next`             | Explicit step mode (same as bare `/sdd`)                        |
+| `/sdd auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
+| `/sdd quick`            | Execute a quick task with SDD guarantees, skip planning overhead |
+| `/sdd stop`             | Stop auto mode gracefully                                       |
+| `/sdd steer`            | Hard-steer plan documents during execution                      |
+| `/sdd discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
+| `/sdd rethink`          | Conversational project reorganization                           |
+| `/sdd mcp`              | MCP server status and connectivity                              |
+| `/sdd status`           | Progress dashboard                                              |
+| `/sdd queue`            | Queue future milestones (safe during auto mode)                 |
+| `/sdd prefs`            | Model selection, timeouts, budget ceiling                       |
+| `/sdd migrate`          | Migrate a v1 `.planning` directory to `.sdd` format             |
+| `/sdd help`             | Categorized command reference for all SDD subcommands           |
+| `/sdd mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
+| `/sdd forensics`        | Full-access SDD debugger for auto-mode failure investigation    |
+| `/sdd cleanup`          | Archive phase directories from completed milestones             |
+| `/sdd doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
+| `/sdd keys`             | API key manager — list, add, remove, test, rotate, doctor       |
+| `/sdd logs`             | Browse activity, debug, and metrics logs                        |
+| `/sdd export --html`    | Generate HTML report for current or completed milestone         |
 | `/worktree` (`/wt`)     | Git worktree lifecycle — create, switch, merge, remove          |
 | `/voice`                | Toggle real-time speech-to-text (macOS, Linux)                  |
 | `/exit`                 | Graceful shutdown — saves session state before exiting          |
@@ -544,7 +544,7 @@ An auto-generated `index.html` shows all reports with progression metrics across
 
 ### Preferences
 
-GSD preferences live in `~/.gsd/PREFERENCES.md` (global) or `.gsd/PREFERENCES.md` (project). Manage with `/gsd prefs`.
+SDD preferences live in `~/.sdd/PREFERENCES.md` (global) or `.sdd/PREFERENCES.md` (project). Manage with `/sdd prefs`.
 
 ```yaml
 ---
@@ -586,7 +586,7 @@ auto_report: true
 | `skill_staleness_days` | Skills unused for N days get deprioritized (default: 60, 0 = disabled)                                |
 | `unique_milestone_ids` | Uses unique milestone names to avoid clashes when working in teams of people                          |
 | `git.isolation`        | `none` (default), `worktree`, or `branch` — enable worktree or branch isolation for milestone work               |
-| `git.manage_gitignore` | Set `false` to prevent GSD from modifying `.gitignore`                                                           |
+| `git.manage_gitignore` | Set `false` to prevent SDD from modifying `.gitignore`                                                           |
 | `verification_commands`| Array of shell commands to run after task execution (e.g., `["npm run lint", "npm run test"]`)        |
 | `verification_auto_fix`| Auto-retry on verification failures (default: true)                                                   |
 | `verification_max_retries` | Max retries for verification failures (default: 2)                                               |
@@ -695,7 +695,7 @@ The best practice for working in teams is to ensure unique milestone names acros
 
 ### Unique Milestone Names
 
-Create or amend your `.gsd/PREFERENCES.md` file within the repo to include `unique_milestone_ids: true` e.g.
+Create or amend your `.sdd/PREFERENCES.md` file within the repo to include `unique_milestone_ids: true` e.g.
 
 ```markdown
 ---
@@ -704,16 +704,16 @@ unique_milestone_ids: true
 ---
 ```
 
-With the above `.gitignore` set up, the `.gsd/PREFERENCES.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
+With the above `.gitignore` set up, the `.sdd/PREFERENCES.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
 
 Milestone names will now be generated with a 6 char random string appended e.g. instead of `M001` you'll get something like `M001-ush8s3`
 
 ### Migrating an existing git ignored `.sdd/` folder
 
 1. Ensure you are not in the middle of any milestones (clean state)
-2. Update the `.gsd/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.gsd/` directory)
-3. Update your `.gsd/PREFERENCES.md` file within the repo as per section `Unique Milestone Names`
-4. If you want to update all your existing milestones use this prompt in GSD: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .gsd file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
+2. Update the `.sdd/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.sdd/` directory)
+3. Update your `.sdd/PREFERENCES.md` file within the repo as per section `Unique Milestone Names`
+4. If you want to update all your existing milestones use this prompt in SDD: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .sdd file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
 5. Commit to git
 
 ---

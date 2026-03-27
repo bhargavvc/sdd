@@ -1,11 +1,11 @@
 {
   "name": "@gsd-build/mcp-server",
   "version": "2.52.0",
-  "description": "MCP server exposing GSD orchestration tools for Claude Code, Cursor, and other MCP clients",
+  "description": "MCP server exposing SDD orchestration tools for Claude Code, Cursor, and other MCP clients",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gsd-build/gsd-2.git",
+    "url": "https://github.com/sdd-build/sdd-2.git",
     "directory": "packages/mcp-server"
   },
   "publishConfig": {
@@ -21,7 +21,7 @@
     }
   },
   "bin": {
-    "gsd-mcp-server": "./dist/cli.js"
+    "sdd-mcp-server": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

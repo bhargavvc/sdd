@@ -1,9 +1,9 @@
 /**
  * engine-types.ts — Engine-polymorphic type contracts.
  *
- * LEAF NODE: This file must have ZERO imports from any GSD module.
+ * LEAF NODE: This file must have ZERO imports from any SDD module.
  * Only `node:` imports are permitted. All engine/policy interfaces
- * depend on these types; nothing here depends on GSD internals.
+ * depend on these types; nothing here depends on SDD internals.
  */
 
 /** Snapshot of engine state at a point in time. */
@@ -13,7 +13,7 @@ export interface EngineState {
   activeSliceId: string | null;
   activeTaskId: string | null;
   isComplete: boolean;
-  /** Opaque engine-specific state — never narrowed to a GSD-specific type. */
+  /** Opaque engine-specific state — never narrowed to a SDD-specific type. */
   raw: unknown;
 }
 

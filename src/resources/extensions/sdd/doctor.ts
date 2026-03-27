@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { loadFile, parseSummary, saveFile, parseTaskPlanMustHaves, countMustHavesMentionedInSummary } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap, parsePlan as parseLegacyPlan } from "./parsers-legacy.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, gsdRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relGsdRootFile, resolveGsdRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
@@ -25,7 +25,7 @@ export { runEnvironmentChecks, runFullEnvironmentChecks, formatEnvironmentReport
 export { computeProgressScore, computeProgressScoreWithContext, formatProgressLine, formatProgressReport, type ProgressScore, type ProgressLevel } from "./progress-score.js";
 
 /**
- * Characters that are used as delimiters in GSD state management documents
+ * Characters that are used as delimiters in SDD state management documents
  * and should not appear in milestone or slice titles.
  *
  * - "\u2014" (em dash, U+2014): used as a display separator in STATE.md and other docs.
@@ -33,13 +33,13 @@ export { computeProgressScore, computeProgressScoreWithContext, formatProgressLi
  *   and confusing the LLM agent that reads and writes these files.
  * - "\u2013" (en dash, U+2013): visually similar to em dash; same ambiguity risk.
  * - "/" (forward slash, U+002F): used as the path separator in unit IDs (M001/S01)
- *   and git branch names (gsd/M001/S01). A slash in a title can break path resolution.
+ *   and git branch names (sdd/M001/S01). A slash in a title can break path resolution.
  */
 const TITLE_DELIMITER_RE = /[\u2014\u2013\/]/; // em dash, en dash, forward slash
 
 /**
  * Check whether a milestone or slice title contains characters that conflict
- * with GSD's state document delimiter conventions.
+ * with SDD's state document delimiter conventions.
  * Returns a human-readable description of the problem, or null if the title is safe.
  */
 export function validateTitle(title: string): string | null {
@@ -47,7 +47,7 @@ export function validateTitle(title: string): string | null {
     const found: string[] = [];
     if (/[\u2014\u2013]/.test(title)) found.push("em/en dash (\u2014 or \u2013)");
     if (/\//.test(title)) found.push("forward slash (/)");
-    return `title contains ${found.join(" and ")}, which conflict with GSD state document delimiters`;
+    return `title contains ${found.join(" and ")}, which conflict with SDD state document delimiters`;
   }
   return null;
 }
@@ -89,7 +89,7 @@ function validatePreferenceShape(preferences: SDDPreferences): string[] {
 
 function buildStateMarkdown(state: Awaited<ReturnType<typeof deriveState>>): string {
   const lines: string[] = [];
-  lines.push("# GSD State", "");
+  lines.push("# SDD State", "");
 
   const activeMilestone = state.activeMilestone
     ? `${state.activeMilestone.id}: ${state.activeMilestone.title}`
@@ -321,7 +321,7 @@ export async function readDoctorHistory(basePath: string, lastN = 50): Promise<D
   } catch { return []; }
 }
 
-export async function runGSDDoctor(basePath: string, options?: { fix?: boolean; dryRun?: boolean; scope?: string; fixLevel?: "task" | "all"; isolationMode?: "none" | "worktree" | "branch"; includeBuild?: boolean; includeTests?: boolean }): Promise<DoctorReport> {
+export async function runSDDDoctor(basePath: string, options?: { fix?: boolean; dryRun?: boolean; scope?: string; fixLevel?: "task" | "all"; isolationMode?: "none" | "worktree" | "branch"; includeBuild?: boolean; includeTests?: boolean }): Promise<DoctorReport> {
   const issues: DoctorIssue[] = [];
   const fixesApplied: string[] = [];
   const fix = options?.fix === true;
@@ -350,7 +350,7 @@ export async function runGSDDoctor(basePath: string, options?: { fix?: boolean; 
         code: "invalid_preferences",
         scope: "project",
         unitId: "project",
-        message: `GSD preferences invalid: ${issue}`,
+        message: `SDD preferences invalid: ${issue}`,
         file: prefs.path,
         fixable: false,
       });

@@ -17,7 +17,7 @@ import {
   parsePreferencesMarkdown,
   _resetParseWarningFlag,
 } from "../preferences.ts";
-import type { SDDPreferences, GSDModelConfigV2, GSDPhaseModelConfig } from "../preferences.ts";
+import type { SDDPreferences, SDDModelConfigV2, SDDPhaseModelConfig } from "../preferences.ts";
 
 // ── Git preferences ──────────────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ test("git.merge_to_main produces deprecation warning", () => {
 test("getIsolationMode defaults to none when preferences have no isolation setting", () => {
   // Validate the default via validatePreferences: when no isolation is set,
   // preferences.git.isolation is undefined, and getIsolationMode returns "none".
-  // Default changed from "worktree" to "none" so GSD works out of the box
+  // Default changed from "worktree" to "none" so SDD works out of the box
   // without PREFERENCES.md (#2480).
   const { preferences } = validatePreferences({});
   assert.equal(preferences.git?.isolation, undefined, "no isolation in empty prefs");
@@ -291,11 +291,11 @@ test("parses OpenRouter model config with org/model IDs and fallbacks", () => {
   const content = `---\nversion: 1\nmodels:\n  research:\n    model: moonshotai/kimi-k2.5\n    fallbacks:\n      - qwen/qwen3.5-397b-a17b\n  planning:\n    model: deepseek/deepseek-r1-0528\n    fallbacks:\n      - moonshotai/kimi-k2.5\n      - deepseek/deepseek-v3.2\n  execution:\n    model: qwen/qwen3-coder\n    fallbacks:\n      - qwen/qwen3-coder-next\n---\n`;
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
-  const research = models.research as GSDPhaseModelConfig;
+  const models = prefs!.models as SDDModelConfigV2;
+  const research = models.research as SDDPhaseModelConfig;
   assert.equal(research.model, "moonshotai/kimi-k2.5");
   assert.deepEqual(research.fallbacks, ["qwen/qwen3.5-397b-a17b"]);
-  const execution = models.execution as GSDPhaseModelConfig;
+  const execution = models.execution as SDDPhaseModelConfig;
   assert.deepEqual(execution.fallbacks, ["qwen/qwen3-coder-next"]);
 });
 
@@ -303,8 +303,8 @@ test("parses model IDs with colons (OpenRouter :free, :exacto)", () => {
   const content = `---\nmodels:\n  execution:\n    model: qwen/qwen3-coder\n    fallbacks:\n      - qwen/qwen3-coder:free\n      - qwen/qwen3-coder:exacto\n---\n`;
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
-  const execution = models.execution as GSDPhaseModelConfig;
+  const models = prefs!.models as SDDModelConfigV2;
+  const execution = models.execution as SDDPhaseModelConfig;
   assert.deepEqual(execution.fallbacks, ["qwen/qwen3-coder:free", "qwen/qwen3-coder:exacto"]);
 });
 
@@ -312,7 +312,7 @@ test("parses legacy string-per-phase model config", () => {
   const content = `---\nmodels:\n  research: claude-opus-4-6\n  execution: claude-sonnet-4-6\n---\n`;
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
+  const models = prefs!.models as SDDModelConfigV2;
   assert.equal(models.research, "claude-opus-4-6");
   assert.equal(models.execution, "claude-sonnet-4-6");
 });
@@ -321,8 +321,8 @@ test("strips inline YAML comments from values", () => {
   const content = `---\nmodels:\n  execution:\n    model: qwen/qwen3-coder  # fast\n    fallbacks:\n      - minimax/minimax-m2.5  # backup\n---\n`;
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
-  const execution = models.execution as GSDPhaseModelConfig;
+  const models = prefs!.models as SDDModelConfigV2;
+  const execution = models.execution as SDDPhaseModelConfig;
   assert.equal(execution.model, "qwen/qwen3-coder");
   assert.deepEqual(execution.fallbacks, ["minimax/minimax-m2.5"]);
 });
@@ -331,8 +331,8 @@ test("handles Windows CRLF line endings", () => {
   const content = "---\r\nmodels:\r\n  execution:\r\n    model: qwen/qwen3-coder\r\n---\r\n";
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
-  const execution = models.execution as GSDPhaseModelConfig;
+  const models = prefs!.models as SDDModelConfigV2;
+  const execution = models.execution as SDDPhaseModelConfig;
   assert.equal(execution.model, "qwen/qwen3-coder");
 });
 
@@ -340,8 +340,8 @@ test("handles model config with explicit provider field", () => {
   const content = `---\nmodels:\n  execution:\n    model: claude-opus-4-6\n    provider: bedrock\n    fallbacks:\n      - claude-sonnet-4-6\n---\n`;
   const prefs = parsePreferencesMarkdown(content);
   assert.notEqual(prefs, null);
-  const models = prefs!.models as GSDModelConfigV2;
-  const execution = models.execution as GSDPhaseModelConfig;
+  const models = prefs!.models as SDDModelConfigV2;
+  const execution = models.execution as SDDPhaseModelConfig;
   assert.equal(execution.model, "claude-opus-4-6");
   assert.equal(execution.provider, "bedrock");
 });
@@ -393,17 +393,17 @@ test("experimental.rtk: false is accepted and stored", () => {
 });
 
 test("experimental.rtk: non-boolean produces error", () => {
-  const result = validatePreferences({ experimental: { rtk: "yes" } } as unknown as GSDPreferences);
+  const result = validatePreferences({ experimental: { rtk: "yes" } } as unknown as SDDPreferences);
   assert.ok(result.errors.some(e => e.includes("experimental.rtk")), `expected rtk error in: ${JSON.stringify(result.errors)}`);
 });
 
 test("experimental: non-object produces error", () => {
-  const result = validatePreferences({ experimental: true } as unknown as GSDPreferences);
+  const result = validatePreferences({ experimental: true } as unknown as SDDPreferences);
   assert.ok(result.errors.some(e => e.includes("experimental must be an object")));
 });
 
 test("experimental: unknown key produces warning", () => {
-  const result = validatePreferences({ experimental: { rtk: true, future_flag: true } } as unknown as GSDPreferences);
+  const result = validatePreferences({ experimental: { rtk: true, future_flag: true } } as unknown as SDDPreferences);
   assert.ok(result.warnings.some(w => w.includes("future_flag")), `expected unknown-key warning in: ${JSON.stringify(result.warnings)}`);
   assert.equal(result.preferences.experimental?.rtk, true);
 });

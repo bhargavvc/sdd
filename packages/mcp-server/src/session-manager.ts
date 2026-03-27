@@ -1,5 +1,5 @@
 /**
- * SessionManager — manages RpcClient lifecycle for background GSD execution.
+ * SessionManager — manages RpcClient lifecycle for background SDD execution.
  *
  * One active session per projectDir. Tracks events in a ring buffer,
  * detects blockers, tracks terminal state, and accumulates cost using
@@ -56,11 +56,11 @@ export class SessionManager {
   private sessions = new Map<string, ManagedSession>();
 
   /**
-   * Start a new GSD auto-mode session for the given project directory.
+   * Start a new SDD auto-mode session for the given project directory.
    *
    * Rejects if a session already exists for this projectDir.
    * Creates an RpcClient, starts the process, performs the v2 init handshake,
-   * wires event tracking, and sends '/gsd auto' to begin execution.
+   * wires event tracking, and sends '/sdd auto' to begin execution.
    */
   async startSession(projectDir: string, options: ExecuteOptions = {}): Promise<string> {
     if (!projectDir || projectDir.trim() === '') {
@@ -125,7 +125,7 @@ export class SessionManager {
       });
 
       // Kick off auto-mode
-      const command = options.command ?? '/gsd auto';
+      const command = options.command ?? '/sdd auto';
       await client.prompt(command);
 
       return session.sessionId;
@@ -237,29 +237,29 @@ export class SessionManager {
   }
 
   /**
-   * Resolve the GSD CLI path.
+   * Resolve the SDD CLI path.
    *
-   * 1. GSD_CLI_PATH env var (highest priority)
-   * 2. `which gsd` → resolve to the actual dist/cli.js
+   * 1. SDD_CLI_PATH env var (highest priority)
+   * 2. `which sdd` → resolve to the actual dist/cli.js
    */
   static resolveCLIPath(): string {
     // Check env var first
-    const envPath = process.env['GSD_CLI_PATH'];
+    const envPath = process.env['SDD_CLI_PATH'];
     if (envPath) return resolve(envPath);
 
-    // Fallback: locate `gsd` via which
+    // Fallback: locate `sdd` via which
     try {
-      const gsdBin = execSync('which gsd', { encoding: 'utf-8' }).trim();
-      if (gsdBin) {
-        // gsd bin is typically a symlink to dist/loader.js — return the resolved path
-        return resolve(gsdBin);
+      const sddBin = execSync('which sdd', { encoding: 'utf-8' }).trim();
+      if (sddBin) {
+        // sdd bin is typically a symlink to dist/loader.js — return the resolved path
+        return resolve(sddBin);
       }
     } catch {
       // which failed
     }
 
     throw new Error(
-      'Cannot find GSD CLI. Set GSD_CLI_PATH environment variable or ensure `gsd` is in PATH.'
+      'Cannot find SDD CLI. Set SDD_CLI_PATH environment variable or ensure `sdd` is in PATH.'
     );
   }
 

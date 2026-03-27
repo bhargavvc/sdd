@@ -21,8 +21,8 @@ const addonDir = path.resolve(
 );
 const platformTag = `${process.platform}-${process.arch}`;
 const candidates = [
-  path.join(addonDir, `gsd_engine.${platformTag}.node`),
-  path.join(addonDir, "gsd_engine.dev.node"),
+  path.join(addonDir, `sdd_engine.${platformTag}.node`),
+  path.join(addonDir, "sdd_engine.dev.node"),
 ];
 
 let native;
@@ -37,14 +37,14 @@ for (const candidate of candidates) {
 
 if (!native) {
   console.error(
-    "Native addon not found. Run `npm run build:native -w @gsd/native` first.",
+    "Native addon not found. Run `npm run build:native -w @sdd/native` first.",
   );
   process.exit(1);
 }
 
 describe("native glob: glob()", () => {
   test("finds files matching a pattern", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "file1.ts"), "const a = 1;");
@@ -60,7 +60,7 @@ describe("native glob: glob()", () => {
   });
 
   test("recursive matching into subdirectories", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.mkdirSync(path.join(tmpDir, "src"));
@@ -79,7 +79,7 @@ describe("native glob: glob()", () => {
   });
 
   test("respects maxResults limit", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     for (let i = 0; i < 10; i++) {
@@ -97,7 +97,7 @@ describe("native glob: glob()", () => {
   });
 
   test("filters by file type (directories only)", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.mkdirSync(path.join(tmpDir, "dir1"));
@@ -117,7 +117,7 @@ describe("native glob: glob()", () => {
   });
 
   test("respects .gitignore", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     // Init a git repo so .gitignore is respected
@@ -137,7 +137,7 @@ describe("native glob: glob()", () => {
   });
 
   test("includes gitignored files when gitignore=false", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.mkdirSync(path.join(tmpDir, ".git"));
@@ -155,7 +155,7 @@ describe("native glob: glob()", () => {
   });
 
   test("skips node_modules by default", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.mkdirSync(path.join(tmpDir, "node_modules"));
@@ -173,7 +173,7 @@ describe("native glob: glob()", () => {
   });
 
   test("sortByMtime returns most recent first", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "old.txt"), "old");
@@ -209,7 +209,7 @@ describe("native glob: glob()", () => {
   });
 
   test("returns mtime for each entry", async (t) => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-glob-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-glob-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "test.txt"), "content");

@@ -1,4 +1,4 @@
-//! Ripgrep-backed search library for GSD.
+//! Ripgrep-backed search library for SDD.
 //!
 //! Provides two search modes:
 //! - `search_content()`: search in-memory content (a byte slice).

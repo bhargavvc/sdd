@@ -83,7 +83,7 @@ Dispatch prompt builders accept an `inlineLevel` parameter. At each level, speci
 - `buildExecuteTaskPrompt` — drops the decisions template, truncates prior summaries to the most recent one
 - `buildPlanMilestonePrompt` — drops `PROJECT.md`, `REQUIREMENTS.md`, decisions, and supplementary templates like `secrets-manifest`
 - `buildCompleteSlicePrompt` — drops requirements and UAT template inlining
-- `buildCompleteMilestonePrompt` — drops root GSD file inlining
+- `buildCompleteMilestonePrompt` — drops root SDD file inlining
 - `buildReassessRoadmapPrompt` — drops project, requirements, and decisions files
 
 These are cumulative — `standard` drops a subset, `minimal` drops more. The `full` level preserves all context (the pre-2.17 behavior).
@@ -176,12 +176,12 @@ SDD tracks the success and failure of each tier assignment over time and adjusts
 
 ### User Feedback
 
-Use `/gsd rate` to submit feedback on the last completed unit's model tier:
+Use `/sdd rate` to submit feedback on the last completed unit's model tier:
 
 ```
-/gsd rate over    # model was overpowered — encourage cheaper next time
-/gsd rate ok      # model was appropriate — no adjustment
-/gsd rate under   # model was too weak — encourage stronger next time
+/sdd rate over    # model was overpowered — encourage cheaper next time
+/sdd rate ok      # model was appropriate — no adjustment
+/sdd rate under   # model was too weak — encourage stronger next time
 ```
 
 Feedback signals are weighted 2× compared to automatic outcomes. Requires dynamic routing to be active (the last unit must have tier data).
@@ -319,7 +319,7 @@ At `budget` and `balanced` inline levels, decisions and requirements are formatt
 
 ### Summary Distillation
 
-When a slice has 3+ dependency summaries and the total exceeds the summary budget, GSD extracts essential structured data (provides, requires, key_files, key_decisions) and drops verbose prose sections before falling back to section-boundary truncation.
+When a slice has 3+ dependency summaries and the total exceeds the summary budget, SDD extracts essential structured data (provides, requires, key_files, key_decisions) and drops verbose prose sections before falling back to section-boundary truncation.
 
 ### Cache Hit Rate Tracking
 

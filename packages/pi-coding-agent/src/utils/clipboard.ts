@@ -1,4 +1,4 @@
-import { copyToClipboard as nativeCopy } from "@gsd/native/clipboard";
+import { copyToClipboard as nativeCopy } from "@sdd/native/clipboard";
 
 export function copyToClipboard(text: string): void {
 	// Always emit OSC 52 - works over SSH/mosh, harmless locally

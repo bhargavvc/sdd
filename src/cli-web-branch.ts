@@ -16,7 +16,7 @@ export interface CliFlags {
   tools?: string[]
   messages: string[]
   web?: boolean
-  /** Optional project path for web mode: `gsd --web <path>` or `gsd web start <path>` */
+  /** Optional project path for web mode: `sdd --web <path>` or `sdd web start <path>` */
   webPath?: string
   /** Custom host to bind web server to: `--host 0.0.0.0` */
   webHost?: string
@@ -117,7 +117,7 @@ export function migrateLegacyFlatSessions(baseSessionsDir: string, projectSessio
 
 function emitWebModeFailure(stderr: WritableLike, status: WebModeLaunchStatus): void {
   if (status.ok) return
-  stderr.write(`[gsd] Web mode launch failed: ${status.failureReason}\n`)
+  stderr.write(`[sdd] Web mode launch failed: ${status.failureReason}\n`)
 }
 
 /**
@@ -198,7 +198,7 @@ export async function runWebCliBranch(
   flags: CliFlags,
   deps: RunWebCliBranchDeps = {},
 ): Promise<RunWebCliBranchResult> {
-  // Handle `gsd web stop [path|--all]` subcommand
+  // Handle `sdd web stop [path|--all]` subcommand
   if (flags.messages[0] === 'web' && flags.messages[1] === 'stop') {
     const stderr = deps.stderr ?? process.stderr
     const stopArg = flags.messages[2]
@@ -216,8 +216,8 @@ export async function runWebCliBranch(
     }
   }
 
-  // `gsd web [start] [path]` is an alias for `gsd --web [path]`
-  // Matches: `gsd web`, `gsd web start`, `gsd web start <path>`, `gsd web <path>`
+  // `sdd web [start] [path]` is an alias for `sdd --web [path]`
+  // Matches: `sdd web`, `sdd web start`, `sdd web start <path>`, `sdd web <path>`
   const isWebSubcommand = flags.messages[0] === 'web' && flags.messages[1] !== 'stop'
   if (!flags.web && !isWebSubcommand) {
     return { handled: false }
@@ -227,9 +227,9 @@ export async function runWebCliBranch(
   const defaultCwd = (deps.cwd ?? (() => process.cwd()))()
 
   // Resolve project path from multiple forms:
-  //   gsd --web <path>           → flags.webPath
-  //   gsd web start <path>       → messages[2]
-  //   gsd web <path>             → messages[1] (when not "start")
+  //   sdd --web <path>           → flags.webPath
+  //   sdd web start <path>       → messages[2]
+  //   sdd web <path>             → messages[1] (when not "start")
   let webPath = flags.webPath
   if (!webPath && isWebSubcommand) {
     if (flags.messages[1] === 'start') {
@@ -244,7 +244,7 @@ export async function runWebCliBranch(
     currentCwd = resolve(defaultCwd, webPath)
     const checkExists = existsSync
     if (!checkExists(currentCwd)) {
-      stderr.write(`[gsd] Project path does not exist: ${currentCwd}\n`)
+      stderr.write(`[sdd] Project path does not exist: ${currentCwd}\n`)
       return {
         handled: true,
         exitCode: 1,
@@ -265,7 +265,7 @@ export async function runWebCliBranch(
         launchInputs: { cwd: currentCwd, projectSessionsDir: '', agentDir: deps.agentDir ?? defaultAgentDir },
       }
     }
-    stderr.write(`[gsd] Using project path: ${currentCwd}\n`)
+    stderr.write(`[sdd] Using project path: ${currentCwd}\n`)
   } else {
     currentCwd = defaultCwd
   }

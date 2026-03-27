@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing SDD auto-mode.
 
 ## UNIT: Execute Task {{taskId}} ("{{taskTitle}}") — Slice {{sliceId}} ("{{sliceTitle}}"), Milestone {{milestoneId}}
 
@@ -64,15 +64,15 @@ Then:
     - Know when to stop. If you've tried 3+ fixes without progress, your mental model is probably wrong. Stop. List what you know for certain. List what you've ruled out. Form fresh hypotheses from there.
     - Don't fix symptoms. Understand *why* something fails before changing code. A test that passes after a change you don't understand is luck, not a fix.
 15. **Blocker discovery:** If execution reveals that the remaining slice plan is fundamentally invalid — not just a bug or minor deviation, but a plan-invalidating finding like a wrong API, missing capability, or architectural mismatch — set `blocker_discovered: true` in the task summary frontmatter and describe the blocker clearly in the summary narrative. Do NOT set `blocker_discovered: true` for ordinary debugging, minor deviations, or issues that can be fixed within the current task or the remaining plan. This flag triggers an automatic replan of the slice.
-16. If you made an architectural, pattern, library, or observability decision during this task that downstream work should know about, append it to `.gsd/DECISIONS.md` (read the template at `~/.gsd/agent/extensions/gsd/templates/decisions.md` if the file doesn't exist yet). Not every task produces decisions — only append when a meaningful choice was made.
-17. If you discover a non-obvious rule, recurring gotcha, or useful pattern during execution, append it to `.gsd/KNOWLEDGE.md`. Only add entries that would save future agents from repeating your investigation. Don't add obvious things.
-18. Read the template at `~/.gsd/agent/extensions/gsd/templates/task-summary.md`
+16. If you made an architectural, pattern, library, or observability decision during this task that downstream work should know about, append it to `.sdd/DECISIONS.md` (read the template at `~/.sdd/agent/extensions/sdd/templates/decisions.md` if the file doesn't exist yet). Not every task produces decisions — only append when a meaningful choice was made.
+17. If you discover a non-obvious rule, recurring gotcha, or useful pattern during execution, append it to `.sdd/KNOWLEDGE.md`. Only add entries that would save future agents from repeating your investigation. Don't add obvious things.
+18. Read the template at `~/.sdd/agent/extensions/sdd/templates/task-summary.md`
 19. Write `{{taskSummaryPath}}`
-20. Call `gsd_complete_task` with milestone_id, slice_id, task_id, and a summary of what was accomplished. This is your final required step — do NOT manually edit PLAN.md checkboxes. The tool marks the task complete, updates the DB, and renders PLAN.md automatically.
+20. Call `sdd_complete_task` with milestone_id, slice_id, task_id, and a summary of what was accomplished. This is your final required step — do NOT manually edit PLAN.md checkboxes. The tool marks the task complete, updates the DB, and renders PLAN.md automatically.
 21. Do not run git commands — the system reads your task summary after completion and creates a meaningful commit from it (type inferred from title, message from your one-liner, key files from frontmatter). Write a clear, specific one-liner in the summary — it becomes the commit message.
 
 All work stays in your working directory: `{{workingDirectory}}`.
 
-**You MUST call `gsd_complete_task` AND write `{{taskSummaryPath}}` before finishing.**
+**You MUST call `sdd_complete_task` AND write `{{taskSummaryPath}}` before finishing.**
 
 When done, say: "Task {{taskId}} complete."

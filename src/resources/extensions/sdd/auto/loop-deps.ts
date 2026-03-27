@@ -4,7 +4,7 @@
  * Leaf node in the import DAG (type-only).
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
 
 import type { AutoSession } from "./session.js";
 import type { SDDPreferences } from "../preferences.js";

@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { GSDWorkspaceStore } from "./gsd-workspace-store"
+import { GSDWorkspaceStore } from "./sdd-workspace-store"
 
 /**
  * ProjectStoreManager maintains a Map<string, GSDWorkspaceStore> of per-project

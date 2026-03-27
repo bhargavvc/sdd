@@ -15,13 +15,13 @@ import {
   getTask,
   getReplanHistory,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import { handleReplanSlice } from '../tools/replan-slice.ts';
 import { parsePlan } from '../parsers-legacy.ts';
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-replan-'));
-  mkdirSync(join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-replan-'));
+  mkdirSync(join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks'), { recursive: true });
   return base;
 }
 
@@ -98,7 +98,7 @@ function validReplanParams() {
 
 test('handleReplanSlice rejects invalid payloads (missing milestoneId)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks();
@@ -113,7 +113,7 @@ test('handleReplanSlice rejects invalid payloads (missing milestoneId)', async (
 
 test('handleReplanSlice rejects structural violation: updating a completed task', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'pending' });
@@ -145,7 +145,7 @@ test('handleReplanSlice rejects structural violation: updating a completed task'
 
 test('handleReplanSlice rejects structural violation: removing a completed task', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'pending' });
@@ -166,7 +166,7 @@ test('handleReplanSlice rejects structural violation: removing a completed task'
 
 test('handleReplanSlice succeeds when modifying only incomplete tasks', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'pending', t03Status: 'pending' });
@@ -230,11 +230,11 @@ test('handleReplanSlice succeeds when modifying only incomplete tasks', async ()
     assert.equal(t01?.status, 'complete');
 
     // Verify rendered PLAN.md exists on disk
-    const planPath = join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
+    const planPath = join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
     assert.ok(existsSync(planPath), 'PLAN.md should be rendered to disk');
 
     // Verify REPLAN.md exists on disk
-    const replanPath = join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'S01-REPLAN.md');
+    const replanPath = join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'S01-REPLAN.md');
     assert.ok(existsSync(replanPath), 'REPLAN.md should be rendered to disk');
     const replanContent = readFileSync(replanPath, 'utf-8');
     assert.ok(replanContent.includes('Blocker Description'), 'REPLAN.md should contain blocker section');
@@ -246,7 +246,7 @@ test('handleReplanSlice succeeds when modifying only incomplete tasks', async ()
 
 test('handleReplanSlice cache invalidation: re-parsing PLAN.md reflects mutations', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'pending', t03Status: 'pending' });
@@ -272,7 +272,7 @@ test('handleReplanSlice cache invalidation: re-parsing PLAN.md reflects mutation
     assert.ok(!('error' in result), `unexpected error: ${'error' in result ? result.error : ''}`);
 
     // Re-parse PLAN.md from disk to verify cache invalidation worked
-    const planPath = join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
+    const planPath = join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'S01-PLAN.md');
     const content = readFileSync(planPath, 'utf-8');
     const parsed = parsePlan(content);
 
@@ -295,7 +295,7 @@ test('handleReplanSlice cache invalidation: re-parsing PLAN.md reflects mutation
 
 test('handleReplanSlice is idempotent: calling twice with same params succeeds', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'pending', t03Status: 'pending' });
@@ -333,7 +333,7 @@ test('handleReplanSlice is idempotent: calling twice with same params succeeds',
 
 test('handleReplanSlice returns missing parent slice error', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     insertMilestone({ id: 'M001', title: 'Milestone', status: 'active' });
@@ -349,7 +349,7 @@ test('handleReplanSlice returns missing parent slice error', async () => {
 
 test('handleReplanSlice rejects task with status "done" (alias for complete)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'done', t02Status: 'pending' });
@@ -381,7 +381,7 @@ test('handleReplanSlice rejects task with status "done" (alias for complete)', a
 
 test('handleReplanSlice returns structured error payloads with actionable messages', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     seedSliceWithTasks({ t01Status: 'complete', t02Status: 'complete', t03Status: 'pending' });

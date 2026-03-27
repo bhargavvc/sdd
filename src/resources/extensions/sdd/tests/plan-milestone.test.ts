@@ -4,13 +4,13 @@ import { mkdtempSync, mkdirSync, rmSync, readFileSync, existsSync, writeFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices } from '../sdd-db.ts';
 import { handlePlanMilestone } from '../tools/plan-milestone.ts';
 import { parseRoadmap } from '../parsers-legacy.ts';
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-plan-milestone-'));
-  mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-plan-milestone-'));
+  mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
   return base;
 }
 
@@ -69,7 +69,7 @@ function validParams() {
 
 test('handlePlanMilestone writes milestone and slice planning state and renders roadmap', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {
@@ -88,7 +88,7 @@ test('handlePlanMilestone writes milestone and slice planning state and renders 
     assert.equal(slices[0]?.goal, 'Wire the handler.');
     assert.equal(slices[1]?.depends[0], 'S01');
 
-    const roadmapPath = join(base, '.gsd', 'milestones', 'M001', 'M001-ROADMAP.md');
+    const roadmapPath = join(base, '.sdd', 'milestones', 'M001', 'M001-ROADMAP.md');
     assert.ok(existsSync(roadmapPath), 'roadmap should be rendered to disk');
     const roadmap = readFileSync(roadmapPath, 'utf-8');
     assert.match(roadmap, /# M001: DB-backed planning/);
@@ -104,7 +104,7 @@ test('handlePlanMilestone writes milestone and slice planning state and renders 
 
 test('handlePlanMilestone rejects invalid payloads', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {
@@ -119,18 +119,18 @@ test('handlePlanMilestone rejects invalid payloads', async () => {
 
 test('handlePlanMilestone surfaces render failures and does not clear parse-visible state on failure', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {
-    const fallbackRoadmapPath = join(base, '.gsd', 'milestones', 'MISSING', 'MISSING-ROADMAP.md');
+    const fallbackRoadmapPath = join(base, '.sdd', 'milestones', 'MISSING', 'MISSING-ROADMAP.md');
     mkdirSync(fallbackRoadmapPath, { recursive: true });
 
     const result = await handlePlanMilestone({ ...validParams(), milestoneId: 'MISSING' }, base);
     assert.ok('error' in result);
     assert.match(result.error, /render failed:/);
 
-    const existingRoadmapPath = join(base, '.gsd', 'milestones', 'M001', 'M001-ROADMAP.md');
+    const existingRoadmapPath = join(base, '.sdd', 'milestones', 'M001', 'M001-ROADMAP.md');
     writeFileSync(existingRoadmapPath, '# M001: Cached roadmap\n\n**Vision:** old value\n\n## Slices\n\n', 'utf-8');
     const cachedAfter = parseRoadmap(readFileSync(existingRoadmapPath, 'utf-8'));
     assert.equal(cachedAfter.vision, 'old value');
@@ -141,11 +141,11 @@ test('handlePlanMilestone surfaces render failures and does not clear parse-visi
 
 test('handlePlanMilestone clears parse-visible roadmap state after successful render', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {
-    const roadmapPath = join(base, '.gsd', 'milestones', 'M001', 'M001-ROADMAP.md');
+    const roadmapPath = join(base, '.sdd', 'milestones', 'M001', 'M001-ROADMAP.md');
     writeFileSync(roadmapPath, '# M001: Cached roadmap\n\n**Vision:** old value\n\n## Slices\n\n', 'utf-8');
 
     const cachedBefore = parseRoadmap(readFileSync(roadmapPath, 'utf-8'));
@@ -165,7 +165,7 @@ test('handlePlanMilestone clears parse-visible roadmap state after successful re
 
 test('handlePlanMilestone reruns idempotently and updates existing planning state', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {

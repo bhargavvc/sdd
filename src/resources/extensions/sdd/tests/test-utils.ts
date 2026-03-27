@@ -1,5 +1,5 @@
 /**
- * Shared test utilities for GSD extension tests.
+ * Shared test utilities for SDD extension tests.
  *
  * Provides cross-platform helpers for creating temporary git repos,
  * safe cleanup, file creation, and shell-free git operations.
@@ -45,7 +45,7 @@ export function git(cwd: string, ...args: string[]): string {
  * @param prefix - Optional prefix for the temp directory name
  * @returns absolute path to the temp repo
  */
-export function makeTempRepo(prefix: string = "gsd-test-"): string {
+export function makeTempRepo(prefix: string = "sdd-test-"): string {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   git(dir, "init");
   git(dir, "config", "user.email", "test@test.com");
@@ -64,7 +64,7 @@ export function makeTempRepo(prefix: string = "gsd-test-"): string {
  * @param prefix - Optional prefix for the temp directory name
  * @returns absolute path to the temp directory
  */
-export function makeTempDir(prefix: string = "gsd-test-"): string {
+export function makeTempDir(prefix: string = "sdd-test-"): string {
   return mkdtempSync(join(tmpdir(), prefix));
 }
 
@@ -110,7 +110,7 @@ export function safeReadFile(filePath: string): string | null {
 }
 
 /**
- * Create a minimal GSD milestone structure in a temp directory.
+ * Create a minimal SDD milestone structure in a temp directory.
  *
  * @param base - Base directory (should have .sdd/ or be a temp repo)
  * @param mid - Milestone ID (e.g., "M001")
@@ -132,7 +132,7 @@ export function writeMilestoneFixture(
     }>;
   } = {},
 ): void {
-  const milestoneDir = join(base, ".gsd", "milestones", mid);
+  const milestoneDir = join(base, ".sdd", "milestones", mid);
   mkdirSync(milestoneDir, { recursive: true });
 
   if (options.roadmap) {

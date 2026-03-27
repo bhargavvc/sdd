@@ -1,6 +1,6 @@
 # Auto Mode
 
-Auto mode is GSD's autonomous execution engine. Run `/gsd auto`, walk away, come back to built software with clean git history.
+Auto mode is SDD's autonomous execution engine. Run `/sdd auto`, walk away, come back to built software with clean git history.
 
 ## How It Works
 
@@ -59,9 +59,9 @@ When your project has independent milestones, you can run them simultaneously. E
 
 ### Crash Recovery
 
-A lock file tracks the current unit. If the session dies, the next `/gsd auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context.
+A lock file tracks the current unit. If the session dies, the next `/sdd auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context.
 
-**Headless auto-restart (v2.26):** When running `gsd headless auto`, crashes trigger automatic restart with exponential backoff (5s → 10s → 30s cap, default 3 attempts). Configure with `--max-restarts N`. SIGINT/SIGTERM bypasses restart. Combined with crash recovery, this enables true overnight "run until done" execution.
+**Headless auto-restart (v2.26):** When running `sdd headless auto`, crashes trigger automatic restart with exponential backoff (5s → 10s → 30s cap, default 3 attempts). Configure with `--max-restarts N`. SIGINT/SIGTERM bypasses restart. Combined with crash recovery, this enables true overnight "run until done" execution.
 
 ### Provider Error Recovery
 
@@ -81,7 +81,7 @@ SDD maintains a `KNOWLEDGE.md` file — an append-only register of project-speci
 
 ### Context Pressure Monitor (v2.26)
 
-When context usage reaches 70%, GSD sends a wrap-up signal to the agent, nudging it to finish durable output (commit, write summaries) before the context window fills. This prevents sessions from hitting the hard context limit mid-task with no artifacts written.
+When context usage reaches 70%, SDD sends a wrap-up signal to the agent, nudging it to finish durable output (commit, write summaries) before the context window fills. This prevents sessions from hitting the hard context limit mid-task with no artifacts written.
 
 ### Meaningful Commit Messages (v2.26)
 
@@ -89,22 +89,22 @@ Commits are generated from task summaries — not generic "complete task" messag
 
 ### Stuck Detection (v2.39)
 
-SDD uses a sliding-window analysis to detect stuck loops. Instead of a simple "same unit dispatched twice" counter, the detector examines recent dispatch history for repeated patterns — catching cycles like A→B→A→B as well as single-unit repeats. On detection, GSD retries once with a deep diagnostic prompt. If it fails again, auto mode stops with the exact file it expected, so you can intervene.
+SDD uses a sliding-window analysis to detect stuck loops. Instead of a simple "same unit dispatched twice" counter, the detector examines recent dispatch history for repeated patterns — catching cycles like A→B→A→B as well as single-unit repeats. On detection, SDD retries once with a deep diagnostic prompt. If it fails again, auto mode stops with the exact file it expected, so you can intervene.
 
 The sliding-window approach reduces false positives on legitimate retries (e.g., verification failures that self-correct) while catching genuine stuck loops faster.
 
 ### Post-Mortem Investigation (v2.40)
 
-`/gsd forensics` is a full-access GSD debugger for post-mortem analysis of auto-mode failures. It provides:
+`/sdd forensics` is a full-access SDD debugger for post-mortem analysis of auto-mode failures. It provides:
 
 - **Anomaly detection** — structured identification of stuck loops, cost spikes, timeouts, missing artifacts, and crashes with severity levels
 - **Unit traces** — last 10 unit executions with error details and execution times
 - **Metrics analysis** — cost, token counts, and execution time breakdowns
-- **Doctor integration** — includes structural health issues from `/gsd doctor`
+- **Doctor integration** — includes structural health issues from `/sdd doctor`
 - **LLM-guided investigation** — an agent session with full tool access to investigate root causes
 
 ```
-/gsd forensics [optional problem description]
+/sdd forensics [optional problem description]
 ```
 
 See [Troubleshooting](./troubleshooting.md) for more on diagnosing issues.
@@ -164,13 +164,13 @@ Auto-mode pauses before each slice, presenting the slice context for discussion.
 
 ### HTML Reports (v2.26)
 
-After a milestone completes, GSD auto-generates a self-contained HTML report in `.sdd/reports/`. Reports include project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base. No external dependencies — all CSS and JS are inlined.
+After a milestone completes, SDD auto-generates a self-contained HTML report in `.sdd/reports/`. Reports include project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base. No external dependencies — all CSS and JS are inlined.
 
 ```yaml
 auto_report: true    # enabled by default
 ```
 
-Generate manually anytime with `/gsd export --html`, or generate reports for all milestones at once with `/gsd export --html --all` (v2.28).
+Generate manually anytime with `/sdd export --html`, or generate reports for all milestones at once with `/sdd export --html --all` (v2.28).
 
 ### Failure Recovery (v2.28)
 
@@ -190,7 +190,7 @@ This linear flow is easier to debug, uses less memory (no recursive call stack),
 
 ### Real-Time Health Visibility (v2.40)
 
-Doctor issues (from `/gsd doctor`) now surface in real time across three places:
+Doctor issues (from `/sdd doctor`) now surface in real time across three places:
 
 - **Dashboard widget** — health indicator with issue count and severity
 - **Workflow visualizer** — issues shown in the status panel
@@ -213,7 +213,7 @@ See [Configuration](./configuration.md) for skill routing preferences.
 ### Start
 
 ```
-/gsd auto
+/sdd auto
 ```
 
 ### Pause
@@ -223,7 +223,7 @@ Press **Escape**. The conversation is preserved. You can interact with the agent
 ### Resume
 
 ```
-/gsd auto
+/sdd auto
 ```
 
 Auto mode reads disk state and picks up where it left off.
@@ -231,7 +231,7 @@ Auto mode reads disk state and picks up where it left off.
 ### Stop
 
 ```
-/gsd stop
+/sdd stop
 ```
 
 Stops auto mode gracefully. Can be run from a different terminal.
@@ -239,7 +239,7 @@ Stops auto mode gracefully. Can be run from a different terminal.
 ### Steer
 
 ```
-/gsd steer
+/sdd steer
 ```
 
 Hard-steer plan documents during execution without stopping the pipeline. Changes are picked up at the next phase boundary.
@@ -247,7 +247,7 @@ Hard-steer plan documents during execution without stopping the pipeline. Change
 ### Capture
 
 ```
-/gsd capture "add rate limiting to API endpoints"
+/sdd capture "add rate limiting to API endpoints"
 ```
 
 Fire-and-forget thought capture. Captures are triaged automatically between tasks. See [Captures & Triage](./captures-triage.md).
@@ -255,14 +255,14 @@ Fire-and-forget thought capture. Captures are triaged automatically between task
 ### Visualize
 
 ```
-/gsd visualize
+/sdd visualize
 ```
 
 Open the workflow visualizer — interactive tabs for progress, dependencies, metrics, and timeline. See [Workflow Visualizer](./visualizer.md).
 
 ## Dashboard
 
-`Ctrl+Alt+G` or `/gsd status` shows real-time progress:
+`Ctrl+Alt+G` or `/sdd status` shows real-time progress:
 
 - Current milestone, slice, and task
 - Auto mode elapsed time and phase
@@ -290,7 +290,7 @@ When enabled, auto-mode automatically selects cheaper models for simple units (s
 
 ## Reactive Task Execution (v2.38)
 
-When `reactive_execution: true` is set in preferences, GSD derives a dependency graph from IO annotations in task plans. Tasks that don't conflict (no shared file reads/writes) are dispatched in parallel via subagents, while dependent tasks wait for their predecessors to complete.
+When `reactive_execution: true` is set in preferences, SDD derives a dependency graph from IO annotations in task plans. Tasks that don't conflict (no shared file reads/writes) are dispatched in parallel via subagents, while dependent tasks wait for their predecessors to complete.
 
 ```yaml
 reactive_execution: true    # disabled by default

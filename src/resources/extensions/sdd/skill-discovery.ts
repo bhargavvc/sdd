@@ -1,5 +1,5 @@
 /**
- * GSD Skill Discovery
+ * SDD Skill Discovery
  *
  * Detects skills installed during auto-mode by comparing the current
  * skills directory against a snapshot taken at auto-mode start.

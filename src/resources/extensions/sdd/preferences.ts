@@ -1,5 +1,5 @@
 /**
- * GSD Preferences -- loading, merging, and rendering.
+ * SDD Preferences -- loading, merging, and rendering.
  *
  * This module is the primary entry point for preference operations.
  * Type definitions live in ./preferences-types.js, validation in
@@ -38,10 +38,10 @@ import { formatSkillRef } from "./preferences-skills.js";
 
 export type {
   WorkflowMode,
-  GSDSkillRule,
-  GSDPhaseModelConfig,
-  GSDModelConfig,
-  GSDModelConfigV2,
+  SDDSkillRule,
+  SDDPhaseModelConfig,
+  SDDModelConfig,
+  SDDModelConfigV2,
   ResolvedModelConfig,
   SkillDiscoveryMode,
   AutoSupervisorConfig,
@@ -82,7 +82,7 @@ export {
 // ─── Path Constants & Getters ───────────────────────────────────────────────
 
 function gsdHome(): string {
-  return process.env.GSD_HOME || join(homedir(), ".gsd");
+  return process.env.SDD_HOME || join(homedir(), ".sdd");
 }
 
 function globalPreferencesPath(): string {
@@ -90,7 +90,7 @@ function globalPreferencesPath(): string {
 }
 
 function legacyGlobalPreferencesPath(): string {
-  return join(homedir(), ".pi", "agent", "gsd-preferences.md");
+  return join(homedir(), ".pi", "agent", "sdd-preferences.md");
 }
 
 function projectPreferencesPath(): string {
@@ -215,7 +215,7 @@ export function parsePreferencesMarkdown(content: string): SDDPreferences | null
   }
 
   // Fallback: heading+list format (e.g. "## Git\n- isolation: none") (#2036)
-  // GSD agents may write preferences files without frontmatter delimiters.
+  // SDD agents may write preferences files without frontmatter delimiters.
   if (/^##\s+\w/m.test(content)) {
     return parseHeadingListFormat(content);
   }
@@ -407,7 +407,7 @@ function mergePreDispatchHooks(
 
 export function renderPreferencesForSystemPrompt(preferences: SDDPreferences, resolutions?: Map<string, SkillResolution>): string {
   const validated = validatePreferences(preferences);
-  const lines: string[] = ["## GSD Skill Preferences"];
+  const lines: string[] = ["## SDD Skill Preferences"];
 
   if (validated.errors.length > 0) {
     lines.push("- Validation: some preference values were ignored because they were invalid.");
@@ -419,7 +419,7 @@ export function renderPreferencesForSystemPrompt(preferences: SDDPreferences, re
   preferences = validated.preferences;
 
   lines.push(
-    "- Treat these as explicit skill-selection policy for GSD work.",
+    "- Treat these as explicit skill-selection policy for SDD work.",
     "- If a listed skill exists and is relevant, load and follow it instead of treating it as a vague suggestion.",
     "- Current user instructions still override these defaults.",
   );
@@ -501,7 +501,7 @@ export function resolvePreDispatchHooks(): PreDispatchHookConfig[] {
  * Resolve the effective git isolation mode from preferences.
  * Returns "none" (default), "worktree", or "branch".
  *
- * Default is "none" so GSD works out of the box without PREFERENCES.md.
+ * Default is "none" so SDD works out of the box without PREFERENCES.md.
  * Worktree isolation requires explicit opt-in because it depends on git
  * branch infrastructure that must be set up before use.
  */

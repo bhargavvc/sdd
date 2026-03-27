@@ -13,7 +13,7 @@ export async function collectKnowledgeData(projectCwdOverride?: string): Promise
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)
   const { projectCwd } = config
 
-  const filePath = join(projectCwd, ".gsd", "KNOWLEDGE.md")
+  const filePath = join(projectCwd, ".sdd", "KNOWLEDGE.md")
 
   if (!existsSync(filePath)) {
     return { entries: [], filePath, lastModified: null }

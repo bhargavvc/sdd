@@ -4,7 +4,7 @@
  * and blocker placeholder generation.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
 import {
   readUnitRuntimeRecord,
   writeUnitRuntimeRecord,
@@ -113,7 +113,7 @@ export async function recoverTimedOutUnit(
 
       pi.sendMessage(
         {
-          customType: "gsd-auto-timeout-recovery",
+          customType: "sdd-auto-timeout-recovery",
           display: verbose,
           content: steeringLines.join("\n"),
         },
@@ -217,7 +217,7 @@ export async function recoverTimedOutUnit(
 
     pi.sendMessage(
       {
-        customType: "gsd-auto-timeout-recovery",
+        customType: "sdd-auto-timeout-recovery",
         display: verbose,
         content: steeringLines.join("\n"),
       },

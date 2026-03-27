@@ -1,15 +1,15 @@
 /**
- * MCP Status — `/gsd mcp` command handler.
+ * MCP Status — `/sdd mcp` command handler.
  *
  * Shows configured MCP servers, their connection status, and available tools.
  *
  * Subcommands:
- *   /gsd mcp             — Overview of all servers (alias: /gsd mcp status)
- *   /gsd mcp status      — Same as bare /gsd mcp
- *   /gsd mcp check <srv> — Detailed status for a specific server
+ *   /sdd mcp             — Overview of all servers (alias: /sdd mcp status)
+ *   /sdd mcp status      — Same as bare /sdd mcp
+ *   /sdd mcp check <srv> — Detailed status for a specific server
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -43,7 +43,7 @@ function readMcpConfigs(): McpServerRawConfig[] {
   const seen = new Set<string>();
   const configPaths = [
     join(process.cwd(), ".mcp.json"),
-    join(process.cwd(), ".gsd", "mcp.json"),
+    join(process.cwd(), ".sdd", "mcp.json"),
   ];
 
   for (const configPath of configPaths) {
@@ -111,7 +111,7 @@ export function formatMcpStatusReport(servers: McpServerStatus[]): string {
   }
 
   lines.push("");
-  lines.push("Use /gsd mcp check <server> for details on a specific server.");
+  lines.push("Use /sdd mcp check <server> for details on a specific server.");
   lines.push("Use mcp_discover to connect and list tools for a server.");
 
   return lines.join("\n");
@@ -147,7 +147,7 @@ export function formatMcpServerDetail(server: McpServerDetail): string {
 // ─── Command handler ────────────────────────────────────────────────────────
 
 /**
- * Handle `/gsd mcp [status|check <server>]`.
+ * Handle `/sdd mcp [status|check <server>]`.
  */
 export async function handleMcpStatus(
   args: string,
@@ -156,7 +156,7 @@ export async function handleMcpStatus(
   const trimmed = args.trim().toLowerCase();
   const configs = readMcpConfigs();
 
-  // /gsd mcp check <server>
+  // /sdd mcp check <server>
   if (trimmed.startsWith("check ")) {
     const serverName = args.trim().slice("check ".length).trim();
     const config = configs.find((c) => c.name === serverName);
@@ -201,7 +201,7 @@ export async function handleMcpStatus(
     return;
   }
 
-  // /gsd mcp or /gsd mcp status
+  // /sdd mcp or /sdd mcp status
   if (!trimmed || trimmed === "status") {
     // Build status for each server
     const statuses: McpServerStatus[] = [];
@@ -239,7 +239,7 @@ export async function handleMcpStatus(
 
   // Unknown subcommand
   ctx.ui.notify(
-    "Usage: /gsd mcp [status|check <server>]\n\n" +
+    "Usage: /sdd mcp [status|check <server>]\n\n" +
     "  status           Show all MCP server statuses (default)\n" +
     "  check <server>   Detailed status for a specific server",
     "warning",

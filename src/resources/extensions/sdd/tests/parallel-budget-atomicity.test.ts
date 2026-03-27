@@ -41,8 +41,8 @@ import type { SDDPreferences } from "../preferences.ts";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-budget-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  const base = join(tmpdir(), `sdd-budget-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   return base;
 }
 
@@ -78,7 +78,7 @@ function writeWorkerCost(
     cost,
     lastHeartbeat: Date.now(),
     startedAt: Date.now() - 60000,
-    worktreePath: join(base, ".gsd", "worktrees", milestoneId.toLowerCase()),
+    worktreePath: join(base, ".sdd", "worktrees", milestoneId.toLowerCase()),
   });
 }
 
@@ -314,7 +314,7 @@ test("budget — refreshWorkerStatuses updates worker state from disk", async ()
       cost: 2.5,
       lastHeartbeat: Date.now(),
       startedAt: Date.now() - 120000,
-      worktreePath: join(base, ".gsd", "worktrees", "m001"),
+      worktreePath: join(base, ".sdd", "worktrees", "m001"),
     });
 
     refreshWorkerStatuses(base);

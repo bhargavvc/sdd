@@ -17,8 +17,8 @@ let tarball = null;
 let installDir = null;
 
 try {
-  // --- Guard: workspace packages must not have @gsd/* cross-deps ---
-  console.log('==> Checking workspace packages for @gsd/* cross-deps...');
+  // --- Guard: workspace packages must not have @sdd/* cross-deps ---
+  console.log('==> Checking workspace packages for @sdd/* cross-deps...');
   const workspaces = ['native', 'pi-agent-core', 'pi-ai', 'pi-coding-agent', 'pi-tui'];
   let crossFailed = false;
 
@@ -26,7 +26,7 @@ try {
     const pkgPath = join(ROOT, 'packages', ws, 'package.json');
     if (!existsSync(pkgPath)) continue;
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-    const deps = Object.keys(pkg.dependencies || {}).filter(d => d.startsWith('@gsd/'));
+    const deps = Object.keys(pkg.dependencies || {}).filter(d => d.startsWith('@sdd/'));
     if (deps.length) {
       console.log(`    LEAKED in ${ws}: ${deps.join(', ')}`);
       crossFailed = true;
@@ -34,11 +34,11 @@ try {
   }
 
   if (crossFailed) {
-    console.log('ERROR: Workspace packages have @gsd/* cross-dependencies.');
+    console.log('ERROR: Workspace packages have @sdd/* cross-dependencies.');
     console.log('    These cause 404s when npm resolves them from the registry.');
     process.exit(1);
   }
-  console.log('    No @gsd/* cross-dependencies.');
+  console.log('    No @sdd/* cross-dependencies.');
 
   // --- Pack tarball ---
   console.log('==> Packing tarball...');
@@ -104,34 +104,34 @@ try {
     process.exit(1);
   }
 
-  // --- Verify @gsd/* packages resolved correctly post-install ---
+  // --- Verify @sdd/* packages resolved correctly post-install ---
   // This catches the Windows-style failure where symlinkSync fails silently and
-  // node_modules/@gsd/ is never populated, causing ERR_MODULE_NOT_FOUND at runtime.
-  console.log('==> Verifying @gsd/* workspace package resolution...');
-  const installedRoot = join(installDir, 'node_modules', 'gsd-pi');
+  // node_modules/@sdd/ is never populated, causing ERR_MODULE_NOT_FOUND at runtime.
+  console.log('==> Verifying @sdd/* workspace package resolution...');
+  const installedRoot = join(installDir, 'node_modules', 'sdd-pi');
   const criticalPkgs = ['pi-coding-agent'];
   let resolutionFailed = false;
   for (const pkg of criticalPkgs) {
-    const pkgPath = join(installedRoot, 'node_modules', '@gsd', pkg);
+    const pkgPath = join(installedRoot, 'node_modules', '@sdd', pkg);
     const fallbackPath = join(installedRoot, 'packages', pkg);
     if (!existsSync(pkgPath)) {
       if (existsSync(fallbackPath)) {
-        console.log(`    MISSING symlink/copy: node_modules/@gsd/${pkg} (packages/${pkg} exists — postinstall may not have run)`);
+        console.log(`    MISSING symlink/copy: node_modules/@sdd/${pkg} (packages/${pkg} exists — postinstall may not have run)`);
       } else {
-        console.log(`    MISSING: node_modules/@gsd/${pkg} (packages/${pkg} also absent — package is broken)`);
+        console.log(`    MISSING: node_modules/@sdd/${pkg} (packages/${pkg} also absent — package is broken)`);
       }
       resolutionFailed = true;
     }
   }
   if (resolutionFailed) {
-    console.log('ERROR: @gsd/* packages are not resolvable after install.');
+    console.log('ERROR: @sdd/* packages are not resolvable after install.');
     console.log('    This will cause ERR_MODULE_NOT_FOUND on first run (especially on Windows).');
     process.exit(1);
   }
-  console.log('    @gsd/* packages are resolvable.');
+  console.log('    @sdd/* packages are resolvable.');
 
   // --- Run the binary to confirm end-to-end resolution ---
-  console.log('==> Running installed binary (gsd -v)...');
+  console.log('==> Running installed binary (sdd -v)...');
   const loaderPath = join(installedRoot, 'dist', 'loader.js');
   try {
     const versionOutput = execSync(`node "${loaderPath}" -v`, {
@@ -140,13 +140,13 @@ try {
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 15000,
     }).trim();
-    console.log(`    gsd -v => ${versionOutput}`);
+    console.log(`    sdd -v => ${versionOutput}`);
     if (!versionOutput.match(/^\d+\.\d+\.\d+/)) {
-      console.log('ERROR: gsd -v returned unexpected output (expected a version string).');
+      console.log('ERROR: sdd -v returned unexpected output (expected a version string).');
       process.exit(1);
     }
   } catch (err) {
-    console.log('ERROR: Running gsd -v failed after install.');
+    console.log('ERROR: Running sdd -v failed after install.');
     if (err.stdout) console.log(err.stdout);
     if (err.stderr) console.log(err.stderr);
     process.exit(1);

@@ -17,13 +17,13 @@ import {
   closeDatabase,
   insertMilestone,
   getMilestone,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-park-db-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-park-db-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   writeFileSync(
-    join(base, ".gsd", "milestones", "M001", "M001-CONTEXT.md"),
+    join(base, ".sdd", "milestones", "M001", "M001-CONTEXT.md"),
     "# M001\n\nContext.",
   );
   return base;

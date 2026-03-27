@@ -1,5 +1,5 @@
 /**
- * GSD Welcome Screen
+ * SDD Welcome Screen
  *
  * Two-panel bar layout: full-width accent bars at top/bottom (matching the
  * auto-mode progress widget style), logo left (fixed width), info right.
@@ -72,7 +72,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Tools left, hint right-aligned on the same row
   const toolsLeft  = toolParts.length > 0 ? chalk.dim('  ' + toolParts.join('  ·  ')) : ''
-  const hintRight  = chalk.dim('/gsd to begin  ·  /gsd help')
+  const hintRight  = chalk.dim('/sdd to begin  ·  /sdd help')
   const footerFill = RIGHT_INNER - visLen(toolsLeft) - visLen(hintRight)
   const footerRow  = toolsLeft + ' '.repeat(Math.max(1, footerFill)) + hintRight
 

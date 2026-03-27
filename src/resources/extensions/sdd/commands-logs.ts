@@ -1,16 +1,16 @@
 /**
- * /gsd logs — Browse activity logs, debug logs, and metrics.
+ * /sdd logs — Browse activity logs, debug logs, and metrics.
  *
  * Subcommands:
- *   /gsd logs              — List recent activity + debug logs
- *   /gsd logs <N>          — Show summary of activity log #N
- *   /gsd logs debug        — List debug log files
- *   /gsd logs debug <N>    — Show debug log summary #N
- *   /gsd logs tail [N]     — Show last N activity log entries (default 5)
- *   /gsd logs clear        — Remove old activity and debug logs
+ *   /sdd logs              — List recent activity + debug logs
+ *   /sdd logs <N>          — Show summary of activity log #N
+ *   /sdd logs debug        — List debug log files
+ *   /sdd logs debug <N>    — Show debug log summary #N
+ *   /sdd logs tail [N]     — Show last N activity log entries (default 5)
+ *   /sdd logs clear        — Remove old activity and debug logs
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readdirSync, readFileSync, statSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { gsdRoot } from "./paths.js";
@@ -247,34 +247,34 @@ export async function handleLogs(args: string, ctx: ExtensionCommandContext): Pr
   const parts = args.trim().split(/\s+/).filter(Boolean);
   const subCmd = parts[0] ?? "";
 
-  // /gsd logs clear
+  // /sdd logs clear
   if (subCmd === "clear") {
     await handleLogsClear(basePath, ctx);
     return;
   }
 
-  // /gsd logs debug [N]
+  // /sdd logs debug [N]
   if (subCmd === "debug") {
     const idx = parts[1] ? parseInt(parts[1], 10) : undefined;
     await handleLogsDebug(basePath, ctx, idx);
     return;
   }
 
-  // /gsd logs tail [N]
+  // /sdd logs tail [N]
   if (subCmd === "tail") {
     const count = parts[1] ? parseInt(parts[1], 10) : 5;
     await handleLogsTail(basePath, ctx, count);
     return;
   }
 
-  // /gsd logs <N> — show specific activity log
+  // /sdd logs <N> — show specific activity log
   if (subCmd && /^\d+$/.test(subCmd)) {
     const seq = parseInt(subCmd, 10);
     await handleLogsShow(basePath, ctx, seq);
     return;
   }
 
-  // /gsd logs — list overview
+  // /sdd logs — list overview
   await handleLogsList(basePath, ctx);
 }
 
@@ -286,7 +286,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
 
   if (activities.length === 0 && debugLogs.length === 0) {
     ctx.ui.notify(
-      "No logs found.\n\nActivity logs are created during auto-mode.\nDebug logs require GSD_DEBUG=1.",
+      "No logs found.\n\nActivity logs are created during auto-mode.\nDebug logs require SDD_DEBUG=1.",
       "info",
     );
     return;
@@ -314,7 +314,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
       lines.push(`  ... and ${activities.length - 15} older entries`);
     }
     lines.push("");
-    lines.push("  View details: /gsd logs <#>");
+    lines.push("  View details: /sdd logs <#>");
   }
 
   if (debugLogs.length > 0) {
@@ -327,7 +327,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
       lines.push(`  ${i + 1}. ${d.filename}  ${size}  ${age}`);
     }
     lines.push("");
-    lines.push("  View details: /gsd logs debug <#>");
+    lines.push("  View details: /sdd logs debug <#>");
   }
 
   // Metrics summary
@@ -347,7 +347,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
   }
 
   lines.push("");
-  lines.push("Tip: Enable debug logging with GSD_DEBUG=1 before /gsd auto");
+  lines.push("Tip: Enable debug logging with SDD_DEBUG=1 before /sdd auto");
 
   ctx.ui.notify(lines.join("\n"), "info");
 }
@@ -357,7 +357,7 @@ async function handleLogsShow(basePath: string, ctx: ExtensionCommandContext, se
   const entry = activities.find(e => e.seq === seq);
 
   if (!entry) {
-    ctx.ui.notify(`Activity log #${seq} not found. Run /gsd logs to see available logs.`, "warning");
+    ctx.ui.notify(`Activity log #${seq} not found. Run /sdd logs to see available logs.`, "warning");
     return;
   }
 
@@ -416,7 +416,7 @@ async function handleLogsDebug(basePath: string, ctx: ExtensionCommandContext, i
 
   if (debugLogs.length === 0) {
     ctx.ui.notify(
-      "No debug logs found.\n\nEnable debug logging: GSD_DEBUG=1 gsd auto",
+      "No debug logs found.\n\nEnable debug logging: SDD_DEBUG=1 sdd auto",
       "info",
     );
     return;
@@ -430,7 +430,7 @@ async function handleLogsDebug(basePath: string, ctx: ExtensionCommandContext, i
       lines.push(`  ${i + 1}. ${d.filename}  ${formatSize(d.size)}  ${formatAge(d.mtime)}`);
     }
     lines.push("");
-    lines.push("View details: /gsd logs debug <#>");
+    lines.push("View details: /sdd logs debug <#>");
     ctx.ui.notify(lines.join("\n"), "info");
     return;
   }

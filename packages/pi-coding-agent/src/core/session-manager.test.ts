@@ -31,7 +31,7 @@ describe("SessionManager usage totals", () => {
 	});
 
 	it("tracks assistant usage incrementally without rescanning entries", () => {
-		dir = mkdtempSync(join(tmpdir(), "gsd-session-manager-test-"));
+		dir = mkdtempSync(join(tmpdir(), "sdd-session-manager-test-"));
 		const manager = SessionManager.create(dir, dir);
 
 		manager.appendMessage({ role: "user", content: [{ type: "text", text: "hello" }] } as any);
@@ -48,7 +48,7 @@ describe("SessionManager usage totals", () => {
 	});
 
 	it("resets totals when starting a new session", () => {
-		dir = mkdtempSync(join(tmpdir(), "gsd-session-manager-test-"));
+		dir = mkdtempSync(join(tmpdir(), "sdd-session-manager-test-"));
 		const manager = SessionManager.create(dir, dir);
 		manager.appendMessage(makeAssistantMessage(5, 5, 0, 0, 0.05));
 		assert.equal(manager.getUsageTotals().input, 5);

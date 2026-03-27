@@ -20,7 +20,7 @@ import {
   insertTask,
   getTask,
   getSlice,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { invalidateAllCaches } from "../cache.ts";
 import { existsSync } from "node:fs";
 
@@ -29,17 +29,17 @@ function makeTempDir(prefix: string): string {
 }
 
 test("handleUndo without --force only warns and leaves completed units intact", async () => {
-  const base = makeTempDir("gsd-undo-confirm");
+  const base = makeTempDir("sdd-undo-confirm");
   try {
-    mkdirSync(join(base, ".gsd"), { recursive: true });
-    mkdirSync(join(base, ".gsd", "activity"), { recursive: true });
+    mkdirSync(join(base, ".sdd"), { recursive: true });
+    mkdirSync(join(base, ".sdd", "activity"), { recursive: true });
     writeFileSync(
-      join(base, ".gsd", "completed-units.json"),
+      join(base, ".sdd", "completed-units.json"),
       JSON.stringify(["execute-task/M001/S01/T01"]),
       "utf-8",
     );
     writeFileSync(
-      join(base, ".gsd", "activity", "001-execute-task-M001-S01-T01.jsonl"),
+      join(base, ".sdd", "activity", "001-execute-task-M001-S01-T01.jsonl"),
       "",
       "utf-8",
     );
@@ -57,9 +57,9 @@ test("handleUndo without --force only warns and leaves completed units intact", 
 
     assert.equal(notifications.length, 1);
     assert.equal(notifications[0]?.level, "warning");
-    assert.match(notifications[0]?.message ?? "", /Run \/gsd undo --force to confirm\./);
+    assert.match(notifications[0]?.message ?? "", /Run \/sdd undo --force to confirm\./);
     assert.deepEqual(
-      JSON.parse(readFileSync(join(base, ".gsd", "completed-units.json"), "utf-8")),
+      JSON.parse(readFileSync(join(base, ".sdd", "completed-units.json"), "utf-8")),
       ["execute-task/M001/S01/T01"],
     );
   } finally {
@@ -68,9 +68,9 @@ test("handleUndo without --force only warns and leaves completed units intact", 
 });
 
 test("uncheckTaskInPlan flips a checked task back to unchecked", () => {
-  const base = makeTempDir("gsd-undo-plan");
+  const base = makeTempDir("sdd-undo-plan");
   try {
-    const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+    const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
     mkdirSync(sliceDir, { recursive: true });
     const planFile = join(sliceDir, "S01-PLAN.md");
     writeFileSync(
@@ -92,9 +92,9 @@ test("uncheckTaskInPlan flips a checked task back to unchecked", () => {
 });
 
 test("findCommitsForUnit reads the newest matching activity log and dedupes SHAs", () => {
-  const base = makeTempDir("gsd-undo-activity");
+  const base = makeTempDir("sdd-undo-activity");
   try {
-    const activityDir = join(base, ".gsd", "activity");
+    const activityDir = join(base, ".sdd", "activity");
     mkdirSync(activityDir, { recursive: true });
 
     writeFileSync(
@@ -170,7 +170,7 @@ function makeCtx(): { notifications: Array<{ message: string; level: string }>; 
 
 function setupTaskFixture(base: string): void {
   // Create milestone/slice/task directory structure
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
 
@@ -206,7 +206,7 @@ function setupTaskFixture(base: string): void {
 
 test("handleUndoTask without args shows usage", async () => {
   const { notifications, ctx } = makeCtx();
-  const base = makeTempDir("gsd-undo-task-usage");
+  const base = makeTempDir("sdd-undo-task-usage");
   try {
     await handleUndoTask("", ctx, {} as any, base);
     assert.equal(notifications.length, 1);
@@ -218,7 +218,7 @@ test("handleUndoTask without args shows usage", async () => {
 });
 
 test("handleUndoTask without --force shows confirmation", async () => {
-  const base = makeTempDir("gsd-undo-task-confirm");
+  const base = makeTempDir("sdd-undo-task-confirm");
   try {
     setupTaskFixture(base);
     const { notifications, ctx } = makeCtx();
@@ -236,7 +236,7 @@ test("handleUndoTask without --force shows confirmation", async () => {
 });
 
 test("handleUndoTask with --force resets task and re-renders plan", async () => {
-  const base = makeTempDir("gsd-undo-task-force");
+  const base = makeTempDir("sdd-undo-task-force");
   try {
     setupTaskFixture(base);
     const { notifications, ctx } = makeCtx();
@@ -247,12 +247,12 @@ test("handleUndoTask with --force resets task and re-renders plan", async () => 
     assert.equal(task?.status, "pending");
 
     // Summary file deleted
-    const summaryPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks", "T01-SUMMARY.md");
+    const summaryPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks", "T01-SUMMARY.md");
     assert.equal(existsSync(summaryPath), false);
 
     // Plan checkbox unchecked
     const planContent = readFileSync(
-      join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md"),
+      join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md"),
       "utf-8",
     );
     assert.match(planContent, /\[ \] \*\*T01:/);
@@ -267,7 +267,7 @@ test("handleUndoTask with --force resets task and re-renders plan", async () => 
 });
 
 test("handleUndoTask with non-existent task returns error", async () => {
-  const base = makeTempDir("gsd-undo-task-notfound");
+  const base = makeTempDir("sdd-undo-task-notfound");
   try {
     openDatabase(":memory:");
     insertMilestone({ id: "M001", title: "Test", status: "active" });
@@ -284,16 +284,16 @@ test("handleUndoTask with non-existent task returns error", async () => {
 });
 
 test("handleUndoTask accepts partial ID (T01) and resolves from state", async () => {
-  const base = makeTempDir("gsd-undo-task-partial");
+  const base = makeTempDir("sdd-undo-task-partial");
   try {
     setupTaskFixture(base);
 
     // Create STATE.md so deriveState can resolve the active milestone/slice
-    mkdirSync(join(base, ".gsd"), { recursive: true });
+    mkdirSync(join(base, ".sdd"), { recursive: true });
     writeFileSync(
-      join(base, ".gsd", "STATE.md"),
+      join(base, ".sdd", "STATE.md"),
       [
-        "# GSD State",
+        "# SDD State",
         "",
         "- Phase: executing",
         "- Active Milestone: M001",
@@ -318,7 +318,7 @@ test("handleUndoTask accepts partial ID (T01) and resolves from state", async ()
 // ─── handleResetSlice tests ──────────────────────────────────────────────────
 
 function setupSliceFixture(base: string): void {
-  const mDir = join(base, ".gsd", "milestones", "M001");
+  const mDir = join(base, ".sdd", "milestones", "M001");
   const sliceDir = join(mDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
@@ -371,7 +371,7 @@ function setupSliceFixture(base: string): void {
 
 test("handleResetSlice without args shows usage", async () => {
   const { notifications, ctx } = makeCtx();
-  const base = makeTempDir("gsd-reset-slice-usage");
+  const base = makeTempDir("sdd-reset-slice-usage");
   try {
     await handleResetSlice("", ctx, {} as any, base);
     assert.equal(notifications.length, 1);
@@ -383,7 +383,7 @@ test("handleResetSlice without args shows usage", async () => {
 });
 
 test("handleResetSlice without --force shows confirmation", async () => {
-  const base = makeTempDir("gsd-reset-slice-confirm");
+  const base = makeTempDir("sdd-reset-slice-confirm");
   try {
     setupSliceFixture(base);
     const { notifications, ctx } = makeCtx();
@@ -400,7 +400,7 @@ test("handleResetSlice without --force shows confirmation", async () => {
 });
 
 test("handleResetSlice with --force resets slice and all tasks", async () => {
-  const base = makeTempDir("gsd-reset-slice-force");
+  const base = makeTempDir("sdd-reset-slice-force");
   try {
     setupSliceFixture(base);
     const { notifications, ctx } = makeCtx();
@@ -415,12 +415,12 @@ test("handleResetSlice with --force resets slice and all tasks", async () => {
     assert.equal(t2?.status, "pending");
 
     // Task summaries deleted
-    const tasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
+    const tasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
     assert.equal(existsSync(join(tasksDir, "T01-SUMMARY.md")), false);
     assert.equal(existsSync(join(tasksDir, "T02-SUMMARY.md")), false);
 
     // Slice summary and UAT deleted
-    const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+    const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
     assert.equal(existsSync(join(sliceDir, "S01-SUMMARY.md")), false);
     assert.equal(existsSync(join(sliceDir, "S01-UAT.md")), false);
 
@@ -431,7 +431,7 @@ test("handleResetSlice with --force resets slice and all tasks", async () => {
 
     // Roadmap checkbox unchecked
     const roadmapContent = readFileSync(
-      join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+      join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
       "utf-8",
     );
     assert.match(roadmapContent, /\[ \] \*\*S01:/);
@@ -446,7 +446,7 @@ test("handleResetSlice with --force resets slice and all tasks", async () => {
 });
 
 test("handleResetSlice with non-existent slice returns error", async () => {
-  const base = makeTempDir("gsd-reset-slice-notfound");
+  const base = makeTempDir("sdd-reset-slice-notfound");
   try {
     openDatabase(":memory:");
     insertMilestone({ id: "M001", title: "Test", status: "active" });

@@ -7,9 +7,9 @@ import { delimiter, join } from "node:path";
 import {
   buildRtkEnv,
   ensureRtkAvailable,
-  GSD_RTK_DISABLED_ENV,
-  GSD_RTK_PATH_ENV,
-  GSD_SKIP_RTK_INSTALL_ENV,
+  SDD_RTK_DISABLED_ENV,
+  SDD_RTK_PATH_ENV,
+  SDD_SKIP_RTK_INSTALL_ENV,
   getManagedRtkDir,
   prependPathEntry,
   resolveRtkAssetName,
@@ -30,10 +30,10 @@ test("resolveRtkAssetName maps supported release assets correctly", () => {
 
 test("prependPathEntry preserves the original PATH key casing and avoids duplicates", () => {
   const env: NodeJS.ProcessEnv = { Path: "/usr/bin" };
-  prependPathEntry(env, "/tmp/gsd-bin");
-  assert.equal(env.Path, `/tmp/gsd-bin${delimiter}${"/usr/bin"}`);
-  prependPathEntry(env, "/tmp/gsd-bin");
-  assert.equal(env.Path, `/tmp/gsd-bin${delimiter}${"/usr/bin"}`);
+  prependPathEntry(env, "/tmp/sdd-bin");
+  assert.equal(env.Path, `/tmp/sdd-bin${delimiter}${"/usr/bin"}`);
+  prependPathEntry(env, "/tmp/sdd-bin");
+  assert.equal(env.Path, `/tmp/sdd-bin${delimiter}${"/usr/bin"}`);
 });
 
 test("buildRtkEnv prepends the managed bin dir and disables telemetry", () => {
@@ -67,15 +67,15 @@ test("rewriteCommandWithRtk respects the disable flag", () => {
     rewriteCommandWithRtk("git status", {
       binaryPath: "/tmp/rtk",
       spawnSyncImpl,
-      env: { [GSD_RTK_DISABLED_ENV]: "1" },
+      env: { [SDD_RTK_DISABLED_ENV]: "1" },
     }),
     "git status",
   );
 });
 
-test("rewriteCommandWithRtk falls back to the managed RTK path when GSD_RTK_PATH is unset", () => {
+test("rewriteCommandWithRtk falls back to the managed RTK path when SDD_RTK_PATH is unset", () => {
   const fake = createFakeRtk({ "git status": "rtk git status" });
-  const managedHome = mkdtempSync(join(tmpdir(), "gsd-rtk-managed-home-"));
+  const managedHome = mkdtempSync(join(tmpdir(), "sdd-rtk-managed-home-"));
   const managedDir = join(managedHome, "agent", "bin");
   const managedPath = join(managedDir, process.platform === "win32" ? "rtk.cmd" : "rtk");
 
@@ -88,9 +88,9 @@ test("rewriteCommandWithRtk falls back to the managed RTK path when GSD_RTK_PATH
   try {
     const env = {
       ...process.env,
-      GSD_HOME: managedHome,
+      SDD_HOME: managedHome,
     };
-    delete env.GSD_RTK_PATH;
+    delete env.SDD_RTK_PATH;
 
     assert.equal(resolveRtkBinaryPath({ env }), managedPath);
     assert.equal(rewriteCommandWithRtk("git status", { env }), "rtk git status");
@@ -110,15 +110,15 @@ test("validateRtkBinary checks the rewrite contract", () => {
 
 test("ensureRtkAvailable respects explicit disable and skip flags without downloading", async () => {
   const disabled = await ensureRtkAvailable({
-    env: { [GSD_RTK_DISABLED_ENV]: "1" },
+    env: { [SDD_RTK_DISABLED_ENV]: "1" },
   });
   assert.equal(disabled.enabled, false);
   assert.equal(disabled.source, "disabled");
 
   const skipped = await ensureRtkAvailable({
     env: {
-      [GSD_SKIP_RTK_INSTALL_ENV]: "1",
-      [GSD_RTK_PATH_ENV]: "/tmp/nonexistent-rtk",
+      [SDD_SKIP_RTK_INSTALL_ENV]: "1",
+      [SDD_RTK_PATH_ENV]: "/tmp/nonexistent-rtk",
     },
   });
   assert.equal(skipped.available, false);

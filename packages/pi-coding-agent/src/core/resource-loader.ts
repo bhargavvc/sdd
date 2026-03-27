@@ -797,7 +797,7 @@ export class DefaultResourceLoader implements ResourceLoader {
 	/**
 	 * Extract the extension name from its path.
 	 * For root-level files: basename without extension (e.g. "search-the-web.ts" → "search-the-web")
-	 * For subdirectory extensions: the directory name (e.g. "/path/to/sdd/index.ts" → "gsd")
+	 * For subdirectory extensions: the directory name (e.g. "/path/to/sdd/index.ts" → "sdd")
 	 */
 	private getExtensionNameFromPath(extPath: string): string {
 		const base = basename(extPath);

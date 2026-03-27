@@ -14,8 +14,8 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-queue-order-'));
-  mkdirSync(join(base, '.gsd'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-queue-order-'));
+  mkdirSync(join(base, '.sdd'), { recursive: true });
   return base;
 }
 
@@ -77,7 +77,7 @@ test('test block at line 76', () => {
   assert.deepStrictEqual(loaded, ['M003', 'M001', 'M002'], 'round-trip preserves order');
 
   // Verify file contains updatedAt
-  const raw = JSON.parse(readFileSync(join(base, '.gsd', 'QUEUE-ORDER.json'), 'utf-8'));
+  const raw = JSON.parse(readFileSync(join(base, '.sdd', 'QUEUE-ORDER.json'), 'utf-8'));
   assert.ok(typeof raw.updatedAt === 'string' && raw.updatedAt.length > 0, 'file contains updatedAt');
 
   cleanup(base);
@@ -86,7 +86,7 @@ test('test block at line 76', () => {
 // Load returns null on corrupt JSON
 test('test block at line 90', () => {
   const base = createFixtureBase();
-  writeFileSync(join(base, '.gsd', 'QUEUE-ORDER.json'), 'not json');
+  writeFileSync(join(base, '.sdd', 'QUEUE-ORDER.json'), 'not json');
   assert.deepStrictEqual(loadQueueOrder(base), null, 'returns null on corrupt JSON');
   cleanup(base);
 });
@@ -94,7 +94,7 @@ test('test block at line 90', () => {
 // Load returns null when order field is not an array
 test('test block at line 98', () => {
   const base = createFixtureBase();
-  writeFileSync(join(base, '.gsd', 'QUEUE-ORDER.json'), '{"order": "invalid"}');
+  writeFileSync(join(base, '.sdd', 'QUEUE-ORDER.json'), '{"order": "invalid"}');
   assert.deepStrictEqual(loadQueueOrder(base), null, 'returns null when order is not array');
   cleanup(base);
 });
@@ -115,7 +115,7 @@ test('pruneQueueOrder', () => {
 test('test block at line 121', () => {
   const base = createFixtureBase();
   pruneQueueOrder(base, ['M001']); // should not throw
-  assert.ok(!existsSync(join(base, '.gsd', 'QUEUE-ORDER.json')), 'prune does not create file');
+  assert.ok(!existsSync(join(base, '.sdd', 'QUEUE-ORDER.json')), 'prune does not create file');
   cleanup(base);
 });
 

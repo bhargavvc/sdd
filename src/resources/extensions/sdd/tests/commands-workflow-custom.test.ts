@@ -1,5 +1,5 @@
 /**
- * commands-workflow-custom.test.ts — Tests for `/gsd workflow` subcommands
+ * commands-workflow-custom.test.ts — Tests for `/sdd workflow` subcommands
  * and catalog completions.
  *
  * Uses real temp directories with actual definition YAML files.
@@ -74,7 +74,7 @@ function createMockPi() {
 
 /** Write a minimal valid workflow definition YAML to the expected location. */
 function writeDefinition(basePath: string, name: string, content: string): void {
-  const defsDir = join(basePath, ".gsd", "workflow-defs");
+  const defsDir = join(basePath, ".sdd", "workflow-defs");
   mkdirSync(defsDir, { recursive: true });
   writeFileSync(join(defsDir, `${name}.yaml`), content, "utf-8");
 }
@@ -178,16 +178,16 @@ describe("workflow command handler", () => {
     return { handled, notifications: ctx.notifications };
   }
 
-  it("bare '/gsd workflow' shows usage", async () => {
+  it("bare '/sdd workflow' shows usage", async () => {
     const { handled, notifications } = await callHandler("workflow");
     assert.ok(handled, "should be handled");
     assert.ok(
-      notifications.some((n) => n.message.includes("Usage: /gsd workflow")),
+      notifications.some((n) => n.message.includes("Usage: /sdd workflow")),
       "should show usage",
     );
   });
 
-  it("'/gsd workflow new' shows skill invocation message", async () => {
+  it("'/sdd workflow new' shows skill invocation message", async () => {
     const { handled, notifications } = await callHandler("workflow new");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -196,7 +196,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow run' without name shows usage warning", async () => {
+  it("'/sdd workflow run' without name shows usage warning", async () => {
     const { handled, notifications } = await callHandler("workflow run");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -205,7 +205,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow run nonexistent' shows error for missing definition", async () => {
+  it("'/sdd workflow run nonexistent' shows error for missing definition", async () => {
     const { handled, notifications } = await callHandler("workflow run nonexistent-def-12345");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -214,7 +214,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow validate' without name shows usage warning", async () => {
+  it("'/sdd workflow validate' without name shows usage warning", async () => {
     const { handled, notifications } = await callHandler("workflow validate");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -223,7 +223,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow validate nonexistent' shows definition not found", async () => {
+  it("'/sdd workflow validate nonexistent' shows definition not found", async () => {
     const { handled, notifications } = await callHandler("workflow validate nonexistent-def-12345");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -232,7 +232,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow pause' without custom engine shows warning", async () => {
+  it("'/sdd workflow pause' without custom engine shows warning", async () => {
     const { handled, notifications } = await callHandler("workflow pause");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -241,7 +241,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow resume' without custom engine shows warning", async () => {
+  it("'/sdd workflow resume' without custom engine shows warning", async () => {
     const { handled, notifications } = await callHandler("workflow resume");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -250,7 +250,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow unknown-sub' shows unknown subcommand", async () => {
+  it("'/sdd workflow unknown-sub' shows unknown subcommand", async () => {
     const { handled, notifications } = await callHandler("workflow blurble");
     assert.ok(handled, "should be handled");
     assert.ok(
@@ -259,7 +259,7 @@ describe("workflow command handler", () => {
     );
   });
 
-  it("'/gsd workflow list' with no runs shows empty message", async () => {
+  it("'/sdd workflow list' with no runs shows empty message", async () => {
     const { handled, notifications } = await callHandler("workflow list");
     assert.ok(handled, "should be handled");
     assert.ok(

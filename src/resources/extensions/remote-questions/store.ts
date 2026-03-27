@@ -8,7 +8,7 @@ import { homedir } from "node:os";
 import type { RemotePrompt, RemotePromptRecord, RemotePromptRef, RemoteAnswer, RemotePromptStatus } from "./types.js";
 
 function getGsdHome(): string {
-  return process.env.GSD_HOME || join(homedir(), ".gsd");
+  return process.env.SDD_HOME || join(homedir(), ".sdd");
 }
 
 function runtimeDir(): string {

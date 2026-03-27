@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  */
 function getDevRoot(): string {
   try {
-    const prefsPath = join(homedir(), ".gsd", "web-preferences.json");
+    const prefsPath = join(homedir(), ".sdd", "web-preferences.json");
     if (existsSync(prefsPath)) {
       const prefs = JSON.parse(readFileSync(prefsPath, "utf-8")) as Record<string, unknown>;
       if (typeof prefs.devRoot === "string" && prefs.devRoot) {

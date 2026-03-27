@@ -57,11 +57,11 @@ Returns: `Vec<{ path: String, branch: String, is_bare: bool }>`
 Implementation: `Repository::worktrees()` + individual worktree info
 
 ### 1.9 — `git_branch_list(repo_path, pattern?) -> Vec<String>`
-Replaces: `git branch --list milestone/*`, `git branch --list gsd/*` (doctor.ts, commands.ts, 3 calls)
+Replaces: `git branch --list milestone/*`, `git branch --list sdd/*` (doctor.ts, commands.ts, 3 calls)
 Returns: Branch names matching pattern
 
 ### 1.10 — `git_branch_list_merged(repo_path, target, pattern?) -> Vec<String>`
-Replaces: `git branch --merged main --list gsd/*` (commands.ts, 1 call)
+Replaces: `git branch --merged main --list sdd/*` (commands.ts, 1 call)
 Returns: Branch names merged into target
 
 ### 1.11 — `git_ls_files(repo_path, pathspec) -> Vec<String>`
@@ -209,7 +209,7 @@ Update each TypeScript file to use native bridge functions:
 ### 4.4 — auto.ts
 - `git rev-parse --git-dir` → use `nativeIsRepo()`
 - `git init -b` → use `nativeInit()`
-- `git add -A .gsd .gitignore && git commit` → use `nativeAddPaths()` + `nativeCommit()`
+- `git add -A .sdd .gitignore && git commit` → use `nativeAddPaths()` + `nativeCommit()`
 
 ### 4.5 — auto-supervisor.ts
 - `detectWorkingTreeActivity()` → use `nativeHasChanges()` (already exists!)

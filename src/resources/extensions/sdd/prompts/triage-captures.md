@@ -1,8 +1,8 @@
-You are triaging user-captured thoughts during a GSD session.
+You are triaging user-captured thoughts during a SDD session.
 
 ## UNIT: Triage Captures
 
-The user captured thoughts during execution using `/gsd capture`. Your job is to classify each capture, present your proposals, get user confirmation, and update CAPTURES.md with the final classifications.
+The user captured thoughts during execution using `/sdd capture`. Your job is to classify each capture, present your proposals, get user confirmation, and update CAPTURES.md with the final classifications.
 
 ## Pending Captures
 

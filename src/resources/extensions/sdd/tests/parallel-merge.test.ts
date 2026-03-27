@@ -54,8 +54,8 @@ function createTempRepo(): string {
   // Mirror production: .sdd/worktrees/ is gitignored so autoCommitDirtyState
   // doesn't pick up the worktrees directory as dirty state (#1127 fix).
   writeFileSync(join(dir, ".gitignore"), ".sdd/worktrees/\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   return dir;
@@ -81,7 +81,7 @@ function cleanup(dir: string): void {
 
 /** Set up a milestone roadmap file in .sdd/milestones/<MID>/ */
 function setupRoadmap(repo: string, mid: string, title: string, slices: string[]): void {
-  const dir = join(repo, ".gsd", "milestones", mid);
+  const dir = join(repo, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   const sliceLines = slices.map(s => `- [x] **${s}**`).join("\n");
   writeFileSync(
@@ -168,7 +168,7 @@ test("formatMergeResults — empty results", () => {
 
 test("formatMergeResults — successful merge", () => {
   const results: MergeResult[] = [
-    { milestoneId: "M001", success: true, commitMessage: "feat: Auth\n\nGSD-Milestone: M001\nBranch: milestone/M001", pushed: true },
+    { milestoneId: "M001", success: true, commitMessage: "feat: Auth\n\nSDD-Milestone: M001\nBranch: milestone/M001", pushed: true },
   ];
   const output = formatMergeResults(results);
   assert.ok(output.includes("M001"));
@@ -178,7 +178,7 @@ test("formatMergeResults — successful merge", () => {
 
 test("formatMergeResults — successful merge without push", () => {
   const results: MergeResult[] = [
-    { milestoneId: "M001", success: true, commitMessage: "feat: Auth\n\nGSD-Milestone: M001\nBranch: milestone/M001", pushed: false },
+    { milestoneId: "M001", success: true, commitMessage: "feat: Auth\n\nSDD-Milestone: M001\nBranch: milestone/M001", pushed: false },
   ];
   const output = formatMergeResults(results);
   assert.ok(output.includes("merged successfully"));
@@ -213,7 +213,7 @@ test("formatMergeResults — generic failure without conflict files", () => {
 
 test("formatMergeResults — mixed results", () => {
   const results: MergeResult[] = [
-    { milestoneId: "M001", success: true, commitMessage: "feat: OK\n\nGSD-Milestone: M001\nBranch: milestone/M001", pushed: false },
+    { milestoneId: "M001", success: true, commitMessage: "feat: OK\n\nSDD-Milestone: M001\nBranch: milestone/M001", pushed: false },
     { milestoneId: "M002", success: false, error: "conflict", conflictFiles: ["a.ts"] },
   ];
   const output = formatMergeResults(results);
@@ -229,7 +229,7 @@ test("formatMergeResults — mixed results", () => {
 
 test("mergeCompletedMilestone — missing roadmap returns error result", async () => {
   const base = join(tmpdir(), `parallel-merge-noroadmap-${Date.now()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   try {
     const result = await mergeCompletedMilestone(base, "M999");
     assert.equal(result.success, false);
@@ -263,7 +263,7 @@ test("mergeCompletedMilestone — clean merge, session status cleaned up", async
       cost: 1.5,
       lastHeartbeat: Date.now(),
       startedAt: Date.now() - 60000,
-      worktreePath: join(repo, ".gsd", "worktrees", "M010"),
+      worktreePath: join(repo, ".sdd", "worktrees", "M010"),
     });
 
     // Verify session status exists before merge
@@ -281,9 +281,9 @@ test("mergeCompletedMilestone — clean merge, session status cleaned up", async
     // Verify file merged to main
     assert.ok(existsSync(join(repo, "auth.ts")), "auth.ts should be on main");
 
-    // Verify commit on main (M010 is now in the body as a GSD-Milestone trailer)
+    // Verify commit on main (M010 is now in the body as a SDD-Milestone trailer)
     const log = run("git log -1 --format=%B main", repo);
-    assert.ok(log.includes("GSD-Milestone: M010"), "commit message should reference M010 in trailer");
+    assert.ok(log.includes("SDD-Milestone: M010"), "commit message should reference M010 in trailer");
 
     // Verify session status cleaned up
     const statusAfter = readSessionStatus(repo, "M010");

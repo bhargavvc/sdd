@@ -10,14 +10,14 @@
  * returns it with source URLs from grounding metadata.
  */
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
 	formatSize,
 	truncateHead,
-} from "@gsd/pi-coding-agent";
-import { Text } from "@gsd/pi-tui";
+} from "@sdd/pi-coding-agent";
+import { Text } from "@sdd/pi-tui";
 import { Type } from "@sinclair/typebox";
 
 // ── Types ────────────────────────────────────────────────────────────────────

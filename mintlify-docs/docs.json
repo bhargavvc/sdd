@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "GSD",
+  "name": "SDD",
   "logo": {
     "light": "/images/logo.svg",
     "dark": "/images/logo.svg",
-    "href": "https://gsd.build"
+    "href": "https://sdd.build"
   },
   "favicon": "/images/favicon.svg",
   "colors": {
@@ -33,7 +33,7 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/gsd-build/gsd-2"
+        "href": "https://github.com/sdd-build/sdd-2"
       }
     ],
     "primary": {
@@ -44,7 +44,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/gsd-build/gsd-2"
+      "github": "https://github.com/sdd-build/sdd-2"
     }
   },
   "navigation": {
@@ -96,6 +96,6 @@
     ]
   },
   "search": {
-    "prompt": "Search GSD docs..."
+    "prompt": "Search SDD docs..."
   }
 }

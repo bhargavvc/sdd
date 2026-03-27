@@ -62,7 +62,7 @@ function makeNotifyCtx(): NotifyCtx {
 
 /** Read all journal entries from a temp .sdd/journal directory. */
 function readJournalEntries(basePath: string): JournalEntry[] {
-  const journalDir = join(basePath, ".gsd", "journal");
+  const journalDir = join(basePath, ".sdd", "journal");
   try {
     const files = readdirSync(journalDir).filter(f => f.endsWith(".jsonl")).sort();
     const entries: JournalEntry[] = [];

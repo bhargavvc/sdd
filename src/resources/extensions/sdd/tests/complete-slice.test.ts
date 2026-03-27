@@ -13,7 +13,7 @@ import {
   getSlice,
   updateSliceStatus,
   getSliceTasks,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import { handleCompleteSlice } from '../tools/complete-slice.ts';
 import type { CompleteSliceParams } from '../types.ts';
 
@@ -24,7 +24,7 @@ const { assertEq, assertTrue, assertMatch, report } = createTestContext();
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDbPath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-complete-slice-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-complete-slice-'));
   return path.join(dir, 'test.db');
 }
 
@@ -50,15 +50,15 @@ function cleanupDir(dirPath: string): void {
 }
 
 /**
- * Create a temp project directory with .gsd structure and roadmap for handler tests.
+ * Create a temp project directory with .sdd structure and roadmap for handler tests.
  */
 function createTempProject(): { basePath: string; roadmapPath: string } {
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-slice-handler-'));
-  const sliceDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01');
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-slice-handler-'));
+  const sliceDir = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01');
   const tasksDir = path.join(sliceDir, 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
 
-  const roadmapPath = path.join(basePath, '.gsd', 'milestones', 'M001', 'M001-ROADMAP.md');
+  const roadmapPath = path.join(basePath, '.sdd', 'milestones', 'M001', 'M001-ROADMAP.md');
   fs.writeFileSync(roadmapPath, `# M001: Test Milestone
 
 ## Slices
@@ -88,7 +88,7 @@ function makeValidSliceParams(): CompleteSliceParams {
     keyDecisions: ['D001'],
     patternsEstablished: ['SliceRow/rowToSlice follows same pattern as TaskRow/rowToTask'],
     observabilitySurfaces: ['SELECT status FROM slices shows completion state'],
-    provides: ['complete_slice handler', 'gsd_slice_complete tool'],
+    provides: ['complete_slice handler', 'sdd_slice_complete tool'],
     requirementsSurfaced: [],
     drillDownPaths: ['milestones/M001/slices/S01/tasks/T01-SUMMARY.md'],
     affects: ['S02'],
@@ -383,8 +383,8 @@ console.log('\n=== complete-slice: handler with missing roadmap ===');
   openDatabase(dbPath);
 
   // Create a temp dir WITHOUT a roadmap file
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-no-roadmap-'));
-  const sliceDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01');
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-no-roadmap-'));
+  const sliceDir = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01');
   fs.mkdirSync(sliceDir, { recursive: true });
 
   // Set up DB state

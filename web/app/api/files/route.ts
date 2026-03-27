@@ -27,7 +27,7 @@ const PROJECT_SKIP_DIRS = new Set([
   ".parcel-cache",
 ]);
 
-type RootMode = "gsd" | "project";
+type RootMode = "sdd" | "project";
 
 interface FileNode {
   name: string;
@@ -36,7 +36,7 @@ interface FileNode {
 }
 
 function getGsdRoot(projectCwd: string): string {
-  return join(projectCwd, ".gsd");
+  return join(projectCwd, ".sdd");
 }
 
 function getRootForMode(mode: RootMode, projectCwd: string): string {
@@ -101,11 +101,11 @@ function buildTree(dirPath: string, skipDirs?: Set<string>, depth = 0, maxDepth 
 export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const pathParam = searchParams.get("path");
-  const rootParam = (searchParams.get("root") ?? "gsd") as RootMode;
+  const rootParam = (searchParams.get("root") ?? "sdd") as RootMode;
 
-  if (rootParam !== "gsd" && rootParam !== "project") {
+  if (rootParam !== "sdd" && rootParam !== "project") {
     return Response.json(
-      { error: `Invalid root: must be "gsd" or "project"` },
+      { error: `Invalid root: must be "sdd" or "project"` },
       { status: 400 },
     );
   }
@@ -172,15 +172,15 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  const { path: pathParam, content, root: rootParam = "gsd" } = body as {
+  const { path: pathParam, content, root: rootParam = "sdd" } = body as {
     path?: string;
     content?: unknown;
     root?: string;
   };
 
-  if (rootParam !== "gsd" && rootParam !== "project") {
+  if (rootParam !== "sdd" && rootParam !== "project") {
     return Response.json(
-      { error: `Invalid root: must be "gsd" or "project"` },
+      { error: `Invalid root: must be "sdd" or "project"` },
       { status: 400 },
     );
   }
@@ -238,15 +238,15 @@ export async function PATCH(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { from, to, root: rootParam = "gsd" } = body as {
+  const { from, to, root: rootParam = "sdd" } = body as {
     from?: string;
     to?: string;
     root?: string;
   };
 
-  if (rootParam !== "gsd" && rootParam !== "project") {
+  if (rootParam !== "sdd" && rootParam !== "project") {
     return Response.json(
-      { error: `Invalid root: must be "gsd" or "project"` },
+      { error: `Invalid root: must be "sdd" or "project"` },
       { status: 400 },
     );
   }
@@ -322,11 +322,11 @@ export async function PATCH(request: Request): Promise<Response> {
 export async function DELETE(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const pathParam = searchParams.get("path");
-  const rootParam = (searchParams.get("root") ?? "gsd") as RootMode;
+  const rootParam = (searchParams.get("root") ?? "sdd") as RootMode;
 
-  if (rootParam !== "gsd" && rootParam !== "project") {
+  if (rootParam !== "sdd" && rootParam !== "project") {
     return Response.json(
-      { error: `Invalid root: must be "gsd" or "project"` },
+      { error: `Invalid root: must be "sdd" or "project"` },
       { status: 400 },
     );
   }
@@ -378,15 +378,15 @@ export async function PUT(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { path: pathParam, type = "file", root: rootParam = "gsd" } = body as {
+  const { path: pathParam, type = "file", root: rootParam = "sdd" } = body as {
     path?: string;
     type?: "file" | "directory";
     root?: string;
   };
 
-  if (rootParam !== "gsd" && rootParam !== "project") {
+  if (rootParam !== "sdd" && rootParam !== "project") {
     return Response.json(
-      { error: `Invalid root: must be "gsd" or "project"` },
+      { error: `Invalid root: must be "sdd" or "project"` },
       { status: 400 },
     );
   }

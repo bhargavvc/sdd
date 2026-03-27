@@ -1,4 +1,4 @@
-// GSD Extension — Write Intercept for Agent State File Blocks
+// SDD Extension — Write Intercept for Agent State File Blocks
 // Detects agent attempts to write authoritative state files and returns
 // an error directing the agent to use the engine tool API instead.
 
@@ -21,9 +21,9 @@ const BLOCKED_PATTERNS: RegExp[] = [
   // Case-insensitive to prevent bypass on macOS (case-insensitive APFS).
   // (^|[/\\]) matches both absolute paths (/project/.sdd/…) and bare relative
   // paths (.sdd/STATE.md) so a path without a leading separator is also blocked.
-  /(^|[/\\])\.gsd[/\\]STATE\.md$/i,
+  /(^|[/\\])\.sdd[/\\]STATE\.md$/i,
   // Also match resolved symlink paths under ~/.sdd/projects/ (Pitfall #6)
-  /(^|[/\\])\.gsd[/\\]projects[/\\][^/\\]+[/\\]STATE\.md$/i,
+  /(^|[/\\])\.sdd[/\\]projects[/\\][^/\\]+[/\\]STATE\.md$/i,
 ];
 
 /**
@@ -82,9 +82,9 @@ function matchesBlockedPattern(path: string): boolean {
  * Directs the agent to use engine tool calls instead.
  */
 export const BLOCKED_WRITE_ERROR = `Direct writes to .sdd/STATE.md are blocked. Use engine tool calls instead:
-- To complete a task: call gsd_complete_task(milestone_id, slice_id, task_id, summary)
-- To complete a slice: call gsd_complete_slice(milestone_id, slice_id, summary, uat_result)
-- To save a decision: call gsd_save_decision(scope, decision, choice, rationale)
-- To start a task: call gsd_start_task(milestone_id, slice_id, task_id)
-- To record verification: call gsd_record_verification(milestone_id, slice_id, task_id, evidence)
-- To report a blocker: call gsd_report_blocker(milestone_id, slice_id, task_id, description)`;
+- To complete a task: call sdd_complete_task(milestone_id, slice_id, task_id, summary)
+- To complete a slice: call sdd_complete_slice(milestone_id, slice_id, summary, uat_result)
+- To save a decision: call sdd_save_decision(scope, decision, choice, rationale)
+- To start a task: call sdd_start_task(milestone_id, slice_id, task_id)
+- To record verification: call sdd_record_verification(milestone_id, slice_id, task_id, evidence)
+- To report a blocker: call sdd_report_blocker(milestone_id, slice_id, task_id, description)`;

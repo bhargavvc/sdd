@@ -77,9 +77,9 @@ describe("DevWorkflowEngine", () => {
     const { DevWorkflowEngine } = await import("../dev-workflow-engine.ts");
     const engine = new DevWorkflowEngine();
 
-    // Create a minimal temp .gsd structure for deriveState
-    const tempDir = mkdtempSync(join(tmpdir(), "gsd-engine-test-"));
-    mkdirSync(join(tempDir, ".gsd", "milestones"), { recursive: true });
+    // Create a minimal temp .sdd structure for deriveState
+    const tempDir = mkdtempSync(join(tmpdir(), "sdd-engine-test-"));
+    mkdirSync(join(tempDir, ".sdd", "milestones"), { recursive: true });
 
     t.after(() => rmSync(tempDir, { recursive: true, force: true }));
 
@@ -171,7 +171,7 @@ describe("DevWorkflowEngine", () => {
     assert.ok("currentPhase" in meta, "should have currentPhase");
     assert.ok("progressSummary" in meta, "should have progressSummary");
     assert.ok("stepCount" in meta, "should have stepCount");
-    assert.equal(meta.engineLabel, "GSD Dev");
+    assert.equal(meta.engineLabel, "SDD Dev");
   });
 });
 
@@ -266,22 +266,22 @@ describe("Resolver routing", () => {
 
 // ── Kill switch ─────────────────────────────────────────────────────────────
 
-describe("Kill switch (GSD_ENGINE_BYPASS)", () => {
-  const originalBypass = process.env.GSD_ENGINE_BYPASS;
+describe("Kill switch (SDD_ENGINE_BYPASS)", () => {
+  const originalBypass = process.env.SDD_ENGINE_BYPASS;
 
   after(() => {
     // Restore original env var state
     if (originalBypass === undefined) {
-      delete process.env.GSD_ENGINE_BYPASS;
+      delete process.env.SDD_ENGINE_BYPASS;
     } else {
-      process.env.GSD_ENGINE_BYPASS = originalBypass;
+      process.env.SDD_ENGINE_BYPASS = originalBypass;
     }
   });
 
-  test("GSD_ENGINE_BYPASS=1 does not affect resolveEngine (bypass checked in autoLoop)", async (t) => {
+  test("SDD_ENGINE_BYPASS=1 does not affect resolveEngine (bypass checked in autoLoop)", async (t) => {
     const { resolveEngine } = await import("../engine-resolver.ts");
-    process.env.GSD_ENGINE_BYPASS = "1";
-    t.after(() => delete process.env.GSD_ENGINE_BYPASS);
+    process.env.SDD_ENGINE_BYPASS = "1";
+    t.after(() => delete process.env.SDD_ENGINE_BYPASS);
 
     // resolveEngine should still resolve normally — bypass is checked in autoLoop
     const { engine } = resolveEngine({ activeEngineId: null });

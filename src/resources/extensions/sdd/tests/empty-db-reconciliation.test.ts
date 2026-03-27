@@ -18,16 +18,16 @@ import {
   openDatabase,
   closeDatabase,
   getAllMilestones,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 test("deriveState populates empty DB from disk milestones (#2631)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-empty-db-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-empty-db-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
 
   try {
     // Create a milestone on disk with a CONTEXT file (not a ghost)
     writeFileSync(
-      join(base, ".gsd", "milestones", "M001", "M001-CONTEXT.md"),
+      join(base, ".sdd", "milestones", "M001", "M001-CONTEXT.md"),
       "# M001: Test Milestone\n\nSome context about this milestone.",
     );
 
@@ -59,9 +59,9 @@ test("deriveState populates empty DB from disk milestones (#2631)", async () => 
 });
 
 test("deriveState does NOT insert ghost milestones into DB (#2631 guard)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-empty-db-"));
+  const base = mkdtempSync(join(tmpdir(), "sdd-empty-db-"));
   // Create a ghost milestone directory (empty — no CONTEXT, no ROADMAP)
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
 
   try {
     openDatabase(":memory:");

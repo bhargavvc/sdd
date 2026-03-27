@@ -1,16 +1,16 @@
 /**
- * Direct phase dispatch — handles manual /gsd dispatch commands.
+ * Direct phase dispatch — handles manual /sdd dispatch commands.
  * Resolves phase name → unit type + prompt, creates a session, and sends the message.
  */
 
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
-} from "@gsd/pi-coding-agent";
+} from "@sdd/pi-coding-agent";
 
 import { deriveState } from "./state.js";
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices } from "./sdd-db.js";
 import { parseRoadmap } from "./parsers-legacy.js";
 import {
   resolveMilestoneFile, resolveSliceFile, relSliceFile,
@@ -69,7 +69,7 @@ export async function dispatchDirectPhase(
         const requireDiscussion = loadEffectiveSDDPreferences()?.preferences?.phases?.require_slice_discussion;
         if (requireDiscussion && !sliceContextFile) {
           ctx.ui.notify(
-            `Slice ${sid} requires discussion before planning. Run /gsd discuss to discuss this slice, then /gsd auto to resume.`,
+            `Slice ${sid} requires discussion before planning. Run /sdd discuss to discuss this slice, then /sdd auto to resume.`,
             "info",
           );
           await pauseAuto(ctx, pi);
@@ -250,7 +250,7 @@ export async function dispatchDirectPhase(
     return;
   }
   pi.sendMessage(
-    { customType: "gsd-dispatch", content: prompt, display: false },
+    { customType: "sdd-dispatch", content: prompt, display: false },
     { triggerTurn: true },
   );
 }

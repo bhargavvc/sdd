@@ -118,7 +118,7 @@ describe("createGridLayout", () => {
           return `surface-${nextId++}`;
         };
 
-        const rightCol = await createSplitFrom("gsd-surface", "right");
+        const rightCol = await createSplitFrom("sdd-surface", "right");
         surfaces.push(rightCol);
         if (count === 1) return surfaces;
 
@@ -126,7 +126,7 @@ describe("createGridLayout", () => {
         surfaces.push(bottomRight);
         if (count === 2) return surfaces;
 
-        const bottomLeft = await createSplitFrom("gsd-surface", "down");
+        const bottomLeft = await createSplitFrom("sdd-surface", "down");
         surfaces.push(bottomLeft);
         if (count === 3) return surfaces;
 
@@ -148,7 +148,7 @@ describe("createGridLayout", () => {
     const surfaces = await mock.createGridLayout(1);
     assert.equal(surfaces.length, 1);
     assert.deepEqual(mock.calls, [
-      { source: "gsd-surface", direction: "right" },
+      { source: "sdd-surface", direction: "right" },
     ]);
   });
 
@@ -157,19 +157,19 @@ describe("createGridLayout", () => {
     const surfaces = await mock.createGridLayout(2);
     assert.equal(surfaces.length, 2);
     assert.deepEqual(mock.calls, [
-      { source: "gsd-surface", direction: "right" },
+      { source: "sdd-surface", direction: "right" },
       { source: "surface-1", direction: "down" },
     ]);
   });
 
-  test("3 agents creates 2x2 grid (gsd + 3 agent surfaces)", async () => {
+  test("3 agents creates 2x2 grid (sdd + 3 agent surfaces)", async () => {
     const mock = makeMockClient();
     const surfaces = await mock.createGridLayout(3);
     assert.equal(surfaces.length, 3);
     assert.deepEqual(mock.calls, [
-      { source: "gsd-surface", direction: "right" },
+      { source: "sdd-surface", direction: "right" },
       { source: "surface-1", direction: "down" },
-      { source: "gsd-surface", direction: "down" },
+      { source: "sdd-surface", direction: "down" },
     ]);
   });
 
@@ -178,9 +178,9 @@ describe("createGridLayout", () => {
     const surfaces = await mock.createGridLayout(4);
     assert.equal(surfaces.length, 4);
     assert.deepEqual(mock.calls, [
-      { source: "gsd-surface", direction: "right" },
+      { source: "sdd-surface", direction: "right" },
       { source: "surface-1", direction: "down" },
-      { source: "gsd-surface", direction: "down" },
+      { source: "sdd-surface", direction: "down" },
       { source: "surface-2", direction: "down" },
     ]);
   });

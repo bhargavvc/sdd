@@ -1,5 +1,5 @@
 /**
- * GSD Forensics — Post-mortem investigation of auto-mode failures
+ * SDD Forensics — Post-mortem investigation of auto-mode failures
  *
  * Programmatically scans activity logs, metrics, crash locks, and doctor
  * diagnostics for anomalies, then hands a structured report to the LLM
@@ -8,7 +8,7 @@
  * Entry point: handleForensics() called from commands.ts
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,7 @@ import {
   formatCost, formatTokenCount, type UnitMetrics, type MetricsLedger,
 } from "./metrics.js";
 import { readCrashLock, isLockProcessAlive, formatCrashInfo, type LockData } from "./crash-recovery.js";
-import { runGSDDoctor, formatDoctorIssuesForPrompt, type DoctorIssue } from "./doctor.js";
+import { runSDDDoctor, formatDoctorIssuesForPrompt, type DoctorIssue } from "./doctor.js";
 import { verifyExpectedArtifact } from "./auto-recovery.js";
 import { deriveState } from "./state.js";
 import { isAutoActive } from "./auto.js";
@@ -54,7 +54,7 @@ interface UnitTrace {
   mtime: number;
 }
 
-/** Summary of .gsd/activity/ directory metadata. */
+/** Summary of .sdd/activity/ directory metadata. */
 interface ActivityLogMeta {
   fileCount: number;
   totalSizeBytes: number;
@@ -63,7 +63,7 @@ interface ActivityLogMeta {
 }
 
 /**
- * Summary of .gsd/journal/ data for forensic investigation.
+ * Summary of .sdd/journal/ data for forensic investigation.
  *
  * To avoid loading huge journal histories into memory, only the most recent
  * daily files are fully parsed. Older files are line-counted for totals.
@@ -114,17 +114,17 @@ Before offering to create a GitHub issue, you MUST search for existing issues an
 
 1. **Search closed issues** for similar keywords from your diagnosis:
    \`\`\`
-   gh issue list --repo gsd-build/gsd-2 --state closed --search "<keywords from root cause>" --limit 20
+   gh issue list --repo sdd-build/sdd-2 --state closed --search "<keywords from root cause>" --limit 20
    \`\`\`
 
 2. **Search open PRs** that might contain the fix:
    \`\`\`
-   gh pr list --repo gsd-build/gsd-2 --state open --search "<keywords>" --limit 10
+   gh pr list --repo sdd-build/sdd-2 --state open --search "<keywords>" --limit 10
    \`\`\`
 
 3. **Search merged PRs** that may have already fixed this:
    \`\`\`
-   gh pr list --repo gsd-build/gsd-2 --state merged --search "<keywords>" --limit 10
+   gh pr list --repo sdd-build/sdd-2 --state merged --search "<keywords>" --limit 10
    \`\`\`
 
 ### Analysis
@@ -139,7 +139,7 @@ For each result, compare it against your root-cause diagnosis:
 If you find potential matches, present them to the user:
 
 1. **"Already fixed by PR #X — skip issue creation"** — when a merged PR or closed issue clearly addresses the same root cause. Explain why you believe it matches.
-2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo gsd-build/gsd-2\` to add forensic evidence.
+2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo sdd-build/sdd-2\` to add forensic evidence.
 3. **"Create new issue anyway"** — when existing results do not cover this specific failure.
 
 Only proceed to issue creation if no matches were found OR the user explicitly chooses "Create new issue anyway".
@@ -155,7 +155,7 @@ async function writeForensicsDedupPref(ctx: ExtensionCommandContext, enabled: bo
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
   const raw = existsSync(prefsPath) ? readFileSync(prefsPath, "utf-8") : "";
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
   const start = raw.startsWith("---\n") ? 4 : raw.startsWith("---\r\n") ? 5 : -1;
   if (start !== -1) {
     const closingIdx = raw.indexOf("\n---", start);
@@ -183,7 +183,7 @@ export async function handleForensics(
   const basePath = process.cwd();
   const root = gsdRoot(basePath);
   if (!existsSync(root)) {
-    ctx.ui.notify("No GSD state found. Run /gsd auto first.", "warning");
+    ctx.ui.notify("No SDD state found. Run /sdd auto first.", "warning");
     return;
   }
 
@@ -227,12 +227,12 @@ export async function handleForensics(
   const report = await buildForensicReport(basePath);
   const savedPath = saveForensicReport(basePath, report, problemDescription);
 
-  // Derive GSD source dir for prompt — fall back to ~/.sdd/agent/extensions/sdd/
+  // Derive SDD source dir for prompt — fall back to ~/.sdd/agent/extensions/sdd/
   // when import.meta.url resolves to the npm-global install path (Windows).
   let gsdSourceDir = dirname(fileURLToPath(import.meta.url));
   if (!existsSync(join(gsdSourceDir, "prompts"))) {
-    const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
-    const fallback = join(gsdHome, "agent", "extensions", "gsd");
+    const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+    const fallback = join(gsdHome, "agent", "extensions", "sdd");
     if (existsSync(join(fallback, "prompts"))) gsdSourceDir = fallback;
   }
 
@@ -247,7 +247,7 @@ export async function handleForensics(
   ctx.ui.notify(`Forensic report saved: ${relative(basePath, savedPath)}`, "info");
 
   pi.sendMessage(
-    { customType: "gsd-forensics", content, display: false },
+    { customType: "sdd-forensics", content, display: false },
     { triggerTurn: true },
   );
 }
@@ -284,7 +284,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   // 6. Run doctor
   let doctorIssues: DoctorIssue[] = [];
   try {
-    const report = await runGSDDoctor(basePath, { scope: undefined });
+    const report = await runSDDDoctor(basePath, { scope: undefined });
     doctorIssues = report.issues;
   } catch { /* doctor failure is non-fatal */ }
 
@@ -304,10 +304,10 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
     }
   }
 
-  // 8. GSD version — use GSD_VERSION env var set by the loader at startup.
+  // 8. SDD version — use SDD_VERSION env var set by the loader at startup.
   // Extensions run from ~/.sdd/agent/extensions/sdd/ at runtime, so path-traversal
   // from import.meta.url would resolve to ~/package.json (wrong on every system).
-  const gsdVersion = process.env.GSD_VERSION || "unknown";
+  const gsdVersion = process.env.SDD_VERSION || "unknown";
 
   // 9. Scan journal for flow timeline and structured events
   const journalSummary = scanJournalForForensics(basePath);
@@ -630,7 +630,7 @@ function detectTimeouts(traces: UnitTrace[], anomalies: ForensicAnomaly[]): void
     // Check for timeout-recovery custom messages in tool calls
     const hasTimeout = ut.trace.toolCalls.some(tc =>
       tc.name === "sendmessage" &&
-      JSON.stringify(tc.input).includes("gsd-auto-timeout-recovery"),
+      JSON.stringify(tc.input).includes("sdd-auto-timeout-recovery"),
     );
     // Check for timeout keywords in last reasoning
     const reasoningTimeout = ut.trace.lastReasoning &&
@@ -789,10 +789,10 @@ function saveForensicReport(basePath: string, report: ForensicReport, problemDes
   const redact = (s: string) => redactForGitHub(s, basePath);
 
   const sections: string[] = [
-    `# GSD Forensic Report`,
+    `# SDD Forensic Report`,
     ``,
     `**Generated:** ${report.timestamp}`,
-    `**GSD Version:** ${report.gsdVersion}`,
+    `**SDD Version:** ${report.gsdVersion}`,
     `**Active Milestone:** ${report.activeMilestone ?? "none"}`,
     `**Active Slice:** ${report.activeSlice ?? "none"}`,
     `**Active Worktree:** ${report.activeWorktree ?? "none"}`,
@@ -1010,7 +1010,7 @@ function formatReportForPrompt(report: ForensicReport): string {
 
   // Completed keys count
   sections.push(`### Completed Keys: ${report.completedKeys.length}`);
-  sections.push(`### GSD Version: ${report.gsdVersion}`);
+  sections.push(`### SDD Version: ${report.gsdVersion}`);
   sections.push(`### Active Milestone: ${report.activeMilestone ?? "none"}`);
   sections.push(`### Active Slice: ${report.activeSlice ?? "none"}`);
   if (report.activeWorktree) {

@@ -202,8 +202,8 @@ Once the user is satisfied, in a single pass:
 When writing context.md, preserve the user's exact terminology, emphasis, and specific framing from the discussion. Do not paraphrase user nuance into generic summaries. If the user said "craft feel," write "craft feel" — not "high-quality user experience." If they emphasized a specific constraint or negative requirement, carry that emphasis through verbatim. The context file is downstream agents' only window into this conversation — flattening specifics into generics loses the signal that shaped every decision.
 
 4. Write `{{contextPath}}` — use the **Context** output template below. Preserve key risks, unknowns, existing codebase constraints, integration points, and relevant requirements surfaced during discussion.
-5. Call `gsd_plan_milestone` to create the roadmap. Decompose into demoable vertical slices with risk, depends, demo sentences, proof strategy, verification classes, milestone definition of done, requirement coverage, and a boundary map. If the milestone crosses multiple runtime boundaries, include an explicit final integration slice that proves the assembled system works end-to-end in a real environment. Use the **Roadmap** output template below to structure the tool call parameters.
-6. For each architectural or pattern decision made during discussion, call `gsd_decision_save` — the tool auto-assigns IDs and regenerates `.sdd/DECISIONS.md` automatically.
+5. Call `sdd_plan_milestone` to create the roadmap. Decompose into demoable vertical slices with risk, depends, demo sentences, proof strategy, verification classes, milestone definition of done, requirement coverage, and a boundary map. If the milestone crosses multiple runtime boundaries, include an explicit final integration slice that proves the assembled system works end-to-end in a real environment. Use the **Roadmap** output template below to structure the tool call parameters.
+6. For each architectural or pattern decision made during discussion, call `sdd_decision_save` — the tool auto-assigns IDs and regenerates `.sdd/DECISIONS.md` automatically.
 7. {{commitInstruction}}
 
 After writing the files, say exactly: "Milestone {{milestoneId}} ready." — nothing else. Auto-mode will start automatically.
@@ -214,15 +214,15 @@ Once the user confirms the milestone split:
 
 #### Phase 1: Shared artifacts
 
-1. For each milestone, call `gsd_milestone_generate_id` to get its ID — never invent milestone IDs manually. Then `mkdir -p .sdd/milestones/<ID>/slices`.
+1. For each milestone, call `sdd_milestone_generate_id` to get its ID — never invent milestone IDs manually. Then `mkdir -p .sdd/milestones/<ID>/slices`.
 2. Write `.sdd/PROJECT.md` — use the **Project** output template below.
 3. Write `.sdd/REQUIREMENTS.md` — use the **Requirements** output template below. Capture Active, Deferred, Out of Scope, and any already Validated requirements. Later milestones may have provisional ownership where slice plans do not exist yet.
-4. For any architectural or pattern decisions made during discussion, call `gsd_decision_save` — the tool auto-assigns IDs and regenerates `.sdd/DECISIONS.md` automatically.
+4. For any architectural or pattern decisions made during discussion, call `sdd_decision_save` — the tool auto-assigns IDs and regenerates `.sdd/DECISIONS.md` automatically.
 
 #### Phase 2: Primary milestone
 
 5. Write a full `CONTEXT.md` for the primary milestone (the one discussed in depth).
-6. Call `gsd_plan_milestone` for **only the primary milestone** — detail-planning later milestones now is waste because the codebase will change. Include requirement coverage and a milestone definition of done.
+6. Call `sdd_plan_milestone` for **only the primary milestone** — detail-planning later milestones now is waste because the codebase will change. Include requirement coverage and a milestone definition of done.
 
 #### MANDATORY: depends_on Frontmatter in CONTEXT.md
 
@@ -243,8 +243,8 @@ If a milestone has no dependencies, omit the frontmatter. The dependency chain f
 For each remaining milestone **one at a time, in sequence**, decide the most likely readiness mode from the evidence you already have, then use `ask_user_questions` to let the user correct that recommendation. Present three options:
 
 - **"Discuss now"** — The user wants to conduct a focused discussion for this milestone in the current session, while the context from the broader discussion is still fresh. Proceed with a focused discussion for this milestone (reflection → investigation → questioning → depth verification). When the discussion concludes, write a full `CONTEXT.md`. Then move to the gate for the next milestone.
-- **"Write draft for later"** — This milestone has seed material from the current conversation but needs its own dedicated discussion in a future session. Write a `CONTEXT-DRAFT.md` capturing the seed material (what was discussed, key ideas, provisional scope, open questions). Mark it clearly as a draft, not a finalized context. **What happens downstream:** When auto-mode reaches this milestone, it pauses and notifies the user: "M00x has draft context — needs discussion. Run /gsd." The `/gsd` wizard shows a "Discuss from draft" option that seeds the new discussion with this draft, so nothing from the current conversation is lost. After the dedicated discussion produces a full CONTEXT.md, the draft file is automatically deleted.
-- **"Just queue it"** — This milestone is identified but intentionally left without context. No context file is written — the directory already exists from Phase 1. **What happens downstream:** When auto-mode reaches this milestone, it pauses and notifies the user to run /gsd. The wizard starts a full discussion from scratch.
+- **"Write draft for later"** — This milestone has seed material from the current conversation but needs its own dedicated discussion in a future session. Write a `CONTEXT-DRAFT.md` capturing the seed material (what was discussed, key ideas, provisional scope, open questions). Mark it clearly as a draft, not a finalized context. **What happens downstream:** When auto-mode reaches this milestone, it pauses and notifies the user: "M00x has draft context — needs discussion. Run /sdd." The `/sdd` wizard shows a "Discuss from draft" option that seeds the new discussion with this draft, so nothing from the current conversation is lost. After the dedicated discussion produces a full CONTEXT.md, the draft file is automatically deleted.
+- **"Just queue it"** — This milestone is identified but intentionally left without context. No context file is written — the directory already exists from Phase 1. **What happens downstream:** When auto-mode reaches this milestone, it pauses and notifies the user to run /sdd. The wizard starts a full discussion from scratch.
 
 **When "Discuss now" is chosen — Technical Assumption Verification is MANDATORY:**
 

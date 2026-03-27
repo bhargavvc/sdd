@@ -1,5 +1,5 @@
 /**
- * GSD Skill Catalog — Curated skill packs mapped to tech stacks.
+ * SDD Skill Catalog — Curated skill packs mapped to tech stacks.
  *
  * Each pack maps a detected (or user-chosen) tech stack to a skills.sh
  * repo + specific skill names.  The init wizard uses this catalog to
@@ -16,7 +16,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { showNextAction } from "../shared/tui.js";
 import type { ProjectSignals, XcodePlatform } from "./detection.js";
 
@@ -642,7 +642,7 @@ export const SKILL_CATALOG: SkillPack[] = [
  * NOT shown directly to users during init (greenfield installs essentials
  * only and defers stack-specific skills).  These mappings are available for:
  *   1. The LLM to install skills after establishing a design
- *   2. The `/gsd skills` command (explicit user request)
+ *   2. The `/sdd skills` command (explicit user request)
  *   3. Re-running brownfield detection after project files are created
  */
 export const GREENFIELD_STACKS: Array<{
@@ -957,7 +957,7 @@ export function isPackInstalled(pack: SkillPack): boolean {
  *   Installs essential packs only (find-skills, skill-creator, etc.).
  *   Stack-specific skills are deferred — once the LLM establishes a design
  *   and creates project files (package.json, firebase.json, etc.), brownfield
- *   detection will pick them up on the next `gsd init` or via auto-mode
+ *   detection will pick them up on the next `sdd init` or via auto-mode
  *   skill discovery.
  *
  * Returns the list of installed pack labels.
@@ -1006,7 +1006,7 @@ export async function runSkillInstallStep(
 
     const totalSkills = toInstall.reduce((n, p) => n + p.skills.length, 0);
     const choice = await showNextAction(ctx, {
-      title: "GSD — Install Skills",
+      title: "SDD — Install Skills",
       summary: summaryLines,
       actions: [
         {
@@ -1021,7 +1021,7 @@ export async function runSkillInstallStep(
           description: "Install skills later with npx skills add",
         },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /sdd init when ready.",
     });
 
     if (choice === "install") {
@@ -1045,9 +1045,9 @@ export async function runSkillInstallStep(
 
     const totalSkills = essentials.reduce((n, p) => n + p.skills.length, 0);
     const choice = await showNextAction(ctx, {
-      title: "GSD — Install Essential Skills",
+      title: "SDD — Install Essential Skills",
       summary: [
-        "GSD will install essential agent skills (skill discovery, authoring,",
+        "SDD will install essential agent skills (skill discovery, authoring,",
         "browser automation, document handling).",
         "",
         "Stack-specific skills (React, Swift, Python, etc.) will be recommended",
@@ -1066,7 +1066,7 @@ export async function runSkillInstallStep(
           description: "Install skills later with npx skills add",
         },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /sdd init when ready.",
     });
 
     if (choice === "install") {

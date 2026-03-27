@@ -17,7 +17,7 @@ const metricsSrc = readFileSync(join(__dirname, "..", "metrics.ts"), "utf-8");
 const dashboardSrc = readFileSync(join(__dirname, "..", "auto-dashboard.ts"), "utf-8");
 
 // ─── Extract pure functions from metrics.ts source ────────────────────────
-// Can't import directly due to paths.js → @gsd/pi-coding-agent import chain.
+// Can't import directly due to paths.js → @sdd/pi-coding-agent import chain.
 // Extract and evaluate the pure math functions.
 
 interface MockUnitMetrics {

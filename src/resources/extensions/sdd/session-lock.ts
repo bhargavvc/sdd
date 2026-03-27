@@ -1,7 +1,7 @@
 /**
- * GSD Session Lock — OS-level exclusive locking for auto-mode sessions.
+ * SDD Session Lock — OS-level exclusive locking for auto-mode sessions.
  *
- * Prevents multiple GSD processes from running auto-mode concurrently on
+ * Prevents multiple SDD processes from running auto-mode concurrently on
  * the same project. Uses proper-lockfile for OS-level file locking (flock/
  * lockfile) which eliminates the TOCTOU race condition that existed with
  * the old advisory JSON lock approach.
@@ -96,7 +96,7 @@ function lockPath(basePath: string): string {
  * that accumulate from macOS file conflict resolution (iCloud/Dropbox/OneDrive)
  * or other filesystem-level copy-on-conflict behavior (#1315).
  *
- * Also removes stray proper-lockfile directories beyond the canonical `.gsd.lock/`.
+ * Also removes stray proper-lockfile directories beyond the canonical `.sdd.lock/`.
  */
 export function cleanupStrayLockFiles(basePath: string): void {
   const gsdDir = gsdRoot(basePath);
@@ -113,14 +113,14 @@ export function cleanupStrayLockFiles(basePath: string): void {
     }
   } catch { /* non-fatal: directory read failure */ }
 
-  // Clean stray proper-lockfile directories (e.g. ".gsd 2.lock/")
-  // The canonical one is ".gsd.lock/" — anything else is stray.
+  // Clean stray proper-lockfile directories (e.g. ".sdd 2.lock/")
+  // The canonical one is ".sdd.lock/" — anything else is stray.
   try {
     const parentDir = dirname(gsdDir);
-    const gsdDirName = gsdDir.split("/").pop() || ".gsd";
+    const gsdDirName = gsdDir.split("/").pop() || ".sdd";
     if (existsSync(parentDir)) {
       for (const entry of readdirSync(parentDir)) {
-        // Match ".gsd <N>.lock" or ".gsd (<N>).lock" directories but NOT ".gsd.lock"
+        // Match ".sdd <N>.lock" or ".sdd (<N>).lock" directories but NOT ".sdd.lock"
         if (entry !== `${gsdDirName}.lock` && entry.startsWith(gsdDirName) && entry.endsWith(".lock")) {
           const fullPath = join(parentDir, entry);
           try {
@@ -140,9 +140,9 @@ export function cleanupStrayLockFiles(basePath: string): void {
  * Uses module-level references so it always operates on current state.
  * Only registers once — subsequent calls are no-ops.
  */
-function ensureExitHandler(_gsdDir: string): void {
+function ensureExitHandler(_sddDir: string): void {
   // Register the gsdDir so exit cleanup covers it
-  _lockDirRegistry.add(_gsdDir);
+  _lockDirRegistry.add(_sddDir);
 
   if (_exitHandlerRegistered) return;
   _exitHandlerRegistered = true;
@@ -189,14 +189,14 @@ function createLockCompromisedHandler(lockFilePath: string): () => void {
     const elapsed = Date.now() - _lockAcquiredAt;
     if (elapsed < 1_800_000) {
       process.stderr.write(
-        `[gsd] Lock heartbeat caught up after ${Math.round(elapsed / 1000)}s — long LLM call, no action needed.\n`,
+        `[sdd] Lock heartbeat caught up after ${Math.round(elapsed / 1000)}s — long LLM call, no action needed.\n`,
       );
       return;
     }
     const existing = readExistingLockDataWithRetry(lockFilePath);
     if (existing && existing.pid === process.pid) {
       process.stderr.write(
-        `[gsd] Lock heartbeat mismatch after ${Math.round(elapsed / 1000)}s — lock file still owned by PID ${process.pid}, treating as false positive.\n`,
+        `[sdd] Lock heartbeat mismatch after ${Math.round(elapsed / 1000)}s — lock file still owned by PID ${process.pid}, treating as false positive.\n`,
       );
       return;
     }
@@ -290,7 +290,7 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
 
     return { acquired: true };
   } catch (err) {
-    // Lock is held by another process — or the .gsd.lock/ directory is stranded.
+    // Lock is held by another process — or the .sdd.lock/ directory is stranded.
     // Check: if auto.lock is gone and no process is alive, the lock dir is stale.
     const existingData = readExistingLockData(lp);
     const existingPid = existingData?.pid;
@@ -412,7 +412,7 @@ export function getSessionLockStatus(basePath: string): SessionLockStatus {
         const result = acquireSessionLock(basePath);
         if (result.acquired) {
           process.stderr.write(
-            `[gsd] Lock recovered after onCompromised — lock file PID matched, re-acquired.\n`,
+            `[sdd] Lock recovered after onCompromised — lock file PID matched, re-acquired.\n`,
           );
           return { valid: true, recovered: true };
         }
@@ -483,7 +483,7 @@ export function releaseSessionLock(basePath: string): void {
     // Non-fatal
   }
 
-  // Remove the proper-lockfile directory (.gsd.lock/) for the current path
+  // Remove the proper-lockfile directory (.sdd.lock/) for the current path
   try {
     const lockDir = join(gsdRoot(basePath) + ".lock");
     if (existsSync(lockDir)) rmSync(lockDir, { recursive: true, force: true });

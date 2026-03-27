@@ -9,9 +9,9 @@
  * Context overflow errors are NOT handled here (see compaction).
  */
 
-import type { Agent } from "@gsd/pi-agent-core";
-import type { AssistantMessage, Model } from "@gsd/pi-ai";
-import { isContextOverflow } from "@gsd/pi-ai";
+import type { Agent } from "@sdd/pi-agent-core";
+import type { AssistantMessage, Model } from "@sdd/pi-ai";
+import { isContextOverflow } from "@sdd/pi-ai";
 import type { UsageLimitErrorType } from "./auth-storage.js";
 import type { FallbackResolver } from "./fallback-resolver.js";
 import type { ModelRegistry } from "./model-registry.js";

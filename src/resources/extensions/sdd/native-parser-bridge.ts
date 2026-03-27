@@ -1,4 +1,4 @@
-// Native GSD Parser Bridge
+// Native SDD Parser Bridge
 // Provides drop-in replacements for the JS parsing functions in files.ts,
 // backed by the Rust native parser for better performance on large projects.
 //
@@ -8,7 +8,7 @@ import type { Roadmap, BoundaryMapEntry, RoadmapSliceEntry, RiskLevel } from './
 
 // Issue #453: auto-mode post-turn reconciliation must stay on the stable JS path
 // unless the native parser is explicitly requested.
-const NATIVE_GSD_PARSER_ENABLED = process.env.GSD_ENABLE_NATIVE_GSD_PARSER === "1";
+const NATIVE_SDD_PARSER_ENABLED = process.env.SDD_ENABLE_NATIVE_SDD_PARSER === "1";
 
 let nativeModule: {
   parseFrontmatter: (content: string) => { metadata: string; body: string };
@@ -33,12 +33,12 @@ let loadAttempted = false;
 function loadNative(): typeof nativeModule {
   if (loadAttempted) return nativeModule;
   loadAttempted = true;
-  if (!NATIVE_GSD_PARSER_ENABLED) return nativeModule;
+  if (!NATIVE_SDD_PARSER_ENABLED) return nativeModule;
 
   try {
     // Dynamic import to avoid hard dependency - fails gracefully if native module not built
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('@gsd/native');
+    const mod = require('@sdd/native');
     if (mod.parseFrontmatter && mod.extractSection && mod.batchParseGsdFiles) {
       nativeModule = mod;
     }

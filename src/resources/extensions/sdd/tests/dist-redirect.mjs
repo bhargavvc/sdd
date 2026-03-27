@@ -9,25 +9,25 @@ const ROOT = new URL("../../../../../", import.meta.url);
 export function resolve(specifier, context, nextResolve) {
   // 1. Redirect all workspace package bare imports to source.
   //    CI portability runs don't build any packages/ dist artifacts, so every
-  //    @gsd/* specifier (including transitive ones pulled in by pi-coding-agent
+  //    @sdd/* specifier (including transitive ones pulled in by pi-coding-agent
   //    source itself) must resolve to the TypeScript source entrypoint.
   if (specifier === "../../packages/pi-coding-agent/src/index.js") {
     specifier = new URL("packages/pi-coding-agent/src/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/pi-coding-agent") {
+  } else if (specifier === "@sdd/pi-coding-agent") {
     specifier = new URL("packages/pi-coding-agent/src/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/pi-ai/oauth") {
+  } else if (specifier === "@sdd/pi-ai/oauth") {
     specifier = new URL("packages/pi-ai/src/utils/oauth/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/pi-ai") {
+  } else if (specifier === "@sdd/pi-ai") {
     specifier = new URL("packages/pi-ai/src/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/pi-agent-core") {
+  } else if (specifier === "@sdd/pi-agent-core") {
     specifier = new URL("packages/pi-agent-core/src/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/pi-tui") {
+  } else if (specifier === "@sdd/pi-tui") {
     specifier = new URL("packages/pi-tui/src/index.ts", ROOT).href;
-  } else if (specifier === "@gsd/native") {
+  } else if (specifier === "@sdd/native") {
     specifier = new URL("packages/native/src/index.ts", ROOT).href;
-  } else if (specifier.startsWith("@gsd/native/")) {
-    // Sub-path imports like @gsd/native/fd, @gsd/native/text, etc.
-    const subpath = specifier.slice("@gsd/native/".length);
+  } else if (specifier.startsWith("@sdd/native/")) {
+    // Sub-path imports like @sdd/native/fd, @sdd/native/text, etc.
+    const subpath = specifier.slice("@sdd/native/".length);
     specifier = new URL(`packages/native/src/${subpath}/index.ts`, ROOT).href;
   }
   // 2. Redirect packages/*/dist/ → packages/*/src/ with .js→.ts for strip-types

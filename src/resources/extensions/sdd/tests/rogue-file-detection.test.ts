@@ -11,19 +11,19 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 import { detectRogueFileWrites } from "../auto-post-unit.ts";
-import { openDatabase, closeDatabase, isDbAvailable, insertMilestone, insertSlice, insertTask, updateSliceStatus, upsertMilestonePlanning } from "../gsd-db.ts";
+import { openDatabase, closeDatabase, isDbAvailable, insertMilestone, insertSlice, insertTask, updateSliceStatus, upsertMilestonePlanning } from "../sdd-db.ts";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function createTmpBase(): string {
-  return realpathSync(mkdtempSync(join(tmpdir(), "gsd-rogue-test-")));
+  return realpathSync(mkdtempSync(join(tmpdir(), "sdd-rogue-test-")));
 }
 
 /**
  * Create a minimal .sdd/ directory structure with a task summary file.
  */
 function createTaskSummaryOnDisk(basePath: string, mid: string, sid: string, tid: string): string {
-  const tasksDir = join(basePath, ".gsd", "milestones", mid, "slices", sid, "tasks");
+  const tasksDir = join(basePath, ".sdd", "milestones", mid, "slices", sid, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   const summaryFile = join(tasksDir, `${tid}-SUMMARY.md`);
   writeFileSync(summaryFile, `---\nid: ${tid}\nparent: ${sid}\nmilestone: ${mid}\n---\n# ${tid}: Test\n`, "utf-8");
@@ -34,7 +34,7 @@ function createTaskSummaryOnDisk(basePath: string, mid: string, sid: string, tid
  * Create a minimal .sdd/ directory structure with a slice summary file.
  */
 function createSliceSummaryOnDisk(basePath: string, mid: string, sid: string): string {
-  const sliceDir = join(basePath, ".gsd", "milestones", mid, "slices", sid);
+  const sliceDir = join(basePath, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(sliceDir, { recursive: true });
   const summaryFile = join(sliceDir, `${sid}-SUMMARY.md`);
   writeFileSync(summaryFile, `---\nid: ${sid}\nmilestone: ${mid}\n---\n# ${sid}: Test Slice\n`, "utf-8");
@@ -42,7 +42,7 @@ function createSliceSummaryOnDisk(basePath: string, mid: string, sid: string): s
 }
 
 function createRoadmapOnDisk(basePath: string, mid: string): string {
-  const milestoneDir = join(basePath, ".gsd", "milestones", mid);
+  const milestoneDir = join(basePath, ".sdd", "milestones", mid);
   mkdirSync(milestoneDir, { recursive: true });
   const roadmapFile = join(milestoneDir, `${mid}-ROADMAP.md`);
   writeFileSync(roadmapFile, `# ${mid}: Test Roadmap\n`, "utf-8");
@@ -50,7 +50,7 @@ function createRoadmapOnDisk(basePath: string, mid: string): string {
 }
 
 function createSlicePlanOnDisk(basePath: string, mid: string, sid: string): string {
-  const sliceDir = join(basePath, ".gsd", "milestones", mid, "slices", sid);
+  const sliceDir = join(basePath, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(sliceDir, { recursive: true });
   const planFile = join(sliceDir, `${sid}-PLAN.md`);
   writeFileSync(planFile, `# ${sid}: Test Plan\n`, "utf-8");
@@ -62,8 +62,8 @@ function createSlicePlanOnDisk(basePath: string, mid: string, sid: string): stri
 
 test("rogue detection: task summary on disk, no DB row → detected as rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -85,8 +85,8 @@ test("rogue detection: task summary on disk, no DB row → detected as rogue", (
 
 test("rogue detection: task summary on disk, DB row with status 'complete' → NOT rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -117,8 +117,8 @@ test("rogue detection: task summary on disk, DB row with status 'complete' → N
 
 test("rogue detection: no summary file on disk → NOT rogue regardless of DB state", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -151,8 +151,8 @@ test("rogue detection: DB not available → returns empty array (graceful degrad
 
 test("rogue detection: slice summary on disk, no DB row → detected as rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -173,8 +173,8 @@ test("rogue detection: slice summary on disk, no DB row → detected as rogue", 
 
 test("rogue detection: slice summary on disk, DB row with status 'complete' → NOT rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -203,8 +203,8 @@ test("rogue detection: slice summary on disk, DB row with status 'complete' → 
 
 test("rogue detection: plan milestone roadmap on disk, no milestone planning row → detected as rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -225,8 +225,8 @@ test("rogue detection: plan milestone roadmap on disk, no milestone planning row
 
 test("rogue detection: plan milestone roadmap on disk, DB milestone planning row exists → NOT rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -249,8 +249,8 @@ test("rogue detection: plan milestone roadmap on disk, DB milestone planning row
 
 test("rogue detection: slice plan on disk, no slice planning row → detected as rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);
@@ -271,8 +271,8 @@ test("rogue detection: slice plan on disk, no slice planning row → detected as
 
 test("rogue detection: slice plan on disk, DB slice planning row exists → NOT rogue", () => {
   const basePath = createTmpBase();
-  const dbPath = join(basePath, ".gsd", "gsd.db");
-  mkdirSync(join(basePath, ".gsd"), { recursive: true });
+  const dbPath = join(basePath, ".sdd", "sdd.db");
+  mkdirSync(join(basePath, ".sdd"), { recursive: true });
 
   try {
     openDatabase(dbPath);

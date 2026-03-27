@@ -9,24 +9,24 @@ if (!process.stdin.isTTY && process.env.CI) {
   process.exit(0);
 }
 
-const tmpDir = mkdtempSync(join(tmpdir(), "gsd-smoke-init-"));
+const tmpDir = mkdtempSync(join(tmpdir(), "sdd-smoke-init-"));
 
 try {
-  const binary = process.env.GSD_SMOKE_BINARY || "npx";
-  const args = process.env.GSD_SMOKE_BINARY
+  const binary = process.env.SDD_SMOKE_BINARY || "npx";
+  const args = process.env.SDD_SMOKE_BINARY
     ? ["init"]
-    : ["gsd-pi", "init"];
+    : ["sdd-pi", "init"];
 
   execFileSync(binary, args, {
     encoding: "utf8",
     timeout: 30_000,
     cwd: tmpDir,
-    env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
+    env: { ...process.env, SDD_NON_INTERACTIVE: "1" },
   });
 
-  const gsdDir = join(tmpDir, ".gsd");
+  const gsdDir = join(tmpDir, ".sdd");
   if (!existsSync(gsdDir)) {
-    console.error(`.gsd directory not created in ${tmpDir}`);
+    console.error(`.sdd directory not created in ${tmpDir}`);
     process.exit(1);
   }
 } finally {

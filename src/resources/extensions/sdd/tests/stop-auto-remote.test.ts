@@ -16,8 +16,8 @@ import {
 import { stopAutoRemote } from "../auto.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  const base = join(tmpdir(), `sdd-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd"), { recursive: true });
   return base;
 }
 
@@ -68,7 +68,7 @@ test("stopAutoRemote cleans up stale lock (dead PID) and returns found:false", (
     // Overwrite PID to a dead one
     const lock = readCrashLock(base)!;
     const staleData = { ...lock, pid: 999999999 };
-    writeFileSync(join(base, ".gsd", "auto.lock"), JSON.stringify(staleData, null, 2), "utf-8");
+    writeFileSync(join(base, ".sdd", "auto.lock"), JSON.stringify(staleData, null, 2), "utf-8");
 
     const result = stopAutoRemote(base);
     assert.equal(result.found, false, "stale lock should not be found as running");
@@ -112,7 +112,7 @@ test("stopAutoRemote sends SIGTERM to a live process and returns found:true", { 
       unitId: "M001/S01/T01",
       unitStartedAt: new Date().toISOString(),
     };
-    writeFileSync(join(base, ".gsd", "auto.lock"), JSON.stringify(lockData, null, 2), "utf-8");
+    writeFileSync(join(base, ".sdd", "auto.lock"), JSON.stringify(lockData, null, 2), "utf-8");
 
     const exitPromise = waitForChildExit(child);
     const result = stopAutoRemote(base);
@@ -137,8 +137,8 @@ test("stopAutoRemote sends SIGTERM to a live process and returns found:true", { 
 
 test("lock file should be discoverable at project root, not worktree path", () => {
   const projectRoot = makeTmpBase();
-  const worktreePath = join(projectRoot, ".gsd", "worktrees", "M001");
-  mkdirSync(join(worktreePath, ".gsd"), { recursive: true });
+  const worktreePath = join(projectRoot, ".sdd", "worktrees", "M001");
+  mkdirSync(join(worktreePath, ".sdd"), { recursive: true });
 
   try {
     // Simulate: auto-mode writes lock to project root (the fix)

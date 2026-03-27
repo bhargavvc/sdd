@@ -7,7 +7,7 @@
  * dispatch rule to fire indefinitely, never tripping the MAX_REWRITE_ATTEMPTS
  * circuit breaker.
  *
- * The fix persists the counter to `.gsd/runtime/rewrite-count.json`.
+ * The fix persists the counter to `.sdd/runtime/rewrite-count.json`.
  */
 import { describe, test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -21,9 +21,9 @@ describe("rewrite-docs circuit breaker persistence (#2203)", () => {
   let tempBase: string;
 
   beforeEach(() => {
-    tempBase = mkdtempSync(join(tmpdir(), "gsd-rewrite-test-"));
-    // Create .gsd/ directory so gsdRoot resolves to it
-    mkdirSync(join(tempBase, ".gsd", "runtime"), { recursive: true });
+    tempBase = mkdtempSync(join(tmpdir(), "sdd-rewrite-test-"));
+    // Create .sdd/ directory so gsdRoot resolves to it
+    mkdirSync(join(tempBase, ".sdd", "runtime"), { recursive: true });
   });
 
   afterEach(() => {
@@ -63,16 +63,16 @@ describe("rewrite-docs circuit breaker persistence (#2203)", () => {
   });
 
   test("getRewriteCount handles corrupt JSON gracefully", () => {
-    const filePath = join(tempBase, ".gsd", "runtime", "rewrite-count.json");
+    const filePath = join(tempBase, ".sdd", "runtime", "rewrite-count.json");
     // writeFileSync is imported at the top of this file
     writeFileSync(filePath, "not json{{{");
     const count = getRewriteCount(tempBase);
     assert.equal(count, 0, "corrupt file should return 0");
   });
 
-  test("rewrite-count.json is written to .gsd/runtime/", () => {
+  test("rewrite-count.json is written to .sdd/runtime/", () => {
     setRewriteCount(tempBase, 1);
-    const filePath = join(tempBase, ".gsd", "runtime", "rewrite-count.json");
+    const filePath = join(tempBase, ".sdd", "runtime", "rewrite-count.json");
     assert.ok(existsSync(filePath), "rewrite-count.json should exist");
 
     const content = JSON.parse(readFileSync(filePath, "utf-8"));

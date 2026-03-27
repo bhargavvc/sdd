@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing SDD auto-mode.
 
 ## UNIT: Rewrite Documents — Apply Override(s) for Milestone {{milestoneId}} ("{{milestoneTitle}}")
 

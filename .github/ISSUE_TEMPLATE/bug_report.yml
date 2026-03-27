@@ -1,5 +1,5 @@
 name: Bug report
-description: Report crashes, regressions, incorrect behavior, or broken workflows in GSD.
+description: Report crashes, regressions, incorrect behavior, or broken workflows in SDD.
 title: "[Bug]: "
 labels:
   - bug
@@ -28,7 +28,7 @@ body:
     attributes:
       label: Summary
       description: One sentence describing what is broken.
-      placeholder: Running `/gsd inspect` reports "No GSD database available" even though `.sdd/gsd.db` exists.
+      placeholder: Running `/sdd inspect` reports "No SDD database available" even though `.sdd/sdd.db` exists.
     validations:
       required: true
 
@@ -40,7 +40,7 @@ body:
       placeholder: |
         1. Run `...`
         2. Open `...`
-        3. Execute `/gsd ...`
+        3. Execute `/sdd ...`
         4. Observe the failure
     validations:
       required: true
@@ -50,7 +50,7 @@ body:
     attributes:
       label: Expected behavior
       description: What should happen if the bug does not exist?
-      placeholder: GSD should open the existing database and continue.
+      placeholder: SDD should open the existing database and continue.
     validations:
       required: true
 
@@ -59,15 +59,15 @@ body:
     attributes:
       label: Actual behavior
       description: What happened instead, including user-visible errors.
-      placeholder: GSD exits the unit and shows an error message.
+      placeholder: SDD exits the unit and shows an error message.
     validations:
       required: true
 
   - type: input
-    id: gsd_version
+    id: sdd_version
     attributes:
-      label: GSD version
-      description: Run `gsd --version` and paste the exact version.
+      label: SDD version
+      description: Run `sdd --version` and paste the exact version.
       placeholder: "e.g. 2.33.1"
     validations:
       required: true
@@ -92,7 +92,7 @@ body:
     id: install_method
     attributes:
       label: Install method
-      description: How are you running GSD?
+      description: How are you running SDD?
       options:
         - npm global install
         - npm link / local checkout
@@ -106,7 +106,7 @@ body:
     id: affected_area
     attributes:
       label: Affected area
-      description: Which part of GSD seems involved?
+      description: Which part of SDD seems involved?
       options:
         - Auto-mode / dispatch loop
         - Planning / roadmap / milestones

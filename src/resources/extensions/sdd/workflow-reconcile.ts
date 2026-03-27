@@ -9,7 +9,7 @@ import {
   insertVerificationEvidence,
   upsertDecision,
   openDatabase,
-} from "./gsd-db.js";
+} from "./sdd-db.js";
 import { writeManifest } from "./workflow-manifest.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { acquireSyncLock, releaseSyncLock } from "./sync-lock.js";
@@ -32,7 +32,7 @@ export interface ReconcileResult {
 
 /**
  * Replay a list of WorkflowEvents by dispatching each to the appropriate
- * gsd-db function.  This replaces the old engine.replayAll() pattern with
+ * sdd-db function.  This replaces the old engine.replayAll() pattern with
  * direct DB calls.
  */
 function replayEvents(events: WorkflowEvent[]): void {
@@ -223,7 +223,7 @@ export function writeConflictsFile(
     `# Merge Conflicts — ${timestamp}`,
     "",
     `Conflicts detected merging worktree \`${worktreePath}\` into \`${basePath}\`.`,
-    `Run \`gsd resolve-conflict\` to resolve each conflict.`,
+    `Run \`sdd resolve-conflict\` to resolve each conflict.`,
     "",
   ];
 
@@ -242,12 +242,12 @@ export function writeConflictsFile(
       lines.push(`  params: ${JSON.stringify(event.params)}`);
     }
     lines.push("");
-    lines.push(`**Resolve with:** \`gsd resolve-conflict --entity ${conflict.entityType}:${conflict.entityId} --pick [main|worktree]\``);
+    lines.push(`**Resolve with:** \`sdd resolve-conflict --entity ${conflict.entityType}:${conflict.entityId} --pick [main|worktree]\``);
     lines.push("");
   });
 
   const content = lines.join("\n");
-  const dir = join(basePath, ".gsd");
+  const dir = join(basePath, ".sdd");
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, "CONFLICTS.md"), content);
 }
@@ -275,7 +275,7 @@ export function reconcileWorktreeLogs(
   const lock = acquireSyncLock(mainBasePath);
   if (!lock.acquired) {
     process.stderr.write(
-      `[gsd] reconcile: could not acquire sync lock — another reconciliation may be in progress\n`,
+      `[sdd] reconcile: could not acquire sync lock — another reconciliation may be in progress\n`,
     );
     return { autoMerged: 0, conflicts: [] };
   }
@@ -292,8 +292,8 @@ function _reconcileWorktreeLogsInner(
   worktreeBasePath: string,
 ): ReconcileResult {
   // Step 1: Read both logs
-  const mainLogPath = join(mainBasePath, ".gsd", "event-log.jsonl");
-  const wtLogPath = join(worktreeBasePath, ".gsd", "event-log.jsonl");
+  const mainLogPath = join(mainBasePath, ".sdd", "event-log.jsonl");
+  const wtLogPath = join(worktreeBasePath, ".sdd", "event-log.jsonl");
 
   const mainEvents = readEvents(mainLogPath);
   const wtEvents = readEvents(wtLogPath);
@@ -316,7 +316,7 @@ function _reconcileWorktreeLogsInner(
     // D-04: atomic all-or-nothing — block entire merge
     writeConflictsFile(mainBasePath, conflicts, worktreeBasePath);
     process.stderr.write(
-      `[gsd] reconcile: ${conflicts.length} conflict(s) detected — see ${join(mainBasePath, ".gsd", "CONFLICTS.md")}\n`,
+      `[sdd] reconcile: ${conflicts.length} conflict(s) detected — see ${join(mainBasePath, ".sdd", "CONFLICTS.md")}\n`,
     );
     return { autoMerged: 0, conflicts };
   }
@@ -330,11 +330,11 @@ function _reconcileWorktreeLogsInner(
   const baseEvents = mainEvents.slice(0, forkPoint + 1);
   const mergedLog = baseEvents.concat(merged);
   const logContent = mergedLog.map((e) => JSON.stringify(e)).join("\n") + (mergedLog.length > 0 ? "\n" : "");
-  mkdirSync(join(mainBasePath, ".gsd"), { recursive: true });
-  atomicWriteSync(join(mainBasePath, ".gsd", "event-log.jsonl"), logContent);
+  mkdirSync(join(mainBasePath, ".sdd"), { recursive: true });
+  atomicWriteSync(join(mainBasePath, ".sdd", "event-log.jsonl"), logContent);
 
   // Step 8: Replay into DB (wrapped in a transaction by replayEvents)
-  openDatabase(join(mainBasePath, ".gsd", "gsd.db"));
+  openDatabase(join(mainBasePath, ".sdd", "sdd.db"));
   replayEvents(merged);
 
   // Step 9: Write manifest
@@ -342,7 +342,7 @@ function _reconcileWorktreeLogsInner(
     writeManifest(mainBasePath);
   } catch (err) {
     process.stderr.write(
-      `[gsd] reconcile: manifest write failed (non-fatal): ${(err as Error).message}\n`,
+      `[sdd] reconcile: manifest write failed (non-fatal): ${(err as Error).message}\n`,
     );
   }
 
@@ -365,7 +365,7 @@ function _reconcileWorktreeLogsInner(
  *     params: {JSON}
  */
 export function listConflicts(basePath: string): ConflictEntry[] {
-  const conflictsPath = join(basePath, ".gsd", "CONFLICTS.md");
+  const conflictsPath = join(basePath, ".sdd", "CONFLICTS.md");
   if (!existsSync(conflictsPath)) return [];
 
   const content = readFileSync(conflictsPath, "utf-8");
@@ -467,7 +467,7 @@ export function resolveConflict(
   const eventsToReplay = pick === "main" ? conflict.mainSideEvents : conflict.worktreeSideEvents;
 
   // Replay resolved events through the DB (updates DB state)
-  openDatabase(join(basePath, ".gsd", "gsd.db"));
+  openDatabase(join(basePath, ".sdd", "sdd.db"));
   replayEvents(eventsToReplay);
 
   // Append resolved events to the event log
@@ -496,7 +496,7 @@ export function resolveConflict(
  * No-op if CONFLICTS.md does not exist.
  */
 export function removeConflictsFile(basePath: string): void {
-  const conflictsPath = join(basePath, ".gsd", "CONFLICTS.md");
+  const conflictsPath = join(basePath, ".sdd", "CONFLICTS.md");
   if (existsSync(conflictsPath)) {
     unlinkSync(conflictsPath);
   }

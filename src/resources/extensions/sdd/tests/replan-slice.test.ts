@@ -27,38 +27,38 @@ function loadPromptFromWorktree(name: string, vars: Record<string, string> = {})
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-replan-test-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-replan-test-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(join(dir, 'tasks'), { recursive: true });
   writeFileSync(join(dir, "tasks", "T01-PLAN.md"), "# T01 Plan\n");
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
 }
 
 function writeTaskSummary(base: string, mid: string, sid: string, tid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid, 'tasks');
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid, 'tasks');
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${tid}-SUMMARY.md`), content);
 }
 
 function writeReplanFile(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-REPLAN.md`), content);
 }
 
 function writeReplanTrigger(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-REPLAN-TRIGGER.md`), content);
 }
@@ -452,7 +452,7 @@ console.log('\n=== display: replan-slice prompt template has correct unit header
 // Doctor: blocker_discovered_no_replan diagnostics
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { runGSDDoctor } from '../doctor.ts';
+import { runSDDDoctor } from '../doctor.ts';
 // (a) blocker + no REPLAN.md → issue emitted
 console.log('\n=== doctor: blocker + no REPLAN.md → blocker_discovered_no_replan issue ===');
 {
@@ -461,7 +461,7 @@ console.log('\n=== doctor: blocker + no REPLAN.md → blocker_discovered_no_repl
   writePlan(base, 'M001', 'S01', makePlanT01DoneT02Pending());
   writeTaskSummary(base, 'M001', 'S01', 'T01', makeTaskSummary('T01', true));
 
-  const report = await runGSDDoctor(base, { fix: false, scope: 'M001/S01' });
+  const report = await runSDDDoctor(base, { fix: false, scope: 'M001/S01' });
   const blockerIssues = report.issues.filter(i => i.code === 'blocker_discovered_no_replan');
   assert.ok(blockerIssues.length > 0, 'doctor emits blocker_discovered_no_replan when blocker + no REPLAN');
   assert.ok(blockerIssues[0]?.message.includes('T01'), 'issue message mentions the blocker task T01');
@@ -479,7 +479,7 @@ console.log('\n=== doctor: blocker + REPLAN.md exists → no blocker_discovered_
   writeTaskSummary(base, 'M001', 'S01', 'T01', makeTaskSummary('T01', true));
   writeReplanFile(base, 'M001', 'S01', '# Replan\n\nAlready replanned.');
 
-  const report = await runGSDDoctor(base, { fix: false, scope: 'M001/S01' });
+  const report = await runSDDDoctor(base, { fix: false, scope: 'M001/S01' });
   const blockerIssues = report.issues.filter(i => i.code === 'blocker_discovered_no_replan');
   assert.deepStrictEqual(blockerIssues.length, 0, 'no blocker_discovered_no_replan when REPLAN.md exists');
   rmSync(base, { recursive: true, force: true });
@@ -493,7 +493,7 @@ console.log('\n=== doctor: no blocker → no blocker_discovered_no_replan issue 
   writePlan(base, 'M001', 'S01', makePlanT01DoneT02Pending());
   writeTaskSummary(base, 'M001', 'S01', 'T01', makeTaskSummary('T01', false));
 
-  const report = await runGSDDoctor(base, { fix: false, scope: 'M001/S01' });
+  const report = await runSDDDoctor(base, { fix: false, scope: 'M001/S01' });
   const blockerIssues = report.issues.filter(i => i.code === 'blocker_discovered_no_replan');
   assert.deepStrictEqual(blockerIssues.length, 0, 'no blocker_discovered_no_replan when no blocker');
   rmSync(base, { recursive: true, force: true });

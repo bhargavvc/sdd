@@ -14,7 +14,7 @@ const onboarding = await import("../web/onboarding-service.ts")
 const browserRoute = await import("../../web/app/api/session/browser/route.ts")
 const manageRoute = await import("../../web/app/api/session/manage/route.ts")
 const gitRoute = await import("../../web/app/api/git/route.ts")
-const { AuthStorage } = await import("@gsd/pi-coding-agent")
+const { AuthStorage } = await import("@sdd/pi-coding-agent")
 
 class FakeRpcChild extends EventEmitter {
   stdin = new PassThrough()
@@ -65,7 +65,7 @@ function makeWorkspaceFixture(): {
   otherSessionsDir: string
   cleanup: () => void
 } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-session-parity-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-session-parity-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
   const otherProjectCwd = join(root, "other-project")
@@ -181,15 +181,15 @@ function git(basePath: string, args: string[]): string {
 }
 
 function withProjectGitEnv(projectCwd: string, run: () => Promise<void>): Promise<void> {
-  const previousProjectCwd = process.env.GSD_WEB_PROJECT_CWD
-  process.env.GSD_WEB_PROJECT_CWD = projectCwd
+  const previousProjectCwd = process.env.SDD_WEB_PROJECT_CWD
+  process.env.SDD_WEB_PROJECT_CWD = projectCwd
 
   return run().finally(() => {
     if (previousProjectCwd === undefined) {
-      delete process.env.GSD_WEB_PROJECT_CWD
+      delete process.env.SDD_WEB_PROJECT_CWD
       return
     }
-    process.env.GSD_WEB_PROJECT_CWD = previousProjectCwd
+    process.env.SDD_WEB_PROJECT_CWD = previousProjectCwd
   })
 }
 
@@ -226,9 +226,9 @@ function configureBridgeFixture(
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
   })
@@ -564,7 +564,7 @@ test("/api/session/manage renames inactive sessions via authoritative session-fi
 })
 
 test("/api/git returns a current-project-scoped repo summary and ignores changes outside the current project subtree", async (t) => {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-git-summary-"))
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-git-summary-"))
   const repoRoot = join(root, "repo")
   const projectCwd = join(repoRoot, "apps", "current-project")
   const docsDir = join(repoRoot, "docs")
@@ -579,8 +579,8 @@ test("/api/git returns a current-project-scoped repo summary and ignores changes
   writeFileSync(join(docsDir, "outside.txt"), "baseline outside\n")
 
   git(repoRoot, ["init"])
-  git(repoRoot, ["config", "user.name", "GSD Test"])
-  git(repoRoot, ["config", "user.email", "gsd-test@example.com"])
+  git(repoRoot, ["config", "user.name", "SDD Test"])
+  git(repoRoot, ["config", "user.email", "sdd-test@example.com"])
   git(repoRoot, ["add", "."])
   git(repoRoot, ["commit", "-m", "initial"])
 
@@ -617,7 +617,7 @@ test("/api/git returns a current-project-scoped repo summary and ignores changes
 })
 
 test("/api/git exposes an explicit not-a-repo state instead of failing silently", async (t) => {
-  const projectCwd = mkdtempSync(join(tmpdir(), "gsd-web-not-repo-"))
+  const projectCwd = mkdtempSync(join(tmpdir(), "sdd-web-not-repo-"))
 
   t.after(() => { rmSync(projectCwd, { recursive: true, force: true }) });
 
@@ -637,7 +637,7 @@ test("/api/git exposes an explicit not-a-repo state instead of failing silently"
 test("browser session, settings, and git surfaces keep inspectable browse/manage/state markers on the shared surface", () => {
   const rpcTypesSource = readFileSync(resolve(import.meta.dirname, "../../packages/pi-coding-agent/src/modes/rpc/rpc-types.ts"), "utf8")
   const contractSource = readFileSync(resolve(import.meta.dirname, "../../web/lib/command-surface-contract.ts"), "utf8")
-  const storeSource = readFileSync(resolve(import.meta.dirname, "../../web/lib/gsd-workspace-store.tsx"), "utf8")
+  const storeSource = readFileSync(resolve(import.meta.dirname, "../../web/lib/sdd-workspace-store.tsx"), "utf8")
   const surfaceSource = readFileSync(resolve(import.meta.dirname, "../../web/components/sdd/command-surface.tsx"), "utf8")
   const sidebarSource = readFileSync(resolve(import.meta.dirname, "../../web/components/sdd/sidebar.tsx"), "utf8")
   const gitRouteSource = readFileSync(resolve(import.meta.dirname, "../../web/app/api/git/route.ts"), "utf8")
@@ -658,15 +658,15 @@ test("browser session, settings, and git surfaces keep inspectable browse/manage
   assert.match(contractSource, /set_auto_retry/, "command-surface-contract.ts must model auto-retry mutations")
   assert.match(contractSource, /abort_retry/, "command-surface-contract.ts must model retry-cancellation mutations")
 
-  assert.match(storeSource, /\/api\/git/, "gsd-workspace-store.tsx must load the current-project git summary route")
-  assert.match(storeSource, /loadGitSummary/, "gsd-workspace-store.tsx must expose a shared git-summary browser action")
-  assert.match(storeSource, /\/api\/session\/browser/, "gsd-workspace-store.tsx must load the dedicated current-project session browser route")
-  assert.match(storeSource, /\/api\/session\/manage/, "gsd-workspace-store.tsx must call the session manage route for browser renames")
-  assert.match(storeSource, /setSteeringModeFromSurface/, "gsd-workspace-store.tsx must expose a shared steering-mode browser action")
-  assert.match(storeSource, /setFollowUpModeFromSurface/, "gsd-workspace-store.tsx must expose a shared follow-up-mode browser action")
-  assert.match(storeSource, /setAutoCompactionFromSurface/, "gsd-workspace-store.tsx must expose a shared auto-compaction browser action")
-  assert.match(storeSource, /setAutoRetryFromSurface/, "gsd-workspace-store.tsx must expose a shared auto-retry browser action")
-  assert.match(storeSource, /abortRetryFromSurface/, "gsd-workspace-store.tsx must expose a shared retry-cancellation browser action")
+  assert.match(storeSource, /\/api\/git/, "sdd-workspace-store.tsx must load the current-project git summary route")
+  assert.match(storeSource, /loadGitSummary/, "sdd-workspace-store.tsx must expose a shared git-summary browser action")
+  assert.match(storeSource, /\/api\/session\/browser/, "sdd-workspace-store.tsx must load the dedicated current-project session browser route")
+  assert.match(storeSource, /\/api\/session\/manage/, "sdd-workspace-store.tsx must call the session manage route for browser renames")
+  assert.match(storeSource, /setSteeringModeFromSurface/, "sdd-workspace-store.tsx must expose a shared steering-mode browser action")
+  assert.match(storeSource, /setFollowUpModeFromSurface/, "sdd-workspace-store.tsx must expose a shared follow-up-mode browser action")
+  assert.match(storeSource, /setAutoCompactionFromSurface/, "sdd-workspace-store.tsx must expose a shared auto-compaction browser action")
+  assert.match(storeSource, /setAutoRetryFromSurface/, "sdd-workspace-store.tsx must expose a shared auto-retry browser action")
+  assert.match(storeSource, /abortRetryFromSurface/, "sdd-workspace-store.tsx must expose a shared retry-cancellation browser action")
 
   assert.match(surfaceSource, /data-testid="command-surface-git-summary"/, "command-surface.tsx must expose the git summary panel")
   assert.match(surfaceSource, /data-testid="command-surface-git-state"/, "command-surface.tsx must expose inspectable git-summary state text")

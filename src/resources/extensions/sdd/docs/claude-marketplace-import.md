@@ -1,24 +1,24 @@
 # Claude Marketplace Import
 
-This document describes the Claude marketplace import feature in GSD: what it reads, what it imports, what it persists, and what it does not translate into active GSD/Pi runtime behavior.
+This document describes the Claude marketplace import feature in SDD: what it reads, what it imports, what it persists, and what it does not translate into active SDD/Pi runtime behavior.
 
 ---
 
 ## What this feature does
 
-SDD can read Claude Code marketplace catalogs, inspect the plugins they reference, and import selected Claude skills into GSD/Pi while preserving Claude-style namespace identity.
+SDD can read Claude Code marketplace catalogs, inspect the plugins they reference, and import selected Claude skills into SDD/Pi while preserving Claude-style namespace identity.
 
 The interactive entry point is:
 
 ```text
-/gsd prefs import-claude
+/sdd prefs import-claude
 ```
 
 You can also choose scope explicitly:
 
 ```text
-/gsd prefs import-claude global
-/gsd prefs import-claude project
+/sdd prefs import-claude global
+/sdd prefs import-claude project
 ```
 
 ---
@@ -57,21 +57,21 @@ SDD aligns its Claude import flow to that model.
 
 ---
 
-## Where GSD looks
+## Where SDD looks
 
-For Claude plugin and marketplace material, GSD prefers Claude-managed locations first:
+For Claude plugin and marketplace material, SDD prefers Claude-managed locations first:
 
 1. `~/.claude/plugins/marketplaces`
 2. `~/.claude/plugins/cache`
 3. `~/.claude/plugins`
 
-After that, GSD still allows local clone-style convenience paths such as sibling repos or `~/repos/...` paths. Those fallbacks remain supported for developer workflows, but they are not the primary Claude storage model.
+After that, SDD still allows local clone-style convenience paths such as sibling repos or `~/repos/...` paths. Those fallbacks remain supported for developer workflows, but they are not the primary Claude storage model.
 
 ---
 
-## What GSD imports
+## What SDD imports
 
-### Imported into GSD/Pi settings
+### Imported into SDD/Pi settings
 
 - Claude skills discovered directly from configured skill roots
 - Marketplace-derived skills
@@ -92,7 +92,7 @@ scientific-method:experiment-protocol
 - hooks
 - MCP server definitions
 - LSP server definitions
-- other plugin metadata that does not currently map directly into active GSD/Pi runtime surfaces
+- other plugin metadata that does not currently map directly into active SDD/Pi runtime surfaces
 
 ---
 
@@ -105,7 +105,7 @@ The import flow does the following:
 3. inspect discovered plugins and inventory their components
 4. let you select components to import
 5. validate the selection for canonical conflicts and ambiguity
-6. persist imported resources into GSD/Pi settings
+6. persist imported resources into SDD/Pi settings
 
 ---
 
@@ -126,7 +126,7 @@ SDD supports shorthand lookup when it is unambiguous.
 
 ### Local-first resolution
 
-When a namespaced component refers to another component by bare name, GSD tries the same plugin namespace first before broader lookup.
+When a namespaced component refers to another component by bare name, SDD tries the same plugin namespace first before broader lookup.
 
 ---
 
@@ -162,7 +162,7 @@ SDD now avoids writing those entries.
 
 ### Skills
 
-Imported skills are persisted into Pi skill settings. Depending on the selection path, they may also be added to GSD preferences.
+Imported skills are persisted into Pi skill settings. Depending on the selection path, they may also be added to SDD preferences.
 
 ### Marketplace agents
 
@@ -188,20 +188,20 @@ This feature has been verified in three ways:
 
 1. **Contract/unit tests** for parsing, namespacing, resolution, diagnostics, and import behavior
 2. **Portable integration-style tests** using local or cloned marketplace fixtures
-3. **Real host validation** against the installed `gsd` binary and actual Claude-managed directories on the host machine
+3. **Real host validation** against the installed `sdd` binary and actual Claude-managed directories on the host machine
 
 Real host validation included:
 
-- clean startup of the installed `gsd` binary after fixing stale bad settings
+- clean startup of the installed `sdd` binary after fixing stale bad settings
 - successful invocation of an imported skill (`/stinkysnake`)
-- successful execution of `/gsd prefs import-claude global`
+- successful execution of `/sdd prefs import-claude global`
 - verification that imported marketplace agent directories were **not** reintroduced into `settings.packages`
 
 ---
 
 ## Current limitations
 
-- GSD does not yet translate every Claude plugin component type into active Pi-native runtime behavior
+- SDD does not yet translate every Claude plugin component type into active Pi-native runtime behavior
 - marketplace-derived agents are not persisted as package roots, by design
 - clone-style local fallbacks still exist for developer convenience, even though Claude-managed marketplace/plugin locations are preferred first
 

@@ -1,4 +1,4 @@
-// GSD Extension — State Derivation
+// SDD Extension — State Derivation
 // DB-primary state derivation with filesystem fallback for unmigrated projects.
 // Pure TypeScript, zero Pi dependencies.
 
@@ -57,7 +57,7 @@ import {
   type MilestoneRow,
   type SliceRow,
   type TaskRow,
-} from './gsd-db.js';
+} from './sdd-db.js';
 
 /**
  * A "ghost" milestone directory contains only META.json (and no substantive
@@ -133,7 +133,7 @@ export function invalidateStateCache(): void {
  */
 export async function getActiveMilestoneId(basePath: string): Promise<string | null> {
   // Parallel worker isolation
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.SDD_MILESTONE_LOCK;
   if (milestoneLock) {
     const milestoneIds = findMilestoneIds(basePath);
     if (!milestoneIds.includes(milestoneLock)) return null;
@@ -146,7 +146,7 @@ export async function getActiveMilestoneId(basePath: string): Promise<string | n
   if (isDbAvailable()) {
     const allMilestones = getAllMilestones();
     if (allMilestones.length > 0) {
-      // Respect queue-order.json so /gsd queue reordering is honored (#2556).
+      // Respect queue-order.json so /sdd queue reordering is honored (#2556).
       // Without this, the DB path uses lexicographic sort while the dispatch
       // guard uses queue order — causing a deadlock.
       const customOrder = loadQueueOrder(basePath);
@@ -185,7 +185,7 @@ export async function getActiveMilestoneId(basePath: string): Promise<string | n
 }
 
 /**
- * Reconstruct GSD state from DB (primary) or filesystem (fallback).
+ * Reconstruct SDD state from DB (primary) or filesystem (fallback).
  * STATE.md is a rendered cache of this output.
  *
  * When DB is available, queries milestone/slice/task tables directly.
@@ -269,7 +269,7 @@ function extractContextTitle(content: string | null, fallback: string): string {
 // ─── DB-backed State Derivation ────────────────────────────────────────────
 
 /**
- * Derive GSD state from the milestones/slices/tasks DB tables.
+ * Derive SDD state from the milestones/slices/tasks DB tables.
  * Flag files (PARKED, VALIDATION, CONTINUE, REPLAN, REPLAN-TRIGGER, CONTEXT-DRAFT)
  * are still checked on the filesystem since they aren't in DB tables.
  * Requirements also stay file-based via parseRequirementCounts().
@@ -282,9 +282,9 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
   let allMilestones = getAllMilestones();
 
   // Incremental disk→DB sync: milestone directories created outside the DB
-  // write path (via /gsd queue, manual mkdir, or complete-milestone writing the
+  // write path (via /sdd queue, manual mkdir, or complete-milestone writing the
   // next CONTEXT.md) are never inserted by the initial migration guard in
-  // auto-start.ts because that guard only runs when gsd.db doesn't exist yet.
+  // auto-start.ts because that guard only runs when sdd.db doesn't exist yet.
   // Reconcile here so deriveStateFromDb never silently misses queued milestones.
   // insertMilestone uses INSERT OR IGNORE, so this is safe to call every time.
   const dbIdSet = new Set(allMilestones.map(m => m.id));
@@ -325,7 +325,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
   for (const id of sortedIds) allMilestones.push(byId.get(id)!);
 
   // Parallel worker isolation: when locked, filter to just the locked milestone
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.SDD_MILESTONE_LOCK;
   const milestones = milestoneLock
     ? allMilestones.filter(m => m.id === milestoneLock)
     : allMilestones;
@@ -338,7 +338,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
       phase: 'pre-planning',
       recentDecisions: [],
       blockers: [],
-      nextAction: 'No milestones found. Run /gsd to create one.',
+      nextAction: 'No milestones found. Run /sdd to create one.',
       registry: [],
       requirements,
       progress: { milestones: { done: 0, total: 0 } },
@@ -502,7 +502,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
         activeMilestone: null, activeSlice: null, activeTask: null,
         phase: 'pre-planning',
         recentDecisions: [], blockers: [],
-        nextAction: `All remaining milestones are parked (${parkedIds}). Run /gsd unpark <id> or create a new milestone.`,
+        nextAction: `All remaining milestones are parked (${parkedIds}). Run /sdd unpark <id> or create a new milestone.`,
         registry, requirements,
         progress: { milestones: milestoneProgress },
       };
@@ -513,7 +513,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
         activeMilestone: null, activeSlice: null, activeTask: null,
         phase: 'pre-planning',
         recentDecisions: [], blockers: [],
-        nextAction: 'No milestones found. Run /gsd to create one.',
+        nextAction: 'No milestones found. Run /sdd to create one.',
         registry: [], requirements,
         progress: { milestones: { done: 0, total: 0 } },
       };
@@ -570,7 +570,7 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
   // ── All slices done → validating/completing ─────────────────────────
   // Guard: [].every() === true (vacuous truth). Without the length check,
   // an empty slice array causes a premature phase transition to
-  // validating-milestone. See: https://github.com/gsd-build/gsd-2/issues/2667
+  // validating-milestone. See: https://github.com/sdd-build/sdd-2/issues/2667
   const allSlicesDone = activeMilestoneSlices.length > 0 && activeMilestoneSlices.every(s => isClosedStatus(s.status));
   if (allSlicesDone) {
     const validationFile = resolveMilestoneFile(basePath, activeMilestone.id, "VALIDATION");
@@ -665,13 +665,13 @@ export async function deriveStateFromDb(basePath: string): Promise<SDDState> {
       try {
         updateTaskStatus(activeMilestone.id, activeSlice.id, t.id, "complete");
         process.stderr.write(
-          `gsd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} had SUMMARY on disk but DB status was "${t.status}" — updated to "complete" (#2514)\n`,
+          `sdd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} had SUMMARY on disk but DB status was "${t.status}" — updated to "complete" (#2514)\n`,
         );
         reconciled = true;
       } catch (e) {
         // DB write failed — continue with stale status rather than crash
         process.stderr.write(
-          `gsd-reconcile: failed to update task ${t.id}: ${(e as Error).message}\n`,
+          `sdd-reconcile: failed to update task ${t.id}: ${(e as Error).message}\n`,
         );
       }
     }
@@ -830,12 +830,12 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
   const milestoneIds = findMilestoneIds(basePath);
 
   // ── Parallel worker isolation ──────────────────────────────────────────
-  // When GSD_MILESTONE_LOCK is set, this process is a parallel worker
+  // When SDD_MILESTONE_LOCK is set, this process is a parallel worker
   // scoped to a single milestone. Filter the milestone list so this worker
   // only sees its assigned milestone (all others are treated as if they
   // don't exist). This gives each worker complete isolation without
   // modifying any other state derivation logic.
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.SDD_MILESTONE_LOCK;
   if (milestoneLock && milestoneIds.includes(milestoneLock)) {
     milestoneIds.length = 0;
     milestoneIds.push(milestoneLock);
@@ -880,7 +880,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
       phase: 'pre-planning',
       recentDecisions: [],
       blockers: [],
-      nextAction: 'No milestones found. Run /gsd to create one.',
+      nextAction: 'No milestones found. Run /sdd to create one.',
       registry: [],
       requirements,
       progress: {
@@ -1116,7 +1116,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
         phase: 'pre-planning',
         recentDecisions: [],
         blockers: [],
-        nextAction: `All remaining milestones are parked (${parkedIds}). Run /gsd unpark <id> or create a new milestone.`,
+        nextAction: `All remaining milestones are parked (${parkedIds}). Run /sdd unpark <id> or create a new milestone.`,
         registry,
         requirements,
         progress: {
@@ -1133,7 +1133,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
         phase: 'pre-planning',
         recentDecisions: [],
         blockers: [],
-        nextAction: 'No milestones found. Run /gsd to create one.',
+        nextAction: 'No milestones found. Run /sdd to create one.',
         registry: [],
         requirements,
         progress: {
@@ -1328,7 +1328,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
     if (summaryPath && existsSync(summaryPath)) {
       t.done = true;
       process.stderr.write(
-        `gsd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} has SUMMARY on disk but plan shows incomplete — marking done (#2514)\n`,
+        `sdd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} has SUMMARY on disk but plan shows incomplete — marking done (#2514)\n`,
       );
     }
   }
@@ -1459,7 +1459,7 @@ export async function _deriveStateImpl(basePath: string): Promise<SDDState> {
   }
 
   // ── REPLAN-TRIGGER detection: triage-initiated replan ──────────────────
-  // Manual `/gsd triage` writes REPLAN-TRIGGER.md when a capture is classified
+  // Manual `/sdd triage` writes REPLAN-TRIGGER.md when a capture is classified
   // as "replan". Detect it here and transition to replanning-slice so the
   // dispatch loop picks it up (instead of silently advancing past it).
   if (!blockerTaskId) {

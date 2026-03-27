@@ -1,9 +1,9 @@
-// GSD Extension — Undo Last Unit + Targeted State Reset
+// SDD Extension — Undo Last Unit + Targeted State Reset
 // handleUndo: Rollback the most recent completed unit (revert git, remove state, uncheck plans).
 // handleUndoTask: Reset a single task's DB status to "pending" and re-render markdown.
 // handleResetSlice: Reset a slice and all its tasks, re-rendering plan + roadmap.
 
-import type { ExtensionCommandContext, ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext, ExtensionAPI } from "@sdd/pi-coding-agent";
 import { existsSync, readFileSync, writeFileSync, unlinkSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { nativeRevertCommit, nativeRevertAbort } from "./native-git-bridge.js";
@@ -12,7 +12,7 @@ import { deriveState } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import { gsdRoot, resolveTasksDir, resolveSlicePath, resolveTaskFile, buildTaskFileName, buildSliceFileName } from "./paths.js";
 import { sendDesktopNotification } from "./notifications.js";
-import { getTask, getSlice, getSliceTasks, updateTaskStatus, updateSliceStatus } from "./gsd-db.js";
+import { getTask, getSlice, getSliceTasks, updateTaskStatus, updateSliceStatus } from "./sdd-db.js";
 import { renderPlanCheckboxes, renderRoadmapCheckboxes } from "./markdown-renderer.js";
 
 /**
@@ -23,7 +23,7 @@ import { renderPlanCheckboxes, renderRoadmapCheckboxes } from "./markdown-render
 export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi: ExtensionAPI, basePath: string): Promise<void> {
   const force = args.includes("--force");
 
-  // Find the last GSD-related commit from git activity logs
+  // Find the last SDD-related commit from git activity logs
   const activityDir = join(gsdRoot(basePath), "activity");
   if (!existsSync(activityDir)) {
     ctx.ui.notify("Nothing to undo — no activity logs found.", "info");
@@ -59,7 +59,7 @@ export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi
       `  - Delete summary artifacts\n` +
       `  - Uncheck task in PLAN (if execute-task)\n` +
       `  - Attempt to revert associated git commits\n\n` +
-      `Run /gsd undo --force to confirm.`,
+      `Run /sdd undo --force to confirm.`,
       "warning",
     );
     return;
@@ -133,7 +133,7 @@ export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi
   }
 
   ctx.ui.notify(results.join("\n"), "success");
-  sendDesktopNotification("GSD", `Undone: ${unitType} (${unitId})`, "info", "complete");
+  sendDesktopNotification("SDD", `Undone: ${unitType} (${unitId})`, "info", "complete");
 }
 
 // ─── Targeted State Reset ────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ export async function handleUndoTask(
 
   if (!rawId) {
     ctx.ui.notify(
-      "Usage: /gsd undo-task <taskId> [--force]\n\n" +
+      "Usage: /sdd undo-task <taskId> [--force]\n\n" +
       "Accepts: T01, S01/T01, or M001/S01/T01\n" +
       "Resets the task's DB status to pending and re-renders plan checkboxes.",
       "warning",
@@ -240,7 +240,7 @@ export async function handleUndoTask(
       `  - Set task status to "pending" in DB\n` +
       `  - Delete task summary file (if exists)\n` +
       `  - Re-render plan checkboxes\n\n` +
-      `Run /gsd undo-task ${rawId} --force to confirm.`,
+      `Run /sdd undo-task ${rawId} --force to confirm.`,
       "warning",
     );
     return;
@@ -288,7 +288,7 @@ export async function handleResetSlice(
 
   if (!rawId) {
     ctx.ui.notify(
-      "Usage: /gsd reset-slice <sliceId> [--force]\n\n" +
+      "Usage: /sdd reset-slice <sliceId> [--force]\n\n" +
       "Accepts: S01 or M001/S01\n" +
       "Resets the slice and all its tasks, re-renders plan + roadmap checkboxes.",
       "warning",
@@ -323,7 +323,7 @@ export async function handleResetSlice(
       `  - Set slice status to "active" in DB\n` +
       `  - Delete task summary files, slice summary, and UAT files\n` +
       `  - Re-render plan + roadmap checkboxes\n\n` +
-      `Run /gsd reset-slice ${rawId} --force to confirm.`,
+      `Run /sdd reset-slice ${rawId} --force to confirm.`,
       "warning",
     );
     return;

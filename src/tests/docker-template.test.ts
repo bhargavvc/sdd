@@ -20,9 +20,9 @@ test("docker/Dockerfile.sandbox exists and uses Node 24 base", () => {
   assert.match(content, /FROM node:24/);
 });
 
-test("docker/Dockerfile.sandbox installs gsd-pi globally", () => {
+test("docker/Dockerfile.sandbox installs sdd-pi globally", () => {
   const content = readFile("docker/Dockerfile.sandbox");
-  assert.match(content, /npm install -g gsd-pi/);
+  assert.match(content, /npm install -g sdd-pi/);
 });
 
 test("docker/Dockerfile.sandbox creates a non-root user", () => {
@@ -42,10 +42,10 @@ test("docker/Dockerfile.sandbox installs git", () => {
 
 // ── docker-compose.yaml (minimal) ──
 
-test("docker/docker-compose.yaml exists and defines gsd service", () => {
+test("docker/docker-compose.yaml exists and defines sdd service", () => {
   const content = readFile("docker/docker-compose.yaml");
   assert.match(content, /services:/);
-  assert.match(content, /gsd:/);
+  assert.match(content, /sdd:/);
 });
 
 test("docker/docker-compose.yaml mounts workspace volume", () => {

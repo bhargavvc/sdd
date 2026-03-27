@@ -15,7 +15,7 @@
  * Adapted from Oh My Pi's hashline implementation for Node.js (no Bun dependency).
  */
 
-import { xxHash32 } from "@gsd/native/xxhash";
+import { xxHash32 } from "@sdd/native/xxhash";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Hash Computation

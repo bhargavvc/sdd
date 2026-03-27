@@ -19,14 +19,14 @@ function assert(condition: boolean, message: string): void {
 
 // ─── Fixture: milestone with only CONTEXT-DRAFT.md ──────────────────────
 
-const tmpBase = mkdtempSync(join(tmpdir(), "gsd-smart-entry-draft-test-"));
-const gsd = join(tmpBase, ".gsd");
+const tmpBase = mkdtempSync(join(tmpdir(), "sdd-smart-entry-draft-test-"));
+const sdd = join(tmpBase, ".sdd");
 
-mkdirSync(join(gsd, "milestones", "M001"), { recursive: true });
+mkdirSync(join(sdd, "milestones", "M001"), { recursive: true });
 
 const draftContent = `# M001: Test Milestone — Context\n\n**Status:** Draft\n\nSeed material from a prior discussion.\n`;
 writeFileSync(
-  join(gsd, "milestones", "M001", "M001-CONTEXT-DRAFT.md"),
+  join(sdd, "milestones", "M001", "M001-CONTEXT-DRAFT.md"),
   draftContent,
 );
 

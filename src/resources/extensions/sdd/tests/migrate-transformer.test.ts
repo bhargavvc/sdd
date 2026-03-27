@@ -1,9 +1,9 @@
 // Migration transformer test suite
-// Tests for transforming parsed PlanningProject into GSDProject structures.
+// Tests for transforming parsed PlanningProject into SDDProject structures.
 // Uses synthetic in-memory fixtures — no filesystem needed.
-// Transformer is pure: PlanningProject → GSDProject.
+// Transformer is pure: PlanningProject → SDDProject.
 
-import { transformToGSD } from '../migrate/transformer.ts';
+import { transformToSDD } from '../migrate/transformer.ts';
 import type {
   PlanningProject,
   PlanningPhase,
@@ -14,10 +14,10 @@ import type {
   PlanningRoadmapMilestone,
   PlanningRequirement,
   PlanningResearch,
-  GSDProject,
-  GSDMilestone,
-  GSDSlice,
-  GSDTask,
+  SDDProject,
+  SDDMilestone,
+  SDDSlice,
+  SDDTask,
 } from '../migrate/types.ts';
 import { describe, test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -156,7 +156,7 @@ test('Scenario 1: Flat single-milestone', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.milestones.length, 1, 'flat: produces 1 milestone');
   assert.ok(result.milestones[0]?.id === 'M001', 'flat: milestone ID is M001');
@@ -202,7 +202,7 @@ test('Scenario 2: Multi-milestone', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.milestones.length, 2, 'multi: 2 milestones');
   assert.deepStrictEqual(result.milestones[0]?.id, 'M001', 'multi: first milestone M001');
@@ -238,7 +238,7 @@ test('Scenario 3: Decimal phase ordering', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.milestones[0]?.slices.length, 5, 'decimal: 5 slices total');
   assert.deepStrictEqual(result.milestones[0]?.slices[0]?.id, 'S01', 'decimal: first is S01');
@@ -280,7 +280,7 @@ test('Scenario 4: Completion state mapping', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
   const doneSlice = result.milestones[0]?.slices[0];
   const activeSlice = result.milestones[0]?.slices[1];
 
@@ -320,7 +320,7 @@ test('Scenario 5: Research consolidation', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   // Project-level research → milestone research
   assert.ok(result.milestones[0]?.research !== null, 'research: milestone has consolidated research');
@@ -357,7 +357,7 @@ test('Scenario 6: Requirements classification', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.requirements.length, 3, 'requirements: 3 requirements');
   assert.deepStrictEqual(result.requirements[0]?.id, 'R001', 'requirements: first is R001');
@@ -388,7 +388,7 @@ test('Scenario 7: Empty phase', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.milestones[0]?.slices[0]?.tasks.length, 0, 'empty: empty phase → 0 tasks');
   assert.deepStrictEqual(result.milestones[0]?.slices[1]?.tasks.length, 1, 'empty: non-empty phase → 1 task');
@@ -410,7 +410,7 @@ test('Scenario 8: Demo derivation', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.ok(result.milestones[0]?.slices[0]?.demo.length > 0, 'demo: slice demo is not empty');
   assert.ok(
@@ -447,7 +447,7 @@ test('Scenario 9: Field defaults', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
   const slice = result.milestones[0]?.slices[0];
   const task = slice?.tasks[0];
 
@@ -478,7 +478,7 @@ test('Scenario 10: Sequential depends', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
   const slices = result.milestones[0]?.slices;
 
   assert.deepStrictEqual(slices?.[0]?.depends, [], 'depends: S01 has empty depends');
@@ -503,7 +503,7 @@ test('Scenario 11: Requirements edge cases', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.deepStrictEqual(result.requirements[0]?.id, 'R001', 'req-edge: empty id gets R001');
   assert.deepStrictEqual(result.requirements[1]?.id, 'R002', 'req-edge: second empty id gets R002');
@@ -523,7 +523,7 @@ test('Scenario 12: Vision derivation', () => {
     phases: { '1-vision-phase': makePhase('1-vision-phase', 1, 'vision-phase') },
   });
 
-  const result1 = transformToGSD(project1);
+  const result1 = transformToSDD(project1);
   assert.ok(result1.milestones[0]?.vision.includes('revolutionary'), 'vision: derived from project first line');
 
   // Vision fallback when no project
@@ -532,7 +532,7 @@ test('Scenario 12: Vision derivation', () => {
     phases: { '1-fallback': makePhase('1-fallback', 1, 'fallback') },
   });
 
-  const result2 = transformToGSD(project2);
+  const result2 = transformToSDD(project2);
   assert.ok(result2.milestones[0]?.vision.length > 0, 'vision: fallback is non-empty');
 });
 
@@ -550,7 +550,7 @@ test('Scenario 13: Decisions content', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   assert.ok(result.decisionsContent.includes('decision-01'), 'decisions: extracts key-decisions from summaries');
 });
@@ -577,7 +577,7 @@ test('Scenario 14: No undefined values', () => {
     },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
 
   // Deep check for undefined values
   function checkNoUndefined(obj: unknown, path: string): void {
@@ -610,7 +610,7 @@ test('Scenario 15: Empty research', () => {
     phases: { '1-no-research': makePhase('1-no-research', 1, 'no-research') },
   });
 
-  const result = transformToGSD(project);
+  const result = transformToSDD(project);
   assert.ok(result.milestones[0]?.research === null, 'empty-research: milestone research is null');
   assert.ok(result.milestones[0]?.slices[0]?.research === null, 'empty-research: slice research is null');
 });

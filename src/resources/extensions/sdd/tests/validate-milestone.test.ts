@@ -16,8 +16,8 @@ import { clearParseCache } from "../files.ts";
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-val-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = join(tmpdir(), `sdd-val-test-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
@@ -28,31 +28,31 @@ function cleanup(base: string): void {
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writeMilestoneSummary(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), content);
 }
 
 function writeValidation(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), content);
 }
 
 function writeSlicePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(join(dir, "tasks"), { recursive: true });
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
 }
 
 function writeSliceSummary(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-SUMMARY.md`), content);
 }
@@ -137,7 +137,7 @@ test("deriveState returns validating-milestone when all slices done and no VALID
   try {
     writeRoadmap(base, "M001", ALL_DONE_ROADMAP);
     // Write CONTEXT so milestone has a title
-    const dir = join(base, ".gsd", "milestones", "M001");
+    const dir = join(base, ".sdd", "milestones", "M001");
     writeFileSync(join(dir, "M001-CONTEXT.md"), CONTEXT_FILE);
 
     const state = await deriveState(base);
@@ -261,7 +261,7 @@ test("dispatch rule skips when skip_milestone_validation preference is set", asy
     assert.equal(result.action, "skip");
 
     // Verify the VALIDATION file was written
-    const validationPath = join(base, ".gsd", "milestones", "M001", "M001-VALIDATION.md");
+    const validationPath = join(base, ".sdd", "milestones", "M001", "M001-VALIDATION.md");
     assert.ok(existsSync(validationPath), "VALIDATION file should be written on skip");
   } finally {
     cleanup(base);
@@ -273,7 +273,7 @@ test("dispatch rule skips when skip_milestone_validation preference is set", asy
 test("resolveExpectedArtifactPath returns VALIDATION path for validate-milestone", () => {
   const base = makeTmpBase();
   try {
-    mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
     const result = resolveExpectedArtifactPath("validate-milestone", "M001", base);
     assert.ok(result);
     assert.ok(result!.includes("VALIDATION"));
@@ -298,7 +298,7 @@ test("verifyExpectedArtifact passes when VALIDATION.md exists", () => {
 test("verifyExpectedArtifact fails when VALIDATION.md is missing", () => {
   const base = makeTmpBase();
   try {
-    mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
     clearPathCache();
     clearParseCache();
     const result = verifyExpectedArtifact("validate-milestone", "M001", base);
@@ -386,7 +386,7 @@ test("buildLoopRemediationSteps returns steps for validate-milestone", () => {
     assert.ok(result);
     assert.ok(result!.includes("VALIDATION"));
     assert.ok(result!.includes("verdict: pass"));
-    assert.ok(result!.includes("gsd recover"));
+    assert.ok(result!.includes("sdd recover"));
   } finally {
     cleanup(base);
   }

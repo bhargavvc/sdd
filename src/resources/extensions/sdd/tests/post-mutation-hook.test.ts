@@ -1,4 +1,4 @@
-// GSD Extension — post-mutation hook regression tests
+// SDD Extension — post-mutation hook regression tests
 // Verifies that after a successful handleCompleteTask call, the post-mutation
 // hook fires: event-log.jsonl and state-manifest.json are both written.
 
@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { openDatabase, closeDatabase } from '../gsd-db.ts';
+import { openDatabase, closeDatabase } from '../sdd-db.ts';
 import { handleCompleteTask } from '../tools/complete-task.ts';
 import { readEvents } from '../workflow-events.ts';
 import { readManifest } from '../workflow-manifest.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-post-hook-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-post-hook-'));
 }
 
 function cleanupDir(dirPath: string): void {
@@ -22,7 +22,7 @@ function cleanupDir(dirPath: string): void {
 
 /** Create a minimal project directory with a PLAN.md for complete-task to find. */
 function createProject(basePath: string): void {
-  const sliceDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01');
+  const sliceDir = path.join(basePath, '.sdd', 'milestones', 'M001', 'slices', 'S01');
   const tasksDir = path.join(sliceDir, 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
   fs.writeFileSync(path.join(sliceDir, 'S01-PLAN.md'), `# S01: Test Slice
@@ -70,7 +70,7 @@ test('post-mutation-hook: event-log.jsonl exists after handleCompleteTask', asyn
     const result = await handleCompleteTask(makeCompleteTaskParams(), base);
     assert.ok(!('error' in result), `handler should succeed, got: ${JSON.stringify(result)}`);
 
-    const logPath = path.join(base, '.gsd', 'event-log.jsonl');
+    const logPath = path.join(base, '.sdd', 'event-log.jsonl');
     assert.ok(fs.existsSync(logPath), 'event-log.jsonl should exist after handler completes');
   } finally {
     closeDatabase();
@@ -87,7 +87,7 @@ test('post-mutation-hook: event log contains complete-task event with correct pa
   try {
     await handleCompleteTask(makeCompleteTaskParams(), base);
 
-    const logPath = path.join(base, '.gsd', 'event-log.jsonl');
+    const logPath = path.join(base, '.sdd', 'event-log.jsonl');
     const events = readEvents(logPath);
     assert.ok(events.length > 0, 'event log should have at least one event');
 
@@ -115,7 +115,7 @@ test('post-mutation-hook: state-manifest.json exists after handleCompleteTask', 
     const result = await handleCompleteTask(makeCompleteTaskParams(), base);
     assert.ok(!('error' in result), `handler should succeed, got: ${JSON.stringify(result)}`);
 
-    const manifestPath = path.join(base, '.gsd', 'state-manifest.json');
+    const manifestPath = path.join(base, '.sdd', 'state-manifest.json');
     assert.ok(fs.existsSync(manifestPath), 'state-manifest.json should exist after handler completes');
   } finally {
     closeDatabase();
@@ -150,14 +150,14 @@ test('post-mutation-hook: manifest has version 1 and includes completed task', a
 // ─── Post-mutation hook: non-fatal on hook failure ───────────────────────
 
 test('post-mutation-hook: handler still returns success even if projections dir is missing', async () => {
-  // basePath with NO .gsd directory — projections will fail to find milestones
+  // basePath with NO .sdd directory — projections will fail to find milestones
   // but handler should still return a result (not throw)
   const base = tempDir();
   const dbPath = path.join(base, 'test.db');
   openDatabase(dbPath);
 
   // Create tasks dir but NO plan file (projections will soft-fail)
-  const tasksDir = path.join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+  const tasksDir = path.join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
 
   try {

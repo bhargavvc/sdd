@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { AuthStorage } from "@gsd/pi-coding-agent";
+import { AuthStorage } from "@sdd/pi-coding-agent";
 import {
   maskKey,
   formatDuration,
@@ -232,7 +232,7 @@ test("formatKeyDashboard includes header and category sections", () => {
   const statuses = getAllKeyStatuses(auth);
   const output = formatKeyDashboard(statuses);
 
-  assert.ok(output.includes("GSD API Key Manager"));
+  assert.ok(output.includes("SDD API Key Manager"));
   assert.ok(output.includes("LLM Providers"));
   assert.ok(output.includes("Search Providers"));
   assert.ok(output.includes("Tool Keys"));

@@ -1,10 +1,10 @@
-// GSD Extension — workflow-projections unit tests
+// SDD Extension — workflow-projections unit tests
 // Tests the pure rendering functions (no DB required).
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { renderPlanContent } from '../workflow-projections.ts';
-import type { SliceRow, TaskRow } from '../gsd-db.ts';
+import type { SliceRow, TaskRow } from '../sdd-db.ts';
 
 // ─── Test fixtures ────────────────────────────────────────────────────────
 

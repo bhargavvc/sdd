@@ -1,5 +1,5 @@
 /**
- * Integration test for `gsd headless` CLI subcommand
+ * Integration test for `sdd headless` CLI subcommand
  *
  * Validates that the headless CLI entry point works end-to-end:
  *   1. Creates a temp dir with a complete .sdd/ project fixture
@@ -36,7 +36,7 @@ const FIXTURE_PROJECT_MD = `# Project
 
 ## What This Is
 
-Headless proof test project. A minimal fixture used to validate GSD auto-mode via RPC.
+Headless proof test project. A minimal fixture used to validate SDD auto-mode via RPC.
 
 ## Core Value
 
@@ -44,7 +44,7 @@ Proves headless auto-mode works end-to-end.
 
 ## Current State
 
-Empty project with GSD milestone planned.
+Empty project with SDD milestone planned.
 
 ## Architecture / Key Patterns
 
@@ -59,7 +59,7 @@ None.
 - [ ] M001: Headless Proof — Create a test file to prove the agent loop works
 `;
 
-const FIXTURE_STATE_MD = `# GSD State
+const FIXTURE_STATE_MD = `# SDD State
 
 **Active Milestone:** M001 — Headless Proof
 **Active Slice:** S01 — Create Test File
@@ -86,7 +86,7 @@ const FIXTURE_CONTEXT_MD = `# M001: Headless Proof — Context
 
 ## Project Description
 
-A minimal test project for validating GSD auto-mode in headless/RPC mode.
+A minimal test project for validating SDD auto-mode in headless/RPC mode.
 
 ## Why This Milestone
 
@@ -96,7 +96,7 @@ Proves that the agent loop can complete a task without a TUI attached.
 
 ### When this milestone is complete, the user can:
 
-- Run GSD in headless mode and have it complete a trivial task
+- Run SDD in headless mode and have it complete a trivial task
 
 ### Entry point / environment
 
@@ -153,11 +153,11 @@ To call this milestone complete, we must prove:
 
 const FIXTURE_ROADMAP_MD = `# M001: Headless Proof
 
-**Vision:** Prove GSD auto-mode works headlessly.
+**Vision:** Prove SDD auto-mode works headlessly.
 
 ## Success Criteria
 
-- Agent creates hello.txt with content "Hello from headless GSD"
+- Agent creates hello.txt with content "Hello from headless SDD"
 
 ## Key Risks / Unknowns
 
@@ -186,20 +186,20 @@ const FIXTURE_PLAN_MD = `# S01: Create Test File
 
 ## Must-Haves
 
-- hello.txt created with content "Hello from headless GSD"
+- hello.txt created with content "Hello from headless SDD"
 
 ## Verification
 
-- File hello.txt exists in project root with content "Hello from headless GSD"
+- File hello.txt exists in project root with content "Hello from headless SDD"
 
 ## Tasks
 
 - [ ] **T01: Create hello.txt** \`est:5m\`
   - Why: Proves the agent can execute a tool call and produce an artifact
   - Files: \`hello.txt\`
-  - Do: Create a file called hello.txt in the project root with the content "Hello from headless GSD"
+  - Do: Create a file called hello.txt in the project root with the content "Hello from headless SDD"
   - Verify: File exists with correct content
-  - Done when: hello.txt exists with content "Hello from headless GSD"
+  - Done when: hello.txt exists with content "Hello from headless SDD"
 
 ## Files Likely Touched
 
@@ -218,37 +218,37 @@ estimated_files: 1
 
 ## Description
 
-Create a file called hello.txt in the project root with the content "Hello from headless GSD".
+Create a file called hello.txt in the project root with the content "Hello from headless SDD".
 
 ## Steps
 
-1. Create the file hello.txt with the content "Hello from headless GSD"
+1. Create the file hello.txt with the content "Hello from headless SDD"
 
 ## Must-Haves
 
-- [ ] hello.txt created with content "Hello from headless GSD"
+- [ ] hello.txt created with content "Hello from headless SDD"
 
 ## Verification
 
-- File hello.txt exists in project root with content "Hello from headless GSD"
+- File hello.txt exists in project root with content "Hello from headless SDD"
 
 ## Expected Output
 
-- \`hello.txt\` — file containing "Hello from headless GSD"
+- \`hello.txt\` — file containing "Hello from headless SDD"
 `;
 
 // ── Fixture Creation ─────────────────────────────────────────────────────────
 
 function createFixture(): string {
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-headless-cmd-"));
+  const tmpDir = mkdtempSync(join(tmpdir(), "sdd-headless-cmd-"));
 
-  // Initialize git repo (GSD requires it for branch-per-slice)
+  // Initialize git repo (SDD requires it for branch-per-slice)
   execSync("git init -b main", { cwd: tmpDir, stdio: "pipe" });
   execSync('git config user.email "test@test.com"', { cwd: tmpDir, stdio: "pipe" });
   execSync('git config user.name "Test"', { cwd: tmpDir, stdio: "pipe" });
 
   // Create .sdd/ structure
-  const gsdDir = join(tmpDir, ".gsd");
+  const gsdDir = join(tmpDir, ".sdd");
   const milestonesDir = join(gsdDir, "milestones");
   const m001Dir = join(milestonesDir, "M001");
   const slicesDir = join(m001Dir, "slices");
@@ -274,7 +274,7 @@ function createFixture(): string {
     ".sdd/runtime/",
   ].join("\n") + "\n");
 
-  // Initial commit so GSD has a clean git state
+  // Initial commit so SDD has a clean git state
   execSync("git add -A && git commit -m 'init: headless command test fixture'", {
     cwd: tmpDir,
     stdio: "pipe",
@@ -318,10 +318,10 @@ function parseJsonlLines(output: string): JsonlEvent[] {
 async function main(): Promise<void> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  // Resolve gsd-2 repo root (6 levels up from tests/integration/)
+  // Resolve sdd-2 repo root (6 levels up from tests/integration/)
   const repoRoot = join(__dirname, "..", "..", "..", "..", "..", "..");
 
-  console.log("=== GSD Headless Command Integration Test ===\n");
+  console.log("=== SDD Headless Command Integration Test ===\n");
 
   // ── Step 1: Create fixture ──────────────────────────────────────────────
   console.log("[1/6] Creating fixture...");
@@ -353,7 +353,7 @@ async function main(): Promise<void> {
 
   // Auth: prefer OAuth credentials from ~/.sdd/agent/auth.json (D013).
   // Fall back to ANTHROPIC_API_KEY env var if present.
-  const authJsonPath = join(homedir(), ".gsd", "agent", "auth.json");
+  const authJsonPath = join(homedir(), ".sdd", "agent", "auth.json");
   let hasOAuth = false;
   if (existsSync(authJsonPath)) {
     try {
@@ -496,7 +496,7 @@ async function main(): Promise<void> {
 
   if (artifactExists) {
     const content = readFileSync(helloPath, "utf-8").trim();
-    const contentMatch = content === "Hello from headless GSD";
+    const contentMatch = content === "Hello from headless SDD";
     console.log(`  ${contentMatch ? "PASS" : "WARN"} hello.txt content: "${content.slice(0, 80)}"`);
   }
 

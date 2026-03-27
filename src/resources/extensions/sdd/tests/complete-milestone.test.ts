@@ -29,25 +29,25 @@ function loadPromptFromWorktree(name: string, vars: Record<string, string> = {})
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-complete-ms-test-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-complete-ms-test-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writeMilestoneSummary(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), content);
 }
 
 function writeMilestoneValidation(base: string, mid: string, verdict: string = "pass"): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), `---\nverdict: ${verdict}\nremediation_round: 0\n---\n\n# Validation\nValidated.`);
 }
@@ -131,9 +131,9 @@ describe("complete-milestone", () => {
       "prompt contains 'Verification Gate' section",
     );
 
-    // Failure path must block gsd_complete_milestone
+    // Failure path must block sdd_complete_milestone
     assert.ok(
-      prompt.includes("Do NOT call `gsd_complete_milestone`"),
+      prompt.includes("Do NOT call `sdd_complete_milestone`"),
       "failure path explicitly blocks calling the completion tool",
     );
 
@@ -259,7 +259,7 @@ describe("complete-milestone", () => {
 
       // Verify isMilestoneComplete returns true
       const { loadFile } = await import("../files.ts");
-      const roadmapPath = join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md");
+      const roadmapPath = join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md");
       const roadmapContent = await loadFile(roadmapPath);
       const roadmap = parseRoadmap(roadmapContent!);
       assert.ok(isMilestoneComplete(roadmap), "isMilestoneComplete returns true when all slices are [x]");

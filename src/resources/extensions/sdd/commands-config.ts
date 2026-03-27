@@ -1,11 +1,11 @@
 /**
- * GSD Config — Tool API key management.
+ * SDD Config — Tool API key management.
  *
  * Contains: TOOL_KEYS, loadToolApiKeys, getConfigAuthStorage, handleConfig
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { AuthStorage } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
+import { AuthStorage } from "@sdd/pi-coding-agent";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 
@@ -34,7 +34,7 @@ function getStoredToolKey(auth: AuthStorage, providerId: string): string | undef
  */
 export function loadToolApiKeys(): void {
   try {
-    const authPath = join(process.env.HOME ?? "", ".gsd", "agent", "auth.json");
+    const authPath = join(process.env.HOME ?? "", ".sdd", "agent", "auth.json");
     if (!existsSync(authPath)) return;
 
     const auth = AuthStorage.create(authPath);
@@ -50,7 +50,7 @@ export function loadToolApiKeys(): void {
 }
 
 export function getConfigAuthStorage(): AuthStorage {
-  const authPath = join(process.env.HOME ?? "", ".gsd", "agent", "auth.json");
+  const authPath = join(process.env.HOME ?? "", ".sdd", "agent", "auth.json");
   mkdirSync(dirname(authPath), { recursive: true });
   return AuthStorage.create(authPath);
 }
@@ -59,7 +59,7 @@ export async function handleConfig(ctx: ExtensionCommandContext): Promise<void> 
   const auth = getConfigAuthStorage();
 
   // Show current status
-  const statusLines = ["GSD Tool Configuration\n"];
+  const statusLines = ["SDD Tool Configuration\n"];
   for (const tool of TOOL_KEYS) {
     const hasKey = !!process.env[tool.env] || !!getStoredToolKey(auth, tool.id);
     statusLines.push(`  ${hasKey ? "\u2713" : "\u2717"} ${tool.label}${hasKey ? "" : ` \u2014 get key at ${tool.hint}`}`);

@@ -1,12 +1,12 @@
 # Skills
 
-Skills are specialized instruction sets that GSD loads when the task matches. They provide domain-specific guidance for the LLM — coding patterns, framework idioms, testing strategies, and tool usage.
+Skills are specialized instruction sets that SDD loads when the task matches. They provide domain-specific guidance for the LLM — coding patterns, framework idioms, testing strategies, and tool usage.
 
-Skills follow the open [Agent Skills standard](https://agentskills.io/) and are **not GSD-specific** — they work with Claude Code, OpenAI Codex, Cursor, GitHub Copilot, Windsurf, and 40+ other agents.
+Skills follow the open [Agent Skills standard](https://agentskills.io/) and are **not SDD-specific** — they work with Claude Code, OpenAI Codex, Cursor, GitHub Copilot, Windsurf, and 40+ other agents.
 
 ## Skill Directories
 
-GSD reads skills from two locations, in priority order:
+SDD reads skills from two locations, in priority order:
 
 | Location                          | Scope   | Description                                              |
 |-----------------------------------|---------|----------------------------------------------------------|
@@ -15,7 +15,7 @@ GSD reads skills from two locations, in priority order:
 
 Global skills take precedence over project skills when names collide.
 
-> **Migration from `~/.gsd/agent/skills/`:** On first launch after upgrading, GSD automatically copies skills from the legacy `~/.gsd/agent/skills/` directory to `~/.agents/skills/`. The old directory is preserved for backward compatibility.
+> **Migration from `~/.sdd/agent/skills/`:** On first launch after upgrading, SDD automatically copies skills from the legacy `~/.sdd/agent/skills/` directory to `~/.agents/skills/`. The old directory is preserved for backward compatibility.
 
 ## Installing Skills
 
@@ -40,9 +40,9 @@ npx skills update
 
 ### Onboarding Catalog
 
-During `gsd init`, GSD detects the project's tech stack and recommends relevant skill packs. For brownfield projects, detection is automatic; for greenfield projects, the user picks a tech stack.
+During `sdd init`, SDD detects the project's tech stack and recommends relevant skill packs. For brownfield projects, detection is automatic; for greenfield projects, the user picks a tech stack.
 
-The curated catalog is maintained in `src/resources/extensions/gsd/skill-catalog.ts`. Each entry maps a tech stack to a skills.sh repo and specific skill names.
+The curated catalog is maintained in `src/resources/extensions/sdd/skill-catalog.ts`. Each entry maps a tech stack to a skills.sh repo and specific skill names.
 
 #### Available Skill Packs
 
@@ -73,7 +73,7 @@ The curated catalog is maintained in `src/resources/extensions/gsd/skill-catalog
 
 ### Maintaining the Catalog
 
-The skill catalog lives in [`src/resources/extensions/gsd/skill-catalog.ts`](../src/resources/extensions/gsd/skill-catalog.ts). To add or update a pack:
+The skill catalog lives in [`src/resources/extensions/sdd/skill-catalog.ts`](../src/resources/extensions/sdd/skill-catalog.ts). To add or update a pack:
 
 1. Add a `SkillPack` entry to the `SKILL_CATALOG` array with `repo`, `skills`, and matching criteria
 2. For language-detection matching, use `matchLanguages` (values from `detection.ts` `LANGUAGE_MAP`)
@@ -84,7 +84,7 @@ The skill catalog lives in [`src/resources/extensions/gsd/skill-catalog.ts`](../
 
 ## Skill Discovery
 
-The `skill_discovery` preference controls how GSD finds skills during auto mode:
+The `skill_discovery` preference controls how SDD finds skills during auto mode:
 
 | Mode | Behavior |
 |------|----------|
@@ -147,7 +147,7 @@ Project-local skills can be committed to version control so team members share t
 
 ## Skill Lifecycle Management
 
-GSD tracks skill performance across auto-mode sessions and surfaces health data to help you maintain skill quality.
+SDD tracks skill performance across auto-mode sessions and surfaces health data to help you maintain skill quality.
 
 ### Skill Telemetry
 
@@ -155,13 +155,13 @@ Every auto-mode unit records which skills were available and actively loaded. Th
 
 ### Skill Health Dashboard
 
-View skill performance with `/gsd skill-health`:
+View skill performance with `/sdd skill-health`:
 
 ```
-/gsd skill-health              # overview table: name, uses, success%, tokens, trend, last used
-/gsd skill-health rust-core    # detailed view for one skill
-/gsd skill-health --stale 30   # skills unused for 30+ days
-/gsd skill-health --declining  # skills with falling success rates
+/sdd skill-health              # overview table: name, uses, success%, tokens, trend, last used
+/sdd skill-health rust-core    # detailed view for one skill
+/sdd skill-health --stale 30   # skills unused for 30+ days
+/sdd skill-health --declining  # skills with falling success rates
 ```
 
 The dashboard flags skills that may need attention:
@@ -183,6 +183,6 @@ Stale skills are excluded from automatic matching but remain invokable explicitl
 
 ### Heal-Skill (Post-Unit Analysis)
 
-When configured as a post-unit hook, GSD can analyze whether the agent deviated from a skill's instructions during execution. If significant drift is detected (outdated API patterns, incorrect guidance), it writes proposed fixes to `.gsd/skill-review-queue.md` for human review.
+When configured as a post-unit hook, SDD can analyze whether the agent deviated from a skill's instructions during execution. If significant drift is detected (outdated API patterns, incorrect guidance), it writes proposed fixes to `.sdd/skill-review-queue.md` for human review.
 
 Key design principle: skills are **never auto-modified**. Research shows curated skills outperform auto-generated ones significantly, so the human review step is critical.

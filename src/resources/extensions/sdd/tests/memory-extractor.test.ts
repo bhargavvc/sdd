@@ -2,7 +2,7 @@ import { parseMemoryResponse, _resetExtractionState } from '../memory-extractor.
 import {
   openDatabase,
   closeDatabase,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import {
   getActiveMemories,
   applyMemoryActions,

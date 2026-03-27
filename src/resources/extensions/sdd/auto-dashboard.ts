@@ -6,7 +6,7 @@
  * or AutoContext dependency. State accessors are passed as callbacks.
  */
 
-import type { ExtensionContext, ExtensionCommandContext, SessionMessageEntry } from "@gsd/pi-coding-agent";
+import type { ExtensionContext, ExtensionCommandContext, SessionMessageEntry } from "@sdd/pi-coding-agent";
 import type { SDDState } from "./types.js";
 import { getCurrentBranch } from "./worktree.js";
 import { getActiveHook } from "./post-unit-hooks.js";
@@ -15,10 +15,10 @@ import {
   resolveMilestoneFile,
   resolveSliceFile,
 } from "./paths.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { truncateToWidth, visibleWidth } from "@gsd/pi-tui";
+import { truncateToWidth, visibleWidth } from "@sdd/pi-tui";
 import { makeUI } from "../shared/tui.js";
 import { GLYPH, INDENT } from "../shared/mod.js";
 import { computeProgressScore } from "./progress-score.js";
@@ -481,7 +481,7 @@ export function updateProgressWidget(
   // Cache the effective service tier at widget creation time (reads preferences)
   const effectiveServiceTier = getEffectiveServiceTier();
 
-  ctx.ui.setWidget("gsd-progress", (tui, theme) => {
+  ctx.ui.setWidget("sdd-progress", (tui, theme) => {
     let pulseBright = true;
     let cachedLines: string[] | undefined;
     let cachedWidth: number | undefined;
@@ -554,7 +554,7 @@ export function updateProgressWidget(
             : "x";
         const healthStr = `  ${theme.fg(healthColor, healthIcon)} ${theme.fg(healthColor, score.summary)}`;
 
-        const headerLeft = `${pad}${dot} ${theme.fg("accent", theme.bold("GSD"))}  ${theme.fg("success", modeTag)}${healthStr}`;
+        const headerLeft = `${pad}${dot} ${theme.fg("accent", theme.bold("SDD"))}  ${theme.fg("success", modeTag)}${healthStr}`;
 
         // ETA in header right, after elapsed
         const eta = estimateTimeRemaining();

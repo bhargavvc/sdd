@@ -44,7 +44,7 @@ test("auto.ts validates milestone before restoring paused session (#1664)", () =
 // ─── Filesystem validation unit tests ───────────────────────────────────────
 
 function makeTmpBase(): string {
-  return join(tmpdir(), `gsd-paused-test-${randomUUID()}`);
+  return join(tmpdir(), `sdd-paused-test-${randomUUID()}`);
 }
 
 function cleanup(base: string): void {
@@ -53,7 +53,7 @@ function cleanup(base: string): void {
 
 test("resolveMilestonePath returns null for missing milestone", (t) => {
   const base = makeTmpBase();
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   t.after(() => cleanup(base));
 
   const result = resolveMilestonePath(base, "M999");
@@ -62,7 +62,7 @@ test("resolveMilestonePath returns null for missing milestone", (t) => {
 
 test("resolveMilestonePath returns path for existing milestone", (t) => {
   const base = makeTmpBase();
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   t.after(() => cleanup(base));
 
   const result = resolveMilestonePath(base, "M001");
@@ -72,7 +72,7 @@ test("resolveMilestonePath returns path for existing milestone", (t) => {
 
 test("resolveMilestoneFile returns null when no SUMMARY exists", (t) => {
   const base = makeTmpBase();
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   t.after(() => cleanup(base));
 
   const result = resolveMilestoneFile(base, "M001", "SUMMARY");
@@ -81,7 +81,7 @@ test("resolveMilestoneFile returns null when no SUMMARY exists", (t) => {
 
 test("resolveMilestoneFile returns path when SUMMARY exists (completed)", (t) => {
   const base = makeTmpBase();
-  const mDir = join(base, ".gsd", "milestones", "M001");
+  const mDir = join(base, ".sdd", "milestones", "M001");
   mkdirSync(mDir, { recursive: true });
   writeFileSync(join(mDir, "M001-SUMMARY.md"), "# Summary\nDone.");
   t.after(() => cleanup(base));
@@ -95,7 +95,7 @@ test("resolveMilestoneFile returns path when SUMMARY exists (completed)", (t) =>
 
 test("stale milestone: missing dir means paused session should be discarded", (t) => {
   const base = makeTmpBase();
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   t.after(() => cleanup(base));
 
   const mDir = resolveMilestonePath(base, "M999");
@@ -106,7 +106,7 @@ test("stale milestone: missing dir means paused session should be discarded", (t
 
 test("stale milestone: completed (has SUMMARY) means paused session should be discarded", (t) => {
   const base = makeTmpBase();
-  const mDir = join(base, ".gsd", "milestones", "M001");
+  const mDir = join(base, ".sdd", "milestones", "M001");
   mkdirSync(mDir, { recursive: true });
   writeFileSync(join(mDir, "M001-SUMMARY.md"), "# Summary\nDone.");
   t.after(() => cleanup(base));
@@ -119,7 +119,7 @@ test("stale milestone: completed (has SUMMARY) means paused session should be di
 
 test("valid milestone: exists and has no SUMMARY means paused session is valid", (t) => {
   const base = makeTmpBase();
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   t.after(() => cleanup(base));
 
   const dir = resolveMilestonePath(base, "M001");

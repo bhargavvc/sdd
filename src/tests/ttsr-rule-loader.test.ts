@@ -15,8 +15,8 @@ import { loadRules } from '../../src/resources/extensions/ttsr/index.js'
 
 function makeTmpProject(): { cwd: string; globalDir: string; projectDir: string; cleanup: () => void } {
 	const cwd = mkdtempSync(join(tmpdir(), 'ttsr-loader-test-'))
-	const globalDir = join(cwd, '.gsd-global', 'agent', 'rules')
-	const projectDir = join(cwd, '.gsd', 'rules')
+	const globalDir = join(cwd, '.sdd-global', 'agent', 'rules')
+	const projectDir = join(cwd, '.sdd', 'rules')
 	return { cwd, globalDir, projectDir, cleanup: () => rmSync(cwd, { recursive: true, force: true }) }
 }
 

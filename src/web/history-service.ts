@@ -8,10 +8,10 @@ import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefi
 import type { HistoryData } from "../../web/lib/remaining-command-types.ts"
 
 const HISTORY_MAX_BUFFER = 2 * 1024 * 1024
-const HISTORY_MODULE_ENV = "GSD_HISTORY_MODULE"
+const HISTORY_MODULE_ENV = "SDD_HISTORY_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -39,7 +39,7 @@ export async function collectHistoryData(projectCwdOverride?: string): Promise<H
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${HISTORY_MODULE_ENV}).href);`,
-    `const ledger = mod.loadLedgerFromDisk(process.env.GSD_HISTORY_BASE);`,
+    `const ledger = mod.loadLedgerFromDisk(process.env.SDD_HISTORY_BASE);`,
     'const units = ledger ? ledger.units : [];',
     'const totals = mod.getProjectTotals(units);',
     'const byPhase = mod.aggregateByPhase(units);',
@@ -63,7 +63,7 @@ export async function collectHistoryData(projectCwdOverride?: string): Promise<H
         env: {
           ...process.env,
           [HISTORY_MODULE_ENV]: historyModulePath,
-          GSD_HISTORY_BASE: projectCwd,
+          SDD_HISTORY_BASE: projectCwd,
         },
         maxBuffer: HISTORY_MAX_BUFFER,
       },

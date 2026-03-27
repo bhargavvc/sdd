@@ -9,7 +9,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import { homedir } from "node:os";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 import type { Rule } from "./ttsr-manager.js";
 import { splitFrontmatter, parseFrontmatterMap } from "../shared/frontmatter.js";
 
@@ -62,7 +62,7 @@ function scanDir(dir: string): Rule[] {
  */
 export function loadRules(cwd: string): Rule[] {
 	const globalDir = join(gsdHome, "agent", "rules");
-	const projectDir = join(cwd, ".gsd", "rules");
+	const projectDir = join(cwd, ".sdd", "rules");
 
 	const globalRules = scanDir(globalDir);
 	const projectRules = scanDir(projectDir);

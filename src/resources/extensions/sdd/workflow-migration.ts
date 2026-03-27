@@ -1,11 +1,11 @@
-// GSD Extension — Legacy Markdown to Engine Migration
+// SDD Extension — Legacy Markdown to Engine Migration
 // Converts legacy markdown-only projects to engine state by parsing
 // existing ROADMAP.md, *-PLAN.md, and *-SUMMARY.md files.
 // Populates data into the already-existing v10 schema tables.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { _getAdapter, transaction } from "./gsd-db.js";
+import { _getAdapter, transaction } from "./sdd-db.js";
 import { parseRoadmap, parsePlan } from "./parsers-legacy.js";
 
 // ─── needsAutoMigration ───────────────────────────────────────────────────
@@ -29,7 +29,7 @@ export function needsAutoMigration(basePath: string): boolean {
   }
 
   // Check if .sdd/milestones/ directory exists
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".sdd", "milestones");
   if (!existsSync(milestonesDir)) return false;
 
   return true;
@@ -58,7 +58,7 @@ export function migrateFromMarkdown(basePath: string): void {
     return;
   }
 
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".sdd", "milestones");
   if (!existsSync(milestonesDir)) {
     process.stderr.write("workflow-migration: no .sdd/milestones/ directory found, nothing to migrate\n");
     return;
@@ -275,7 +275,7 @@ export function validateMigration(basePath: string): { discrepancies: string[] }
   const engineTaskCount = engTasks ? (engTasks["cnt"] as number) : 0;
 
   // Count from markdown
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".sdd", "milestones");
   if (!existsSync(milestonesDir)) {
     return { discrepancies };
   }

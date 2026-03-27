@@ -1,5 +1,5 @@
 /**
- * Status predicates for GSD state-machine guards.
+ * Status predicates for SDD state-machine guards.
  *
  * The DB stores status as free-form strings. Two values indicate
  * "closed": "complete" (canonical) and "done" (legacy / alias).

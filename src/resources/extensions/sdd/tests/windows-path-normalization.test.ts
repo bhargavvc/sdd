@@ -70,7 +70,7 @@ assert.deepStrictEqual(
 
 console.log("\n=== cd command construction with normalised paths ===");
 
-const windowsCwd = "C:\\Users\\user\\project\\.gsd\\worktrees\\M001";
+const windowsCwd = "C:\\Users\\user\\project\\.sdd\\worktrees\\M001";
 const cdCommand = `cd ${bashPath(windowsCwd)}`;
 assert.deepStrictEqual(
   cdCommand,
@@ -88,7 +88,7 @@ assert.ok(
 
 console.log("\n=== teardown orphan warning path formatting ===");
 
-const windowsWtDir = "C:\\Users\\user\\project\\.gsd\\worktrees\\M001";
+const windowsWtDir = "C:\\Users\\user\\project\\.sdd\\worktrees\\M001";
 const helpCommand = `rm -rf "${windowsWtDir.replaceAll("\\", "/")}"`;
 assert.deepStrictEqual(
   helpCommand,

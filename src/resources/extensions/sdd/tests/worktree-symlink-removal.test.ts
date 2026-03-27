@@ -32,8 +32,8 @@ function run(command: string, cwd: string): string {
 // mimicking the external state directory layout (~/.sdd/projects/<hash>/).
 // Resolve tmpdir to handle macOS /tmp -> /private/var/... symlink.
 const realTmp = realpathSync(tmpdir());
-const base = mkdtempSync(join(realTmp, "gsd-wt-symlink-test-"));
-const externalState = mkdtempSync(join(realTmp, "gsd-wt-symlink-ext-"));
+const base = mkdtempSync(join(realTmp, "sdd-wt-symlink-test-"));
+const externalState = mkdtempSync(join(realTmp, "sdd-wt-symlink-ext-"));
 
 run("git init -b main", base);
 run('git config user.name "Test"', base);
@@ -42,14 +42,14 @@ run('git config user.email "test@example.com"', base);
 // Create external state directory structure
 mkdirSync(join(externalState, "worktrees"), { recursive: true });
 
-// Create .gsd as a symlink to the external state directory
-symlinkSync(externalState, join(base, ".gsd"));
+// Create .sdd as a symlink to the external state directory
+symlinkSync(externalState, join(base, ".sdd"));
 
 // Verify the symlink is in place
-assert.ok(existsSync(join(base, ".gsd")), ".gsd symlink exists");
+assert.ok(existsSync(join(base, ".sdd")), ".sdd symlink exists");
 assert.ok(
-  realpathSync(join(base, ".gsd")) === externalState,
-  ".gsd resolves to external state dir",
+  realpathSync(join(base, ".sdd")) === externalState,
+  ".sdd resolves to external state dir",
 );
 
 // Create initial commit so we have a valid repo
@@ -80,15 +80,15 @@ describe('worktree-symlink-removal', async () => {
   const computedPath = worktreePath(base, "M002");
   assert.ok(existsSync(computedPath), "computed path exists (via symlink)");
 
-  // Simulate what syncStateToProjectRoot does: replace the .gsd symlink with
+  // Simulate what syncStateToProjectRoot does: replace the .sdd symlink with
   // a real directory containing stale worktree data. This causes worktreePath()
   // to compute a LOCAL path that differs from git's REGISTERED path (the
   // resolved external path). The stale local dir passes existsSync but is not
   // a real git worktree, so nativeWorktreeRemove fails silently.
-  unlinkSync(join(base, ".gsd"));  // remove the symlink
-  mkdirSync(join(base, ".gsd", "worktrees", "M002"), { recursive: true });
+  unlinkSync(join(base, ".sdd"));  // remove the symlink
+  mkdirSync(join(base, ".sdd", "worktrees", "M002"), { recursive: true });
   // Write a dummy file so the stale directory is non-empty
-  writeFileSync(join(base, ".gsd", "worktrees", "M002", "stale.txt"), "stale sync artifact", "utf-8");
+  writeFileSync(join(base, ".sdd", "worktrees", "M002", "stale.txt"), "stale sync artifact", "utf-8");
 
   // Now worktreePath(base, "M002") points to the LOCAL stale dir, not the
   // external path where git actually registered the worktree.

@@ -6,7 +6,7 @@ set -euo pipefail
 
 HOOK_DIR="$(git rev-parse --git-dir)/hooks"
 HOOK_FILE="$HOOK_DIR/pre-commit"
-MARKER="# gsd-secret-scan"
+MARKER="# sdd-secret-scan"
 
 mkdir -p "$HOOK_DIR"
 
@@ -25,7 +25,7 @@ if [[ -f "$HOOK_FILE" ]]; then
 else
   cat > "$HOOK_FILE" << 'EOF'
 #!/usr/bin/env bash
-# gsd-secret-scan
+# sdd-secret-scan
 # Pre-commit hook: scan staged files for hardcoded secrets
 bash "$(git rev-parse --show-toplevel)/scripts/secret-scan.sh"
 EOF

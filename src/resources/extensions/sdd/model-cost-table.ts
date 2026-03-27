@@ -1,9 +1,9 @@
-// GSD Extension — Model Cost Table
+// SDD Extension — Model Cost Table
 // Static cost reference for known models, used by the dynamic router
 // for cross-provider cost comparison.
 //
 // Costs are approximate per-1K-token rates in USD (input tokens).
-// Updated with GSD releases. Users can override via preferences.
+// Updated with SDD releases. Users can override via preferences.
 
 export interface ModelCostEntry {
   /** Model ID (bare, without provider prefix) */
@@ -18,7 +18,7 @@ export interface ModelCostEntry {
 
 /**
  * Bundled cost table for known models.
- * Updated periodically with GSD releases.
+ * Updated periodically with SDD releases.
  */
 export const BUNDLED_COST_TABLE: ModelCostEntry[] = [
   // Anthropic

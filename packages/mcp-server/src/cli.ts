@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   async function cleanup(): Promise<void> {
     if (cleaningUp) return;
     cleaningUp = true;
-    process.stderr.write('[gsd-mcp-server] Shutting down...\n');
+    process.stderr.write('[sdd-mcp-server] Shutting down...\n');
     try {
       await sessionManager.cleanup();
     } catch {
@@ -50,10 +50,10 @@ async function main(): Promise<void> {
   // Connect and start serving
   try {
     await server.connect(transport);
-    process.stderr.write('[gsd-mcp-server] MCP server started on stdio\n');
+    process.stderr.write('[sdd-mcp-server] MCP server started on stdio\n');
   } catch (err) {
     process.stderr.write(
-      `[gsd-mcp-server] Fatal: failed to start — ${err instanceof Error ? err.message : String(err)}\n`
+      `[sdd-mcp-server] Fatal: failed to start — ${err instanceof Error ? err.message : String(err)}\n`
     );
     await sessionManager.cleanup();
     process.exit(1);
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   process.stderr.write(
-    `[gsd-mcp-server] Fatal: ${err instanceof Error ? err.message : String(err)}\n`
+    `[sdd-mcp-server] Fatal: ${err instanceof Error ? err.message : String(err)}\n`
   );
   process.exit(1);
 });

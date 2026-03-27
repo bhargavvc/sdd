@@ -4,7 +4,7 @@
  * Imports from: auto/types, auto/resolve
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
 
 import type { AutoSession } from "./session.js";
 import { NEW_SESSION_TIMEOUT_MS } from "./session.js";
@@ -94,7 +94,7 @@ export async function runUnit(
   debugLog("runUnit", { phase: "send-message", unitType, unitId });
 
   pi.sendMessage(
-    { customType: "gsd-auto", content: prompt, display: s.verbose },
+    { customType: "sdd-auto", content: prompt, display: s.verbose },
     { triggerTurn: true },
   );
 

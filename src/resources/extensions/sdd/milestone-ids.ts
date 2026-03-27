@@ -2,7 +2,7 @@
  * Milestone ID primitives — pure utilities for generating, parsing, sorting,
  * and discovering milestone identifiers.
  *
- * Consumed by 15+ modules across the GSD extension. Zero side-effects.
+ * Consumed by 15+ modules across the SDD extension. Zero side-effects.
  */
 
 import { randomInt } from "node:crypto";
@@ -75,7 +75,7 @@ export function nextMilestoneId(milestoneIds: string[], uniqueEnabled?: boolean)
 /**
  * Module-level set of milestone IDs that have been previewed/promised to the
  * user but not yet materialised on disk. Both guided-flow (preview) and
- * gsd_milestone_generate_id (tool) share this set so the ID shown in the UI
+ * sdd_milestone_generate_id (tool) share this set so the ID shown in the UI
  * matches the one the tool returns.
  */
 const reservedMilestoneIds = new Set<string>();
@@ -128,7 +128,7 @@ export function findMilestoneIds(basePath: string): string[] {
   } catch (err) {
     // Log why milestone scanning failed — silent [] here causes infinite loops (#456)
     if (existsSync(dir)) {
-      console.error(`[gsd] findMilestoneIds: .sdd/milestones/ exists but readdirSync failed — ${getErrorMessage(err)}`);
+      console.error(`[sdd] findMilestoneIds: .sdd/milestones/ exists but readdirSync failed — ${getErrorMessage(err)}`);
     }
     return [];
   }

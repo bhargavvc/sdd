@@ -20,11 +20,11 @@ import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveSDDPreferen
 import { parseRoadmap } from "./parsers-legacy.js";
 import type { SDDState, InlineLevel } from "./types.js";
 import type { SDDPreferences } from "./preferences.js";
-import { getLoadedSkills, type Skill } from "@gsd/pi-coding-agent";
+import { getLoadedSkills, type Skill } from "@sdd/pi-coding-agent";
 import { join, basename } from "node:path";
 import { existsSync } from "node:fs";
 import { computeBudgets, resolveExecutorContextWindow, truncateAtSectionBoundary } from "./context-budget.js";
-import { getPendingGates } from "./gsd-db.js";
+import { getPendingGates } from "./sdd-db.js";
 import { formatDecisionsCompact, formatRequirementsCompact } from "./structured-data-formatter.js";
 
 // ─── Preamble Cap ─────────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ export async function inlineDependencySummaries(
   // DB primary path — get slice depends directly
   let depends: string[] | null = null;
   try {
-    const { isDbAvailable, getSlice } = await import("./gsd-db.js");
+    const { isDbAvailable, getSlice } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const slice = getSlice(mid, sid);
       if (slice) {
@@ -263,7 +263,7 @@ export async function inlineDecisionsFromDb(
 ): Promise<string | null> {
   const inlineLevel = level ?? resolveInlineLevel();
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const { queryDecisions, formatDecisionsForPrompt } = await import("./context-store.js");
       const decisions = queryDecisions({ milestoneId, scope });
@@ -290,7 +290,7 @@ export async function inlineRequirementsFromDb(
 ): Promise<string | null> {
   const inlineLevel = level ?? resolveInlineLevel();
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const { queryRequirements, formatRequirementsForPrompt } = await import("./context-store.js");
       const requirements = queryRequirements({ sliceId });
@@ -316,7 +316,7 @@ export async function inlineProjectFromDb(
   base: string,
 ): Promise<string | null> {
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const { queryProject } = await import("./context-store.js");
       const content = queryProject();
@@ -718,7 +718,7 @@ export async function checkNeedsReassessment(
 ): Promise<{ sliceId: string } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const slices = getMilestoneSlices(mid);
       if (slices.length > 0) {
@@ -772,7 +772,7 @@ export async function checkNeedsRunUat(
 ): Promise<{ sliceId: string; uatType: UatType } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const slices = getMilestoneSlices(mid);
       if (slices.length > 0) {
@@ -790,7 +790,7 @@ export async function checkNeedsRunUat(
         // If the UAT file already contains a verdict, UAT has been run — skip
         if (hasVerdict(uatContent)) return null;
         // Also check the ASSESSMENT file — the run-uat prompt writes the verdict
-        // there (via gsd_summary_save artifact_type:"ASSESSMENT"), not into the
+        // there (via sdd_summary_save artifact_type:"ASSESSMENT"), not into the
         // UAT spec file. Without this check the unit re-dispatches indefinitely.
         const assessmentFile = resolveSliceFile(base, mid, sid, "ASSESSMENT");
         if (assessmentFile) {
@@ -1291,7 +1291,7 @@ export async function buildCompleteMilestonePrompt(
   // Inline all slice summaries (deduplicated by slice ID)
   let sliceIds: string[] = [];
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       sliceIds = getMilestoneSlices(mid).map(s => s.id);
     }
@@ -1312,7 +1312,7 @@ export async function buildCompleteMilestonePrompt(
     inlined.push(await inlineFile(summaryPath, summaryRel, `${sid} Summary`));
   }
 
-  // Inline root GSD files (skip for minimal — completion can read these if needed)
+  // Inline root SDD files (skip for minimal — completion can read these if needed)
   if (inlineLevel !== "minimal") {
     const requirementsInline = await inlineRequirementsFromDb(base, undefined, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
@@ -1323,7 +1323,7 @@ export async function buildCompleteMilestonePrompt(
   }
   const knowledgeInlineCM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCM) inlined.push(knowledgeInlineCM);
-  // Inline milestone context file (milestone-level, not GSD root)
+  // Inline milestone context file (milestone-level, not SDD root)
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
   const contextRel = relMilestoneFile(base, mid, "CONTEXT");
   const contextInline = await inlineFileOptional(contextPath, contextRel, "Milestone Context");
@@ -1362,7 +1362,7 @@ export async function buildValidateMilestonePrompt(
 
   // Inline verification classes from planning (if available in DB)
   try {
-    const { isDbAvailable, getMilestone } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestone } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       const milestone = getMilestone(mid);
       if (milestone) {
@@ -1381,7 +1381,7 @@ export async function buildValidateMilestonePrompt(
   // Inline all slice summaries and UAT results
   let valSliceIds: string[] = [];
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./sdd-db.js");
     if (isDbAvailable()) {
       valSliceIds = getMilestoneSlices(mid).map(s => s.id);
     }
@@ -1433,7 +1433,7 @@ export async function buildValidateMilestonePrompt(
     inlined.push(`### Previous Validation (re-validation round ${remediationRound})\nSource: \`${validationRel}\`\n\n${validationContent.trim()}`);
   }
 
-  // Inline root GSD files
+  // Inline root SDD files
   if (inlineLevel !== "minimal") {
     const requirementsInline = await inlineRequirementsFromDb(base, undefined, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
@@ -1783,7 +1783,7 @@ export async function buildGateEvaluatePrompt(
       "## Instructions",
       "",
       "Analyze the slice plan above and answer the gate question.",
-      `Call the \`gsd_save_gate_result\` tool with:`,
+      `Call the \`sdd_save_gate_result\` tool with:`,
       `- \`milestoneId\`: "${mid}"`,
       `- \`sliceId\`: "${sid}"`,
       `- \`gateId\`: "${gate.gate_id}"`,
@@ -1836,7 +1836,7 @@ export async function buildRewriteDocsPrompt(
         // DB primary path — get incomplete tasks
         let incompleteTasks: { id: string }[] | null = null;
         try {
-          const { isDbAvailable, getSliceTasks } = await import("./gsd-db.js");
+          const { isDbAvailable, getSliceTasks } = await import("./sdd-db.js");
           if (isDbAvailable()) {
             incompleteTasks = getSliceTasks(mid, sid)
               .filter(t => t.status !== "complete" && t.status !== "done")

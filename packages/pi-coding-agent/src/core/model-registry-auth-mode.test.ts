@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import type { Api, Model, SimpleStreamOptions, Context, AssistantMessageEventStream } from "@gsd/pi-ai";
-import { getApiProvider } from "@gsd/pi-ai";
+import type { Api, Model, SimpleStreamOptions, Context, AssistantMessageEventStream } from "@sdd/pi-ai";
+import { getApiProvider } from "@sdd/pi-ai";
 import type { AuthStorage } from "./auth-storage.js";
 import { ModelRegistry } from "./model-registry.js";
 

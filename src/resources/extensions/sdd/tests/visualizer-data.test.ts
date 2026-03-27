@@ -1,4 +1,4 @@
-// Tests for GSD visualizer data loader.
+// Tests for SDD visualizer data loader.
 // Verifies the VisualizerData interface shape and source-file contracts.
 
 import { readFileSync } from "node:fs";
@@ -313,8 +313,8 @@ const overlaySrc = readFileSync(overlayPath, "utf-8");
 console.log("\n=== visualizer-overlay.ts source contracts ===");
 
 assert.ok(
-  overlaySrc.includes("export class GSDVisualizerOverlay"),
-  "exports GSDVisualizerOverlay class",
+  overlaySrc.includes("export class SDDVisualizerOverlay"),
+  "exports SDDVisualizerOverlay class",
 );
 
 assert.ok(
@@ -434,8 +434,8 @@ assert.ok(
 );
 
 assert.ok(
-  coreHandlerSrc.includes("GSDVisualizerOverlay"),
-  "core.ts imports GSDVisualizerOverlay",
+  coreHandlerSrc.includes("SDDVisualizerOverlay"),
+  "core.ts imports SDDVisualizerOverlay",
 );
 
 assert.ok(

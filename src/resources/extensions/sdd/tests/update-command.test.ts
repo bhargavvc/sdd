@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { registerGSDCommand } from "../commands.ts";
+import { registerSDDCommand } from "../commands.ts";
 
 function createMockPi() {
   const commands = new Map<string, any>();
@@ -31,33 +31,33 @@ function createMockCtx() {
   };
 }
 
-test("/gsd update appears in subcommand completions", () => {
+test("/sdd update appears in subcommand completions", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerSDDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  assert.ok(gsd, "registerGSDCommand should register /gsd");
+  const sdd = pi.commands.get("sdd");
+  assert.ok(sdd, "registerSDDCommand should register /sdd");
 
-  const completions = gsd.getArgumentCompletions("update");
+  const completions = sdd.getArgumentCompletions("update");
   const updateEntry = completions.find((c: any) => c.value === "update");
   assert.ok(updateEntry, "update should appear in completions");
   assert.equal(updateEntry.label, "update");
 });
 
-test("/gsd update appears in help description", () => {
+test("/sdd update appears in help description", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerSDDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  assert.ok(gsd?.description?.includes("update"), "description should mention update");
+  const sdd = pi.commands.get("sdd");
+  assert.ok(sdd?.description?.includes("update"), "description should mention update");
 });
 
-test("/gsd update is listed in completions with correct description", () => {
+test("/sdd update is listed in completions with correct description", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerSDDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  const completions = gsd.getArgumentCompletions("");
+  const sdd = pi.commands.get("sdd");
+  const completions = sdd.getArgumentCompletions("");
   const updateEntry = completions.find((c: any) => c.value === "update");
   assert.ok(updateEntry, "update should appear in full completion list");
   assert.ok(

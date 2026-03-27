@@ -10,8 +10,8 @@ Maximize quality-of-life for the autocomplete system by adding missing argument 
 - Values: `off`, `minimal`, `low`, `medium`, `high`, `xhigh` with descriptions
 - Location: `setupAutocomplete()` in interactive-mode.ts, after the `/model` block
 
-### 2. Add descriptions to GSD 2nd-level subcommand completions (commands.ts)
-- Currently `/gsd auto --verbose` shows label only, no description
+### 2. Add descriptions to SDD 2nd-level subcommand completions (commands.ts)
+- Currently `/sdd auto --verbose` shows label only, no description
 - Add descriptions to all 2nd-level completion items across:
   - `auto` flags: --verbose, --debug
   - `mode` subcommands: global, project

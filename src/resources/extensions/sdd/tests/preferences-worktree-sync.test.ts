@@ -55,10 +55,10 @@ test("#2684: copyPlanningArtifacts file list includes preferences.md", () => {
 
 test("#2684: syncGsdStateToWorktree copies preferences.md", async () => {
   // Functional test: create a mock source and destination, call the sync
-  const srcBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-src-"));
-  const dstBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-dst-"));
-  const srcGsd = join(srcBase, ".gsd");
-  const dstGsd = join(dstBase, ".gsd");
+  const srcBase = mkdtempSync(join(tmpdir(), "sdd-wt-prefs-src-"));
+  const dstBase = mkdtempSync(join(tmpdir(), "sdd-wt-prefs-dst-"));
+  const srcGsd = join(srcBase, ".sdd");
+  const dstGsd = join(dstBase, ".sdd");
   mkdirSync(srcGsd, { recursive: true });
   mkdirSync(dstGsd, { recursive: true });
 

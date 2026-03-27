@@ -1,4 +1,4 @@
-// GSD DB Writer — Markdown generators + DB-first write helpers
+// SDD DB Writer — Markdown generators + DB-first write helpers
 //
 // The missing DB→markdown direction. S03 established markdown→DB (md-importer.ts).
 // This module generates DECISIONS.md and REQUIREMENTS.md from DB state,
@@ -13,7 +13,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import type { Decision, Requirement } from './types.js';
 import { resolveGsdRootFile } from './paths.js';
 import { saveFile } from './files.js';
-import { GSDError, GSD_STALE_STATE, GSD_IO_ERROR } from './errors.js';
+import { SDDError, SDD_STALE_STATE, SDD_IO_ERROR } from './errors.js';
 import { logWarning, logError } from './workflow-logger.js';
 import { invalidateStateCache } from './state.js';
 import { clearPathCache } from './paths.js';
@@ -208,7 +208,7 @@ export function generateRequirementsMd(requirements: Requirement[]): string {
  */
 export async function nextDecisionId(): Promise<string> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
     const adapter = db._getAdapter();
     if (!adapter) return 'D001';
 
@@ -249,7 +249,7 @@ export async function saveDecisionToDb(
   basePath: string,
 ): Promise<{ id: string }> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
 
     const id = await nextDecisionId();
 
@@ -341,11 +341,11 @@ export async function updateRequirementInDb(
   basePath: string,
 ): Promise<void> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
 
     const existing = db.getRequirementById(id);
     if (!existing) {
-      throw new GSDError(GSD_STALE_STATE, `Requirement ${id} not found`);
+      throw new SDDError(SDD_STALE_STATE, `Requirement ${id} not found`);
     }
 
     // Merge updates into existing
@@ -423,13 +423,13 @@ export async function saveArtifactToDb(
   basePath: string,
 ): Promise<void> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
 
     // Guard against path traversal before any reads/writes
-    const gsdDir = resolve(basePath, '.gsd');
-    const fullPath = resolve(basePath, '.gsd', opts.path);
+    const gsdDir = resolve(basePath, '.sdd');
+    const fullPath = resolve(basePath, '.sdd', opts.path);
     if (!fullPath.startsWith(gsdDir)) {
-      throw new GSDError(GSD_IO_ERROR, `saveArtifactToDb: path escapes .sdd/ directory: ${opts.path}`);
+      throw new SDDError(SDD_IO_ERROR, `saveArtifactToDb: path escapes .sdd/ directory: ${opts.path}`);
     }
 
     // Shrinkage guard: if the file already exists and the new content is

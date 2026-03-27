@@ -1,8 +1,8 @@
 /**
  * Worktree Integration Tests
  *
- * Tests the full lifecycle of GSD operations inside a worktree:
- * - Branch namespacing (gsd/<wt>/<M>/<S> instead of gsd/<M>/<S>)
+ * Tests the full lifecycle of SDD operations inside a worktree:
+ * - Branch namespacing (sdd/<wt>/<M>/<S> instead of sdd/<M>/<S>)
  * - getMainBranch returns worktree/<name> inside a worktree
  * - Parallel worktrees don't conflict on branch names
  * - State derivation works correctly inside worktrees
@@ -38,17 +38,17 @@ function run(command: string, cwd: string): string {
 
 // ─── Test repo setup ──────────────────────────────────────────────────────────
 
-const base = mkdtempSync(join(tmpdir(), "gsd-wt-integration-"));
+const base = mkdtempSync(join(tmpdir(), "sdd-wt-integration-"));
 run("git init -b main", base);
 run("git config user.name 'Pi Test'", base);
 run("git config user.email 'pi@example.com'", base);
 
 // Create a project with one milestone and two slices
-mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
-mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S02", "tasks"), { recursive: true });
+mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S02", "tasks"), { recursive: true });
 writeFileSync(join(base, "README.md"), "# Test Project\n", "utf-8");
 writeFileSync(
-  join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+  join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
   [
     "# M001: Demo",
     "",
@@ -61,12 +61,12 @@ writeFileSync(
   "utf-8",
 );
 writeFileSync(
-  join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md"),
+  join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md"),
   "# S01: First\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Must-Haves\n- done\n\n## Tasks\n- [ ] **T01: Implement** `est:10m`\n  do it\n",
   "utf-8",
 );
 writeFileSync(
-  join(base, ".gsd", "milestones", "M001", "slices", "S02", "S02-PLAN.md"),
+  join(base, ".sdd", "milestones", "M001", "slices", "S02", "S02-PLAN.md"),
   "# S02: Second\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Must-Haves\n- done\n\n## Tasks\n- [ ] **T01: Implement** `est:10m`\n  do it\n",
   "utf-8",
 );
@@ -99,15 +99,15 @@ describe('worktree-integration', async () => {
   // ── Verify branch name helper ──────────────────────────────────────────────
 
   console.log("\n=== getSliceBranchName with worktree ===");
-  assert.deepStrictEqual(getSliceBranchName("M001", "S01", "alpha"), "gsd/alpha/M001/S01", "explicit worktree param");
-  assert.deepStrictEqual(getSliceBranchName("M001", "S01"), "gsd/M001/S01", "no worktree param = plain branch");
+  assert.deepStrictEqual(getSliceBranchName("M001", "S01", "alpha"), "sdd/alpha/M001/S01", "explicit worktree param");
+  assert.deepStrictEqual(getSliceBranchName("M001", "S01"), "sdd/M001/S01", "no worktree param = plain branch");
 
   // ── Slice branch creation and detection inside worktree ────────────────────
 
   console.log("\n=== Slice branch in worktree ===");
   const sliceBranch = getSliceBranchName("M001", "S01", "alpha");
   run(`git checkout -b ${sliceBranch}`, wt.path);
-  assert.deepStrictEqual(getCurrentBranch(wt.path), "gsd/alpha/M001/S01", "worktree-namespaced slice branch");
+  assert.deepStrictEqual(getCurrentBranch(wt.path), "sdd/alpha/M001/S01", "worktree-namespaced slice branch");
   assert.ok(SLICE_BRANCH_RE.test(getCurrentBranch(wt.path)), "slice branch regex matches namespaced branch");
 
   // ── Do work on slice branch, then merge to worktree branch ─────────────────
@@ -128,14 +128,14 @@ describe('worktree-integration', async () => {
 
   // Verify slice branch is gone
   const branches = run("git branch", base);
-  assert.ok(!branches.includes("gsd/alpha/M001/S01"), "slice branch cleaned up");
+  assert.ok(!branches.includes("sdd/alpha/M001/S01"), "slice branch cleaned up");
 
   // ── Second slice in same worktree ──────────────────────────────────────────
 
   console.log("\n=== Second slice in worktree ===");
   const sliceBranch2 = getSliceBranchName("M001", "S02", "alpha");
   run(`git checkout -b ${sliceBranch2}`, wt.path);
-  assert.deepStrictEqual(getCurrentBranch(wt.path), "gsd/alpha/M001/S02", "on S02 namespaced branch");
+  assert.deepStrictEqual(getCurrentBranch(wt.path), "sdd/alpha/M001/S02", "on S02 namespaced branch");
 
   writeFileSync(join(wt.path, "feature2.txt"), "second feature\n", "utf-8");
   run("git add .", wt.path);
@@ -155,17 +155,17 @@ describe('worktree-integration', async () => {
   // Both worktrees can create S01 branches without conflict
   const betaBranch = getSliceBranchName("M001", "S01", "beta");
   run(`git checkout -b ${betaBranch}`, wt2.path);
-  assert.deepStrictEqual(getCurrentBranch(wt2.path), "gsd/beta/M001/S01", "beta has its own namespaced branch");
+  assert.deepStrictEqual(getCurrentBranch(wt2.path), "sdd/beta/M001/S01", "beta has its own namespaced branch");
 
   // Alpha worktree can re-create S01 too (it was already merged+deleted earlier)
   const alphaReBranch = getSliceBranchName("M001", "S01", "alpha");
   run(`git checkout -b ${alphaReBranch}`, wt.path);
-  assert.deepStrictEqual(getCurrentBranch(wt.path), "gsd/alpha/M001/S01", "alpha re-created S01");
+  assert.deepStrictEqual(getCurrentBranch(wt.path), "sdd/alpha/M001/S01", "alpha re-created S01");
 
   // Both exist simultaneously
   const allBranches = run("git branch", base);
-  assert.ok(allBranches.includes("gsd/alpha/M001/S01"), "alpha S01 branch exists");
-  assert.ok(allBranches.includes("gsd/beta/M001/S01"), "beta S01 branch exists");
+  assert.ok(allBranches.includes("sdd/alpha/M001/S01"), "alpha S01 branch exists");
+  assert.ok(allBranches.includes("sdd/beta/M001/S01"), "beta S01 branch exists");
 
   // ── State derivation in worktree ───────────────────────────────────────────
 

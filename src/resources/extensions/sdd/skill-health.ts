@@ -1,5 +1,5 @@
 /**
- * GSD Skill Health — Dashboard, Staleness, and Heal-Skill Integration (#599)
+ * SDD Skill Health — Dashboard, Staleness, and Heal-Skill Integration (#599)
  *
  * Aggregates skill telemetry from metrics.json to surface:
  *   - Per-skill pass/fail rates, token usage, and trends
@@ -221,7 +221,7 @@ export function formatSkillDetail(basePath: string, skillName: string): string {
 
 /**
  * Build the heal-skill prompt for a post-unit hook.
- * This is the GSD-integrated version of glittercowboy's heal-skill concept.
+ * This is the SDD-integrated version of glittercowboy's heal-skill concept.
  *
  * The prompt instructs the agent to:
  * 1. Detect which skill was loaded during the completed unit

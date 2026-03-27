@@ -35,31 +35,31 @@ test("secure_env_collect: checkExistingEnvKeys — key found in .env file", asyn
 
 test("secure_env_collect: checkExistingEnvKeys — key found in process.env", async () => {
 	const tmp = makeTempDir("sec-env-test");
-	const savedVal = process.env.GSD_TEST_ENV_KEY_12345;
+	const savedVal = process.env.SDD_TEST_ENV_KEY_12345;
 	try {
-		process.env.GSD_TEST_ENV_KEY_12345 = "some-value";
+		process.env.SDD_TEST_ENV_KEY_12345 = "some-value";
 		const envPath = join(tmp, ".env"); // file doesn't exist
-		const result = await checkExistingEnvKeys(["GSD_TEST_ENV_KEY_12345"], envPath);
-		assert.deepStrictEqual(result, ["GSD_TEST_ENV_KEY_12345"]);
+		const result = await checkExistingEnvKeys(["SDD_TEST_ENV_KEY_12345"], envPath);
+		assert.deepStrictEqual(result, ["SDD_TEST_ENV_KEY_12345"]);
 	} finally {
-		delete process.env.GSD_TEST_ENV_KEY_12345;
-		if (savedVal !== undefined) process.env.GSD_TEST_ENV_KEY_12345 = savedVal;
+		delete process.env.SDD_TEST_ENV_KEY_12345;
+		if (savedVal !== undefined) process.env.SDD_TEST_ENV_KEY_12345 = savedVal;
 		rmSync(tmp, { recursive: true, force: true });
 	}
 });
 
 test("secure_env_collect: checkExistingEnvKeys — key found in both .env and process.env", async () => {
 	const tmp = makeTempDir("sec-env-test");
-	const savedVal = process.env.GSD_TEST_BOTH_KEY;
+	const savedVal = process.env.SDD_TEST_BOTH_KEY;
 	try {
-		process.env.GSD_TEST_BOTH_KEY = "from-env";
+		process.env.SDD_TEST_BOTH_KEY = "from-env";
 		const envPath = join(tmp, ".env");
-		writeFileSync(envPath, "GSD_TEST_BOTH_KEY=from-file\n");
-		const result = await checkExistingEnvKeys(["GSD_TEST_BOTH_KEY"], envPath);
-		assert.deepStrictEqual(result, ["GSD_TEST_BOTH_KEY"]);
+		writeFileSync(envPath, "SDD_TEST_BOTH_KEY=from-file\n");
+		const result = await checkExistingEnvKeys(["SDD_TEST_BOTH_KEY"], envPath);
+		assert.deepStrictEqual(result, ["SDD_TEST_BOTH_KEY"]);
 	} finally {
-		delete process.env.GSD_TEST_BOTH_KEY;
-		if (savedVal !== undefined) process.env.GSD_TEST_BOTH_KEY = savedVal;
+		delete process.env.SDD_TEST_BOTH_KEY;
+		if (savedVal !== undefined) process.env.SDD_TEST_BOTH_KEY = savedVal;
 		rmSync(tmp, { recursive: true, force: true });
 	}
 });
@@ -80,54 +80,54 @@ test("secure_env_collect: checkExistingEnvKeys — key not found anywhere", asyn
 
 test("secure_env_collect: checkExistingEnvKeys — .env file doesn't exist (ENOENT), still checks process.env", async () => {
 	const tmp = makeTempDir("sec-env-test");
-	const savedVal = process.env.GSD_TEST_ENOENT_KEY;
+	const savedVal = process.env.SDD_TEST_ENOENT_KEY;
 	try {
-		process.env.GSD_TEST_ENOENT_KEY = "exists-in-process";
+		process.env.SDD_TEST_ENOENT_KEY = "exists-in-process";
 		const envPath = join(tmp, "nonexistent.env");
-		const result = await checkExistingEnvKeys(["GSD_TEST_ENOENT_KEY", "MISSING_KEY_XYZ"], envPath);
-		assert.deepStrictEqual(result, ["GSD_TEST_ENOENT_KEY"]);
+		const result = await checkExistingEnvKeys(["SDD_TEST_ENOENT_KEY", "MISSING_KEY_XYZ"], envPath);
+		assert.deepStrictEqual(result, ["SDD_TEST_ENOENT_KEY"]);
 	} finally {
-		delete process.env.GSD_TEST_ENOENT_KEY;
-		if (savedVal !== undefined) process.env.GSD_TEST_ENOENT_KEY = savedVal;
+		delete process.env.SDD_TEST_ENOENT_KEY;
+		if (savedVal !== undefined) process.env.SDD_TEST_ENOENT_KEY = savedVal;
 		rmSync(tmp, { recursive: true, force: true });
 	}
 });
 
 test("secure_env_collect: checkExistingEnvKeys — empty-string value in process.env counts as existing", async () => {
 	const tmp = makeTempDir("sec-env-test");
-	const savedVal = process.env.GSD_TEST_EMPTY_KEY;
+	const savedVal = process.env.SDD_TEST_EMPTY_KEY;
 	try {
-		process.env.GSD_TEST_EMPTY_KEY = "";
+		process.env.SDD_TEST_EMPTY_KEY = "";
 		const envPath = join(tmp, ".env");
 		writeFileSync(envPath, "");
-		const result = await checkExistingEnvKeys(["GSD_TEST_EMPTY_KEY"], envPath);
-		assert.deepStrictEqual(result, ["GSD_TEST_EMPTY_KEY"]);
+		const result = await checkExistingEnvKeys(["SDD_TEST_EMPTY_KEY"], envPath);
+		assert.deepStrictEqual(result, ["SDD_TEST_EMPTY_KEY"]);
 	} finally {
-		delete process.env.GSD_TEST_EMPTY_KEY;
-		if (savedVal !== undefined) process.env.GSD_TEST_EMPTY_KEY = savedVal;
+		delete process.env.SDD_TEST_EMPTY_KEY;
+		if (savedVal !== undefined) process.env.SDD_TEST_EMPTY_KEY = savedVal;
 		rmSync(tmp, { recursive: true, force: true });
 	}
 });
 
 test("secure_env_collect: checkExistingEnvKeys — returns only existing keys from input list", async () => {
 	const tmp = makeTempDir("sec-env-test");
-	const saved1 = process.env.GSD_TEST_EXISTS_A;
-	const saved2 = process.env.GSD_TEST_EXISTS_B;
+	const saved1 = process.env.SDD_TEST_EXISTS_A;
+	const saved2 = process.env.SDD_TEST_EXISTS_B;
 	try {
-		process.env.GSD_TEST_EXISTS_A = "val-a";
-		delete process.env.GSD_TEST_EXISTS_B;
+		process.env.SDD_TEST_EXISTS_A = "val-a";
+		delete process.env.SDD_TEST_EXISTS_B;
 		const envPath = join(tmp, ".env");
 		writeFileSync(envPath, "FILE_KEY=val\n");
 		const result = await checkExistingEnvKeys(
-			["GSD_TEST_EXISTS_A", "GSD_TEST_EXISTS_B", "FILE_KEY", "NOPE_KEY"],
+			["SDD_TEST_EXISTS_A", "SDD_TEST_EXISTS_B", "FILE_KEY", "NOPE_KEY"],
 			envPath,
 		);
-		assert.deepStrictEqual(result.sort(), ["FILE_KEY", "GSD_TEST_EXISTS_A"]);
+		assert.deepStrictEqual(result.sort(), ["FILE_KEY", "SDD_TEST_EXISTS_A"]);
 	} finally {
-		delete process.env.GSD_TEST_EXISTS_A;
-		delete process.env.GSD_TEST_EXISTS_B;
-		if (saved1 !== undefined) process.env.GSD_TEST_EXISTS_A = saved1;
-		if (saved2 !== undefined) process.env.GSD_TEST_EXISTS_B = saved2;
+		delete process.env.SDD_TEST_EXISTS_A;
+		delete process.env.SDD_TEST_EXISTS_B;
+		if (saved1 !== undefined) process.env.SDD_TEST_EXISTS_A = saved1;
+		if (saved2 !== undefined) process.env.SDD_TEST_EXISTS_B = saved2;
 		rmSync(tmp, { recursive: true, force: true });
 	}
 });

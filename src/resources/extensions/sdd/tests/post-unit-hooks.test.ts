@@ -1,4 +1,4 @@
-// GSD Extension — Hook Engine Tests (Post-Unit, Pre-Dispatch, State Persistence)
+// SDD Extension — Hook Engine Tests (Post-Unit, Pre-Dispatch, State Persistence)
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -24,8 +24,8 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-hook-test-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-hook-test-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
   return base;
 }
 
@@ -44,7 +44,7 @@ test('resolveHookArtifactPath', () => {
   const taskPath = resolveHookArtifactPath(base, "M001/S01/T01", "REVIEW-PASS.md");
   assert.deepStrictEqual(
     taskPath,
-    join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks", "T01-REVIEW-PASS.md"),
+    join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks", "T01-REVIEW-PASS.md"),
     "task-level artifact path",
   );
 
@@ -52,7 +52,7 @@ test('resolveHookArtifactPath', () => {
   const slicePath = resolveHookArtifactPath(base, "M001/S01", "REVIEW-PASS.md");
   assert.deepStrictEqual(
     slicePath,
-    join(base, ".gsd", "milestones", "M001", "slices", "S01", "REVIEW-PASS.md"),
+    join(base, ".sdd", "milestones", "M001", "slices", "S01", "REVIEW-PASS.md"),
     "slice-level artifact path",
   );
 
@@ -60,7 +60,7 @@ test('resolveHookArtifactPath', () => {
   const milestonePath = resolveHookArtifactPath(base, "M001", "REVIEW-PASS.md");
   assert.deepStrictEqual(
     milestonePath,
-    join(base, ".gsd", "milestones", "M001", "REVIEW-PASS.md"),
+    join(base, ".sdd", "milestones", "M001", "REVIEW-PASS.md"),
     "milestone-level artifact path",
   );
 });
@@ -164,7 +164,7 @@ test('State persistence: persist and restore', () => {
 
     // Persist empty state
     persistHookState(base);
-    const filePath = join(base, ".gsd", "hook-state.json");
+    const filePath = join(base, ".sdd", "hook-state.json");
     assert.ok(existsSync(filePath), "hook-state.json created");
 
     const content = JSON.parse(readFileSync(filePath, "utf-8"));
@@ -181,7 +181,7 @@ test('State persistence: restore from disk', () => {
     resetHookState();
 
     // Write a state file with some cycle counts
-    const stateFile = join(base, ".gsd", "hook-state.json");
+    const stateFile = join(base, ".sdd", "hook-state.json");
     writeFileSync(stateFile, JSON.stringify({
       cycleCounts: {
         "review/execute-task/M001/S01/T01": 2,
@@ -209,7 +209,7 @@ test('State persistence: clear', () => {
     resetHookState();
 
     // Write then clear
-    const stateFile = join(base, ".gsd", "hook-state.json");
+    const stateFile = join(base, ".sdd", "hook-state.json");
     writeFileSync(stateFile, JSON.stringify({
       cycleCounts: { "review/execute-task/M001/S01/T01": 3 },
       savedAt: new Date().toISOString(),
@@ -240,7 +240,7 @@ test('State persistence: restore handles corrupt file', () => {
   const base = createFixtureBase();
   try {
     resetHookState();
-    writeFileSync(join(base, ".gsd", "hook-state.json"), "not json", "utf-8");
+    writeFileSync(join(base, ".sdd", "hook-state.json"), "not json", "utf-8");
     // Should not throw
     restoreHookState(base);
     assert.deepStrictEqual(getActiveHook(), null, "no active hook after corrupt restore");

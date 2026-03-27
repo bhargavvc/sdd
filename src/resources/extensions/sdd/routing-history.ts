@@ -1,4 +1,4 @@
-// GSD Extension — Routing History (Adaptive Learning)
+// SDD Extension — Routing History (Adaptive Learning)
 // Tracks success/failure per tier per unit-type pattern to improve
 // classification accuracy over time.
 
@@ -24,7 +24,7 @@ export interface RoutingHistoryData {
   version: 1;
   /** Keyed by pattern string, e.g. "execute-task:docs" or "complete-slice" */
   patterns: Record<string, PatternHistory>;
-  /** User feedback entries (from /gsd:rate-unit) */
+  /** User feedback entries (from /sdd:rate-unit) */
   feedback: FeedbackEntry[];
   /** Last updated timestamp */
   updatedAt: string;

@@ -19,15 +19,15 @@ import {
   saveGateResult,
   markAllGatesOmitted,
   getPendingSliceGateCount,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { deriveState, invalidateStateCache } from "../state.ts";
 import { renderPlanFromDb } from "../markdown-renderer.ts";
 import { invalidateAllCaches } from "../cache.ts";
 
 function setupTestProject(): { tmpDir: string; dbPath: string } {
   const tmpDir = mkdtempSync(join(tmpdir(), "gate-dispatch-"));
-  const dbPath = join(tmpDir, ".gsd", "gsd.db");
-  mkdirSync(join(tmpDir, ".gsd"), { recursive: true });
+  const dbPath = join(tmpDir, ".sdd", "sdd.db");
+  mkdirSync(join(tmpDir, ".sdd"), { recursive: true });
   openDatabase(dbPath);
 
   // Create milestone
@@ -48,7 +48,7 @@ function setupTestProject(): { tmpDir: string; dbPath: string } {
   });
 
   // Write roadmap file (required for deriveState)
-  const milestoneDir = join(tmpDir, ".gsd", "milestones", "M001");
+  const milestoneDir = join(tmpDir, ".sdd", "milestones", "M001");
   mkdirSync(milestoneDir, { recursive: true });
   writeFileSync(
     join(milestoneDir, "M001-ROADMAP.md"),

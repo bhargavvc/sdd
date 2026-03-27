@@ -1,10 +1,10 @@
 /**
- * Worktree Health — lifecycle status helpers for GSD-managed worktrees.
+ * Worktree Health — lifecycle status helpers for SDD-managed worktrees.
  *
  * Used by doctor-checks.ts for health audits and by worktree-command.ts
  * for the enhanced `/worktree list` display.
  *
- * Only inspects worktrees under .sdd/worktrees/ — GSD owns what GSD creates.
+ * Only inspects worktrees under .sdd/worktrees/ — SDD owns what SDD creates.
  */
 
 import { existsSync } from "node:fs";
@@ -121,7 +121,7 @@ export function getWorktreeHealth(
 }
 
 /**
- * Compute health status for all GSD-managed worktrees.
+ * Compute health status for all SDD-managed worktrees.
  *
  * @param basePath — the main project root
  * @param staleDays — days without commits to consider stale (default: 14)

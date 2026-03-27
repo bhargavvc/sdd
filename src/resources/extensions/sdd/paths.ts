@@ -1,5 +1,5 @@
 /**
- * GSD Paths — ID-based path resolution
+ * SDD Paths — ID-based path resolution
  *
  * Directories use bare IDs: M001/, S01/, etc.
  * Files use ID-SUFFIX: M001-ROADMAP.md, S01-PLAN.md, T01-PLAN.md
@@ -256,7 +256,7 @@ export function resolveTaskJsonFiles(tasksDir: string, suffix: string): string[]
 
 // ─── Full Path Builders ────────────────────────────────────────────────────
 
-export const GSD_ROOT_FILES = {
+export const SDD_ROOT_FILES = {
   PROJECT: "PROJECT.md",
   DECISIONS: "DECISIONS.md",
   QUEUE: "QUEUE.md",
@@ -266,9 +266,9 @@ export const GSD_ROOT_FILES = {
   KNOWLEDGE: "KNOWLEDGE.md",
 } as const;
 
-export type GSDRootFileKey = keyof typeof GSD_ROOT_FILES;
+export type SDDRootFileKey = keyof typeof SDD_ROOT_FILES;
 
-const LEGACY_GSD_ROOT_FILES: Record<GSDRootFileKey, string> = {
+const LEGACY_SDD_ROOT_FILES: Record<SDDRootFileKey, string> = {
   PROJECT: "project.md",
   DECISIONS: "decisions.md",
   QUEUE: "queue.md",
@@ -278,7 +278,7 @@ const LEGACY_GSD_ROOT_FILES: Record<GSDRootFileKey, string> = {
   KNOWLEDGE: "knowledge.md",
 };
 
-// ─── GSD Root Discovery ───────────────────────────────────────────────────────
+// ─── SDD Root Discovery ───────────────────────────────────────────────────────
 
 const gsdRootCache = new Map<string, string>();
 
@@ -288,13 +288,13 @@ export function _clearGsdRootCache(): void {
 }
 
 /**
- * Resolve the `.gsd` directory for a given project base path.
+ * Resolve the `.sdd` directory for a given project base path.
  *
  * Probe order:
- *   1. basePath/.gsd         — fast path (common case)
+ *   1. basePath/.sdd         — fast path (common case)
  *   2. git rev-parse root    — handles cwd-is-a-subdirectory
- *   3. Walk up from basePath — handles moved .gsd in an ancestor (bounded by git root)
- *   4. basePath/.gsd         — creation fallback (init scenario)
+ *   3. Walk up from basePath — handles moved .sdd in an ancestor (bounded by git root)
+ *   4. basePath/.sdd         — creation fallback (init scenario)
  *
  * Result is cached per basePath for the process lifetime.
  */
@@ -309,7 +309,7 @@ export function gsdRoot(basePath: string): string {
 
 function probeGsdRoot(rawBasePath: string): string {
   // 1. Fast path — check the input path directly
-  const local = join(rawBasePath, ".gsd");
+  const local = join(rawBasePath, ".sdd");
   if (existsSync(local)) return local;
 
   // Resolve symlinks so path comparisons work correctly across platforms
@@ -333,7 +333,7 @@ function probeGsdRoot(rawBasePath: string): string {
   } catch { /* git not available */ }
 
   if (gitRoot) {
-    const candidate = join(gitRoot, ".gsd");
+    const candidate = join(gitRoot, ".sdd");
     if (existsSync(candidate)) return candidate;
   }
 
@@ -341,7 +341,7 @@ function probeGsdRoot(rawBasePath: string): string {
   if (gitRoot && basePath !== gitRoot) {
     let cur = dirname(basePath);
     while (cur !== basePath) {
-      const candidate = join(cur, ".gsd");
+      const candidate = join(cur, ".sdd");
       if (existsSync(candidate)) return candidate;
       if (cur === gitRoot) break;
       basePath = cur;
@@ -360,17 +360,17 @@ export function resolveRuntimeFile(basePath: string): string {
   return join(gsdRoot(basePath), "RUNTIME.md");
 }
 
-export function resolveGsdRootFile(basePath: string, key: GSDRootFileKey): string {
+export function resolveGsdRootFile(basePath: string, key: SDDRootFileKey): string {
   const root = gsdRoot(basePath);
-  const canonical = join(root, GSD_ROOT_FILES[key]);
+  const canonical = join(root, SDD_ROOT_FILES[key]);
   if (existsSync(canonical)) return canonical;
-  const legacy = join(root, LEGACY_GSD_ROOT_FILES[key]);
+  const legacy = join(root, LEGACY_SDD_ROOT_FILES[key]);
   if (existsSync(legacy)) return legacy;
   return canonical;
 }
 
-export function relGsdRootFile(key: GSDRootFileKey): string {
-  return `.sdd/${GSD_ROOT_FILES[key]}`;
+export function relGsdRootFile(key: SDDRootFileKey): string {
+  return `.sdd/${SDD_ROOT_FILES[key]}`;
 }
 
 /**

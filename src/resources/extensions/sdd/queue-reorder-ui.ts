@@ -1,5 +1,5 @@
 /**
- * GSD Queue Reorder UI
+ * SDD Queue Reorder UI
  *
  * Interactive TUI overlay for reordering pending milestones.
  * ↑/↓ navigates cursor. Space grabs/releases item for moving.
@@ -8,9 +8,9 @@
  * Conflicting depends_on entries are auto-removed on confirm.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
-import { type Theme } from "@gsd/pi-coding-agent";
-import { Key, matchesKey, truncateToWidth, type TUI } from "@gsd/pi-tui";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
+import { type Theme } from "@sdd/pi-coding-agent";
+import { Key, matchesKey, truncateToWidth, type TUI } from "@sdd/pi-tui";
 import { makeUI } from "../shared/tui.js";
 import { GLYPH } from "../shared/mod.js";
 import { validateQueueOrder, type DependencyValidation } from "./queue-order.js";

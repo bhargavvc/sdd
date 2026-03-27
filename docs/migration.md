@@ -1,15 +1,15 @@
 # Migration from v1
 
-If you have projects with `.planning` directories from the original Get Shit Done (v1), you can migrate them to GSD-2's `.gsd` format.
+If you have projects with `.planning` directories from the original Get Shit Done (v1), you can migrate them to SDD-2's `.sdd` format.
 
 ## Running the Migration
 
 ```bash
 # From within the project directory
-/gsd migrate
+/sdd migrate
 
 # Or specify a path
-/gsd migrate ~/projects/my-old-project
+/sdd migrate ~/projects/my-old-project
 ```
 
 ## What Gets Migrated
@@ -42,7 +42,7 @@ Migration works best with a `ROADMAP.md` file for milestone structure. Without o
 After migrating, verify the output with:
 
 ```
-/gsd doctor
+/sdd doctor
 ```
 
 This checks `.sdd/` integrity and flags any structural issues.

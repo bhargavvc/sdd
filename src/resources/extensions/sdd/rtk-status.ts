@@ -1,12 +1,12 @@
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import {
   ensureRtkSessionBaseline,
   formatRtkSavingsLabel,
   getRtkSessionSavings,
 } from "../shared/rtk-session-stats.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveSDDPreferences } from "./preferences.js";
 
-const STATUS_KEY = "gsd-rtk";
+const STATUS_KEY = "sdd-rtk";
 const REFRESH_INTERVAL_MS = 30_000;
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -19,7 +19,7 @@ function clearTimer(): void {
 }
 
 function isRtkEnabledInPrefs(): boolean {
-  return loadEffectiveGSDPreferences()?.preferences.experimental?.rtk === true;
+  return loadEffectiveSDDPreferences()?.preferences.experimental?.rtk === true;
 }
 
 function updateStatus(ctx: ExtensionContext): void {

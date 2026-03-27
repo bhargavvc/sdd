@@ -17,8 +17,8 @@ import {
 // ─── Test Setup ──────────────────────────────────────────────────────────────
 
 function makeTmpDir(): string {
-  const dir = join(tmpdir(), `gsd-routing-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  const dir = join(tmpdir(), `sdd-routing-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
   return dir;
 }
 

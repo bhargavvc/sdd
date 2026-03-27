@@ -1,7 +1,7 @@
 /**
  * Core GitHub sync engine.
  *
- * Entry point: `runGitHubSync()` — called from the GSD post-unit pipeline.
+ * Entry point: `runGitHubSync()` — called from the SDD post-unit pipeline.
  * Routes to per-event sync functions based on the unit type, reads SDD
  * files to build GitHub entities, and persists the sync mapping.
  *
@@ -58,7 +58,7 @@ import {
 // ─── Entry Point ────────────────────────────────────────────────────────────
 
 /**
- * Main sync entry point — called from GSD post-unit pipeline.
+ * Main sync entry point — called from SDD post-unit pipeline.
  * Routes to the appropriate sync function based on unit type.
  */
 export async function runGitHubSync(
@@ -462,7 +462,7 @@ export async function bootstrapSync(basePath: string): Promise<{
 
   const taskCountBefore = Object.keys(mapping.tasks).length;
   const counts = { milestones: 0, slices: 0, tasks: 0 };
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".sdd", "milestones");
   if (!existsSync(milestonesDir)) return counts;
 
   const milestoneIds = readdirSync(milestonesDir, { withFileTypes: true })

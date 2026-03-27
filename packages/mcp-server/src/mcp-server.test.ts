@@ -168,7 +168,7 @@ class TestableSessionManager extends SessionManager {
       });
 
       // Kick off auto-mode
-      const command = options.command ?? '/gsd auto';
+      const command = options.command ?? '/sdd auto';
       await client.prompt(command);
 
       return session.sessionId;
@@ -223,7 +223,7 @@ describe('SessionManager', () => {
   });
 
   it('startSession creates session and returns sessionId', async () => {
-    const sessionId = await sm.startSession('/tmp/test-project', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/test-project', { cliPath: '/usr/bin/sdd' });
     assert.equal(sessionId, 'mock-session-001');
 
     const session = sm.getSession(sessionId);
@@ -232,22 +232,22 @@ describe('SessionManager', () => {
     assert.equal(session.projectDir, resolve('/tmp/test-project'));
   });
 
-  it('startSession sends /gsd auto by default', async () => {
-    await sm.startSession('/tmp/test-prompt', { cliPath: '/usr/bin/gsd' });
+  it('startSession sends /sdd auto by default', async () => {
+    await sm.startSession('/tmp/test-prompt', { cliPath: '/usr/bin/sdd' });
     assert.ok(sm.lastClient);
-    assert.deepEqual(sm.lastClient.prompted, ['/gsd auto']);
+    assert.deepEqual(sm.lastClient.prompted, ['/sdd auto']);
   });
 
   it('startSession sends custom command when provided', async () => {
-    await sm.startSession('/tmp/test-cmd', { cliPath: '/usr/bin/gsd', command: '/gsd auto --resume' });
+    await sm.startSession('/tmp/test-cmd', { cliPath: '/usr/bin/sdd', command: '/sdd auto --resume' });
     assert.ok(sm.lastClient);
-    assert.deepEqual(sm.lastClient.prompted, ['/gsd auto --resume']);
+    assert.deepEqual(sm.lastClient.prompted, ['/sdd auto --resume']);
   });
 
   it('startSession rejects duplicate projectDir', async () => {
-    await sm.startSession('/tmp/dup-test', { cliPath: '/usr/bin/gsd' });
+    await sm.startSession('/tmp/dup-test', { cliPath: '/usr/bin/sdd' });
     await assert.rejects(
-      () => sm.startSession('/tmp/dup-test', { cliPath: '/usr/bin/gsd' }),
+      () => sm.startSession('/tmp/dup-test', { cliPath: '/usr/bin/sdd' }),
       (err: Error) => {
         assert.ok(err.message.includes('Session already active'));
         return true;
@@ -257,7 +257,7 @@ describe('SessionManager', () => {
 
   it('startSession rejects empty projectDir', async () => {
     await assert.rejects(
-      () => sm.startSession('', { cliPath: '/usr/bin/gsd' }),
+      () => sm.startSession('', { cliPath: '/usr/bin/sdd' }),
       (err: Error) => {
         assert.ok(err.message.includes('projectDir is required'));
         return true;
@@ -269,7 +269,7 @@ describe('SessionManager', () => {
     sm.nextStartError = new Error('spawn failed');
 
     await assert.rejects(
-      () => sm.startSession('/tmp/fail-start', { cliPath: '/usr/bin/gsd' }),
+      () => sm.startSession('/tmp/fail-start', { cliPath: '/usr/bin/sdd' }),
       (err: Error) => {
         assert.ok(err.message.includes('Failed to start session'));
         assert.ok(err.message.includes('spawn failed'));
@@ -282,7 +282,7 @@ describe('SessionManager', () => {
     sm.nextInitError = new Error('handshake failed');
 
     await assert.rejects(
-      () => sm.startSession('/tmp/fail-init', { cliPath: '/usr/bin/gsd' }),
+      () => sm.startSession('/tmp/fail-init', { cliPath: '/usr/bin/sdd' }),
       (err: Error) => {
         assert.ok(err.message.includes('Failed to start session'));
         assert.ok(err.message.includes('handshake failed'));
@@ -297,14 +297,14 @@ describe('SessionManager', () => {
   });
 
   it('getSessionByDir returns session for known dir', async () => {
-    await sm.startSession('/tmp/by-dir', { cliPath: '/usr/bin/gsd' });
+    await sm.startSession('/tmp/by-dir', { cliPath: '/usr/bin/sdd' });
     const session = sm.getSessionByDir('/tmp/by-dir');
     assert.ok(session);
     assert.equal(session.sessionId, 'mock-session-001');
   });
 
   it('resolveBlocker errors when no pending blocker', async () => {
-    const sessionId = await sm.startSession('/tmp/no-blocker', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/no-blocker', { cliPath: '/usr/bin/sdd' });
     await assert.rejects(
       () => sm.resolveBlocker(sessionId, 'some response'),
       (err: Error) => {
@@ -325,7 +325,7 @@ describe('SessionManager', () => {
   });
 
   it('resolveBlocker clears pendingBlocker and sends UI response', async () => {
-    const sessionId = await sm.startSession('/tmp/blocker-resolve', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/blocker-resolve', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     // Simulate a blocking UI request event
@@ -350,7 +350,7 @@ describe('SessionManager', () => {
   });
 
   it('cancelSession calls abort + stop on client', async () => {
-    const sessionId = await sm.startSession('/tmp/cancel-test', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/cancel-test', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     await sm.cancelSession(sessionId);
@@ -373,8 +373,8 @@ describe('SessionManager', () => {
   });
 
   it('cleanup stops all active sessions', async () => {
-    await sm.startSession('/tmp/cleanup-1', { cliPath: '/usr/bin/gsd' });
-    await sm.startSession('/tmp/cleanup-2', { cliPath: '/usr/bin/gsd' });
+    await sm.startSession('/tmp/cleanup-1', { cliPath: '/usr/bin/sdd' });
+    await sm.startSession('/tmp/cleanup-2', { cliPath: '/usr/bin/sdd' });
 
     assert.equal(sm.allClients.length, 2);
 
@@ -386,7 +386,7 @@ describe('SessionManager', () => {
   });
 
   it('event ring buffer caps at MAX_EVENTS', async () => {
-    const sessionId = await sm.startSession('/tmp/ring-buffer', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/ring-buffer', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     for (let i = 0; i < MAX_EVENTS + 20; i++) {
@@ -400,7 +400,7 @@ describe('SessionManager', () => {
   });
 
   it('blocker detection: non-fire-and-forget extension_ui_request sets pendingBlocker', async () => {
-    const sessionId = await sm.startSession('/tmp/blocker-detect', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/blocker-detect', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     // 'select' is not in FIRE_AND_FORGET_METHODS
@@ -419,7 +419,7 @@ describe('SessionManager', () => {
   });
 
   it('fire-and-forget methods do not set pendingBlocker', async () => {
-    const sessionId = await sm.startSession('/tmp/fire-forget', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/fire-forget', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     // 'notify' is fire-and-forget — on its own (no terminal prefix) should not block
@@ -436,7 +436,7 @@ describe('SessionManager', () => {
   });
 
   it('terminal detection: auto-mode stopped sets status to completed', async () => {
-    const sessionId = await sm.startSession('/tmp/terminal', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/terminal', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     client.emitEvent({
@@ -451,7 +451,7 @@ describe('SessionManager', () => {
   });
 
   it('terminal detection with blocked: message sets status to blocked', async () => {
-    const sessionId = await sm.startSession('/tmp/terminal-blocked', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/terminal-blocked', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     client.emitEvent({
@@ -467,7 +467,7 @@ describe('SessionManager', () => {
   });
 
   it('cost tracking: cumulative-max from cost_update events', async () => {
-    const sessionId = await sm.startSession('/tmp/cost-track', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/cost-track', { cliPath: '/usr/bin/sdd' });
     const client = sm.lastClient!;
 
     client.emitEvent({
@@ -491,7 +491,7 @@ describe('SessionManager', () => {
   });
 
   it('getResult returns HeadlessJsonResult-shaped object', async () => {
-    const sessionId = await sm.startSession('/tmp/result-shape', { cliPath: '/usr/bin/gsd' });
+    const sessionId = await sm.startSession('/tmp/result-shape', { cliPath: '/usr/bin/sdd' });
     const result = sm.getResult(sessionId);
 
     assert.equal(result.sessionId, sessionId);
@@ -520,33 +520,33 @@ describe('SessionManager', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionManager.resolveCLIPath', () => {
-  const originalGsdPath = process.env['GSD_CLI_PATH'];
+  const originalGsdPath = process.env['SDD_CLI_PATH'];
   const originalPath = process.env['PATH'];
 
   afterEach(() => {
     if (originalGsdPath !== undefined) {
-      process.env['GSD_CLI_PATH'] = originalGsdPath;
+      process.env['SDD_CLI_PATH'] = originalGsdPath;
     } else {
-      delete process.env['GSD_CLI_PATH'];
+      delete process.env['SDD_CLI_PATH'];
     }
     if (originalPath !== undefined) {
       process.env['PATH'] = originalPath;
     }
   });
 
-  it('GSD_CLI_PATH env var takes precedence', () => {
-    process.env['GSD_CLI_PATH'] = '/custom/path/to/gsd';
+  it('SDD_CLI_PATH env var takes precedence', () => {
+    process.env['SDD_CLI_PATH'] = '/custom/path/to/sdd';
     const result = SessionManager.resolveCLIPath();
-    assert.equal(result, resolve('/custom/path/to/gsd'));
+    assert.equal(result, resolve('/custom/path/to/sdd'));
   });
 
-  it('throws when GSD_CLI_PATH not set and which fails', () => {
-    delete process.env['GSD_CLI_PATH'];
+  it('throws when SDD_CLI_PATH not set and which fails', () => {
+    delete process.env['SDD_CLI_PATH'];
     process.env['PATH'] = '/nonexistent';
     assert.throws(
       () => SessionManager.resolveCLIPath(),
       (err: Error) => {
-        assert.ok(err.message.includes('Cannot find GSD CLI'));
+        assert.ok(err.message.includes('Cannot find SDD CLI'));
         return true;
       },
     );
@@ -578,14 +578,14 @@ describe('createMcpServer tool registration', () => {
     assert.ok(typeof server.close === 'function');
   });
 
-  it('gsd_execute flow returns sessionId on success', async () => {
-    const sessionId = await sm.startSession('/tmp/tool-exec', { cliPath: '/usr/bin/gsd' });
+  it('sdd_execute flow returns sessionId on success', async () => {
+    const sessionId = await sm.startSession('/tmp/tool-exec', { cliPath: '/usr/bin/sdd' });
     assert.equal(typeof sessionId, 'string');
     assert.ok(sessionId.length > 0);
   });
 
-  it('gsd_status flow returns correct shape', async () => {
-    const sessionId = await sm.startSession('/tmp/tool-status', { cliPath: '/usr/bin/gsd' });
+  it('sdd_status flow returns correct shape', async () => {
+    const sessionId = await sm.startSession('/tmp/tool-status', { cliPath: '/usr/bin/sdd' });
     const session = sm.getSession(sessionId)!;
 
     assert.equal(typeof session.status, 'string');
@@ -594,8 +594,8 @@ describe('createMcpServer tool registration', () => {
     assert.equal(typeof session.startTime, 'number');
   });
 
-  it('gsd_resolve_blocker flow returns error when no blocker', async () => {
-    const sessionId = await sm.startSession('/tmp/tool-resolve', { cliPath: '/usr/bin/gsd' });
+  it('sdd_resolve_blocker flow returns error when no blocker', async () => {
+    const sessionId = await sm.startSession('/tmp/tool-resolve', { cliPath: '/usr/bin/sdd' });
     await assert.rejects(
       () => sm.resolveBlocker(sessionId, 'fix'),
       (err: Error) => {
@@ -605,8 +605,8 @@ describe('createMcpServer tool registration', () => {
     );
   });
 
-  it('gsd_result flow returns HeadlessJsonResult shape', async () => {
-    const sessionId = await sm.startSession('/tmp/tool-result', { cliPath: '/usr/bin/gsd' });
+  it('sdd_result flow returns HeadlessJsonResult shape', async () => {
+    const sessionId = await sm.startSession('/tmp/tool-result', { cliPath: '/usr/bin/sdd' });
     const result = sm.getResult(sessionId);
 
     assert.ok('sessionId' in result);
@@ -619,8 +619,8 @@ describe('createMcpServer tool registration', () => {
     assert.ok('error' in result);
   });
 
-  it('gsd_cancel flow marks session as cancelled', async () => {
-    const sessionId = await sm.startSession('/tmp/tool-cancel', { cliPath: '/usr/bin/gsd' });
+  it('sdd_cancel flow marks session as cancelled', async () => {
+    const sessionId = await sm.startSession('/tmp/tool-cancel', { cliPath: '/usr/bin/sdd' });
     await sm.cancelSession(sessionId);
     const session = sm.getSession(sessionId)!;
     assert.equal(session.status, 'cancelled');

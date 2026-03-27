@@ -20,7 +20,7 @@ export const ECOSYSTEM_SKILLS_DIR = join(homedir(), ".agents", "skills");
 export const ECOSYSTEM_PROJECT_SKILLS_DIR = ".agents";
 
 /**
- * Legacy skills directory (~/.gsd/agent/skills/ or ~/.pi/agent/skills/).
+ * Legacy skills directory (~/.sdd/agent/skills/ or ~/.pi/agent/skills/).
  * Read as a fallback so existing installs don't lose skills before migration runs.
  */
 const LEGACY_SKILLS_DIR = join(homedir(), CONFIG_DIR_NAME, "agent", "skills");
@@ -424,7 +424,7 @@ export function loadSkills(options: LoadSkillsOptions = {}): LoadSkillsResult {
 		// Primary project: .agents/skills/ — standard project-level location
 		addSkills(loadSkillsFromDirInternal(resolve(cwd, ECOSYSTEM_PROJECT_SKILLS_DIR, "skills"), "project", true));
 
-		// Legacy fallback: read skills from ~/.gsd/agent/skills/ so existing
+		// Legacy fallback: read skills from ~/.sdd/agent/skills/ so existing
 		// installs keep working until the one-time migration in resource-loader
 		// copies them to ~/.agents/skills/. Skip if migration has completed.
 		const legacyMigrated = existsSync(join(LEGACY_SKILLS_DIR, ".migrated-to-agents"));

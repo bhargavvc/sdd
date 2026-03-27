@@ -3,7 +3,7 @@
  *
  * Routes `null` and `"dev"` engine IDs to the DevWorkflowEngine/DevExecutionPolicy
  * pair. Any other non-null engine ID is treated as a custom workflow engine that
- * reads its state from an `activeRunDir`. Respects `GSD_ENGINE_BYPASS=1` kill
+ * reads its state from an `activeRunDir`. Respects `SDD_ENGINE_BYPASS=1` kill
  * switch to skip the engine layer entirely.
  */
 
@@ -27,7 +27,7 @@ export interface ResolvedEngine {
  * - any other non-null ID → CustomWorkflowEngine(activeRunDir) + CustomExecutionPolicy()
  *   (requires activeRunDir to be a non-empty string)
  *
- * Note: `GSD_ENGINE_BYPASS=1` is checked in autoLoop before calling this function.
+ * Note: `SDD_ENGINE_BYPASS=1` is checked in autoLoop before calling this function.
  */
 export function resolveEngine(
   session: { activeEngineId: string | null; activeRunDir?: string | null },

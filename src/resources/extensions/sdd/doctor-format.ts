@@ -38,7 +38,7 @@ export function formatDoctorReport(
   const summary = summarizeDoctorIssues(scopedIssues);
   const maxIssues = options?.maxIssues ?? 12;
   const lines: string[] = [];
-  lines.push(options?.title ?? (summary.errors > 0 ? "GSD doctor found blocking issues." : "GSD doctor report."));
+  lines.push(options?.title ?? (summary.errors > 0 ? "SDD doctor found blocking issues." : "SDD doctor report."));
   lines.push(`Scope: ${options?.scope ?? "all milestones"}`);
   lines.push(`Issues: ${summary.total} total · ${summary.errors} error(s) · ${summary.warnings} warning(s) · ${summary.fixable} fixable`);
 
@@ -79,7 +79,7 @@ export function formatDoctorIssuesForPrompt(issues: DoctorIssue[]): string {
 
 /**
  * Serialize a doctor report to JSON — suitable for CI/tooling integration.
- * Usage: /gsd doctor --json
+ * Usage: /sdd doctor --json
  */
 export function formatDoctorReportJson(report: DoctorReport): string {
   return JSON.stringify(

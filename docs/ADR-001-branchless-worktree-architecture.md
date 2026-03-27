@@ -7,7 +7,7 @@
 
 ## Context
 
-SDD uses git for isolation during autonomous coding sessions. The current architecture (shipped in M003, v2.13.0) creates a **worktree per milestone** with **slice branches inside each worktree**. Each slice (`S01`, `S02`, ...) gets its own branch (`gsd/M001/S01`) within the worktree, which merges back to the milestone branch (`milestone/M001`) via `--no-ff` when the slice completes. The milestone branch squash-merges to `main` when the milestone completes.
+SDD uses git for isolation during autonomous coding sessions. The current architecture (shipped in M003, v2.13.0) creates a **worktree per milestone** with **slice branches inside each worktree**. Each slice (`S01`, `S02`, ...) gets its own branch (`sdd/M001/S01`) within the worktree, which merges back to the milestone branch (`milestone/M001`) via `--no-ff` when the slice completes. The milestone branch squash-merges to `main` when the milestone completes.
 
 This architecture replaced a previous "branch-per-slice" model that had severe `.sdd/` merge conflicts. M003 solved the merge conflicts but retained slice branches inside worktrees, inheriting complexity that has produced persistent, user-facing failures.
 
@@ -21,9 +21,9 @@ Documented in the auto-stop architecture doc as "The Branch-Switching Problem."
 
 **2. `.sdd/` state clobbering across branches**
 
-`.sdd/` is gitignored (line 52 of `.gitignore`: `.sdd/`). Planning artifacts (roadmaps, plans, summaries, decisions, requirements) live in `.sdd/milestones/` but are invisible to git. When multiple branches or worktrees operate from the same repo, they share a single `.sdd/` directory on disk. Branch A's M001 roadmap overwrites Branch B's M001 roadmap. GSD reads corrupted state, shows wrong milestone as complete, or enters infinite dispatch loops.
+`.sdd/` is gitignored (line 52 of `.gitignore`: `.sdd/`). Planning artifacts (roadmaps, plans, summaries, decisions, requirements) live in `.sdd/milestones/` but are invisible to git. When multiple branches or worktrees operate from the same repo, they share a single `.sdd/` directory on disk. Branch A's M001 roadmap overwrites Branch B's M001 roadmap. SDD reads corrupted state, shows wrong milestone as complete, or enters infinite dispatch loops.
 
-The codebase has a contradictory workaround: `smartStage()` (git-service.ts:304-352) force-adds `GSD_DURABLE_PATHS` (milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md) despite the `.gitignore`. This means `.sdd/milestones/` IS partially tracked on some branches but the gitignore claims otherwise. The code fights the configuration.
+The codebase has a contradictory workaround: `smartStage()` (git-service.ts:304-352) force-adds `SDD_DURABLE_PATHS` (milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md) despite the `.gitignore`. This means `.sdd/milestones/` IS partially tracked on some branches but the gitignore claims otherwise. The code fights the configuration.
 
 **3. Merge/conflict code complexity**
 
@@ -112,7 +112,7 @@ main ─────────────────────────
 .sdd/metrics.json        — token/cost accumulator
 .sdd/completed-units.json — dispatch idempotency tracker
 .sdd/STATE.md            — derived state cache (rebuilt by deriveState())
-.sdd/gsd.db              — SQLite cache (rebuilt from tracked markdown by importers)
+.sdd/sdd.db              — SQLite cache (rebuilt from tracked markdown by importers)
 .sdd/DISCUSSION-MANIFEST.json — discussion phase tracking
 .sdd/milestones/**/*-CONTINUE.md — interrupted-work markers
 .sdd/milestones/**/continue.md   — legacy continue markers
@@ -123,12 +123,12 @@ main ─────────────────────────
 Replace the current blanket `.sdd/` ignore with explicit runtime-only ignores:
 
 ```gitignore
-# ── GSD: Runtime / Ephemeral ─────────────────────────────────
+# ── SDD: Runtime / Ephemeral ─────────────────────────────────
 .sdd/auto.lock
 .sdd/completed-units.json
 .sdd/STATE.md
 .sdd/metrics.json
-.sdd/gsd.db
+.sdd/sdd.db
 .sdd/activity/
 .sdd/runtime/
 .sdd/worktrees/
@@ -167,7 +167,7 @@ No conflict categorization. No runtime file stripping. No `.sdd/` special handli
 
 ### What `smartStage()` Becomes
 
-The force-add of `GSD_DURABLE_PATHS` is no longer needed — planning artifacts are not gitignored, so `git add -A` picks them up naturally. The function reduces to:
+The force-add of `SDD_DURABLE_PATHS` is no longer needed — planning artifacts are not gitignored, so `git add -A` picks them up naturally. The function reduces to:
 
 1. `git add -A`
 2. `git reset HEAD -- <runtime paths>` (unstage runtime files)
@@ -192,7 +192,7 @@ The `fix-merge` dispatch unit type is eliminated. Within a worktree, there are n
 
 The `shouldUseWorktreeIsolation()` three-tier preference resolution is replaced by a single behavior: worktree isolation is always used. The `git.isolation: "branch"` preference is deprecated.
 
-Projects with existing `gsd/M001/S01` slice branches can still be read by state derivation, but new work never creates slice branches.
+Projects with existing `sdd/M001/S01` slice branches can still be read by state derivation, but new work never creates slice branches.
 
 ### Risks
 
@@ -209,7 +209,7 @@ Squash merge collapses all commits into one on `main`. Mitigations:
 
 **3. SQLite DB desync after `git reset`**
 
-If tracked markdown rolls back via `git reset --hard`, the gitignored `gsd.db` doesn't. Mitigation: the importer layer (M001/S02) rebuilds the DB from markdown on startup. The DB is a cache, markdown is truth.
+If tracked markdown rolls back via `git reset --hard`, the gitignored `sdd.db` doesn't. Mitigation: the importer layer (M001/S02) rebuilds the DB from markdown on startup. The DB is a cache, markdown is truth.
 
 **4. Disk space with multiple worktrees**
 
@@ -225,7 +225,7 @@ After `research-slice` or `plan-slice`, immediately merge the slice branch back 
 
 ### B. Keep `.sdd/` gitignored, bootstrap from git history for manual worktrees
 
-When GSD detects an empty `.sdd/` in a worktree, reconstruct state from the branch's git history using `git show <commit>:.sdd/...`.
+When SDD detects an empty `.sdd/` in a worktree, reconstruct state from the branch's git history using `git show <commit>:.sdd/...`.
 
 **Rejected:** Recovery logic, not architecture. Doesn't fix the fundamental problem of branch-agnostic state. Fails when git history has been rewritten.
 
@@ -243,7 +243,7 @@ This architecture was stress-tested by three independent models:
 
 **GPT-5.4 (Codex)** read the full codebase and confirmed the model is sound. Identified that `smartStage()` already force-adds durable paths (validating the tracked-artifact approach) and that `resolveMainWorktreeRoot` in PR #487 is architecturally wrong (adopted — PR to be closed).
 
-**Codebase analysis** confirmed `.sdd/milestones/` is already partially tracked on `main` despite the `.gitignore`, that `GSD_DURABLE_PATHS` exists as a code-level acknowledgment that planning artifacts should be tracked, and that the README already documents the correct runtime-only gitignore pattern.
+**Codebase analysis** confirmed `.sdd/milestones/` is already partially tracked on `main` despite the `.gitignore`, that `SDD_DURABLE_PATHS` exists as a code-level acknowledgment that planning artifacts should be tracked, and that the README already documents the correct runtime-only gitignore pattern.
 
 ### Codex (GPT-5.4) Dissent — "No Slice Branches Is a Redesign"
 
@@ -255,7 +255,7 @@ Rebuttal: In the branchless model, there is no integration step to crash between
 
 **Concern 2: "Concurrent edits to shared root docs (PROJECT.md, DECISIONS.md) from two terminals."**
 
-Rebuttal: Valid edge case. If `/gsd queue` edits `DECISIONS.md` on `main` while auto-mode edits it in a worktree, there's a content conflict at squash-merge time. This is a standard git content conflict — no different from two developers editing the same file. Handled by normal merge resolution. Not caused by or solved by slice branches.
+Rebuttal: Valid edge case. If `/sdd queue` edits `DECISIONS.md` on `main` while auto-mode edits it in a worktree, there's a content conflict at squash-merge time. This is a standard git content conflict — no different from two developers editing the same file. Handled by normal merge resolution. Not caused by or solved by slice branches.
 
 **Concern 3: "Slice→milestone merges provide continuous integration. Removing them pushes conflict discovery to the end."**
 
@@ -263,12 +263,12 @@ Rebuttal: In a single-user sequential workflow, there is nothing to integrate ag
 
 **Concern 4: "Replace slice branches with another explicit slice-boundary primitive. Don't just delete them."**
 
-Response: Accepted in spirit. Commits with conventional tags (`feat(M001/S01):`, `feat(M001/S01/T01):`) serve as the slice boundary primitive. `git log --grep="M001/S01"` isolates a slice's history. `git revert` targets specific commits. Git tags (`gsd/M001/S01-complete`) can mark slice completion if needed. The boundary primitive is commit metadata, not branches.
+Response: Accepted in spirit. Commits with conventional tags (`feat(M001/S01):`, `feat(M001/S01/T01):`) serve as the slice boundary primitive. `git log --grep="M001/S01"` isolates a slice's history. `git revert` targets specific commits. Git tags (`sdd/M001/S01-complete`) can mark slice completion if needed. The boundary primitive is commit metadata, not branches.
 
 ## Action Items
 
 1. Close PR #487 (`resolveMainWorktreeRoot`) — contradicts this architecture
-2. Implement as a GSD milestone with phases:
+2. Implement as a SDD milestone with phases:
    - Update `.gitignore` and force-add existing planning artifacts
    - Remove slice branch creation/switching/merging code
    - Simplify `mergeMilestoneToMain()` and `smartStage()`

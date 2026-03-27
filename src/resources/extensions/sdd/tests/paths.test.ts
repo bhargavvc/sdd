@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 import { gsdRoot, _clearGsdRootCache } from "../paths.ts";
 /** Create a tmp dir and resolve symlinks + 8.3 short names (macOS /var→/private/var, Windows RUNNER~1→runneradmin). */
 function tmp(): string {
-  const p = mkdtempSync(join(tmpdir(), "gsd-paths-test-"));
+  const p = mkdtempSync(join(tmpdir(), "sdd-paths-test-"));
   try { return realpathSync.native(p); } catch { return p; }
 }
 
@@ -22,44 +22,44 @@ function initGit(dir: string): void {
 }
 
 describe('paths', () => {
-  test('Case 1: .gsd exists at basePath — fast path', () => {
+  test('Case 1: .sdd exists at basePath — fast path', () => {
     const root = tmp();
     try {
-      mkdirSync(join(root, ".gsd"));
+      mkdirSync(join(root, ".sdd"));
       _clearGsdRootCache();
       const result = gsdRoot(root);
-      assert.deepStrictEqual(result, join(root, ".gsd"), "fast path: returns basePath/.gsd");
+      assert.deepStrictEqual(result, join(root, ".sdd"), "fast path: returns basePath/.sdd");
     } finally { cleanup(root); }
   });
 
-  test('Case 2: .gsd exists at git root, cwd is a subdirectory', () => {
+  test('Case 2: .sdd exists at git root, cwd is a subdirectory', () => {
     const root = tmp();
     try {
       initGit(root);
-      mkdirSync(join(root, ".gsd"));
+      mkdirSync(join(root, ".sdd"));
       const sub = join(root, "src", "deep");
       mkdirSync(sub, { recursive: true });
       _clearGsdRootCache();
       const result = gsdRoot(sub);
-      assert.deepStrictEqual(result, join(root, ".gsd"), "git-root probe: finds .gsd at git root from subdirectory");
+      assert.deepStrictEqual(result, join(root, ".sdd"), "git-root probe: finds .sdd at git root from subdirectory");
     } finally { cleanup(root); }
   });
 
-  test('Case 3: .gsd in an ancestor — walk-up finds it', () => {
+  test('Case 3: .sdd in an ancestor — walk-up finds it', () => {
     const root = tmp();
     try {
       initGit(root);
       const project = join(root, "project");
-      mkdirSync(join(project, ".gsd"), { recursive: true });
+      mkdirSync(join(project, ".sdd"), { recursive: true });
       const deep = join(project, "src", "deep");
       mkdirSync(deep, { recursive: true });
       _clearGsdRootCache();
       const result = gsdRoot(deep);
-      assert.deepStrictEqual(result, join(project, ".gsd"), "walk-up: finds .gsd in ancestor when git root has none");
+      assert.deepStrictEqual(result, join(project, ".sdd"), "walk-up: finds .sdd in ancestor when git root has none");
     } finally { cleanup(root); }
   });
 
-  test('Case 4: .gsd nowhere — fallback returns original basePath/.gsd', () => {
+  test('Case 4: .sdd nowhere — fallback returns original basePath/.sdd', () => {
     const root = tmp();
     try {
       initGit(root);
@@ -67,14 +67,14 @@ describe('paths', () => {
       mkdirSync(sub, { recursive: true });
       _clearGsdRootCache();
       const result = gsdRoot(sub);
-      assert.deepStrictEqual(result, join(sub, ".gsd"), "fallback: returns basePath/.gsd when .gsd not found anywhere");
+      assert.deepStrictEqual(result, join(sub, ".sdd"), "fallback: returns basePath/.sdd when .sdd not found anywhere");
     } finally { cleanup(root); }
   });
 
   test('Case 5: cache — second call returns same value without re-probing', () => {
     const root = tmp();
     try {
-      mkdirSync(join(root, ".gsd"));
+      mkdirSync(join(root, ".sdd"));
       _clearGsdRootCache();
       const first = gsdRoot(root);
       const second = gsdRoot(root);
@@ -83,16 +83,16 @@ describe('paths', () => {
     } finally { cleanup(root); }
   });
 
-  test('Case 6: .gsd at basePath takes precedence over ancestor .gsd', () => {
+  test('Case 6: .sdd at basePath takes precedence over ancestor .sdd', () => {
     const outer = tmp();
     try {
       initGit(outer);
-      mkdirSync(join(outer, ".gsd"));
+      mkdirSync(join(outer, ".sdd"));
       const inner = join(outer, "nested");
-      mkdirSync(join(inner, ".gsd"), { recursive: true });
+      mkdirSync(join(inner, ".sdd"), { recursive: true });
       _clearGsdRootCache();
       const result = gsdRoot(inner);
-      assert.deepStrictEqual(result, join(inner, ".gsd"), "precedence: nearest .gsd wins over ancestor");
+      assert.deepStrictEqual(result, join(inner, ".sdd"), "precedence: nearest .sdd wins over ancestor");
     } finally { cleanup(outer); }
   });
 });

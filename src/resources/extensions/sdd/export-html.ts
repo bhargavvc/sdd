@@ -1,8 +1,8 @@
 /**
- * GSD HTML Report Generator
+ * SDD HTML Report Generator
  *
  * Produces a single self-contained HTML file with:
- *   - Branding header (project name, path, GSD version, generated timestamp)
+ *   - Branding header (project name, path, SDD version, generated timestamp)
  *   - Project summary & overall progress
  *   - Progress tree (milestones → slices → tasks, with critical path)
  *   - Execution timeline (chronological unit history)
@@ -73,14 +73,14 @@ export function generateHtmlReport(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GSD Report — ${esc(opts.projectName)}${opts.milestoneId ? ` — ${esc(opts.milestoneId)}` : ''}</title>
+<title>SDD Report — ${esc(opts.projectName)}${opts.milestoneId ? ` — ${esc(opts.milestoneId)}` : ''}</title>
 <style>${CSS}</style>
 </head>
 <body>
 <header>
   <div class="header-inner">
     <div class="branding">
-      <span class="logo">GSD</span>
+      <span class="logo">SDD</span>
       <span class="version">v${esc(opts.gsdVersion)}</span>
     </div>
     <div class="header-meta">
@@ -114,7 +114,7 @@ ${sections.join('\n')}
 </main>
 <footer>
   <div class="footer-inner">
-    <span>GSD v${esc(opts.gsdVersion)}</span>
+    <span>SDD v${esc(opts.gsdVersion)}</span>
     <span class="sep">/</span>
     <span>${esc(opts.projectName)}</span>
     ${opts.milestoneId ? `<span class="sep">/</span><span class="mono">${esc(opts.milestoneId)}</span>` : ''}
@@ -1364,7 +1364,7 @@ const JS = `
   });
 })();
 (function(){
-  var saved=JSON.parse(localStorage.getItem('gsd-collapsed')||'{}');
+  var saved=JSON.parse(localStorage.getItem('sdd-collapsed')||'{}');
   document.querySelectorAll('section[id]').forEach(function(sec){
     var h2=sec.querySelector('h2');
     if(!h2)return;
@@ -1380,7 +1380,7 @@ const JS = `
       toggleSection(sec,collapsed);
       btn.textContent=collapsed?'+':'-';
       saved[sec.id]=collapsed;
-      localStorage.setItem('gsd-collapsed',JSON.stringify(saved));
+      localStorage.setItem('sdd-collapsed',JSON.stringify(saved));
     });
   });
   function toggleSection(sec,hide){
@@ -1395,13 +1395,13 @@ const JS = `
   if(!hr)return;
   var btn=document.createElement('button');
   btn.className='theme-toggle';
-  btn.textContent=localStorage.getItem('gsd-theme')==='light'?'Dark':'Light';
-  if(localStorage.getItem('gsd-theme')==='light')document.documentElement.classList.add('light-theme');
+  btn.textContent=localStorage.getItem('sdd-theme')==='light'?'Dark':'Light';
+  if(localStorage.getItem('sdd-theme')==='light')document.documentElement.classList.add('light-theme');
   btn.addEventListener('click',function(){
     document.documentElement.classList.toggle('light-theme');
     var isLight=document.documentElement.classList.contains('light-theme');
     btn.textContent=isLight?'Dark':'Light';
-    localStorage.setItem('gsd-theme',isLight?'light':'dark');
+    localStorage.setItem('sdd-theme',isLight?'light':'dark');
   });
   hr.prepend(btn);
 })();

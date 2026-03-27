@@ -88,7 +88,7 @@ export async function runRpcMode(session: AgentSession): Promise<never> {
 	// v2 event filtering: null = no filter (all events); Set = only listed event types
 	let eventFilter: Set<string> | null = null;
 
-	const embeddedTerminalEnabled = process.env.GSD_WEB_BRIDGE_TUI === "1";
+	const embeddedTerminalEnabled = process.env.SDD_WEB_BRIDGE_TUI === "1";
 	const remoteTerminal = embeddedTerminalEnabled
 		? new RemoteTerminal({
 				onWrite: (data) => {

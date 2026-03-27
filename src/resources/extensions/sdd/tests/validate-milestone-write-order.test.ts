@@ -6,13 +6,13 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
 import { handleValidateMilestone } from "../tools/validate-milestone.js";
-import { openDatabase, closeDatabase, _getAdapter, insertMilestone } from "../gsd-db.js";
+import { openDatabase, closeDatabase, _getAdapter, insertMilestone } from "../sdd-db.js";
 import { clearPathCache } from "../paths.js";
 import { clearParseCache } from "../files.js";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-val-handler-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  const base = join(tmpdir(), `sdd-val-handler-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
   return base;
 }
 
@@ -41,7 +41,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
 
   it("writes DB row and disk file on success", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".gsd", "gsd.db");
+    const dbPath = join(base, ".sdd", "sdd.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
 
@@ -57,20 +57,20 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
     assert.equal(row!.status, "pass");
 
     // Disk file exists
-    const filePath = join(base, ".gsd", "milestones", "M001", "M001-VALIDATION.md");
+    const filePath = join(base, ".sdd", "milestones", "M001", "M001-VALIDATION.md");
     assert.ok(existsSync(filePath), "VALIDATION.md should exist on disk");
   });
 
   it("rolls back DB row when disk write fails", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".gsd", "gsd.db");
+    const dbPath = join(base, ".sdd", "sdd.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
 
     // Force disk write failure by replacing the milestone directory with a
     // regular file. saveFile() will fail because it cannot write inside a
     // non-directory. This works cross-platform (chmod is ignored on Windows).
-    const milestoneDir = join(base, ".gsd", "milestones", "M001");
+    const milestoneDir = join(base, ".sdd", "milestones", "M001");
     rmSync(milestoneDir, { recursive: true, force: true });
     writeFileSync(milestoneDir, "not-a-directory");
 

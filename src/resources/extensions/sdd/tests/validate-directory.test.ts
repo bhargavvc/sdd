@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Directory Validation — safeguards against dangerous directories.
+ * Unit tests for SDD Directory Validation — safeguards against dangerous directories.
  *
  * Exercises validateDirectory() and assertSafeDirectory() with:
  * - Blocked system paths (/, /usr, /etc, $HOME, C:\Windows)
@@ -20,7 +20,7 @@ const isWindows = platform() === "win32";
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-validate-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `sdd-validate-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -101,18 +101,18 @@ test("validateDirectory: subdirectory of home is NOT blocked", () => {
   }
 });
 
-// Regression test for #1317: GSD worktree inside $HOME must not be blocked even
+// Regression test for #1317: SDD worktree inside $HOME must not be blocked even
 // when the resolved project root equals $HOME (e.g. home dir is a git repo).
-test("validateDirectory: GSD worktree path nested under home is NOT blocked (#1317)", () => {
-  const worktreePath = join(homedir(), ".gsd", "worktrees", "M001");
+test("validateDirectory: SDD worktree path nested under home is NOT blocked (#1317)", () => {
+  const worktreePath = join(homedir(), ".sdd", "worktrees", "M001");
   mkdirSync(worktreePath, { recursive: true });
   try {
     // The worktree CWD itself is a valid location — it must pass.
     const result = validateDirectory(worktreePath);
-    assert.equal(result.safe, true, "GSD worktree path should be safe to run in");
+    assert.equal(result.safe, true, "SDD worktree path should be safe to run in");
     assert.equal(result.severity, "ok");
   } finally {
-    rmSync(join(homedir(), ".gsd", "worktrees", "M001"), { recursive: true, force: true });
+    rmSync(join(homedir(), ".sdd", "worktrees", "M001"), { recursive: true, force: true });
   }
 });
 

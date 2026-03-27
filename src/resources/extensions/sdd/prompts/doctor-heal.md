@@ -1,4 +1,4 @@
-You are executing GSD doctor heal mode.
+You are executing SDD doctor heal mode.
 
 The doctor has already scanned the repo and optionally applied deterministic fixes. You are now responsible for resolving the remaining issues using the smallest safe set of changes.
 
@@ -8,7 +8,7 @@ Rules:
 3. Prefer fixing authoritative artifacts over masking warnings.
 4. For missing summaries or UAT files, generate the real artifact from existing slice/task context when possible — do not leave placeholders if you can reconstruct the real content.
 5. After each repair cluster, verify the relevant invariant directly from disk.
-6. When done, rerun `/gsd doctor {{doctorCommandSuffix}}` mentally by ensuring the remaining issue set for this scope is reduced or cleared.
+6. When done, rerun `/sdd doctor {{doctorCommandSuffix}}` mentally by ensuring the remaining issue set for this scope is reduced or cleared.
 
 ## Doctor Summary
 
@@ -26,4 +26,4 @@ Then:
 - Repair the unresolved issues in scope
 - Keep changes minimal and targeted
 - If unresolved issues remain outside scope, leave them untouched and mention them briefly
-- End with: "GSD doctor heal complete."
+- End with: "SDD doctor heal complete."

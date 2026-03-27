@@ -28,32 +28,32 @@ import assert from 'node:assert/strict';
 // ─── Fixture Helpers ──────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-integration-mixed-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-integration-mixed-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(join(dir, 'tasks'), { recursive: true });
   writeFileSync(join(dir, "tasks", "T01-PLAN.md"), "# T01 Plan\n");
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
 }
 
 function writeMilestoneSummary(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), content);
 }
 
 function writeMilestoneValidation(base: string, mid: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), `---\nverdict: pass\nremediation_round: 0\n---\n\n# Validation\nPassed.`);
 }
@@ -67,8 +67,8 @@ function run(command: string, cwd: string): string {
 }
 
 function createGitRepo(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-integration-git-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-integration-git-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   run('git init -b main', base);
   run("git config user.name 'Integration Test'", base);
   run("git config user.email 'test@example.com'", base);
@@ -338,7 +338,7 @@ test('Group 4: inlinePriorMilestoneSummary with mixed formats', async () => {
     const base = createFixtureBase();
     try {
       // M001 — completed with summary
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
       writeMilestoneSummary(base, 'M001', `# M001: Legacy Feature Summary
 
 **Completed legacy feature**
@@ -351,7 +351,7 @@ Built the legacy feature successfully.
 `);
 
       // M002-abc123 — active milestone (just needs directory to exist)
-      mkdirSync(join(base, '.gsd', 'milestones', 'M002-abc123'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'milestones', 'M002-abc123'), { recursive: true });
 
       const result = await inlinePriorMilestoneSummary('M002-abc123', base);
 
@@ -522,12 +522,12 @@ test('Group 6: Branch name helpers with new-format IDs', () => {
     // Test getSliceBranchName with new-format ID
     assert.deepStrictEqual(
       getSliceBranchName('M001-abc123', 'S01'),
-      'gsd/M001-abc123/S01',
-      'G6: getSliceBranchName returns gsd/M001-abc123/S01',
+      'sdd/M001-abc123/S01',
+      'G6: getSliceBranchName returns sdd/M001-abc123/S01',
     );
 
     // Test parseSliceBranch with new-format branch name
-    const parsed = parseSliceBranch('gsd/M001-abc123/S01');
+    const parsed = parseSliceBranch('sdd/M001-abc123/S01');
     assert.ok(parsed !== null, 'G6: parseSliceBranch returns non-null for new-format');
     assert.deepStrictEqual(parsed?.milestoneId, 'M001-abc123', 'G6: parsed milestoneId is M001-abc123');
     assert.deepStrictEqual(parsed?.sliceId, 'S01', 'G6: parsed sliceId is S01');

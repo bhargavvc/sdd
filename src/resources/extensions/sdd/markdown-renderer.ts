@@ -1,4 +1,4 @@
-// GSD Markdown Renderer — DB → Markdown file generation
+// SDD Markdown Renderer — DB → Markdown file generation
 //
 // Transforms DB state into correct markdown files on disk.
 // Each render function reads from DB (with disk fallback),
@@ -22,8 +22,8 @@ import {
   getArtifact,
   insertArtifact,
   getGateResults,
-} from "./gsd-db.js";
-import type { MilestoneRow, SliceRow, TaskRow, ArtifactRow } from "./gsd-db.js";
+} from "./sdd-db.js";
+import type { MilestoneRow, SliceRow, TaskRow, ArtifactRow } from "./sdd-db.js";
 import type { GateRow } from "./types.js";
 import {
   resolveMilestoneFile,
@@ -41,7 +41,7 @@ import { clearPathCache } from "./paths.js";
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 /**
- * Convert an absolute file path to a .gsd-relative artifact path.
+ * Convert an absolute file path to a .sdd-relative artifact path.
  * E.g. "/project/.sdd/milestones/M001/M001-ROADMAP.md" → "milestones/M001/M001-ROADMAP.md"
  */
 function toArtifactPath(absPath: string, basePath: string): string {

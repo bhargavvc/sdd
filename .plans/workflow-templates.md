@@ -1,4 +1,4 @@
-# GSD Workflow Templates — Implementation Plan (Updated)
+# SDD Workflow Templates — Implementation Plan (Updated)
 
 **Date:** 2026-03-18
 **Branch:** `feat/workflow-templates`
@@ -8,17 +8,17 @@
 
 ## Architecture Mapping (Plan → Actual Codebase)
 
-The original plan referenced `gsd-tools.cjs`, `lib/init.cjs`, `lib/core.cjs` — these don't exist.
+The original plan referenced `sdd-tools.cjs`, `lib/init.cjs`, `lib/core.cjs` — these don't exist.
 The actual architecture is a TypeScript extension system:
 
 | Plan Reference | Actual Location |
 |---|---|
-| `gsd-tools.cjs` command routing | `src/resources/extensions/sdd/commands.ts` |
+| `sdd-tools.cjs` command routing | `src/resources/extensions/sdd/commands.ts` |
 | `lib/workflow-template.cjs` | `src/resources/extensions/sdd/workflow-templates.ts` (new) |
 | `lib/init.cjs` | No separate init; logic lives in handler module |
 | `lib/core.cjs` | Utilities spread across `paths.ts`, `state.ts`, etc. |
 | `~/.claude/get-shit-done/workflow-templates/` | `src/resources/extensions/sdd/workflow-templates/` (new dir) |
-| `/gsd:start`, `/gsd:templates` | `/gsd start`, `/gsd templates` subcommands |
+| `/sdd:start`, `/sdd:templates` | `/sdd start`, `/sdd templates` subcommands |
 | Prompt templates | `src/resources/extensions/sdd/prompts/` |
 
 ---
@@ -38,8 +38,8 @@ The actual architecture is a TypeScript extension system:
    - `getTemplateInfo(name)` — detailed template metadata
 
 3. **`src/resources/extensions/sdd/commands-workflow-templates.ts`**
-   - `handleStart(args, ctx, pi)` — `/gsd start [template] [args]`
-   - `handleTemplates(args, ctx)` — `/gsd templates [info <name>]`
+   - `handleStart(args, ctx, pi)` — `/sdd start [template] [args]`
+   - `handleTemplates(args, ctx)` — `/sdd templates [info <name>]`
 
 4. **Wire into `commands.ts`**:
    - Add `start` and `templates` to subcommand completions
@@ -58,7 +58,7 @@ The actual architecture is a TypeScript extension system:
 
 ### Prompt Templates
 
-13. **`src/resources/extensions/sdd/prompts/workflow-start.md`** — dispatched when `/gsd start` resolves a template
+13. **`src/resources/extensions/sdd/prompts/workflow-start.md`** — dispatched when `/sdd start` resolves a template
 14. **`src/resources/extensions/sdd/prompts/workflow-bugfix.md`** — bugfix-specific dispatch prompt
 15. **`src/resources/extensions/sdd/prompts/workflow-small-feature.md`**
 16. **`src/resources/extensions/sdd/prompts/workflow-spike.md`**
@@ -68,10 +68,10 @@ The actual architecture is a TypeScript extension system:
 
 ## Success Criteria
 
-- [ ] `/gsd start bugfix` resolves template and dispatches workflow prompt
-- [ ] `/gsd start` with no args auto-detects from context or shows choices
-- [ ] `/gsd templates` lists all available templates
-- [ ] `/gsd templates info bugfix` shows detailed template info
-- [ ] All existing `/gsd *` commands work unchanged (zero regression)
+- [ ] `/sdd start bugfix` resolves template and dispatches workflow prompt
+- [ ] `/sdd start` with no args auto-detects from context or shows choices
+- [ ] `/sdd templates` lists all available templates
+- [ ] `/sdd templates info bugfix` shows detailed template info
+- [ ] All existing `/sdd *` commands work unchanged (zero regression)
 - [ ] Registry validates (all referenced template files exist)
 - [ ] Templates reuse existing agents and prompt patterns

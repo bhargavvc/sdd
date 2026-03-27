@@ -148,7 +148,7 @@ function setupProject(overrides?: Record<string, string>): {
   runDir: string;
 } {
   const basePath = makeTmpDir();
-  const defsDir = join(basePath, ".gsd", "workflow-defs");
+  const defsDir = join(basePath, ".sdd", "workflow-defs");
   mkdirSync(defsDir, { recursive: true });
   writeFileSync(join(defsDir, "e2e-pipeline.yaml"), E2E_DEFINITION_YAML, "utf-8");
 

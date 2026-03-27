@@ -1,5 +1,5 @@
 /**
- * reopen-slice handler — the core operation behind gsd_slice_reopen.
+ * reopen-slice handler — the core operation behind sdd_slice_reopen.
  *
  * Resets a completed slice back to "in_progress" and resets ALL of its
  * tasks back to "pending". This is intentional — if you're reopening a
@@ -8,7 +8,7 @@
  * The parent milestone must still be open (not complete).
  */
 
-// GSD — reopen-slice tool handler
+// SDD — reopen-slice tool handler
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import {
@@ -18,7 +18,7 @@ import {
   updateSliceStatus,
   updateTaskStatus,
   transaction,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { invalidateStateCache } from "../state.js";
 import { isClosedStatus } from "../status-guards.js";
 import { renderAllProjections } from "../workflow-projections.js";
@@ -114,7 +114,7 @@ export async function handleReopenSlice(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: reopen-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `sdd: reopen-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

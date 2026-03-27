@@ -1,5 +1,5 @@
 /**
- * GSD Session Status I/O
+ * SDD Session Status I/O
  *
  * File-based IPC protocol for coordinator-worker communication in
  * parallel milestone orchestration. Each worker writes its status to a

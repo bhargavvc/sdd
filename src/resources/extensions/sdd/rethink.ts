@@ -1,5 +1,5 @@
 /**
- * GSD Rethink — Conversational project reorganization.
+ * SDD Rethink — Conversational project reorganization.
  *
  * Collects a snapshot of all milestones (status, dependencies, slice progress,
  * queue order) and dispatches a prompt that turns Claude into a reorganization
@@ -7,7 +7,7 @@
  * through conversation.
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync } from "node:fs";
 
 import { isAutoActive } from "./auto.js";
@@ -16,7 +16,7 @@ import { gsdRoot } from "./paths.js";
 import { findMilestoneIds } from "./milestone-ids.js";
 import { loadQueueOrder, validateQueueOrder } from "./queue-order.js";
 import { isParked, getParkedReason } from "./milestone-actions.js";
-import { getMilestoneSlices, isDbAvailable } from "./gsd-db.js";
+import { getMilestoneSlices, isDbAvailable } from "./sdd-db.js";
 import { buildExistingMilestonesContext } from "./guided-flow-queue.js";
 import { loadPrompt } from "./prompt-loader.js";
 
@@ -35,7 +35,7 @@ export async function handleRethink(
   const basePath = process.cwd();
   const root = gsdRoot(basePath);
   if (!existsSync(root)) {
-    ctx.ui.notify("No GSD project found. Run /gsd init first.", "warning");
+    ctx.ui.notify("No SDD project found. Run /sdd init first.", "warning");
     return;
   }
 
@@ -59,7 +59,7 @@ export async function handleRethink(
   });
 
   pi.sendMessage(
-    { customType: "gsd-rethink", content, display: false },
+    { customType: "sdd-rethink", content, display: false },
     { triggerTurn: true },
   );
 }

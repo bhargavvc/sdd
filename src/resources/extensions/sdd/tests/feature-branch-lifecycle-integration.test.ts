@@ -66,18 +66,18 @@ function allBranches(cwd: string): string[] {
  * Returns { repo, featureBranch } with HEAD on the feature branch.
  */
 function createFeatureBranchRepo(featureBranch: string): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "gsd-fb-lifecycle-")));
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdd-fb-lifecycle-")));
   run("git init", dir);
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
 
   // Initial commit on main
   writeFileSync(join(dir, "README.md"), "# project\n");
-  // Mirror production: GSD runtime dirs are gitignored so autoCommitDirtyState
+  // Mirror production: SDD runtime dirs are gitignored so autoCommitDirtyState
   // doesn't pick up the worktrees directory as dirty state (#1127 fix).
   writeFileSync(join(dir, ".gitignore"), ".sdd/worktrees/\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -183,12 +183,12 @@ describe('feature-branch-lifecycle-integration', async () => {
       // In production, the first dispatch unit (research-milestone) would
       // auto-commit via autoCommitCurrentBranch. But the worktree is created
       // BEFORE any unit runs. So we simulate the pre-worktree state:
-      // GSD bootstraps .sdd/ and captureIntegrationBranch commits metadata.
+      // SDD bootstraps .sdd/ and captureIntegrationBranch commits metadata.
       // The user's dirty files are NOT auto-committed pre-worktree — they
       // stay in the original working directory.
 
       // Create milestone directory (happens during guided-flow)
-      mkdirSync(join(repo, ".gsd", "milestones", milestoneId), { recursive: true });
+      mkdirSync(join(repo, ".sdd", "milestones", milestoneId), { recursive: true });
 
       // Write integration branch metadata (what captureIntegrationBranch does)
       writeIntegrationBranch(repo, milestoneId, featureBranch);
@@ -285,7 +285,7 @@ describe('feature-branch-lifecycle-integration', async () => {
       run(`git checkout ${featureBranch}`, repo);
 
       // ── Assert: worktree cleaned up ──
-      const worktreeDir = join(repo, ".gsd", "worktrees", milestoneId);
+      const worktreeDir = join(repo, ".sdd", "worktrees", milestoneId);
       assert.ok(!existsSync(worktreeDir), "worktree directory removed");
 
       // Milestone branch deleted
@@ -317,17 +317,17 @@ describe('feature-branch-lifecycle-integration', async () => {
       const milestoneId = nextMilestoneId([], true);
 
       // Write planning files that are NOT committed
-      mkdirSync(join(repo, ".gsd", "milestones", milestoneId, "slices", "S01", "tasks"), { recursive: true });
+      mkdirSync(join(repo, ".sdd", "milestones", milestoneId, "slices", "S01", "tasks"), { recursive: true });
       writeFileSync(
-        join(repo, ".gsd", "milestones", milestoneId, `${milestoneId}-ROADMAP.md`),
+        join(repo, ".sdd", "milestones", milestoneId, `${milestoneId}-ROADMAP.md`),
         makeRoadmap(milestoneId, "Planning test", [{ id: "S01", title: "First" }]),
       );
       writeFileSync(
-        join(repo, ".gsd", "milestones", milestoneId, "slices", "S01", "S01-PLAN.md"),
+        join(repo, ".sdd", "milestones", milestoneId, "slices", "S01", "S01-PLAN.md"),
         "# S01: First\n\n**Goal:** Test\n**Demo:** Test\n\n## Tasks\n- [ ] **T01: Do it** `est:10m`\n",
       );
-      writeFileSync(join(repo, ".gsd", "PROJECT.md"), "# Planning Test Project\n");
-      writeFileSync(join(repo, ".gsd", "DECISIONS.md"), "# Decisions\n\n## D001\nTest decision.\n");
+      writeFileSync(join(repo, ".sdd", "PROJECT.md"), "# Planning Test Project\n");
+      writeFileSync(join(repo, ".sdd", "DECISIONS.md"), "# Decisions\n\n## D001\nTest decision.\n");
 
       // These files are untracked
       assert.ok(run("git status --short", repo).length > 0, "repo has untracked files");
@@ -337,10 +337,10 @@ describe('feature-branch-lifecycle-integration', async () => {
       const wtPath = createAutoWorktree(repo, milestoneId);
       tempDirs.push(wtPath);
 
-      // With external state, worktree .gsd is a symlink to shared state.
+      // With external state, worktree .sdd is a symlink to shared state.
       // Verify symlink was created (planning files are shared, not copied).
-      const wtGsd = join(wtPath, ".gsd");
-      assert.ok(existsSync(wtGsd), "worktree .gsd exists (symlink or dir)");
+      const wtGsd = join(wtPath, ".sdd");
+      assert.ok(existsSync(wtGsd), "worktree .sdd exists (symlink or dir)");
 
       // Clean up: chdir back before teardown
       process.chdir(savedCwd);
@@ -360,7 +360,7 @@ describe('feature-branch-lifecycle-integration', async () => {
 
       // First milestone
       const mid1 = nextMilestoneId([], true);
-      mkdirSync(join(repo, ".gsd", "milestones", mid1), { recursive: true });
+      mkdirSync(join(repo, ".sdd", "milestones", mid1), { recursive: true });
       writeIntegrationBranch(repo, mid1, featureBranch);
 
       const wt1 = createAutoWorktree(repo, mid1);
@@ -379,7 +379,7 @@ describe('feature-branch-lifecycle-integration', async () => {
       assert.ok(mid1 !== mid2, "second milestone has different ID");
       assert.match(mid2, /^M002-[a-z0-9]{6}$/, "second milestone is M002-xxxxxx");
 
-      mkdirSync(join(repo, ".gsd", "milestones", mid2), { recursive: true });
+      mkdirSync(join(repo, ".sdd", "milestones", mid2), { recursive: true });
       writeIntegrationBranch(repo, mid2, featureBranch);
 
       const wt2 = createAutoWorktree(repo, mid2);

@@ -1,5 +1,5 @@
 /**
- * GSD Auto Mode — Fresh Session Per Unit
+ * SDD Auto Mode — Fresh Session Per Unit
  *
  * State machine driven by .sdd/ files on disk. Each "unit" of work
  * (plan slice, execute task, complete slice) gets a fresh session via
@@ -14,11 +14,11 @@ import type {
   ExtensionAPI,
   ExtensionContext,
   ExtensionCommandContext,
-} from "@gsd/pi-coding-agent";
+} from "@sdd/pi-coding-agent";
 
 import { deriveState } from "./state.js";
 import { parseUnitId } from "./unit-id.js";
-import type { GSDState } from "./types.js";
+import type { SDDState } from "./types.js";
 import { getManifestStatus } from "./files.js";
 export { inlinePriorMilestoneSummary } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
@@ -91,7 +91,7 @@ import {
   restoreHookState,
   clearPersistedHookState,
 } from "./post-unit-hooks.js";
-import { runGSDDoctor, rebuildState } from "./doctor.js";
+import { runSDDDoctor, rebuildState } from "./doctor.js";
 import {
   preDispatchHealthGate,
   recordHealthSnapshot,
@@ -174,7 +174,7 @@ import {
   deregisterSigtermHandler as _deregisterSigtermHandler,
   detectWorkingTreeActivity,
 } from "./auto-supervisor.js";
-import { isDbAvailable } from "./gsd-db.js";
+import { isDbAvailable } from "./sdd-db.js";
 import { countPendingCaptures } from "./captures.js";
 import { clearCmuxSidebar, logCmuxEvent, syncCmuxSidebar } from "../cmux/index.js";
 
@@ -259,7 +259,7 @@ export function shouldUseWorktreeIsolation(): boolean {
 
 /**
  * Model captured at auto-mode start. Used to prevent model bleed between
- * concurrent GSD instances sharing the same global settings.json (#650).
+ * concurrent SDD instances sharing the same global settings.json (#650).
  * When preferences don't specify a model for a unit type, this ensures
  * the session's original model is re-applied instead of reading from
  * the shared global settings (which another instance may have overwritten).
@@ -309,7 +309,7 @@ export function getAutoDashboardData(): AutoDashboardData {
   const rtkSavings = sessionId && s.basePath
     ? getRtkSessionSavings(s.basePath, sessionId)
     : null;
-  const rtkEnabled = loadEffectiveGSDPreferences()?.preferences.experimental?.rtk === true;
+  const rtkEnabled = loadEffectiveSDDPreferences()?.preferences.experimental?.rtk === true;
   // Pending capture count — lazy check, non-fatal
   let pendingCaptureCount = 0;
   try {
@@ -439,8 +439,8 @@ export function stopAutoRemote(projectRoot: string): {
 /**
  * Check if a remote auto-mode session is running (from a different process).
  * Reads the crash lock, checks PID liveness, and returns session details.
- * Used by the guard in commands.ts to prevent bare /gsd, /gsd next, and
- * /gsd auto from stealing the session lock.
+ * Used by the guard in commands.ts to prevent bare /sdd, /sdd next, and
+ * /sdd auto from stealing the session lock.
  */
 export function checkRemoteAutoSession(projectRoot: string): {
   running: boolean;
@@ -527,12 +527,12 @@ function handleLostSessionLock(
   clearCmuxSidebar(loadEffectiveSDDPreferences()?.preferences);
   const base = lockBase();
   const lockFilePath = base ? join(gsdRoot(base), "auto.lock") : "unknown";
-  const recoverySuggestion = "\nTo recover, run: gsd doctor --fix";
+  const recoverySuggestion = "\nTo recover, run: sdd doctor --fix";
   const message =
     lockStatus?.failureReason === "pid-mismatch"
       ? lockStatus.existingPid
-        ? `Session lock (${lockFilePath}) moved to PID ${lockStatus.existingPid} — another GSD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
-        : `Session lock (${lockFilePath}) moved to a different process — another GSD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
+        ? `Session lock (${lockFilePath}) moved to PID ${lockStatus.existingPid} — another SDD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
+        : `Session lock (${lockFilePath}) moved to a different process — another SDD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
       : lockStatus?.failureReason === "missing-metadata"
         ? `Session lock metadata (${lockFilePath}) disappeared, so ownership could not be confirmed. Stopping gracefully.${recoverySuggestion}`
         : lockStatus?.failureReason === "compromised"
@@ -542,8 +542,8 @@ function handleLostSessionLock(
     message,
     "error",
   );
-  ctx?.ui.setStatus("gsd-auto", undefined);
-  ctx?.ui.setWidget("gsd-progress", undefined);
+  ctx?.ui.setStatus("sdd-auto", undefined);
+  ctx?.ui.setWidget("sdd-progress", undefined);
   ctx?.ui.setFooter(undefined);
 }
 
@@ -559,7 +559,7 @@ function cleanupAfterLoopExit(ctx: ExtensionContext): void {
   s.active = false;
   clearUnitTimeout();
 
-  // Clear crash lock and release session lock so the next `/gsd next` does
+  // Clear crash lock and release session lock so the next `/sdd next` does
   // not see a stale lock with the current PID and treat it as a "remote"
   // session (which would cause it to SIGTERM itself). (#2730)
   try {
@@ -569,8 +569,8 @@ function cleanupAfterLoopExit(ctx: ExtensionContext): void {
     /* best-effort — mirror stopAuto cleanup */
   }
 
-  ctx.ui.setStatus("gsd-auto", undefined);
-  ctx.ui.setWidget("gsd-progress", undefined);
+  ctx.ui.setStatus("sdd-auto", undefined);
+  ctx.ui.setWidget("sdd-progress", undefined);
   ctx.ui.setFooter(undefined);
 
   // Restore CWD out of worktree back to original project root
@@ -672,7 +672,7 @@ export async function stopAuto(
     // ── Step 5: DB cleanup ──
     if (isDbAvailable()) {
       try {
-        const { closeDatabase } = await import("./gsd-db.js");
+        const { closeDatabase } = await import("./sdd-db.js");
         closeDatabase();
       } catch (e) {
         debugLog("db-close-failed", {
@@ -804,8 +804,8 @@ export async function stopAuto(
     resetProactiveHealing();
 
     // UI cleanup
-    ctx?.ui.setStatus("gsd-auto", undefined);
-    ctx?.ui.setWidget("gsd-progress", undefined);
+    ctx?.ui.setStatus("sdd-auto", undefined);
+    ctx?.ui.setWidget("sdd-progress", undefined);
     ctx?.ui.setFooter(undefined);
 
     // Reset all session state in one call
@@ -815,7 +815,7 @@ export async function stopAuto(
 
 /**
  * Pause auto-mode without destroying state. Context is preserved.
- * The user can interact with the agent, then `/gsd auto` resumes
+ * The user can interact with the agent, then `/sdd auto` resumes
  * from disk state. Called when the user presses Escape during auto-mode.
  */
 export async function pauseAuto(
@@ -881,10 +881,10 @@ export async function pauseAuto(
   s.paused = true;
   s.pendingVerificationRetry = null;
   s.verificationRetryCount.clear();
-  ctx?.ui.setStatus("gsd-auto", "paused");
-  ctx?.ui.setWidget("gsd-progress", undefined);
+  ctx?.ui.setStatus("sdd-auto", "paused");
+  ctx?.ui.setWidget("sdd-progress", undefined);
   ctx?.ui.setFooter(undefined);
-  const resumeCmd = s.stepMode ? "/gsd next" : "/gsd auto";
+  const resumeCmd = s.stepMode ? "/sdd next" : "/sdd auto";
   ctx?.ui.notify(
     `${s.stepMode ? "Step" : "Auto"}-mode paused (Escape). Type to interact, or ${resumeCmd} to resume.`,
     "info",
@@ -1150,7 +1150,7 @@ export async function startAuto(
 
     registerSigtermHandler(lockBase());
 
-    ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+    ctx.ui.setStatus("sdd-auto", s.stepMode ? "next" : "auto");
     ctx.ui.setFooter(hideFooter);
     ctx.ui.notify(
       s.stepMode ? "Step-mode resumed." : "Auto-mode resumed.",
@@ -1166,7 +1166,7 @@ export async function startAuto(
       });
     }
     try {
-      const report = await runGSDDoctor(s.basePath, { fix: true });
+      const report = await runSDDDoctor(s.basePath, { fix: true });
       if (report.fixesApplied.length > 0) {
         ctx.ui.notify(
           `Resume: applied ${report.fixesApplied.length} fix(es) to state.`,
@@ -1361,7 +1361,7 @@ function buildRecoveryContext(): import("./auto-timeout-recovery.js").RecoveryCo
 
 /**
  * Dispatch a hook unit directly, bypassing normal pre-dispatch hooks.
- * Used for manual hook triggers via /gsd run-hook.
+ * Used for manual hook triggers via /sdd run-hook.
  */
 export async function dispatchHookUnit(
   ctx: ExtensionContext,
@@ -1444,7 +1444,7 @@ export async function dispatchHookUnit(
     await pauseAuto(ctx, pi);
   }, hookHardTimeoutMs);
 
-  ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+  ctx.ui.setStatus("sdd-auto", s.stepMode ? "next" : "auto");
   ctx.ui.notify(`Running post-unit hook: ${hookName}`, "info");
 
   // Ensure cwd matches basePath before hook dispatch (#1389)
@@ -1455,7 +1455,7 @@ export async function dispatchHookUnit(
     promptLength: hookPrompt.length,
   });
   pi.sendMessage(
-    { customType: "gsd-auto", content: hookPrompt, display: true },
+    { customType: "sdd-auto", content: hookPrompt, display: true },
     { triggerTurn: true },
   );
 

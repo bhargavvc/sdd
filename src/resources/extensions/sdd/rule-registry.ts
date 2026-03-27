@@ -1,4 +1,4 @@
-// GSD Extension — Unified Rule Registry
+// SDD Extension — Unified Rule Registry
 //
 // Holds all dispatch rules and hooks as a flat list of UnifiedRule objects.
 // Provides evaluation methods for each phase (dispatch, post-unit, pre-dispatch)
@@ -27,12 +27,12 @@ import { parseUnitId } from "./unit-id.js";
 export function resolveHookArtifactPath(basePath: string, unitId: string, artifactName: string): string {
   const { milestone, slice, task } = parseUnitId(unitId);
   if (task !== undefined && slice !== undefined) {
-    return join(basePath, ".gsd", "milestones", milestone, "slices", slice, "tasks", `${task}-${artifactName}`);
+    return join(basePath, ".sdd", "milestones", milestone, "slices", slice, "tasks", `${task}-${artifactName}`);
   }
   if (slice !== undefined) {
-    return join(basePath, ".gsd", "milestones", milestone, "slices", slice, artifactName);
+    return join(basePath, ".sdd", "milestones", milestone, "slices", slice, artifactName);
   }
-  return join(basePath, ".gsd", "milestones", milestone, artifactName);
+  return join(basePath, ".sdd", "milestones", milestone, artifactName);
 }
 
 // ─── Dispatch Rule Conversion ──────────────────────────────────────────────
@@ -135,7 +135,7 @@ export class RuleRegistry {
     }
     return {
       action: "stop",
-      reason: `Unhandled phase "${ctx.state.phase}" — run /gsd doctor to diagnose.`,
+      reason: `Unhandled phase "${ctx.state.phase}" — run /sdd doctor to diagnose.`,
       level: "info",
       matchedRule: "<no-match>",
     };
@@ -374,7 +374,7 @@ export class RuleRegistry {
   // ── Persistence ─────────────────────────────────────────────────────
 
   private _hookStatePath(basePath: string): string {
-    return join(basePath, ".gsd", HOOK_STATE_FILE);
+    return join(basePath, ".sdd", HOOK_STATE_FILE);
   }
 
   /** Persist current hook cycle counts to disk. */
@@ -384,7 +384,7 @@ export class RuleRegistry {
       savedAt: new Date().toISOString(),
     };
     try {
-      const dir = join(basePath, ".gsd");
+      const dir = join(basePath, ".sdd");
       if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
       writeFileSync(this._hookStatePath(basePath), JSON.stringify(state, null, 2), "utf-8");
     } catch {
@@ -524,7 +524,7 @@ export class RuleRegistry {
   formatHookStatus(): string {
     const entries = this.getHookStatus();
     if (entries.length === 0) {
-      return "No hooks configured. Add post_unit_hooks or pre_dispatch_hooks to .gsd/PREFERENCES.md";
+      return "No hooks configured. Add post_unit_hooks or pre_dispatch_hooks to .sdd/PREFERENCES.md";
     }
 
     const lines: string[] = ["Configured Hooks:", ""];

@@ -10,8 +10,8 @@ function withTempHome(fn: (tempHome: string) => void | Promise<void>) {
   return async () => {
     const savedHome = process.env.HOME;
     const savedUserProfile = process.env.USERPROFILE;
-    const tempHome = join(tmpdir(), `gsd-remote-status-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-    mkdirSync(join(tempHome, ".gsd", "runtime", "remote-questions"), { recursive: true });
+    const tempHome = join(tmpdir(), `sdd-remote-status-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    mkdirSync(join(tempHome, ".sdd", "runtime", "remote-questions"), { recursive: true });
     process.env.HOME = tempHome;
     process.env.USERPROFILE = tempHome;
     try {

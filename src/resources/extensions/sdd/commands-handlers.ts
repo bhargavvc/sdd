@@ -1,11 +1,11 @@
 /**
- * GSD Command Handlers — fire-and-forget handlers that delegate to other modules.
+ * SDD Command Handlers — fire-and-forget handlers that delegate to other modules.
  *
  * Contains: handleDoctor, handleSteer, handleCapture, handleTriage, handleKnowledge,
  * handleRunHook, handleUpdate, handleSkillHealth
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { deriveState } from "./state.js";
@@ -16,7 +16,7 @@ import {
   formatDoctorIssuesForPrompt,
   formatDoctorReport,
   formatDoctorReportJson,
-  runGSDDoctor,
+  runSDDDoctor,
   selectDoctorScope,
   filterDoctorIssues,
 } from "./doctor.js";
@@ -25,7 +25,7 @@ import { projectRoot } from "./commands/context.js";
 import { loadPrompt } from "./prompt-loader.js";
 
 export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, reportText: string, structuredIssues: string): void {
-  const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
+  const workflowPath = process.env.SDD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".sdd", "agent", "SDD-WORKFLOW.md");
   const workflow = readFileSync(workflowPath, "utf-8");
   const prompt = loadPrompt("doctor-heal", {
     doctorSummary: reportText,
@@ -34,10 +34,10 @@ export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, 
     doctorCommandSuffix: scope ? ` ${scope}` : "",
   });
 
-  const content = `Read the following GSD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`;
+  const content = `Read the following SDD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`;
 
   pi.sendMessage(
-    { customType: "gsd-doctor-heal", content, display: false },
+    { customType: "sdd-doctor-heal", content, display: false },
     { triggerTurn: true },
   );
 }
@@ -55,7 +55,7 @@ export async function handleDoctor(args: string, ctx: ExtensionCommandContext, p
   const requestedScope = mode === "doctor" ? parts[0] : parts[1];
   const scope = await selectDoctorScope(projectRoot(), requestedScope);
   const effectiveScope = mode === "audit" ? requestedScope : scope;
-  const report = await runGSDDoctor(projectRoot(), {
+  const report = await runSDDDoctor(projectRoot(), {
     fix: mode === "fix" || mode === "heal" || dryRun,
     dryRun,
     scope: effectiveScope,
@@ -72,7 +72,7 @@ export async function handleDoctor(args: string, ctx: ExtensionCommandContext, p
     scope: effectiveScope,
     includeWarnings: mode === "audit",
     maxIssues: mode === "audit" ? 50 : 12,
-    title: mode === "audit" ? "GSD doctor audit." : mode === "heal" ? "GSD doctor heal prep." : undefined,
+    title: mode === "audit" ? "SDD doctor audit." : mode === "heal" ? "SDD doctor heal prep." : undefined,
   });
 
   ctx.ui.notify(reportText, report.ok ? "info" : "warning");
@@ -103,7 +103,7 @@ export async function handleSkillHealth(args: string, ctx: ExtensionCommandConte
 
   const basePath = projectRoot();
 
-  // /gsd skill-health <skill-name> — detail view
+  // /sdd skill-health <skill-name> — detail view
   if (args && !args.startsWith("--")) {
     const detail = formatSkillDetail(basePath, args);
     ctx.ui.notify(detail, "info");
@@ -137,7 +137,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
   // Strip surrounding quotes from the argument
   let text = args.trim();
   if (!text) {
-    ctx.ui.notify('Usage: /gsd capture "your thought here"', "warning");
+    ctx.ui.notify('Usage: /sdd capture "your thought here"', "warning");
     return;
   }
   // Remove wrapping quotes (single or double)
@@ -145,7 +145,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
     text = text.slice(1, -1);
   }
   if (!text) {
-    ctx.ui.notify('Usage: /gsd capture "your thought here"', "warning");
+    ctx.ui.notify('Usage: /sdd capture "your thought here"', "warning");
     return;
   }
 
@@ -202,13 +202,13 @@ export async function handleTriage(ctx: ExtensionCommandContext, pi: ExtensionAP
     roadmapContext: roadmapContext || "(no active roadmap)",
   });
 
-  const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
+  const workflowPath = process.env.SDD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".sdd", "agent", "SDD-WORKFLOW.md");
   const workflow = readFileSync(workflowPath, "utf-8");
 
   pi.sendMessage(
     {
-      customType: "gsd-triage",
-      content: `Read the following GSD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`,
+      customType: "sdd-triage",
+      content: `Read the following SDD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`,
       display: false,
     },
     { triggerTurn: true },
@@ -226,7 +226,7 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
 
   if (isAutoActive()) {
     pi.sendMessage({
-      customType: "gsd-hard-steer",
+      customType: "sdd-hard-steer",
       content: [
         "HARD STEER — User override registered.",
         "",
@@ -242,7 +242,7 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
     ctx.ui.notify(`Override registered: "${change}". Will be applied before next task dispatch.`, "info");
   } else {
     pi.sendMessage({
-      customType: "gsd-hard-steer",
+      customType: "sdd-hard-steer",
       content: [
         "HARD STEER — User override registered.",
         "",
@@ -264,7 +264,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 
   if (!typeArg || !["rule", "pattern", "lesson"].includes(typeArg)) {
     ctx.ui.notify(
-      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\nExample: /gsd knowledge rule Use real DB for integration tests",
+      "Usage: /sdd knowledge <rule|pattern|lesson> <description>\nExample: /sdd knowledge rule Use real DB for integration tests",
       "warning",
     );
     return;
@@ -272,7 +272,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 
   const entryText = parts.slice(1).join(" ").trim();
   if (!entryText) {
-    ctx.ui.notify(`Usage: /gsd knowledge ${typeArg} <description>`, "warning");
+    ctx.ui.notify(`Usage: /sdd knowledge ${typeArg} <description>`, "warning");
     return;
   }
 
@@ -290,7 +290,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 export async function handleRunHook(args: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
   const parts = args.trim().split(/\s+/);
   if (parts.length < 3) {
-    ctx.ui.notify(`Usage: /gsd run-hook <hook-name> <unit-type> <unit-id>
+    ctx.ui.notify(`Usage: /sdd run-hook <hook-name> <unit-type> <unit-id>
 
 Unit types:
   execute-task   - Task execution (unit-id: M001/S01/T01)
@@ -300,8 +300,8 @@ Unit types:
   complete-milestone - Milestone completion (unit-id: M001)
 
 Examples:
-  /gsd run-hook code-review execute-task M001/S01/T01
-  /gsd run-hook lint-check plan-slice M001/S01`, "warning");
+  /sdd run-hook code-review execute-task M001/S01/T01
+  /sdd run-hook lint-check plan-slice M001/S01`, "warning");
     return;
   }
 
@@ -370,8 +370,8 @@ function compareSemverLocal(a: string, b: string): number {
 export async function handleUpdate(ctx: ExtensionCommandContext): Promise<void> {
   const { execSync } = await import("node:child_process");
 
-  const NPM_PACKAGE = "gsd-pi";
-  const current = process.env.GSD_VERSION || "0.0.0";
+  const NPM_PACKAGE = "sdd-pi";
+  const current = process.env.SDD_VERSION || "0.0.0";
 
   ctx.ui.notify(`Current version: v${current}\nChecking npm registry...`, "info");
 
@@ -398,7 +398,7 @@ export async function handleUpdate(ctx: ExtensionCommandContext): Promise<void> 
       stdio: ["ignore", "pipe", "ignore"],
     });
     ctx.ui.notify(
-      `Updated to v${latest}. Restart your GSD session to use the new version.`,
+      `Updated to v${latest}. Restart your SDD session to use the new version.`,
       "info",
     );
   } catch {

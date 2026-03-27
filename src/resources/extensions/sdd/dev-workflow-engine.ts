@@ -1,7 +1,7 @@
 /**
  * dev-workflow-engine.ts — DevWorkflowEngine implementation.
  *
- * Implements WorkflowEngine by delegating to existing GSD state derivation
+ * Implements WorkflowEngine by delegating to existing SDD state derivation
  * and dispatch logic. This is the "dev" engine — it wraps the current SDD
  * auto-mode behavior behind the engine-polymorphic interface.
  */
@@ -24,7 +24,7 @@ import { loadEffectiveSDDPreferences } from "./preferences.js";
 // ─── Bridge: DispatchAction → EngineDispatchAction ────────────────────────
 
 /**
- * Map a GSD-specific DispatchAction (which carries `matchedRule`, `unitType`,
+ * Map a SDD-specific DispatchAction (which carries `matchedRule`, `unitType`,
  * etc.) to the engine-generic EngineDispatchAction discriminated union.
  *
  * Exported for unit testing.
@@ -57,14 +57,14 @@ export class DevWorkflowEngine implements WorkflowEngine {
   readonly engineId = "dev" as const;
 
   async deriveState(basePath: string): Promise<EngineState> {
-    const gsd: SDDState = await deriveState(basePath);
+    const sdd: SDDState = await deriveState(basePath);
     return {
-      phase: gsd.phase,
-      currentMilestoneId: gsd.activeMilestone?.id ?? null,
-      activeSliceId: gsd.activeSlice?.id ?? null,
-      activeTaskId: gsd.activeTask?.id ?? null,
-      isComplete: gsd.phase === "complete",
-      raw: gsd,
+      phase: sdd.phase,
+      currentMilestoneId: sdd.activeMilestone?.id ?? null,
+      activeSliceId: sdd.activeSlice?.id ?? null,
+      activeTaskId: sdd.activeTask?.id ?? null,
+      isComplete: sdd.phase === "complete",
+      raw: sdd,
     };
   }
 
@@ -72,9 +72,9 @@ export class DevWorkflowEngine implements WorkflowEngine {
     state: EngineState,
     context: { basePath: string },
   ): Promise<EngineDispatchAction> {
-    const gsd = state.raw as SDDState;
-    const mid = gsd.activeMilestone?.id ?? "";
-    const midTitle = gsd.activeMilestone?.title ?? "";
+    const sdd = state.raw as SDDState;
+    const mid = sdd.activeMilestone?.id ?? "";
+    const midTitle = sdd.activeMilestone?.title ?? "";
     const loaded = loadEffectiveSDDPreferences();
     const prefs = loaded?.preferences ?? undefined;
 
@@ -82,7 +82,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
       basePath: context.basePath,
       mid,
       midTitle,
-      state: gsd,
+      state: sdd,
       prefs,
     };
 
@@ -101,7 +101,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
 
   getDisplayMetadata(state: EngineState): DisplayMetadata {
     return {
-      engineLabel: "GSD Dev",
+      engineLabel: "SDD Dev",
       currentPhase: state.phase,
       progressSummary: `${state.currentMilestoneId ?? "no milestone"} / ${state.activeSliceId ?? "—"} / ${state.activeTaskId ?? "—"}`,
       stepCount: null,

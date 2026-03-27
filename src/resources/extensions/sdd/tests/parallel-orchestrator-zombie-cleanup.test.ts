@@ -26,8 +26,8 @@ import {
 } from "../parallel-orchestrator.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-zombie-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd", "parallel"), { recursive: true });
+  const base = join(tmpdir(), `sdd-test-zombie-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd", "parallel"), { recursive: true });
   return base;
 }
 
@@ -39,18 +39,18 @@ function cleanup(base: string): void {
 
 /** Write a fake orchestrator.json to simulate persisted state. */
 function writePersistedState(basePath: string, data: PersistedState): void {
-  const dest = join(basePath, ".gsd", "orchestrator.json");
+  const dest = join(basePath, ".sdd", "orchestrator.json");
   writeFileSync(dest, JSON.stringify(data, null, 2), "utf-8");
 }
 
-/** Write a fake session status file to .gsd/parallel/<milestoneId>.status.json */
+/** Write a fake session status file to .sdd/parallel/<milestoneId>.status.json */
 function writeSessionStatusFile(
   basePath: string,
   milestoneId: string,
   state: "running" | "paused" | "stopped" | "error",
   pid: number,
 ): void {
-  const dest = join(basePath, ".gsd", "parallel", `${milestoneId}.status.json`);
+  const dest = join(basePath, ".sdd", "parallel", `${milestoneId}.status.json`);
   writeFileSync(
     dest,
     JSON.stringify({
@@ -272,6 +272,6 @@ test("#2736: restoreRuntimeState clears stale state when all workers are stopped
   assert.equal(getOrchestratorState(), null, "state should be null");
 
   // Verify the state file was removed
-  const stateFile = join(base, ".gsd", "orchestrator.json");
+  const stateFile = join(base, ".sdd", "orchestrator.json");
   assert.equal(existsSync(stateFile), false, "orchestrator.json should be removed");
 });

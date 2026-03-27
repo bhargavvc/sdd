@@ -1,5 +1,5 @@
 /**
- * GSD External State Migration
+ * SDD External State Migration
  *
  * Migrates legacy in-project `.sdd/` directories to the external
  * `~/.sdd/projects/<hash>/` state directory. After migration, a
@@ -23,18 +23,18 @@ export interface MigrationResult {
  * Migrate a legacy in-project `.sdd/` directory to external storage.
  *
  * Algorithm:
- * 1. If `<project>/.gsd` is a symlink or doesn't exist -> skip
- * 2. If `<project>/.gsd` is a real directory:
+ * 1. If `<project>/.sdd` is a symlink or doesn't exist -> skip
+ * 2. If `<project>/.sdd` is a real directory:
  *    a. Compute external path from repoIdentity
  *    b. mkdir -p external dir
- *    c. Rename `.gsd` -> `.gsd.migrating` (atomic on same FS, acts as lock)
+ *    c. Rename `.sdd` -> `.sdd.migrating` (atomic on same FS, acts as lock)
  *    d. Copy contents to external dir (skip `worktrees/` subdirectory)
- *    e. Create symlink `.gsd -> external path`
- *    f. Remove `.gsd.migrating`
- * 3. On failure: rename `.gsd.migrating` back to `.gsd` (rollback)
+ *    e. Create symlink `.sdd -> external path`
+ *    f. Remove `.sdd.migrating`
+ * 3. On failure: rename `.sdd.migrating` back to `.sdd` (rollback)
  */
 export function migrateToExternalState(basePath: string): MigrationResult {
-  const localGsd = join(basePath, ".gsd");
+  const localGsd = join(basePath, ".sdd");
 
   // Skip if doesn't exist
   if (!existsSync(localGsd)) {
@@ -48,10 +48,10 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       return { migrated: false };
     }
     if (!stat.isDirectory()) {
-      return { migrated: false, error: ".gsd exists but is not a directory or symlink" };
+      return { migrated: false, error: ".sdd exists but is not a directory or symlink" };
     }
   } catch (err) {
-    return { migrated: false, error: `Cannot stat .gsd: ${getErrorMessage(err)}` };
+    return { migrated: false, error: `Cannot stat .sdd: ${getErrorMessage(err)}` };
   }
 
   // Skip if .sdd/ contains git-tracked files — the project intentionally
@@ -77,13 +77,13 @@ export function migrateToExternalState(basePath: string): MigrationResult {
   }
 
   const externalPath = externalGsdRoot(basePath);
-  const migratingPath = join(basePath, ".gsd.migrating");
+  const migratingPath = join(basePath, ".sdd.migrating");
 
   try {
     // mkdir -p the external dir
     mkdirSync(externalPath, { recursive: true });
 
-    // Rename .gsd -> .gsd.migrating (atomic lock).
+    // Rename .sdd -> .sdd.migrating (atomic lock).
     // On Windows, NTFS may reject rename with EPERM if file descriptors are
     // open (VS Code watchers, antivirus on-access scan). Fall back to
     // copy+delete (#1292).
@@ -121,7 +121,7 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       }
     }
 
-    // Create symlink .gsd -> external path
+    // Create symlink .sdd -> external path
     symlinkSync(externalPath, localGsd, "junction");
 
     // Verify the symlink resolves correctly before removing the backup (#1377).
@@ -151,7 +151,7 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     // as deleted. Remove them from the index so the working tree stays clean.
     // --ignore-unmatch makes this a no-op on fresh projects with no tracked .sdd/.
     try {
-      execFileSync("git", ["rm", "-r", "--cached", "--ignore-unmatch", ".gsd"], {
+      execFileSync("git", ["rm", "-r", "--cached", "--ignore-unmatch", ".sdd"], {
         cwd: basePath,
         stdio: ["ignore", "pipe", "ignore"],
         env: GIT_NO_PROMPT_ENV,
@@ -161,18 +161,18 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       // Non-fatal — git may be unavailable or nothing was tracked
     }
 
-    // Remove .gsd.migrating only after symlink is verified and index is clean
+    // Remove .sdd.migrating only after symlink is verified and index is clean
     rmSync(migratingPath, { recursive: true, force: true });
 
     return { migrated: true };
   } catch (err) {
-    // Rollback: rename .gsd.migrating back to .gsd
+    // Rollback: rename .sdd.migrating back to .sdd
     try {
       if (existsSync(migratingPath) && !existsSync(localGsd)) {
         renameSync(migratingPath, localGsd);
       }
     } catch {
-      // Rollback failed -- leave .gsd.migrating for doctor to detect
+      // Rollback failed -- leave .sdd.migrating for doctor to detect
     }
 
     return {
@@ -183,12 +183,12 @@ export function migrateToExternalState(basePath: string): MigrationResult {
 }
 
 /**
- * Recover from a failed migration (`.gsd.migrating` exists).
- * Moves `.gsd.migrating` back to `.gsd` if `.gsd` doesn't exist.
+ * Recover from a failed migration (`.sdd.migrating` exists).
+ * Moves `.sdd.migrating` back to `.sdd` if `.sdd` doesn't exist.
  */
 export function recoverFailedMigration(basePath: string): boolean {
-  const localGsd = join(basePath, ".gsd");
-  const migratingPath = join(basePath, ".gsd.migrating");
+  const localGsd = join(basePath, ".sdd");
+  const migratingPath = join(basePath, ".sdd.migrating");
 
   if (!existsSync(migratingPath)) return false;
   if (existsSync(localGsd)) return false; // both exist -- ambiguous, don't touch

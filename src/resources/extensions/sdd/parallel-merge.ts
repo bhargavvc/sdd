@@ -1,5 +1,5 @@
 /**
- * GSD Parallel Merge — Worktree reconciliation for parallel milestones.
+ * SDD Parallel Merge — Worktree reconciliation for parallel milestones.
  *
  * Handles merging completed milestone worktrees back to main branch
  * with safety checks for parallel execution context.
@@ -147,7 +147,7 @@ export function formatMergeResults(results: MergeResult[]): string {
       for (const f of r.conflictFiles) {
         lines.push(`  - \`${f}\``);
       }
-      lines.push(`  Resolve conflicts manually and run \`/gsd parallel merge ${r.milestoneId}\` to retry.`);
+      lines.push(`  Resolve conflicts manually and run \`/sdd parallel merge ${r.milestoneId}\` to retry.`);
     } else {
       lines.push(`- **${r.milestoneId}** — failed: ${r.error}`);
     }

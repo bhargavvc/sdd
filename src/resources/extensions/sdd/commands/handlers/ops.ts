@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { enableDebug } from "../../debug-logger.js";
 import { dispatchDirectPhase } from "../../auto-direct-dispatch.js";
@@ -19,7 +19,7 @@ export async function handleOpsCommand(trimmed: string, ctx: ExtensionCommandCon
     const { handleReinit, showProjectInit } = await import("../../init-wizard.js");
     const basePath = projectRoot();
     const detection = detectProjectState(basePath);
-    if (detection.state === "v2-gsd" || detection.state === "v2-gsd-empty") {
+    if (detection.state === "v2-sdd" || detection.state === "v2-sdd-empty") {
       await handleReinit(ctx, detection);
     } else {
       await showProjectInit(ctx, pi, basePath, detection);
@@ -68,7 +68,7 @@ export async function handleOpsCommand(trimmed: string, ctx: ExtensionCommandCon
     return true;
   }
   if (trimmed === "skip") {
-    ctx.ui.notify("Usage: /gsd skip <unit-id>  Example: /gsd skip M001/S01/T03", "warning");
+    ctx.ui.notify("Usage: /sdd skip <unit-id>  Example: /sdd skip M001/S01/T03", "warning");
     return true;
   }
   if (trimmed.startsWith("skip ")) {
@@ -130,7 +130,7 @@ export async function handleOpsCommand(trimmed: string, ctx: ExtensionCommandCon
     return true;
   }
   if (trimmed === "run-hook") {
-    ctx.ui.notify(`Usage: /gsd run-hook <hook-name> <unit-type> <unit-id>
+    ctx.ui.notify(`Usage: /sdd run-hook <hook-name> <unit-type> <unit-id>
 
 Unit types:
   execute-task   - Task execution (unit-id: M001/S01/T01)
@@ -140,8 +140,8 @@ Unit types:
   complete-milestone - Milestone completion (unit-id: M001)
 
 Examples:
-  /gsd run-hook code-review execute-task M001/S01/T01
-  /gsd run-hook lint-check plan-slice M001/S01`, "warning");
+  /sdd run-hook code-review execute-task M001/S01/T01
+  /sdd run-hook lint-check plan-slice M001/S01`, "warning");
     return true;
   }
   if (trimmed.startsWith("steer ")) {
@@ -149,7 +149,7 @@ Examples:
     return true;
   }
   if (trimmed === "steer") {
-    ctx.ui.notify("Usage: /gsd steer <description of change>. Example: /gsd steer Use Postgres instead of SQLite", "warning");
+    ctx.ui.notify("Usage: /sdd steer <description of change>. Example: /sdd steer Use Postgres instead of SQLite", "warning");
     return true;
   }
   if (trimmed.startsWith("knowledge ")) {
@@ -157,7 +157,7 @@ Examples:
     return true;
   }
   if (trimmed === "knowledge") {
-    ctx.ui.notify("Usage: /gsd knowledge <rule|pattern|lesson> <description>. Example: /gsd knowledge rule Use real DB for integration tests", "warning");
+    ctx.ui.notify("Usage: /sdd knowledge <rule|pattern|lesson> <description>. Example: /sdd knowledge rule Use real DB for integration tests", "warning");
     return true;
   }
   if (trimmed === "migrate" || trimmed.startsWith("migrate ")) {
@@ -172,7 +172,7 @@ Examples:
   if (trimmed === "dispatch" || trimmed.startsWith("dispatch ")) {
     const phase = trimmed.replace(/^dispatch\s*/, "").trim();
     if (!phase) {
-      ctx.ui.notify("Usage: /gsd dispatch <phase>  (research|plan|execute|complete|reassess|uat|replan)", "warning");
+      ctx.ui.notify("Usage: /sdd dispatch <phase>  (research|plan|execute|complete|reassess|uat|replan)", "warning");
       return true;
     }
     await dispatchDirectPhase(ctx, pi, phase, projectRoot());

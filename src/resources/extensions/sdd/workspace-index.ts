@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { parseRoadmap, parsePlan } from "./parsers-legacy.js";
 import {
   resolveMilestoneFile,
@@ -51,7 +51,7 @@ export interface WorkspaceScopeTarget {
   kind: "project" | "milestone" | "slice" | "task";
 }
 
-export interface GSDWorkspaceIndex {
+export interface SDDWorkspaceIndex {
   milestones: WorkspaceMilestoneTarget[];
   active: {
     milestoneId?: string;
@@ -135,7 +135,7 @@ export interface IndexWorkspaceOptions {
   validate?: boolean;
 }
 
-export async function indexWorkspace(basePath: string, opts: IndexWorkspaceOptions = {}): Promise<GSDWorkspaceIndex> {
+export async function indexWorkspace(basePath: string, opts: IndexWorkspaceOptions = {}): Promise<SDDWorkspaceIndex> {
   const milestoneIds = findMilestoneIds(basePath);
   const milestones: WorkspaceMilestoneTarget[] = [];
 
@@ -233,10 +233,10 @@ export async function getSuggestedNextCommands(basePath: string): Promise<string
     : index.active.milestoneId;
 
   const commands = new Set<string>();
-  if (index.active.phase === "planning") commands.add("/gsd");
-  if (index.active.phase === "executing" || index.active.phase === "summarizing") commands.add("/gsd auto");
-  if (scope) commands.add(`/gsd doctor ${scope}`);
-  if (scope) commands.add(`/gsd doctor fix ${scope}`);
-  commands.add("/gsd status");
+  if (index.active.phase === "planning") commands.add("/sdd");
+  if (index.active.phase === "executing" || index.active.phase === "summarizing") commands.add("/sdd auto");
+  if (scope) commands.add(`/sdd doctor ${scope}`);
+  if (scope) commands.add(`/sdd doctor fix ${scope}`);
+  commands.add("/sdd status");
   return [...commands];
 }

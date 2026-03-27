@@ -75,6 +75,6 @@ pre_dispatch_hooks: []
 #   rtk: false
 ---
 
-# GSD Skill Preferences
+# SDD Skill Preferences
 
 See `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.

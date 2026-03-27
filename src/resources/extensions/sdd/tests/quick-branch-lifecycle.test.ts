@@ -22,12 +22,12 @@ function run(command: string, cwd: string): string {
 }
 
 function createTestRepo(): string {
-  const repo = mkdtempSync(join(tmpdir(), "gsd-quick-lifecycle-"));
+  const repo = mkdtempSync(join(tmpdir(), "sdd-quick-lifecycle-"));
   run("git init -b main", repo);
-  run(`git config user.name "GSD Test"`, repo);
-  run(`git config user.email "test@gsd.dev"`, repo);
-  mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
-  mkdirSync(join(repo, ".gsd", "milestones", "M001"), { recursive: true });
+  run(`git config user.name "SDD Test"`, repo);
+  run(`git config user.email "test@sdd.dev"`, repo);
+  mkdirSync(join(repo, ".sdd", "runtime"), { recursive: true });
+  mkdirSync(join(repo, ".sdd", "milestones", "M001"), { recursive: true });
   writeFileSync(join(repo, "README.md"), "init\n");
   run("git add -A", repo);
   run(`git commit -m "init"`, repo);
@@ -41,13 +41,13 @@ function createTestRepo(): string {
 
 describe('quick-branch-lifecycle', () => {
 test('QUICK_BRANCH_RE: matches quick-task branches', () => {
-  assert.ok(QUICK_BRANCH_RE.test("gsd/quick/1-fix-typo"), "matches standard quick branch");
+  assert.ok(QUICK_BRANCH_RE.test("sdd/quick/1-fix-typo"), "matches standard quick branch");
 });
 
-  assert.ok(QUICK_BRANCH_RE.test("gsd/quick/42-some-long-slug-name"), "matches multi-digit quick branch");
+  assert.ok(QUICK_BRANCH_RE.test("sdd/quick/42-some-long-slug-name"), "matches multi-digit quick branch");
   assert.ok(!QUICK_BRANCH_RE.test("main"), "rejects main");
-  assert.ok(!QUICK_BRANCH_RE.test("gsd/M001/S01"), "rejects slice branch");
-  assert.ok(!QUICK_BRANCH_RE.test("gsd/quickly-something"), "rejects non-quick prefix");
+  assert.ok(!QUICK_BRANCH_RE.test("sdd/M001/S01"), "rejects slice branch");
+  assert.ok(!QUICK_BRANCH_RE.test("sdd/quickly-something"), "rejects non-quick prefix");
   assert.ok(!QUICK_BRANCH_RE.test("feature/sdd/quick/1"), "rejects nested prefix");
   // ═══════════════════════════════════════════════════════════════════════
   // captureIntegrationBranch: guard against quick-task branches
@@ -56,8 +56,8 @@ test('captureIntegrationBranch: skips quick-task branches', () => {
     const repo = createTestRepo();
 
     // Create and checkout a quick-task branch
-    run("git checkout -b gsd/quick/1-fix-typo", repo);
-    assert.deepStrictEqual(getCurrentBranch(repo), "gsd/quick/1-fix-typo", "on quick branch");
+    run("git checkout -b sdd/quick/1-fix-typo", repo);
+    assert.deepStrictEqual(getCurrentBranch(repo), "sdd/quick/1-fix-typo", "on quick branch");
 
     captureIntegrationBranch(repo, "M001");
 
@@ -77,7 +77,7 @@ test('captureIntegrationBranch: records main correctly', () => {
       "main is recorded as integration branch");
 
     // Switch to quick branch — capture should be no-op (doesn't overwrite main)
-    run("git checkout -b gsd/quick/1-fix-typo", repo);
+    run("git checkout -b sdd/quick/1-fix-typo", repo);
     captureIntegrationBranch(repo, "M001");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), "main",
       "quick branch does not overwrite existing integration branch");
@@ -90,14 +90,14 @@ test('captureIntegrationBranch: correct after quick branch round-trip', () => {
     const repo = createTestRepo();
 
     // Simulate quick-task lifecycle: branch off, do work, return to main
-    run("git checkout -b gsd/quick/1-fix-typo", repo);
+    run("git checkout -b sdd/quick/1-fix-typo", repo);
     writeFileSync(join(repo, "fix.txt"), "fixed\n");
     run("git add -A", repo);
     run(`git commit -m "quick-fix"`, repo);
     run("git checkout main", repo);
-    run("git merge --squash gsd/quick/1-fix-typo", repo);
+    run("git merge --squash sdd/quick/1-fix-typo", repo);
     run(`git commit -m "quick(Q1): fix-typo"`, repo);
-    run("git branch -D gsd/quick/1-fix-typo", repo);
+    run("git branch -D sdd/quick/1-fix-typo", repo);
 
     // Now capture — should get main, not the deleted quick branch
     captureIntegrationBranch(repo, "M002");
@@ -115,7 +115,7 @@ test('cleanupQuickBranch: merges back and cleans up (same session)', async () =>
     const origCwd = process.cwd();
 
     // Simulate what handleQuick does: create branch, set pending state
-    run("git checkout -b gsd/quick/1-fix-typo", repo);
+    run("git checkout -b sdd/quick/1-fix-typo", repo);
     writeFileSync(join(repo, "fix.txt"), "fixed\n");
     run("git add -A", repo);
     run(`git commit -m "quick-fix"`, repo);
@@ -124,12 +124,12 @@ test('cleanupQuickBranch: merges back and cleans up (same session)', async () =>
     const returnState = {
       basePath: repo,
       originalBranch: "main",
-      quickBranch: "gsd/quick/1-fix-typo",
+      quickBranch: "sdd/quick/1-fix-typo",
       taskNum: 1,
       slug: "fix-typo",
       description: "fix typo",
     };
-    const runtimeDir = join(repo, ".gsd", "runtime");
+    const runtimeDir = join(repo, ".sdd", "runtime");
     mkdirSync(runtimeDir, { recursive: true });
     writeFileSync(join(runtimeDir, "quick-return.json"), JSON.stringify(returnState) + "\n");
 
@@ -150,7 +150,7 @@ test('cleanupQuickBranch: merges back and cleans up (same session)', async () =>
 
     // Verify quick branch deleted
     const branches = run("git branch", repo);
-    assert.ok(!branches.includes("gsd/quick/1-fix-typo"), "quick branch deleted");
+    assert.ok(!branches.includes("sdd/quick/1-fix-typo"), "quick branch deleted");
 
     // Verify disk state cleaned up
     assert.ok(!existsSync(join(runtimeDir, "quick-return.json")), "quick-return.json removed");
@@ -168,18 +168,18 @@ test('cleanupQuickBranch: recovers from disk state (cross-session)', async () =>
 
     // Simulate a crashed session: branch exists with work, disk state persisted,
     // but in-memory state is gone (new process)
-    run("git checkout -b gsd/quick/2-add-docs", repo);
+    run("git checkout -b sdd/quick/2-add-docs", repo);
     writeFileSync(join(repo, "docs.md"), "# Docs\n");
     run("git add -A", repo);
     run(`git commit -m "add-docs"`, repo);
 
     // Write disk state manually (simulates what handleQuick would persist)
-    const runtimeDir = join(repo, ".gsd", "runtime");
+    const runtimeDir = join(repo, ".sdd", "runtime");
     mkdirSync(runtimeDir, { recursive: true });
     writeFileSync(join(runtimeDir, "quick-return.json"), JSON.stringify({
       basePath: repo,
       originalBranch: "main",
-      quickBranch: "gsd/quick/2-add-docs",
+      quickBranch: "sdd/quick/2-add-docs",
       taskNum: 2,
       slug: "add-docs",
       description: "add docs",
@@ -228,7 +228,7 @@ test('E2E: quick branch does not contaminate integration branch', () => {
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), "main", "M001 integration = main");
 
     // 2. Start a quick task (branch off)
-    run("git checkout -b gsd/quick/1-fix-typo", repo);
+    run("git checkout -b sdd/quick/1-fix-typo", repo);
 
     // 3. Try to capture integration branch for M002 while on quick branch
     captureIntegrationBranch(repo, "M002");

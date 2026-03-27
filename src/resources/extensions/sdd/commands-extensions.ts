@@ -1,17 +1,17 @@
 /**
- * GSD Extensions Command — /gsd extensions
+ * SDD Extensions Command — /sdd extensions
  *
  * Manage the extension registry: list, enable, disable, info.
  * Self-contained — no imports outside the extensions tree (extensions are loaded
  * via jiti at runtime from ~/.sdd/agent/, not compiled by tsc).
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 // ─── Types (mirrored from extension-registry.ts) ────────────────────────────
 
@@ -139,7 +139,7 @@ export async function handleExtensions(args: string, ctx: ExtensionCommandContex
   }
 
   ctx.ui.notify(
-    `Unknown: /gsd extensions ${subCmd}. Usage: /gsd extensions [list|enable|disable|info]`,
+    `Unknown: /sdd extensions ${subCmd}. Usage: /sdd extensions [list|enable|disable|info]`,
     "warning",
   );
 }
@@ -181,7 +181,7 @@ function handleList(ctx: ExtensionCommandContext): void {
     );
 
     if (!enabled) {
-      lines.push(`  ↳ gsd extensions enable ${m.id}`);
+      lines.push(`  ↳ sdd extensions enable ${m.id}`);
     }
   }
 
@@ -190,13 +190,13 @@ function handleList(ctx: ExtensionCommandContext): void {
 
 function handleEnable(id: string | undefined, ctx: ExtensionCommandContext): void {
   if (!id) {
-    ctx.ui.notify("Usage: /gsd extensions enable <id>", "warning");
+    ctx.ui.notify("Usage: /sdd extensions enable <id>", "warning");
     return;
   }
 
   const manifests = discoverManifests();
   if (!manifests.has(id)) {
-    ctx.ui.notify(`Extension "${id}" not found. Run /gsd extensions list to see available extensions.`, "warning");
+    ctx.ui.notify(`Extension "${id}" not found. Run /sdd extensions list to see available extensions.`, "warning");
     return;
   }
 
@@ -215,12 +215,12 @@ function handleEnable(id: string | undefined, ctx: ExtensionCommandContext): voi
     registry.entries[id] = { id, enabled: true, source: "bundled" };
   }
   saveRegistry(registry);
-  ctx.ui.notify(`Enabled "${id}". Restart GSD to activate.`, "info");
+  ctx.ui.notify(`Enabled "${id}". Restart SDD to activate.`, "info");
 }
 
 function handleDisable(id: string | undefined, reason: string, ctx: ExtensionCommandContext): void {
   if (!id) {
-    ctx.ui.notify("Usage: /gsd extensions disable <id>", "warning");
+    ctx.ui.notify("Usage: /sdd extensions disable <id>", "warning");
     return;
   }
 
@@ -228,7 +228,7 @@ function handleDisable(id: string | undefined, reason: string, ctx: ExtensionCom
   const manifest = manifests.get(id) ?? null;
 
   if (!manifests.has(id)) {
-    ctx.ui.notify(`Extension "${id}" not found. Run /gsd extensions list to see available extensions.`, "warning");
+    ctx.ui.notify(`Extension "${id}" not found. Run /sdd extensions list to see available extensions.`, "warning");
     return;
   }
 
@@ -258,12 +258,12 @@ function handleDisable(id: string | undefined, reason: string, ctx: ExtensionCom
     };
   }
   saveRegistry(registry);
-  ctx.ui.notify(`Disabled "${id}". Restart GSD to deactivate.`, "info");
+  ctx.ui.notify(`Disabled "${id}". Restart SDD to deactivate.`, "info");
 }
 
 function handleInfo(id: string | undefined, ctx: ExtensionCommandContext): void {
   if (!id) {
-    ctx.ui.notify("Usage: /gsd extensions info <id>", "warning");
+    ctx.ui.notify("Usage: /sdd extensions info <id>", "warning");
     return;
   }
 

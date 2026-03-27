@@ -56,7 +56,7 @@ describe("Import smoke tests", () => {
 // ── Leaf-node constraint ────────────────────────────────────────────────────
 
 describe("Leaf-node constraint", () => {
-  test("engine-types.ts has zero imports from GSD modules (only node: allowed)", () => {
+  test("engine-types.ts has zero imports from SDD modules (only node: allowed)", () => {
     const source = readSource(ENGINE_TYPES_PATH);
     const lines = source.split("\n");
     const violations: string[] = [];
@@ -72,7 +72,7 @@ describe("Leaf-node constraint", () => {
     assert.equal(
       violations.length,
       0,
-      `engine-types.ts must be a leaf node with zero GSD imports. ` +
+      `engine-types.ts must be a leaf node with zero SDD imports. ` +
       `Only node: imports are allowed.\nViolations:\n${violations.join("\n")}`,
     );
   });
@@ -100,10 +100,10 @@ describe("EngineState shape", () => {
       );
     }
 
-    // raw must be typed unknown — not a GSD-specific type
+    // raw must be typed unknown — not a SDD-specific type
     assert.ok(
       /raw:\s*unknown/.test(source),
-      "EngineState.raw must be typed 'unknown', not a GSD-specific type",
+      "EngineState.raw must be typed 'unknown', not a SDD-specific type",
     );
   });
 });

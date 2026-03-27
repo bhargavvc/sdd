@@ -1,4 +1,4 @@
-// GSD Extension — Unit Ownership
+// SDD Extension — Unit Ownership
 // Opt-in per-unit ownership claims for multi-agent safety.
 //
 // An agent can claim a unit (task, slice) before working on it.
@@ -38,7 +38,7 @@ export function sliceUnitKey(milestoneId: string, sliceId: string): string {
 // ─── File Path ───────────────────────────────────────────────────────────
 
 function claimsPath(basePath: string): string {
-  return join(basePath, ".gsd", "unit-claims.json");
+  return join(basePath, ".sdd", "unit-claims.json");
 }
 
 // ─── Read Claims ─────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ function readClaims(basePath: string): ClaimsMap | null {
 export function claimUnit(basePath: string, unitKey: string, agentName: string): void {
   const claims = readClaims(basePath) ?? {};
   claims[unitKey] = { agent: agentName, claimed_at: new Date().toISOString() };
-  const dir = join(basePath, ".gsd");
+  const dir = join(basePath, ".sdd");
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(claimsPath(basePath), JSON.stringify(claims, null, 2) + "\n");
 }

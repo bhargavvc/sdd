@@ -14,7 +14,7 @@ import {
   insertDecision,
   insertRequirement,
   insertArtifact,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import {
   queryDecisions,
   queryRequirements,
@@ -294,20 +294,20 @@ console.log('\n=== prompt-db: DB helpers wrapper format matches expected pattern
   assert.ok(decisions.length === 1, 'got 1 decision for M001');
   const dFormatted = formatDecisionsForPrompt(decisions);
   const dWrapped = `### Decisions\nSource: \`.sdd/DECISIONS.md\`\n\n${dFormatted}`;
-  assert.match(dWrapped, /^### Decisions\nSource: `.gsd\/DECISIONS\.md`\n\n\| #/, 'decisions wrapper format correct');
+  assert.match(dWrapped, /^### Decisions\nSource: `.sdd\/DECISIONS\.md`\n\n\| #/, 'decisions wrapper format correct');
 
   // Simulate what inlineRequirementsFromDb does
   const reqs = queryRequirements({ sliceId: 'S01' });
   assert.ok(reqs.length === 1, 'got 1 requirement for S01');
   const rFormatted = formatRequirementsForPrompt(reqs);
   const rWrapped = `### Requirements\nSource: \`.sdd/REQUIREMENTS.md\`\n\n${rFormatted}`;
-  assert.match(rWrapped, /^### Requirements\nSource: `.gsd\/REQUIREMENTS\.md`\n\n### R001/, 'requirements wrapper format correct');
+  assert.match(rWrapped, /^### Requirements\nSource: `.sdd\/REQUIREMENTS\.md`\n\n### R001/, 'requirements wrapper format correct');
 
   // Simulate what inlineProjectFromDb does
   const project = queryProject();
   assert.ok(project !== null, 'project content exists');
   const pWrapped = `### Project\nSource: \`.sdd/PROJECT.md\`\n\n${project}`;
-  assert.match(pWrapped, /^### Project\nSource: `.gsd\/PROJECT\.md`\n\n# Project Name/, 'project wrapper format correct');
+  assert.match(pWrapped, /^### Project\nSource: `.sdd\/PROJECT\.md`\n\n# Project Name/, 'project wrapper format correct');
 
   closeDatabase();
 }
@@ -326,7 +326,7 @@ describe('prompt-db', () => {
 test('prompt-db: re-import updates DB when source markdown changes', () => {
   // Create a temp dir simulating a project with .sdd/DECISIONS.md
   const tmpDir = mkdtempSync(join(tmpdir(), 'prompt-db-reimport-'));
-  const gsdDir = join(tmpDir, '.gsd');
+  const gsdDir = join(tmpDir, '.sdd');
   mkdirSync(gsdDir, { recursive: true });
 
   // Write initial DECISIONS.md with 2 decisions

@@ -78,7 +78,7 @@ describe("Dashboard custom-engine: updateProgressWidget in custom engine path", 
       "iterData should be built before updateProgressWidget is called",
     );
 
-    // Verify the call uses iterData.state (which holds the derived GSD state)
+    // Verify the call uses iterData.state (which holds the derived SDD state)
     assert.ok(
       afterCustomEngine.includes("iterData.state"),
       "Custom engine updateProgressWidget should reference iterData.state",

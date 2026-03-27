@@ -9,9 +9,9 @@ import { handleLogs } from "../commands-logs.ts";
 // ─── Test helpers ───────────────────────────────────────────────────────────
 
 function createTestDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-logs-test-"));
-  mkdirSync(join(dir, ".gsd", "activity"), { recursive: true });
-  mkdirSync(join(dir, ".gsd", "debug"), { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), "sdd-logs-test-"));
+  mkdirSync(join(dir, ".sdd", "activity"), { recursive: true });
+  mkdirSync(join(dir, ".sdd", "debug"), { recursive: true });
   return dir;
 }
 
@@ -32,12 +32,12 @@ function writeActivityLog(dir: string, seq: number, unitType: string, unitId: st
   const safeId = unitId.replace(/\//g, "-");
   const filename = `${String(seq).padStart(3, "0")}-${unitType}-${safeId}.jsonl`;
   const content = entries.map(e => JSON.stringify(e)).join("\n") + "\n";
-  writeFileSync(join(dir, ".gsd", "activity", filename), content);
+  writeFileSync(join(dir, ".sdd", "activity", filename), content);
 }
 
 function writeDebugLog(dir: string, name: string, entries: Record<string, unknown>[]): void {
   const content = entries.map(e => JSON.stringify(e)).join("\n") + "\n";
-  writeFileSync(join(dir, ".gsd", "debug", name), content);
+  writeFileSync(join(dir, ".sdd", "debug", name), content);
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ test("logs lists activity logs", async (t) => {
   assert.ok(msg.includes("Activity Logs"), "should show activity logs header");
   assert.ok(msg.includes("execute-task"), "should show unit type");
   assert.ok(msg.includes("complete-slice"), "should show second log");
-  assert.ok(msg.includes("/gsd logs <#>"), "should show usage hint");
+  assert.ok(msg.includes("/sdd logs <#>"), "should show usage hint");
 });
 
 test("logs <N> shows activity log details", async (t) => {
@@ -216,7 +216,7 @@ test("logs clear removes old logs", async (t) => {
 
   // Create an old activity log (modify mtime to 10 days ago)
   writeActivityLog(dir, 1, "execute-task", "M001/S01/T01", [{ type: "toolCall" }]);
-  const oldFile = join(dir, ".gsd", "activity", "001-execute-task-M001-S01-T01.jsonl");
+  const oldFile = join(dir, ".sdd", "activity", "001-execute-task-M001-S01-T01.jsonl");
   const oldTime = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
   utimesSync(oldFile, oldTime, oldTime);
 
@@ -235,7 +235,7 @@ test("logs clear removes old logs", async (t) => {
   // Old log should be removed, recent ones kept
   assert.ok(!existsSync(oldFile), "old log should be removed");
   assert.ok(
-    existsSync(join(dir, ".gsd", "activity", "007-execute-task-M001-S01-T07.jsonl")),
+    existsSync(join(dir, ".sdd", "activity", "007-execute-task-M001-S01-T07.jsonl")),
     "most recent log should be kept",
   );
 });

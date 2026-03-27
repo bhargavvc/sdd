@@ -19,7 +19,7 @@ import { describe, test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 
 function createFixtureBase(): string {
-  return mkdtempSync(join(tmpdir(), 'gsd-migrate-t02-'));
+  return mkdtempSync(join(tmpdir(), 'sdd-migrate-t02-'));
 }
 function createPlanningDir(base: string): string {
   const dir = join(base, '.planning');

@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a new capability or improvement for GSD.
+description: Propose a new capability or improvement for SDD.
 title: "[Feature]: "
 labels:
   - enhancement
@@ -32,7 +32,7 @@ body:
     attributes:
       label: Proposed solution
       description: Describe the desired behavior, UX, CLI shape, or API as specifically as you can.
-      placeholder: Add `/gsd queue list` that renders queued milestones with IDs, status, and created timestamps.
+      placeholder: Add `/sdd queue list` that renders queued milestones with IDs, status, and created timestamps.
     validations:
       required: true
 

@@ -5,7 +5,7 @@
 1. references/recommended-structure.md
 2. references/skill-structure.md
 3. references/use-xml-tags.md
-4. references/gsd-skill-ecosystem.md
+4. references/sdd-skill-ecosystem.md
 </required_reading>
 
 <process>

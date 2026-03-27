@@ -12,7 +12,7 @@ export interface MarketplaceFixtureSet {
 
 const CLAUDE_SKILLS_REPO = 'https://github.com/Jamie-BitFlight/claude_skills.git';
 const CLAUDE_PLUGINS_OFFICIAL_REPO = 'https://github.com/Jamie-BitFlight/claude-plugins-official.git';
-const CLONE_FIXTURES_ENABLED = process.env.GSD_TEST_CLONE_MARKETPLACES === '1';
+const CLONE_FIXTURES_ENABLED = process.env.SDD_TEST_CLONE_MARKETPLACES === '1';
 
 function canRunGit(): boolean {
   const result = spawnSync('git', ['--version'], { stdio: 'ignore' });
@@ -52,7 +52,7 @@ export function getMarketplaceFixtures(testFileDir: string): { available: boolea
   if (!CLONE_FIXTURES_ENABLED) {
     return {
       available: false,
-      skipReason: 'Marketplace repos absent and clone-based fixtures are disabled (set GSD_TEST_CLONE_MARKETPLACES=1 to enable)',
+      skipReason: 'Marketplace repos absent and clone-based fixtures are disabled (set SDD_TEST_CLONE_MARKETPLACES=1 to enable)',
     };
   }
 
@@ -64,7 +64,7 @@ export function getMarketplaceFixtures(testFileDir: string): { available: boolea
   }
 
   try {
-    const fixtureRoot = mkdtempSync(join(tmpdir(), 'gsd-marketplace-fixtures-'));
+    const fixtureRoot = mkdtempSync(join(tmpdir(), 'sdd-marketplace-fixtures-'));
     const clonedClaudeSkillsPath = join(fixtureRoot, 'claude_skills');
     const clonedClaudePluginsOfficialPath = join(fixtureRoot, 'claude-plugins-official');
 

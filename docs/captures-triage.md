@@ -2,15 +2,15 @@
 
 *Introduced in v2.19.0*
 
-Captures let you fire-and-forget thoughts during auto-mode execution. Instead of pausing auto-mode to steer, you can capture ideas, bugs, or scope changes and let GSD triage them at natural seams between tasks.
+Captures let you fire-and-forget thoughts during auto-mode execution. Instead of pausing auto-mode to steer, you can capture ideas, bugs, or scope changes and let SDD triage them at natural seams between tasks.
 
 ## Quick Start
 
 While auto-mode is running (or any time):
 
 ```
-/gsd capture "add rate limiting to the API endpoints"
-/gsd capture "the auth flow should support OAuth, not just JWT"
+/sdd capture "add rate limiting to the API endpoints"
+/sdd capture "the auth flow should support OAuth, not just JWT"
 ```
 
 Captures are appended to `.sdd/CAPTURES.md` and triaged automatically between tasks.
@@ -23,8 +23,8 @@ Captures are appended to `.sdd/CAPTURES.md` and triaged automatically between ta
 capture → triage → confirm → resolve → resume
 ```
 
-1. **Capture** — `/gsd capture "thought"` appends to `.sdd/CAPTURES.md` with a timestamp and unique ID
-2. **Triage** — at natural seams between tasks (in `handleAgentEnd`), GSD detects pending captures and classifies them
+1. **Capture** — `/sdd capture "thought"` appends to `.sdd/CAPTURES.md` with a timestamp and unique ID
+2. **Triage** — at natural seams between tasks (in `handleAgentEnd`), SDD detects pending captures and classifies them
 3. **Confirm** — the user is shown the proposed resolution and confirms or adjusts
 4. **Resolve** — the resolution is applied (task injection, replan trigger, deferral, etc.)
 5. **Resume** — auto-mode continues
@@ -55,7 +55,7 @@ The LLM classifies each capture and proposes a resolution. Plan-modifying resolu
 Trigger triage manually at any time:
 
 ```
-/gsd triage
+/sdd triage
 ```
 
 This is useful when you've accumulated several captures and want to process them before the next natural seam.
@@ -78,5 +78,5 @@ Captures always resolve to the **original project root's** `.sdd/CAPTURES.md`, n
 
 | Command | Description |
 |---------|-------------|
-| `/gsd capture "text"` | Capture a thought (quotes optional for single words) |
-| `/gsd triage` | Manually trigger triage of pending captures |
+| `/sdd capture "text"` | Capture a thought (quotes optional for single words) |
+| `/sdd triage` | Manually trigger triage of pending captures |

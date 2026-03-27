@@ -28,7 +28,7 @@ import {
   type EnvironmentCheckResult,
 } from "../doctor-environment.ts";
 function createProjectDir(files: Record<string, string> = {}): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-env-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "sdd-env-test-"));
   for (const [name, content] of Object.entries(files)) {
     const filePath = join(dir, name);
     mkdirSync(dirname(filePath), { recursive: true });

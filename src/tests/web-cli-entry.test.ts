@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 const { resolveGsdCliEntry } = await import("../web/cli-entry.ts");
 
 function makeFixture(paths: string[]): string {
-  const root = mkdtempSync(join(tmpdir(), "gsd-cli-entry-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-cli-entry-"));
   for (const relativePath of paths) {
     const fullPath = join(root, relativePath);
     mkdirSync(join(fullPath, ".."), { recursive: true });
@@ -62,7 +62,7 @@ test("resolveGsdCliEntry prefers the source loader for source-dev interactive se
     command: "/custom/node",
     args: [
       "--import",
-      pathToFileURL(join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")).href,
+      pathToFileURL(join(packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs")).href,
       "--experimental-strip-types",
       join(packageRoot, "src", "loader.ts"),
     ],

@@ -1,6 +1,6 @@
-# Frontier Techniques for GSD-2
+# Frontier Techniques for SDD-2
 
-Research into cutting-edge AI agent techniques that map directly to GSD-2's architecture, ranked by impact and feasibility.
+Research into cutting-edge AI agent techniques that map directly to SDD-2's architecture, ranked by impact and feasibility.
 
 **Date:** 2026-03-25
 **Status:** Research / Pre-RFC
@@ -23,15 +23,15 @@ Research into cutting-edge AI agent techniques that map directly to GSD-2's arch
 
 ## Executive Summary
 
-GSD-2 is a multi-layered, event-driven agent platform with strong extensibility primitives: a skill system, file-based memory, session branching, compaction, and 16+ extension lifecycle hooks. These existing primitives create natural integration points for six frontier techniques that could fundamentally change how GSD operates.
+SDD-2 is a multi-layered, event-driven agent platform with strong extensibility primitives: a skill system, file-based memory, session branching, compaction, and 16+ extension lifecycle hooks. These existing primitives create natural integration points for six frontier techniques that could fundamentally change how SDD operates.
 
 The techniques fall into three categories:
 
 | Category | Techniques | Theme |
 |----------|-----------|-------|
-| **Self-Improvement** | Skill Library Evolution, Cross-Session Learning Graph | GSD gets better the more you use it |
-| **Performance** | DAG Tool Execution, Speculative Tool Execution | GSD gets faster per turn |
-| **Intelligence** | Semantic Context Compression, MCTS Planning | GSD reasons better with the same context budget |
+| **Self-Improvement** | Skill Library Evolution, Cross-Session Learning Graph | SDD gets better the more you use it |
+| **Performance** | DAG Tool Execution, Speculative Tool Execution | SDD gets faster per turn |
+| **Intelligence** | Semantic Context Compression, MCTS Planning | SDD reasons better with the same context budget |
 
 ---
 
@@ -42,7 +42,7 @@ The techniques fall into three categories:
 
 ### What It Is
 
-Inspired by [SkillRL](https://arxiv.org/abs/2602.08234) (ICLR 2026), this technique transforms GSD's skill system from static instruction files into a self-improving knowledge base. Instead of skills being written once and updated manually, they evolve based on execution outcomes.
+Inspired by [SkillRL](https://arxiv.org/abs/2602.08234) (ICLR 2026), this technique transforms SDD's skill system from static instruction files into a self-improving knowledge base. Instead of skills being written once and updated manually, they evolve based on execution outcomes.
 
 SkillRL demonstrates that agents with learned skill libraries outperform baselines by 15.3%+ across task benchmarks, with 10-20% token compression compared to raw trajectory storage.
 
@@ -70,9 +70,9 @@ SkillRL demonstrates that agents with learned skill libraries outperform baselin
 | **General Skills** | Universal strategic guidance applicable across tasks | "When editing TypeScript files, always check for type errors via LSP before committing" |
 | **Task-Specific Skills** | Category-level heuristics for specific skill domains | "The `fix-issue` skill should check CI status before opening a PR, not after" |
 
-### Why It Fits GSD-2
+### Why It Fits SDD-2
 
-GSD already has every primitive needed:
+SDD already has every primitive needed:
 
 - **Skill files** (`~/.claude/skills/`, `.claude/skills/`) — the storage layer exists
 - **Extension hooks** (`turn_end`, `agent_end`) — outcome capture points exist
@@ -83,7 +83,7 @@ The gap is automation: connecting execution outcomes back to skill files without
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `agent-session.ts` → `turn_end` event | Captures execution outcome (success/failure signals) |
 | Extension hook: `agent_end` | Triggers trajectory distillation |
@@ -147,7 +147,7 @@ The [LLM Compiler pattern](https://arxiv.org/pdf/2312.04511) (ICML 2024) treats 
 
 ### How It Works
 
-**Current GSD behavior (sequential):**
+**Current SDD behavior (sequential):**
 ```
 Read(auth.ts) ─── 150ms ───▶ result
                                │
@@ -181,15 +181,15 @@ Total: ~150ms (max of parallel set)
 | Bash(cmd) | Bash(cmd) | Maybe | Depends on side effects |
 | Write(file) | Read(file) | Yes | Read after write needs write to complete |
 
-### Why It Fits GSD-2
+### Why It Fits SDD-2
 
-The model already emits multiple `tool_use` blocks in a single response. GSD processes them, but the execution path in `agent-loop.ts` handles them in sequence. The parallelism opportunity is sitting right there.
+The model already emits multiple `tool_use` blocks in a single response. SDD processes them, but the execution path in `agent-loop.ts` handles them in sequence. The parallelism opportunity is sitting right there.
 
 **Measured impact estimate:** A typical coding turn involves 3-5 tool calls. With 60% parallelizable (reads, greps, globs), per-turn latency drops by 40-60%. Over a 50-turn session, that's minutes saved.
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `agent-loop.ts` tool execution path | Replace sequential execution with DAG scheduler |
 | Tool definitions | Annotate tools with side-effect metadata (pure/impure) |
@@ -277,18 +277,18 @@ Based on [Speculative Tool Calls research](https://arxiv.org/pdf/2512.15834), th
 | **Learned patterns** | Use the skill library evolution data to predict tool sequences | 60-80% |
 | **Model pre-query** | Ask a fast/cheap model to predict tool calls | 70-85% |
 
-### Why It Fits GSD-2
+### Why It Fits SDD-2
 
-The #1 latency bottleneck in GSD is the round-trip: user prompt → model thinks → model requests tool → tool executes → result sent back → model thinks again. Speculative execution attacks the highest-latency step.
+The #1 latency bottleneck in SDD is the round-trip: user prompt → model thinks → model requests tool → tool executes → result sent back → model thinks again. Speculative execution attacks the highest-latency step.
 
-GSD's architecture makes this easy to add:
+SDD's architecture makes this easy to add:
 - `AgentSession.prompt()` already processes user input before sending to the model
 - Tool results are already cached in the message array
 - The extension system can intercept input and spawn pre-fetches
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `AgentSession.prompt()` | Trigger speculation after user input, before model call |
 | Tool result cache (new) | Store speculated results keyed by tool+args |
@@ -348,9 +348,9 @@ User input arrives
 
 ### What It Is
 
-GSD's compaction system uses a char/4 heuristic for token estimation and all-or-nothing LLM summarization for context reduction. Research from [Zylos](https://zylos.ai/research/2026-02-28-ai-agent-context-compression-strategies) and [context engineering literature](https://rlancemartin.github.io/2025/06/23/context_engineering/) shows that embedding-based compression achieves 80-90% token reduction while preserving the ability to selectively recall specific historical context.
+SDD's compaction system uses a char/4 heuristic for token estimation and all-or-nothing LLM summarization for context reduction. Research from [Zylos](https://zylos.ai/research/2026-02-28-ai-agent-context-compression-strategies) and [context engineering literature](https://rlancemartin.github.io/2025/06/23/context_engineering/) shows that embedding-based compression achieves 80-90% token reduction while preserving the ability to selectively recall specific historical context.
 
-### Current GSD Compaction (Weaknesses Highlighted)
+### Current SDD Compaction (Weaknesses Highlighted)
 
 ```
 Messages: [M1, M2, M3, M4, M5, M6, M7, M8, M9, M10]
@@ -441,7 +441,7 @@ The hybrid approach — use actual token counts from provider responses for rece
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `compaction.ts` | Replace cut-point algorithm with tiered approach |
 | `compaction-orchestrator.ts` | Add warm-tier retrieval before model call |
@@ -464,7 +464,7 @@ The hybrid approach — use actual token counts from provider responses for rece
 
 ### What It Is
 
-GSD's memory system (MEMORY.md + individual files) stores flat, file-based memories. A learning graph extends this into a structured knowledge base that captures relationships between codebases, files, errors, solutions, and patterns across all sessions.
+SDD's memory system (MEMORY.md + individual files) stores flat, file-based memories. A learning graph extends this into a structured knowledge base that captures relationships between codebases, files, errors, solutions, and patterns across all sessions.
 
 This is informed by research on [agent memory architectures](https://github.com/Shichun-Liu/Agent-Memory-Paper-List) and the emerging discipline of [context engineering](https://thenewstack.io/memory-for-ai-agents-a-new-paradigm-of-context-engineering/).
 
@@ -524,7 +524,7 @@ This is informed by research on [agent memory architectures](https://github.com/
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `session-manager.ts` | Write graph nodes on session save |
 | `agent-session.ts` prompt building | Query graph for relevant context before model call |
@@ -555,7 +555,7 @@ This is informed by research on [agent memory architectures](https://github.com/
 
 ### What It Is
 
-Inspired by [ToolTree](https://www.agentic-patterns.com/patterns/skill-library-evolution/) and Monte Carlo Tree Search, this technique replaces GSD's linear action selection with a tree-based planner that explores multiple solution paths simultaneously.
+Inspired by [ToolTree](https://www.agentic-patterns.com/patterns/skill-library-evolution/) and Monte Carlo Tree Search, this technique replaces SDD's linear action selection with a tree-based planner that explores multiple solution paths simultaneously.
 
 Instead of the model deciding one action at a time and hoping it works, the system:
 
@@ -604,9 +604,9 @@ Read auth.ts
 Result: Branch B succeeds after 2 actions, not 5+
 ```
 
-### Why It Fits GSD-2
+### Why It Fits SDD-2
 
-GSD already has session branching primitives:
+SDD already has session branching primitives:
 - `fork()` creates a branch from any message
 - Branch summaries compress history at fork points
 - Tree navigation (`/tree`) lets users explore branches
@@ -652,7 +652,7 @@ The gap: these primitives are user-triggered. MCTS would make the agent trigger 
 
 ### Integration Points
 
-| GSD Component | Role in Integration |
+| SDD Component | Role in Integration |
 |---------------|-------------------|
 | `agent-loop.ts` | New planning phase between user prompt and action execution |
 | Session branching (`fork()`) | Used to create exploration branches |

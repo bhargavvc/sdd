@@ -1,7 +1,7 @@
 /**
  * TUI Command Flow Tests for import-claude
  *
- * Tests R015: validates the TUI command flow for /gsd prefs import-claude.
+ * Tests R015: validates the TUI command flow for /sdd prefs import-claude.
  * These tests currently use mock UI, and marketplace availability is still
  * derived from real/local marketplace roots. Follow-up work should route these
  * through portable marketplace fixtures that mirror Claude Code's
@@ -13,7 +13,7 @@ import assert from 'node:assert';
 import { existsSync, mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { ExtensionCommandContext } from '@gsd/pi-coding-agent';
+import type { ExtensionCommandContext } from '@sdd/pi-coding-agent';
 import { runClaudeImportFlow, getClaudeSearchRoots, discoverClaudeSkills, discoverClaudePlugins } from '../claude-import.js';
 import { getMarketplaceFixtures } from './marketplace-test-fixtures.js';
 
@@ -125,7 +125,7 @@ describe(
 		let prefs: Record<string, unknown>;
 
 		before(() => {
-			tempDir = mkdtempSync(join(tmpdir(), 'gsd-tui-test-'));
+			tempDir = mkdtempSync(join(tmpdir(), 'sdd-tui-test-'));
 			prefsPath = join(tempDir, 'PREFERENCES.md');
 			prefs = { version: 1 };
 		});
@@ -306,13 +306,13 @@ describe(
 			});
 
 			it('should not persist marketplace agent directories into package sources', async (t) => {
-				const isolatedAgentDir = join(tempDir, '.gsd', 'agent');
+				const isolatedAgentDir = join(tempDir, '.sdd', 'agent');
 				const settingsPath = join(isolatedAgentDir, 'settings.json');
 				rmSync(isolatedAgentDir, { recursive: true, force: true });
-				process.env.GSD_CODING_AGENT_DIR = isolatedAgentDir;
+				process.env.SDD_CODING_AGENT_DIR = isolatedAgentDir;
 
 				t.after(() => {
-					delete process.env.GSD_CODING_AGENT_DIR;
+					delete process.env.SDD_CODING_AGENT_DIR;
 					rmSync(isolatedAgentDir, { recursive: true, force: true });
 				});
 

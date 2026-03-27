@@ -36,8 +36,8 @@ function createTempRepo(): string {
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
   writeFileSync(join(dir, "README.md"), "# test\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -125,7 +125,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     const branches = run("git branch", repo);
     assert.ok(!branches.includes("milestone/M010"), "milestone branch deleted");
 
-    const worktreeDir = join(repo, ".gsd", "worktrees", "M010");
+    const worktreeDir = join(repo, ".sdd", "worktrees", "M010");
     assert.ok(!existsSync(worktreeDir), "worktree directory removed");
 
     assert.strictEqual(getAutoWorktreeOriginalBase(), null, "originalBase cleared after merge");
@@ -165,12 +165,12 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.ok(result.commitMessage.includes("- S01: Core API"), "body lists S01");
     assert.ok(result.commitMessage.includes("- S02: Error handling"), "body lists S02");
     assert.ok(result.commitMessage.includes("- S03: Logging infra"), "body lists S03");
-    assert.ok(result.commitMessage.includes("GSD-Milestone: M020"), "body has GSD-Milestone trailer");
+    assert.ok(result.commitMessage.includes("SDD-Milestone: M020"), "body has SDD-Milestone trailer");
     assert.ok(result.commitMessage.includes("Branch: milestone/M020"), "body has branch metadata");
 
     const gitMsg = run("git log -1 --format=%B main", repo).trim();
     assert.match(gitMsg, /^feat:/, "git commit message starts with feat:");
-    assert.ok(gitMsg.includes("GSD-Milestone: M020"), "git commit has GSD-Milestone trailer");
+    assert.ok(gitMsg.includes("SDD-Milestone: M020"), "git commit has SDD-Milestone trailer");
     assert.ok(gitMsg.includes("- S01: Core API"), "git commit body has S01");
   });
 
@@ -232,12 +232,12 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "feature.ts", content: "export const feature = true;\n", message: "add feature" },
     ]);
 
-    writeFileSync(join(wtPath, ".gsd", "STATE.md"), "# State\n\n## Updated on milestone branch\n");
+    writeFileSync(join(wtPath, ".sdd", "STATE.md"), "# State\n\n## Updated on milestone branch\n");
     run("git add .", wtPath);
     run('git commit -m "chore: update state on milestone branch"', wtPath);
 
     run("git checkout main", repo);
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State\n\n## Updated on main\n");
+    writeFileSync(join(repo, ".sdd", "STATE.md"), "# State\n\n## Updated on main\n");
     run("git add .", repo);
     run('git commit -m "chore: update state on main"', repo);
 
@@ -250,7 +250,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M050", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M050"), "merge commit created despite .gsd conflict");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M050"), "merge commit created despite .sdd conflict");
     } catch (err) {
       threw = true;
     }
@@ -276,7 +276,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M060", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M060"), "merge commit created");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M060"), "merge commit created");
     } catch (err) {
       threw = true;
     }
@@ -291,8 +291,8 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     run("git config user.email test@test.com", dir);
     run("git config user.name Test", dir);
     writeFileSync(join(dir, "README.md"), "# master-branch repo\n");
-    mkdirSync(join(dir, ".gsd"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+    mkdirSync(join(dir, ".sdd"), { recursive: true });
+    writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
     run("git add .", dir);
     run("git commit -m init", dir);
     const defaultBranch = run("git rev-parse --abbrev-ref HEAD", dir);
@@ -303,7 +303,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "master-feature.ts", content: "export const masterFeature = true;\n", message: "add master feature" },
     ]);
 
-    const metaFile = join(dir, ".gsd", "milestones", "M070", "M070-META.json");
+    const metaFile = join(dir, ".sdd", "milestones", "M070", "M070-META.json");
     assert.ok(!existsSync(metaFile), "no META.json — integration branch not captured");
 
     const roadmap = makeRoadmap("M070", "Master branch milestone", [
@@ -314,7 +314,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let errMsg = "";
     try {
       const result = mergeMilestoneToMain(dir, "M070", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M070"), "merge commit created on master");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M070"), "merge commit created on master");
     } catch (err) {
       threw = true;
       errMsg = err instanceof Error ? err.message : String(err);
@@ -375,15 +375,15 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "sync-test.ts", content: "export const sync = true;\n", message: "add sync-test" },
     ]);
 
-    const msDir = join(repo, ".gsd", "milestones", "M090", "slices", "S01");
+    const msDir = join(repo, ".sdd", "milestones", "M090", "slices", "S01");
     mkdirSync(msDir, { recursive: true });
     writeFileSync(join(msDir, "S01-PLAN.md"), "# synced plan\n");
     writeFileSync(
-      join(repo, ".gsd", "milestones", "M090", "M090-ROADMAP.md"),
+      join(repo, ".sdd", "milestones", "M090", "M090-ROADMAP.md"),
       "# synced roadmap\n",
     );
 
-    const runtimeDir = join(repo, ".gsd", "runtime", "units");
+    const runtimeDir = join(repo, ".sdd", "runtime", "units");
     mkdirSync(runtimeDir, { recursive: true });
     writeFileSync(join(runtimeDir, "unit-001.json"), '{"stale": true}');
 
@@ -394,7 +394,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M090", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M090"), "#1738 merge succeeds after cleaning synced dirs");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M090"), "#1738 merge succeeds after cleaning synced dirs");
     } catch (err: unknown) {
       threw = true;
     }
@@ -421,7 +421,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M100", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M100"), "#2151: merge succeeds after stashing dirty files");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M100"), "#2151: merge succeeds after stashing dirty files");
     } catch {
       threw = true;
     }
@@ -521,7 +521,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let errMsg = "";
     try {
       const result = mergeMilestoneToMain(repo, "M140", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M140"), "merge commit created");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M140"), "merge commit created");
     } catch (err) {
       threw = true;
       errMsg = err instanceof Error ? err.message : String(err);
@@ -591,7 +591,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.ok(existsSync(squashMsgPath), "SQUASH_MSG planted before merge");
 
     const result = mergeMilestoneToMain(repo, "M160", roadmap);
-    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M160"), "merge commit created");
+    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M160"), "merge commit created");
 
     assert.ok(!existsSync(squashMsgPath), "#1853: SQUASH_MSG must not persist after successful squash-merge");
   });
@@ -611,7 +611,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     ]);
 
     const result = mergeMilestoneToMain(repo, "M170", roadmap);
-    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M170"), "merge commit created");
+    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("SDD-Milestone: M170"), "merge commit created");
 
     assert.ok(
       existsSync(join(repo, "uncommitted-agent-code.ts")),
@@ -623,9 +623,9 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     const repo = freshRepo();
     const wtPath = createAutoWorktree(repo, "M180");
 
-    mkdirSync(join(wtPath, ".gsd", "milestones", "M180"), { recursive: true });
+    mkdirSync(join(wtPath, ".sdd", "milestones", "M180"), { recursive: true });
     writeFileSync(
-      join(wtPath, ".gsd", "milestones", "M180", "SUMMARY.md"),
+      join(wtPath, ".sdd", "milestones", "M180", "SUMMARY.md"),
       "# M180 Summary\n\nThis milestone was planned but not implemented.\n",
     );
     run("git add .", wtPath);

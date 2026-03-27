@@ -216,11 +216,11 @@ describe('git-service', async () => {
       keyFiles: ["src/auth.ts", "src/middleware/jwt.ts"],
     });
     assert.ok(msg.startsWith("feat:"), "message starts with type: (no scope)");
-    assert.ok(!msg.includes("(S01/T02)"), "no GSD ID in subject line");
+    assert.ok(!msg.includes("(S01/T02)"), "no SDD ID in subject line");
     assert.ok(msg.includes("JWT-based auth"), "message includes one-liner content");
     assert.ok(msg.includes("- src/auth.ts"), "message body includes key files");
     assert.ok(msg.includes("- src/middleware/jwt.ts"), "message body includes second key file");
-    assert.ok(msg.includes("GSD-Task: S01/T02"), "GSD-Task trailer in body");
+    assert.ok(msg.includes("SDD-Task: S01/T02"), "SDD-Task trailer in body");
   });
 
   {
@@ -230,7 +230,7 @@ describe('git-service', async () => {
     });
     assert.ok(msg.startsWith("fix:"), "infers fix type from title");
     assert.ok(msg.includes("fix login redirect bug"), "uses task title when no one-liner");
-    assert.ok(msg.includes("GSD-Task: S02/T01"), "GSD-Task trailer present");
+    assert.ok(msg.includes("SDD-Task: S02/T01"), "SDD-Task trailer present");
   }
 
   {
@@ -240,7 +240,7 @@ describe('git-service', async () => {
       oneLiner: "Unit tests for auth module with coverage",
     });
     assert.ok(msg.startsWith("test:"), "infers test type");
-    assert.ok(msg.includes("GSD-Task: S01/T03"), "GSD-Task trailer present");
+    assert.ok(msg.includes("SDD-Task: S01/T03"), "SDD-Task trailer present");
   }
 
   // ─── RUNTIME_EXCLUSION_PATHS ───────────────────────────────────────────
@@ -260,9 +260,9 @@ describe('git-service', async () => {
     ".sdd/metrics.json",
     ".sdd/completed-units.json",
     ".sdd/STATE.md",
-    ".sdd/gsd.db",
-    ".sdd/gsd.db-shm",
-    ".sdd/gsd.db-wal",
+    ".sdd/sdd.db",
+    ".sdd/sdd.db-shm",
+    ".sdd/sdd.db-wal",
     ".sdd/journal/",
     ".sdd/doctor-history.jsonl",
     ".sdd/DISCUSSION-MANIFEST.json",
@@ -286,7 +286,7 @@ describe('git-service', async () => {
   // ─── runGit ────────────────────────────────────────────────────────────
 
 
-  const tempDir = mkdtempSync(join(tmpdir(), "gsd-git-service-test-"));
+  const tempDir = mkdtempSync(join(tmpdir(), "sdd-git-service-test-"));
   runGit(tempDir, ["init", "-b", "main"]);
   runGit(tempDir, ["config", "user.name", "Pi Test"]);
   runGit(tempDir, ["config", "user.email", "pi@example.com"]);
@@ -333,7 +333,7 @@ describe('git-service', async () => {
   }
 
   function initTempRepo(): string {
-    const dir = mkdtempSync(join(tmpdir(), "gsd-git-t02-"));
+    const dir = mkdtempSync(join(tmpdir(), "sdd-git-t02-"));
     runGit(dir, ["init", "-b", "main"]);
     runGit(dir, ["config", "user.name", "Pi Test"]);
     runGit(dir, ["config", "user.email", "pi@example.com"]);
@@ -481,7 +481,7 @@ describe('git-service', async () => {
 
     // Without task context, autoCommit uses generic chore message
     const msg = svc.autoCommit("task", "T01");
-    assert.deepStrictEqual(msg, "chore: auto-commit after task\n\nGSD-Unit: T01", "autoCommit returns generic format with trailer");
+    assert.deepStrictEqual(msg, "chore: auto-commit after task\n\nSDD-Unit: T01", "autoCommit returns generic format with trailer");
 
     const log = run("git log --oneline -1", repo);
     assert.ok(log.includes("chore: auto-commit after task"), "generic commit message is in git log");
@@ -497,7 +497,7 @@ describe('git-service', async () => {
     assert.ok(msg2 !== null, "autoCommit with task context returns a message");
     assert.ok(msg2!.startsWith("feat:"), "meaningful commit uses feat type without scope");
     assert.ok(msg2!.includes("JWT-based auth"), "meaningful commit includes one-liner content");
-    assert.ok(msg2!.includes("GSD-Task: S01/T02"), "meaningful commit has GSD-Task trailer");
+    assert.ok(msg2!.includes("SDD-Task: S01/T02"), "meaningful commit has SDD-Task trailer");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -531,9 +531,9 @@ describe('git-service', async () => {
     createFile(repo, ".sdd/milestones/M001/M001-ROADMAP.md", "- [x] S01");
     createFile(repo, "src/feature.ts", "export const y = 2;");
 
-    // Auto-commit with .gsd/ excluded (simulates pre-switch)
-    const msg = svc.autoCommit("pre-switch", "main", [".gsd/"]);
-    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nGSD-Unit: main", "pre-switch autoCommit with .gsd/ exclusion commits");
+    // Auto-commit with .sdd/ excluded (simulates pre-switch)
+    const msg = svc.autoCommit("pre-switch", "main", [".sdd/"]);
+    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nSDD-Unit: main", "pre-switch autoCommit with .sdd/ exclusion commits");
 
     // Verify .sdd/ file was NOT committed
     const show = run("git show --stat HEAD", repo);
@@ -576,7 +576,7 @@ describe('git-service', async () => {
   // ─── Helper: create repo for branch tests ────────────────────────────
 
   function initBranchTestRepo(): string {
-    const dir = mkdtempSync(join(tmpdir(), "gsd-git-t03-"));
+    const dir = mkdtempSync(join(tmpdir(), "sdd-git-t03-"));
     runGit(dir, ["init", "-b", "main"]);
     runGit(dir, ["config", "user.name", "Pi Test"]);
     runGit(dir, ["config", "user.email", "pi@example.com"]);
@@ -594,8 +594,8 @@ describe('git-service', async () => {
 
     assert.deepStrictEqual(svc.getCurrentBranch(), "main", "getCurrentBranch returns main on main branch");
 
-    run("git checkout -b gsd/M001/S01", repo);
-    assert.deepStrictEqual(svc.getCurrentBranch(), "gsd/M001/S01", "getCurrentBranch returns slice branch name");
+    run("git checkout -b sdd/M001/S01", repo);
+    assert.deepStrictEqual(svc.getCurrentBranch(), "sdd/M001/S01", "getCurrentBranch returns slice branch name");
 
     run("git checkout -b feature/foo", repo);
     assert.deepStrictEqual(svc.getCurrentBranch(), "feature/foo", "getCurrentBranch returns feature branch name");
@@ -617,7 +617,7 @@ describe('git-service', async () => {
 
   {
     // master-only repo
-    const repo = mkdtempSync(join(tmpdir(), "gsd-git-t03-master-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-git-t03-master-"));
     runGit(repo, ["init", "-b", "master"]);
     runGit(repo, ["config", "user.name", "Pi Test"]);
     runGit(repo, ["config", "user.email", "pi@example.com"]);
@@ -642,12 +642,12 @@ describe('git-service', async () => {
     const svc = new GitServiceImpl(repo);
 
     // Create a branch with a commit
-    run("git checkout -b gsd/M001/S01", repo);
+    run("git checkout -b sdd/M001/S01", repo);
     createFile(repo, "src/snap.ts", "snapshot me");
     svc.commit({ message: "snapshot test commit" });
 
     // Create snapshot ref for this branch
-    svc.createSnapshot("gsd/M001/S01");
+    svc.createSnapshot("sdd/M001/S01");
 
     // Verify ref exists under refs/sdd/snapshots/
     const refs = run("git for-each-ref refs/sdd/snapshots/", repo);
@@ -662,12 +662,12 @@ describe('git-service', async () => {
     const repo = initBranchTestRepo();
     const svc = new GitServiceImpl(repo, { snapshots: false });
 
-    run("git checkout -b gsd/M001/S01", repo);
+    run("git checkout -b sdd/M001/S01", repo);
     createFile(repo, "src/no-snap.ts", "no snapshot");
     svc.commit({ message: "no snapshot commit" });
 
     // createSnapshot should be a no-op when disabled
-    svc.createSnapshot("gsd/M001/S01");
+    svc.createSnapshot("sdd/M001/S01");
 
     const refs = run("git for-each-ref refs/sdd/snapshots/", repo);
     assert.deepStrictEqual(refs, "", "no snapshot ref created when prefs.snapshots is false");
@@ -895,7 +895,7 @@ describe('git-service', async () => {
   test('Integration branch: rejects slice branches', () => {
     const repo = initBranchTestRepo();
 
-    writeIntegrationBranch(repo, "M001", "gsd/M001/S01");
+    writeIntegrationBranch(repo, "M001", "sdd/M001/S01");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "slice branches are not recorded as integration branch");
 
     rmSync(repo, { recursive: true, force: true });
@@ -907,28 +907,28 @@ describe('git-service', async () => {
     const repo = initBranchTestRepo();
 
     // All 8 registered workflow templates should be rejected
-    writeIntegrationBranch(repo, "M001", "gsd/hotfix/fix-login");
+    writeIntegrationBranch(repo, "M001", "sdd/hotfix/fix-login");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "hotfix branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/bugfix/null-pointer");
+    writeIntegrationBranch(repo, "M001", "sdd/bugfix/null-pointer");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "bugfix branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/small-feature/add-button");
+    writeIntegrationBranch(repo, "M001", "sdd/small-feature/add-button");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "small-feature branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/refactor/rename-module");
+    writeIntegrationBranch(repo, "M001", "sdd/refactor/rename-module");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "refactor branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/spike/evaluate-lib");
+    writeIntegrationBranch(repo, "M001", "sdd/spike/evaluate-lib");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "spike branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/security-audit/owasp-scan");
+    writeIntegrationBranch(repo, "M001", "sdd/security-audit/owasp-scan");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "security-audit branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/dep-upgrade/bump-react");
+    writeIntegrationBranch(repo, "M001", "sdd/dep-upgrade/bump-react");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "dep-upgrade branch is not recorded");
 
-    writeIntegrationBranch(repo, "M001", "gsd/full-project/new-app");
+    writeIntegrationBranch(repo, "M001", "sdd/full-project/new-app");
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "full-project branch is not recorded");
 
     rmSync(repo, { recursive: true, force: true });
@@ -936,7 +936,7 @@ describe('git-service', async () => {
 
   // ─── writeIntegrationBranch: still records legitimate branches ────────
 
-  test('Integration branch: records non-ephemeral gsd branches', () => {
+  test('Integration branch: records non-ephemeral sdd branches', () => {
     const repo = initBranchTestRepo();
 
     // A normal feature branch should still be recorded
@@ -1114,19 +1114,19 @@ describe('git-service', async () => {
 
   test('untrackRuntimeFiles', async () => {
     const { untrackRuntimeFiles } = await import("../gitignore.ts");
-    const repo = mkdtempSync(join(tmpdir(), "gsd-untrack-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-untrack-"));
     runGit(repo, ["init", "-b", "main"]);
     runGit(repo, ["config", "user.email", "test@test.com"]);
     runGit(repo, ["config", "user.name", "Test"]);
 
     // Create and track runtime files (simulates pre-.gitignore state)
-    mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
-    writeFileSync(join(repo, ".gsd", "completed-units.json"), '["u1"]');
-    writeFileSync(join(repo, ".gsd", "metrics.json"), '{}');
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State");
-    writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
-    writeFileSync(join(repo, ".gsd", "runtime", "data.json"), "{}");
+    mkdirSync(join(repo, ".sdd", "activity"), { recursive: true });
+    mkdirSync(join(repo, ".sdd", "runtime"), { recursive: true });
+    writeFileSync(join(repo, ".sdd", "completed-units.json"), '["u1"]');
+    writeFileSync(join(repo, ".sdd", "metrics.json"), '{}');
+    writeFileSync(join(repo, ".sdd", "STATE.md"), "# State");
+    writeFileSync(join(repo, ".sdd", "activity", "log.jsonl"), "{}");
+    writeFileSync(join(repo, ".sdd", "runtime", "data.json"), "{}");
     writeFileSync(join(repo, "src.ts"), "code");
     runGit(repo, ["add", "-A"]);
     runGit(repo, ["commit", "-m", "init"]);
@@ -1148,9 +1148,9 @@ describe('git-service', async () => {
     assert.ok(srcTracked.includes("src.ts"), "untrack: non-runtime files remain tracked");
 
     // Files still exist on disk
-    assert.ok(existsSync(join(repo, ".gsd", "completed-units.json")),
+    assert.ok(existsSync(join(repo, ".sdd", "completed-units.json")),
       "untrack: completed-units.json still on disk");
-    assert.ok(existsSync(join(repo, ".gsd", "metrics.json")),
+    assert.ok(existsSync(join(repo, ".sdd", "metrics.json")),
       "untrack: metrics.json still on disk");
 
     // Idempotent — running again doesn't error
@@ -1163,7 +1163,7 @@ describe('git-service', async () => {
   // ─── smartStage excludes runtime files but allows milestone artifacts ──
 
   test('smartStage excludes runtime files, allows milestone artifacts', () => {
-    const repo = mkdtempSync(join(tmpdir(), "gsd-smart-stage-excludes-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-smart-stage-excludes-"));
     runGit(repo, ["init", "-b", "main"]);
     runGit(repo, ["config", "user.email", "test@test.com"]);
     runGit(repo, ["config", "user.name", "Test"]);
@@ -1172,14 +1172,14 @@ describe('git-service', async () => {
     runGit(repo, ["commit", "-m", "init"]);
 
     // Create .sdd/ runtime files + milestone artifacts + a normal source file
-    mkdirSync(join(repo, ".gsd", "milestones", "M001"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
-    writeFileSync(join(repo, ".gsd", "milestones", "M001", "ROADMAP.md"), "# Roadmap");
-    writeFileSync(join(repo, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---");
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State");
-    writeFileSync(join(repo, ".gsd", "runtime", "units.json"), "{}");
-    writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
+    mkdirSync(join(repo, ".sdd", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(repo, ".sdd", "runtime"), { recursive: true });
+    mkdirSync(join(repo, ".sdd", "activity"), { recursive: true });
+    writeFileSync(join(repo, ".sdd", "milestones", "M001", "ROADMAP.md"), "# Roadmap");
+    writeFileSync(join(repo, ".sdd", "PREFERENCES.md"), "---\nversion: 1\n---");
+    writeFileSync(join(repo, ".sdd", "STATE.md"), "# State");
+    writeFileSync(join(repo, ".sdd", "runtime", "units.json"), "{}");
+    writeFileSync(join(repo, ".sdd", "activity", "log.jsonl"), "{}");
     writeFileSync(join(repo, "src.ts"), "const x = 1;");
 
     // smartStage excludes only runtime paths, not all of .sdd/ (#1326)
@@ -1219,20 +1219,20 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── ensureGitignore: always adds .gsd to gitignore ──────────────────
+  // ─── ensureGitignore: always adds .sdd to gitignore ──────────────────
 
-  test('ensureGitignore: adds .gsd entry', async () => {
+  test('ensureGitignore: adds .sdd entry', async () => {
     const { ensureGitignore } = await import("../gitignore.ts");
-    const repo = mkdtempSync(join(tmpdir(), "gsd-gitignore-external-state-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-gitignore-external-state-"));
 
-    // Should add .gsd to gitignore (external state dir is a symlink)
+    // Should add .sdd to gitignore (external state dir is a symlink)
     const modified = ensureGitignore(repo);
     assert.ok(modified, "ensureGitignore: gitignore was modified");
 
     const { readFileSync } = await import("node:fs");
     const content = readFileSync(join(repo, ".gitignore"), "utf-8");
     const lines = content.split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    assert.ok(lines.includes(".gsd"), "ensureGitignore: .gitignore contains .gsd");
+    assert.ok(lines.includes(".sdd"), "ensureGitignore: .gitignore contains .sdd");
 
     // Idempotent — calling again doesn't add duplicates
     const modified2 = ensureGitignore(repo);
@@ -1241,30 +1241,30 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── nativeAddAllWithExclusions: symlinked .gsd fallback ───────────────
+  // ─── nativeAddAllWithExclusions: symlinked .sdd fallback ───────────────
 
-  test('nativeAddAllWithExclusions: symlinked .gsd fallback', () => {
-    // When .gsd is a symlink, git rejects `:!.sdd/...` pathspecs with
+  test('nativeAddAllWithExclusions: symlinked .sdd fallback', () => {
+    // When .sdd is a symlink, git rejects `:!.sdd/...` pathspecs with
     // "fatal: pathspec '...' is beyond a symbolic link". The fix falls
     // back to plain `git add -A`, which respects .gitignore.
     const repo = initTempRepo();
 
-    // Create the real .gsd directory outside the repo, then symlink it
-    const externalGsd = mkdtempSync(join(tmpdir(), "gsd-external-"));
+    // Create the real .sdd directory outside the repo, then symlink it
+    const externalGsd = mkdtempSync(join(tmpdir(), "sdd-external-"));
     mkdirSync(join(externalGsd, "activity"), { recursive: true });
     writeFileSync(join(externalGsd, "activity", "log.jsonl"), "log data");
     writeFileSync(join(externalGsd, "STATE.md"), "# State");
 
-    // Symlink .gsd -> external directory
-    symlinkSync(externalGsd, join(repo, ".gsd"));
+    // Symlink .sdd -> external directory
+    symlinkSync(externalGsd, join(repo, ".sdd"));
 
     // Add .gitignore so git add -A fallback skips .sdd/
-    writeFileSync(join(repo, ".gitignore"), ".gsd\n");
+    writeFileSync(join(repo, ".gitignore"), ".sdd\n");
 
     // Create a real file that should be staged
     createFile(repo, "src/app.ts", "export const x = 1;");
 
-    // nativeAddAllWithExclusions should NOT throw despite .gsd being a symlink
+    // nativeAddAllWithExclusions should NOT throw despite .sdd being a symlink
     let threw = false;
     try {
       nativeAddAllWithExclusions(repo, RUNTIME_EXCLUSION_PATHS);
@@ -1272,20 +1272,20 @@ describe('git-service', async () => {
       threw = true;
       console.error("  unexpected error:", e);
     }
-    assert.ok(!threw, "nativeAddAllWithExclusions does not throw with symlinked .gsd");
+    assert.ok(!threw, "nativeAddAllWithExclusions does not throw with symlinked .sdd");
 
     // Verify the real file was staged
     const staged = run("git diff --cached --name-only", repo);
-    assert.ok(staged.includes("src/app.ts"), "real file staged despite symlinked .gsd");
-    assert.ok(!staged.includes(".gsd"), ".gsd content not staged");
+    assert.ok(staged.includes("src/app.ts"), "real file staged despite symlinked .sdd");
+    assert.ok(!staged.includes(".sdd"), ".sdd content not staged");
 
     rmSync(repo, { recursive: true, force: true });
     rmSync(externalGsd, { recursive: true, force: true });
   });
 
-  // ─── nativeAddAllWithExclusions: non-symlinked .gsd still works ───────
+  // ─── nativeAddAllWithExclusions: non-symlinked .sdd still works ───────
 
-  test('nativeAddAllWithExclusions: non-symlinked .gsd still works', () => {
+  test('nativeAddAllWithExclusions: non-symlinked .sdd still works', () => {
     // Verify the normal (non-symlink) case still works with pathspec exclusions
     const repo = initTempRepo();
 
@@ -1299,10 +1299,10 @@ describe('git-service', async () => {
     } catch {
       threw = true;
     }
-    assert.ok(!threw, "nativeAddAllWithExclusions works with normal .gsd directory");
+    assert.ok(!threw, "nativeAddAllWithExclusions works with normal .sdd directory");
 
     const staged = run("git diff --cached --name-only", repo);
-    assert.ok(staged.includes("src/code.ts"), "real file staged with normal .gsd");
+    assert.ok(staged.includes("src/code.ts"), "real file staged with normal .sdd");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -1313,12 +1313,12 @@ describe('git-service', async () => {
     const err = new MergeConflictError(
       ["src/foo.ts", "src/bar.ts"],
       "squash",
-      "gsd/M001/S01",
+      "sdd/M001/S01",
       "main",
     );
     assert.deepStrictEqual(err.conflictedFiles, ["src/foo.ts", "src/bar.ts"], "MergeConflictError.conflictedFiles populated");
     assert.deepStrictEqual(err.strategy, "squash", "MergeConflictError.strategy set");
-    assert.deepStrictEqual(err.branch, "gsd/M001/S01", "MergeConflictError.branch set");
+    assert.deepStrictEqual(err.branch, "sdd/M001/S01", "MergeConflictError.branch set");
     assert.deepStrictEqual(err.mainBranch, "main", "MergeConflictError.mainBranch set");
     assert.deepStrictEqual(err.name, "MergeConflictError", "MergeConflictError.name is MergeConflictError");
     assert.ok(err.message.includes("src/foo.ts"), "MergeConflictError message lists conflicted files");
@@ -1327,13 +1327,13 @@ describe('git-service', async () => {
     assert.ok(err instanceof Error, "MergeConflictError is an Error instance");
   });
 
-  // ─── Integration branch: rejects gsd/quick/* branches ────────────────────
+  // ─── Integration branch: rejects sdd/quick/* branches ────────────────────
 
-  test('Integration branch: rejects gsd/quick/* branches', () => {
+  test('Integration branch: rejects sdd/quick/* branches', () => {
     const repo = initBranchTestRepo();
 
-    writeIntegrationBranch(repo, "M001", "gsd/quick/1234-some-task");
-    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "gsd/quick/* branches are not recorded as integration branch");
+    writeIntegrationBranch(repo, "M001", "sdd/quick/1234-some-task");
+    assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null, "sdd/quick/* branches are not recorded as integration branch");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -1383,11 +1383,11 @@ describe('git-service', async () => {
     });
     assert.ok(msg.includes("Resolves #42"), "buildTaskCommitMessage includes Resolves #N trailer when issueNumber is set");
     assert.ok(msg.startsWith("fix:"), "buildTaskCommitMessage infers fix type");
-    assert.ok(msg.includes("GSD-Task: S01/T03"), "GSD-Task trailer present");
-    // GSD-Task should come before Resolves
-    const taskIdx = msg.indexOf("GSD-Task: S01/T03");
+    assert.ok(msg.includes("SDD-Task: S01/T03"), "SDD-Task trailer present");
+    // SDD-Task should come before Resolves
+    const taskIdx = msg.indexOf("SDD-Task: S01/T03");
     const resolvesIdx = msg.indexOf("Resolves #42");
-    assert.ok(taskIdx < resolvesIdx, "GSD-Task trailer before Resolves trailer");
+    assert.ok(taskIdx < resolvesIdx, "SDD-Task trailer before Resolves trailer");
   });
 
   {
@@ -1397,7 +1397,7 @@ describe('git-service', async () => {
       taskTitle: "add dashboard widget",
     });
     assert.ok(!msg.includes("Resolves"), "buildTaskCommitMessage omits Resolves trailer when issueNumber is absent");
-    assert.ok(msg.includes("GSD-Task: S01/T04"), "GSD-Task trailer still present");
+    assert.ok(msg.includes("SDD-Task: S01/T04"), "SDD-Task trailer still present");
   }
 
   // ─── runPreMergeCheck: skips when no package.json ────────────────────────
@@ -1414,24 +1414,24 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247) ──
+  // ─── autoCommit: symlinked .sdd does NOT stage milestone artifacts (#2247) ──
 
-  test('autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247)', () => {
-    // When .gsd is a symlink (external state project), .sdd/ files live outside
+  test('autoCommit: symlinked .sdd does NOT stage milestone artifacts (#2247)', () => {
+    // When .sdd is a symlink (external state project), .sdd/ files live outside
     // the repo by design. smartStage() must NOT force-stage them into git — the
     // .gitignore exclusion is correct and intentional.
     const repo = initTempRepo();
 
-    // Create an external .gsd directory and symlink it into the repo
-    const externalGsd = mkdtempSync(join(tmpdir(), "gsd-external-symlink-"));
+    // Create an external .sdd directory and symlink it into the repo
+    const externalGsd = mkdtempSync(join(tmpdir(), "sdd-external-symlink-"));
     mkdirSync(join(externalGsd, "milestones", "M009"), { recursive: true });
     mkdirSync(join(externalGsd, "activity"), { recursive: true });
     mkdirSync(join(externalGsd, "runtime"), { recursive: true });
 
-    symlinkSync(externalGsd, join(repo, ".gsd"));
+    symlinkSync(externalGsd, join(repo, ".sdd"));
 
-    // .gitignore blocks .gsd (as ensureGitignore would do for symlink projects)
-    writeFileSync(join(repo, ".gitignore"), ".gsd\n");
+    // .gitignore blocks .sdd (as ensureGitignore would do for symlink projects)
+    writeFileSync(join(repo, ".gitignore"), ".sdd\n");
     run('git add .gitignore', repo);
     run('git commit -m "add gitignore"', repo);
 

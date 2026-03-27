@@ -1,5 +1,5 @@
 /**
- * complete-task handler — the core operation behind gsd_complete_task.
+ * complete-task handler — the core operation behind sdd_complete_task.
  *
  * Validates inputs, writes task row to DB in a transaction, then (outside
  * the transaction) renders SUMMARY.md to disk, toggles the plan checkbox,
@@ -24,7 +24,7 @@ import {
   updateTaskStatus,
   setTaskSummaryMd,
   deleteVerificationEvidence,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { resolveSliceFile, resolveTasksDir, clearPathCache } from "../paths.js";
 import { checkOwnership, taskUnitKey } from "../unit-ownership.js";
 import { saveFile, clearParseCache } from "../files.js";
@@ -173,7 +173,7 @@ export async function handleCompleteTask(
 
     const existingTask = getTask(params.milestoneId, params.sliceId, params.taskId);
     if (existingTask && isClosedStatus(existingTask.status)) {
-      guardError = `task ${params.taskId} is already complete — use gsd_task_reopen first if you need to redo it`;
+      guardError = `task ${params.taskId} is already complete — use sdd_task_reopen first if you need to redo it`;
       return;
     }
 
@@ -228,7 +228,7 @@ export async function handleCompleteTask(
     summaryPath = join(tasksDir, `${params.taskId}-SUMMARY.md`);
   } else {
     // Tasks dir doesn't exist on disk yet — build path manually and ensure dirs
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".sdd");
     const manualTasksDir = join(gsdDir, "milestones", params.milestoneId, "slices", params.sliceId, "tasks");
     mkdirSync(manualTasksDir, { recursive: true });
     summaryPath = join(manualTasksDir, `${params.taskId}-SUMMARY.md`);
@@ -243,13 +243,13 @@ export async function handleCompleteTask(
       await renderPlanCheckboxes(basePath, params.milestoneId, params.sliceId);
     } else {
       process.stderr.write(
-        `gsd-db: complete_task — could not find plan file for ${params.sliceId}/${params.milestoneId}, skipping checkbox toggle\n`,
+        `sdd-db: complete_task — could not find plan file for ${params.sliceId}/${params.milestoneId}, skipping checkbox toggle\n`,
       );
     }
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_task — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `sdd-db: complete_task — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     // Delete orphaned verification_evidence rows first (FK constraint
     // references tasks, so evidence must go before status change).
@@ -282,7 +282,7 @@ export async function handleCompleteTask(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: complete-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `sdd: complete-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

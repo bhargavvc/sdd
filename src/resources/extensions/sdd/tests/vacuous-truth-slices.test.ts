@@ -19,17 +19,17 @@ import {
   closeDatabase,
   insertMilestone,
   insertSlice,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 test("deriveStateFromDb does NOT skip to validating when slice array is empty (#2667)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-vacuous-truth-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-vacuous-truth-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
 
   try {
     // Set up a milestone with a roadmap that references slices,
     // but the DB has NO slice rows (simulating a worktree DB wipe)
     writeFileSync(
-      join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+      join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
       [
         "# M001: Test Milestone",
         "",
@@ -72,12 +72,12 @@ test("deriveStateFromDb does NOT skip to validating when slice array is empty (#
 });
 
 test("deriveStateFromDb correctly reaches validating when all slices are done (#2667 guard)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-vacuous-truth-"));
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-vacuous-truth-"));
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01"), { recursive: true });
 
   try {
     writeFileSync(
-      join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+      join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
       [
         "# M001: Test Milestone",
         "",
@@ -90,7 +90,7 @@ test("deriveStateFromDb correctly reaches validating when all slices are done (#
 
     // Write a slice summary so the filesystem recognizes it as complete
     writeFileSync(
-      join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md"),
+      join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md"),
       "# S01 Summary\n\nDone.",
     );
 

@@ -23,7 +23,7 @@ import { syncWorktreeStateBack } from "../auto-worktree.ts";
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 function makeTempDir(prefix: string): string {
-  return mkdtempSync(join(tmpdir(), `gsd-sync-test-${prefix}-`));
+  return mkdtempSync(join(tmpdir(), `sdd-sync-test-${prefix}-`));
 }
 
 function cleanup(...dirs: string[]): void {
@@ -61,8 +61,8 @@ test("syncWorktreeStateBack copies task summaries from tasks/ subdirectory (#167
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S01/tasks/T02-PLAN.md`, "# Task 2 Plan\n");
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S01/tasks/T02-SUMMARY.md`, "# Task 2 Summary\n");
 
-    // Set up main with empty .gsd
-    mkdirSync(join(mainBase, ".gsd"), { recursive: true });
+    // Set up main with empty .sdd
+    mkdirSync(join(mainBase, ".sdd"), { recursive: true });
 
     // Run sync
     const result = syncWorktreeStateBack(mainBase, wtBase, mid);
@@ -137,7 +137,7 @@ test("syncWorktreeStateBack handles multiple slices with tasks (#1678)", () => {
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S02/tasks/T02-SUMMARY.md`, "# S02-T02\n");
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S02/tasks/T03-SUMMARY.md`, "# S02-T03\n");
 
-    mkdirSync(join(mainBase, ".gsd"), { recursive: true });
+    mkdirSync(join(mainBase, ".sdd"), { recursive: true });
 
     const result = syncWorktreeStateBack(mainBase, wtBase, mid);
 
@@ -166,7 +166,7 @@ test("syncWorktreeStateBack handles slices without tasks/ directory", () => {
     // Slice with no tasks/ subdirectory (legitimate case: pre-planning)
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S01/S01-RESEARCH.md`, "# Research\n");
 
-    mkdirSync(join(mainBase, ".gsd"), { recursive: true });
+    mkdirSync(join(mainBase, ".sdd"), { recursive: true });
 
     const result = syncWorktreeStateBack(mainBase, wtBase, mid);
 
@@ -192,7 +192,7 @@ test("syncWorktreeStateBack ignores non-md files in tasks/", () => {
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S01/tasks/.DS_Store`, "junk");
     writeFile(wtBase, `.sdd/milestones/${mid}/slices/S01/tasks/notes.txt`, "notes");
 
-    mkdirSync(join(mainBase, ".gsd"), { recursive: true });
+    mkdirSync(join(mainBase, ".sdd"), { recursive: true });
 
     const result = syncWorktreeStateBack(mainBase, wtBase, mid);
 

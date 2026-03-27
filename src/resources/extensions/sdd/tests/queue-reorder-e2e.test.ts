@@ -24,8 +24,8 @@ import { parseContextDependsOn } from '../files.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-reorder-e2e-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-reorder-e2e-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
@@ -34,18 +34,18 @@ function cleanup(base: string): void {
 }
 
 function writeMilestoneDir(base: string, mid: string): void {
-  mkdirSync(join(base, '.gsd', 'milestones', mid), { recursive: true });
+  mkdirSync(join(base, '.sdd', 'milestones', mid), { recursive: true });
 }
 
 function writeContext(base: string, mid: string, frontmatter: string, body: string = ''): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   const fm = frontmatter ? `---\n${frontmatter}\n---\n\n` : '';
   writeFileSync(join(dir, `${mid}-CONTEXT.md`), `${fm}# ${mid}: Test\n\n${body}`);
 }
 
 function writeCompleteMilestone(base: string, mid: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), `# ${mid}: Complete
 
@@ -61,7 +61,7 @@ function writeCompleteMilestone(base: string, mid: string): void {
 }
 
 function readContextFile(base: string, mid: string): string {
-  return readFileSync(join(base, '.gsd', 'milestones', mid, `${mid}-CONTEXT.md`), 'utf-8');
+  return readFileSync(join(base, '.sdd', 'milestones', mid, `${mid}-CONTEXT.md`), 'utf-8');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -126,7 +126,7 @@ test('E2E: reorder with depends_on removal', async () => {
     // Remove depends_on from M008-CONTEXT.md (simulating what handleQueueReorder does)
     const contextContent = readContextFile(base, 'M008');
     const newContent = contextContent.replace(/---\ndepends_on: \[M009\]\n---\n\n/, '');
-    writeFileSync(join(base, '.gsd', 'milestones', 'M008', 'M008-CONTEXT.md'), newContent);
+    writeFileSync(join(base, '.sdd', 'milestones', 'M008', 'M008-CONTEXT.md'), newContent);
 
     // Verify: depends_on is gone
     const updatedContent = readContextFile(base, 'M008');
@@ -244,8 +244,8 @@ test('E2E: non-milestone directories filtered from findMilestoneIds (#1494)', ()
     writeContext(base, 'M001', '', 'First');
     writeContext(base, 'M002', '', 'Second');
     // Create a rogue non-milestone directory
-    mkdirSync(join(base, '.gsd', 'milestones', 'slices'), { recursive: true });
-    mkdirSync(join(base, '.gsd', 'milestones', 'temp-backup'), { recursive: true });
+    mkdirSync(join(base, '.sdd', 'milestones', 'slices'), { recursive: true });
+    mkdirSync(join(base, '.sdd', 'milestones', 'temp-backup'), { recursive: true });
 
     invalidateStateCache();
     const ids = findMilestoneIds(base);
@@ -279,7 +279,7 @@ test('E2E: depends_on inline format preserved after partial removal', () => {
     // Simulate removing only M009 dep (keep M010)
     const content = readContextFile(base, 'M008');
     const updated = content.replace('depends_on: [M009, M010]', 'depends_on: [M010]');
-    writeFileSync(join(base, '.gsd', 'milestones', 'M008', 'M008-CONTEXT.md'), updated);
+    writeFileSync(join(base, '.sdd', 'milestones', 'M008', 'M008-CONTEXT.md'), updated);
 
     // Verify only M010 remains
     const contentAfter = readContextFile(base, 'M008');
@@ -298,8 +298,8 @@ test('E2E: DB-backed path respects queue order (#2556)', async () => {
     // the dispatch guard (which respects queue order) blocked completion.
     const base = createFixtureBase();
     try {
-      const { openDatabase, closeDatabase, insertMilestone, isDbAvailable } = await import('../gsd-db.ts');
-      const dbPath = join(base, '.gsd', 'gsd.db');
+      const { openDatabase, closeDatabase, insertMilestone, isDbAvailable } = await import('../sdd-db.ts');
+      const dbPath = join(base, '.sdd', 'sdd.db');
 
       // Create milestone directories (required for findMilestoneIds)
       writeMilestoneDir(base, 'M006');
@@ -313,7 +313,7 @@ test('E2E: DB-backed path respects queue order (#2556)', async () => {
         insertMilestone({ id: 'M006', title: 'Earlier', status: 'active' });
         insertMilestone({ id: 'M008', title: 'Later', status: 'active' });
 
-        // Set queue order: M008 should come FIRST (user reordered via /gsd queue)
+        // Set queue order: M008 should come FIRST (user reordered via /sdd queue)
         saveQueueOrder(base, ['M008', 'M006']);
 
         // deriveState should pick M008 (queue-first), not M006 (ID-first)

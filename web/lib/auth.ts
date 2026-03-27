@@ -13,14 +13,14 @@
  * header.
  *
  * localStorage is shared across all tabs on the same origin. Because each
- * GSD instance binds to a unique random port, the origin already scopes
+ * SDD instance binds to a unique random port, the origin already scopes
  * the token to that instance — no additional namespacing is needed.
  *
  * For EventSource (SSE), which cannot send custom headers, the token is
  * appended as a `?_token=` query parameter instead.
  */
 
-const AUTH_STORAGE_KEY = "gsd-auth-token"
+const AUTH_STORAGE_KEY = "sdd-auth-token"
 
 let cachedToken: string | null = null
 
@@ -35,14 +35,14 @@ export function getAuthToken(): string | null {
 
   if (typeof window === "undefined") return null
 
-  // 1. Try the URL fragment (initial page load from gsd --web)
+  // 1. Try the URL fragment (initial page load from sdd --web)
   const hash = window.location.hash
   if (hash) {
     const match = hash.match(/token=([a-fA-F0-9]+)/)
     if (match) {
       cachedToken = match[1]
       // Persist to localStorage so the token survives page refreshes and
-      // is available to other tabs on the same origin (same GSD instance).
+      // is available to other tabs on the same origin (same SDD instance).
       try {
         localStorage.setItem(AUTH_STORAGE_KEY, cachedToken)
       } catch {

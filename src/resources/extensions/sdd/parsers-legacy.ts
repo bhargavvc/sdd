@@ -1,4 +1,4 @@
-// GSD Extension - Legacy Parsers
+// SDD Extension - Legacy Parsers
 // parseRoadmap() and parsePlan() extracted from files.ts.
 // Used only by: md-importer.ts (migration), state.ts (pre-migration fallback),
 // markdown-renderer.ts (detectStaleRenders disk-vs-DB comparison),

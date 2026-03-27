@@ -29,7 +29,7 @@ const BASE_VARS = {
   skillActivation: "Load the relevant skills.",
 };
 
-const DEFAULT_SKILL_ACTIVATION = "If a `GSD Skill Preferences` block is present in system context, use it and the `<available_skills>` catalog in your system prompt to decide which skills to load and follow for this unit, without relaxing required verification or artifact rules.";
+const DEFAULT_SKILL_ACTIVATION = "If a `SDD Skill Preferences` block is present in system context, use it and the `<available_skills>` catalog in your system prompt to decide which skills to load and follow for this unit, without relaxing required verification or artifact rules.";
 
 function loadPromptWithDefaultSkillActivation(name: string, vars: Record<string, string> = {}): string {
   return loadPrompt(name, { skillActivation: DEFAULT_SKILL_ACTIVATION, ...vars });
@@ -56,16 +56,16 @@ test("plan-slice prompt: all variables substituted", () => {
 
 test("plan-slice prompt: DB-backed tool names survive template substitution", () => {
   const result = loadPrompt("plan-slice", { ...BASE_VARS, commitInstruction: "Do not commit." });
-  assert.ok(result.includes("gsd_plan_slice"), "gsd_plan_slice should appear in rendered prompt");
-  assert.ok(result.includes("gsd_plan_task"), "gsd_plan_task should appear in rendered prompt");
+  assert.ok(result.includes("sdd_plan_slice"), "sdd_plan_slice should appear in rendered prompt");
+  assert.ok(result.includes("sdd_plan_task"), "sdd_plan_task should appear in rendered prompt");
   assert.ok(result.includes("canonical write path"), "canonical write path language should survive substitution");
 });
 
-test("plan-slice prompt: footer references gsd_plan_slice tool, not direct write", () => {
+test("plan-slice prompt: footer references sdd_plan_slice tool, not direct write", () => {
   const result = loadPrompt("plan-slice", { ...BASE_VARS, commitInstruction: "Do not commit." });
   assert.ok(
-    result.includes("MUST call `gsd_plan_slice`"),
-    "footer should instruct calling gsd_plan_slice tool",
+    result.includes("MUST call `sdd_plan_slice`"),
+    "footer should instruct calling sdd_plan_slice tool",
   );
   assert.ok(
     !result.includes("MUST write the file"),
@@ -186,14 +186,14 @@ test("research-milestone prompt substitutes skillActivation", () => {
   assert.ok(!result.includes("{{skillActivation}}"));
 });
 
-test("research-milestone prompt references gsd_summary_save, not direct write", () => {
+test("research-milestone prompt references sdd_summary_save, not direct write", () => {
   const result = loadPrompt("research-milestone", {
     workingDirectory: "/tmp/test-project",
     milestoneId: "M001",
     milestoneTitle: "Test Milestone",
-    milestonePath: ".gsd/milestones/M001",
-    contextPath: ".gsd/milestones/M001/M001-CONTEXT.md",
-    outputPath: "/tmp/test-project/.gsd/milestones/M001/M001-RESEARCH.md",
+    milestonePath: ".sdd/milestones/M001",
+    contextPath: ".sdd/milestones/M001/M001-CONTEXT.md",
+    outputPath: "/tmp/test-project/.sdd/milestones/M001/M001-RESEARCH.md",
     inlinedContext: "Context",
     skillDiscoveryMode: "manual",
     skillDiscoveryInstructions: " Discover skills manually.",
@@ -201,8 +201,8 @@ test("research-milestone prompt references gsd_summary_save, not direct write", 
   });
 
   assert.ok(
-    result.includes("gsd_summary_save"),
-    "research-milestone should reference gsd_summary_save tool",
+    result.includes("sdd_summary_save"),
+    "research-milestone should reference sdd_summary_save tool",
   );
   assert.ok(
     result.includes('artifact_type: "RESEARCH"'),

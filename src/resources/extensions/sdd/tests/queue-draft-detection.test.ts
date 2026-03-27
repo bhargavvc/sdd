@@ -9,37 +9,37 @@ import { buildExistingMilestonesContext } from "../guided-flow.js";
 
 describe('queue-draft-detection', () => {
   test('draft and context milestone detection', async () => {
-    const tmpBase = mkdtempSync(join(tmpdir(), "gsd-queue-draft-test-"));
-    const gsd = join(tmpBase, ".gsd");
+    const tmpBase = mkdtempSync(join(tmpdir(), "sdd-queue-draft-test-"));
+    const sdd = join(tmpBase, ".sdd");
 
     try {
       // M001: has only CONTEXT-DRAFT.md (draft milestone)
-      mkdirSync(join(gsd, "milestones", "M001"), { recursive: true });
+      mkdirSync(join(sdd, "milestones", "M001"), { recursive: true });
       writeFileSync(
-        join(gsd, "milestones", "M001", "M001-CONTEXT-DRAFT.md"),
+        join(sdd, "milestones", "M001", "M001-CONTEXT-DRAFT.md"),
         "# M001: Draft Milestone\n\nSeed material from prior discussion.\n",
       );
 
       // M002: has full CONTEXT.md (ready milestone)
-      mkdirSync(join(gsd, "milestones", "M002"), { recursive: true });
+      mkdirSync(join(sdd, "milestones", "M002"), { recursive: true });
       writeFileSync(
-        join(gsd, "milestones", "M002", "M002-CONTEXT.md"),
+        join(sdd, "milestones", "M002", "M002-CONTEXT.md"),
         "# M002: Ready Milestone\n\nFull context from deep discussion.\n",
       );
 
       // M003: has both CONTEXT.md and CONTEXT-DRAFT.md (CONTEXT wins)
-      mkdirSync(join(gsd, "milestones", "M003"), { recursive: true });
+      mkdirSync(join(sdd, "milestones", "M003"), { recursive: true });
       writeFileSync(
-        join(gsd, "milestones", "M003", "M003-CONTEXT.md"),
+        join(sdd, "milestones", "M003", "M003-CONTEXT.md"),
         "# M003: Full Context\n\nThis is the real context.\n",
       );
       writeFileSync(
-        join(gsd, "milestones", "M003", "M003-CONTEXT-DRAFT.md"),
+        join(sdd, "milestones", "M003", "M003-CONTEXT-DRAFT.md"),
         "# M003: Draft\n\nThis should be ignored.\n",
       );
 
       // M004: has neither (empty milestone dir)
-      mkdirSync(join(gsd, "milestones", "M004"), { recursive: true });
+      mkdirSync(join(sdd, "milestones", "M004"), { recursive: true });
 
       // Build context
       const state = await deriveState(tmpBase);

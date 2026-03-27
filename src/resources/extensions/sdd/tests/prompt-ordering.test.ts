@@ -26,7 +26,7 @@ describe("reorderForCaching", () => {
 
   it("preserves preamble at the beginning", () => {
     const prompt = [
-      "You are executing GSD auto-mode.",
+      "You are executing SDD auto-mode.",
       "",
       "## Output Template",
       "Template content.",
@@ -37,7 +37,7 @@ describe("reorderForCaching", () => {
 
     const result = reorderForCaching(prompt);
     assert.ok(
-      result.startsWith("You are executing GSD auto-mode."),
+      result.startsWith("You are executing SDD auto-mode."),
       "Preamble should remain at the start",
     );
   });
@@ -211,7 +211,7 @@ describe("real-world prompt reordering", () => {
   it("reorders a realistic execute-task prompt for better cache efficiency", () => {
     // Simulate a prompt resembling buildExecuteTaskPrompt output
     const prompt = [
-      "You are executing GSD auto-mode.",
+      "You are executing SDD auto-mode.",
       "",
       "## UNIT: Execute Task T1.2 (\"Add login\") -- Slice S1 (\"Auth\"), Milestone M1",
       "",
@@ -289,7 +289,7 @@ describe("real-world prompt reordering", () => {
 
     // Preamble still first
     assert.ok(
-      reordered.startsWith("You are executing GSD auto-mode."),
+      reordered.startsWith("You are executing SDD auto-mode."),
       "Preamble preserved at start",
     );
   });

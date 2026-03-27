@@ -149,7 +149,7 @@ function handleContentHeuristic(
  *
  * SECURITY: The command string comes from a frozen DEFINITION.yaml written
  * at run-creation time. The trust boundary is the workflow definition author.
- * Commands run with the same privileges as the GSD process. Only use
+ * Commands run with the same privileges as the SDD process. Only use
  * shell-command verification with definitions you trust.
  */
 function handleShellCommand(

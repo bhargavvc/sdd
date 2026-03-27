@@ -60,8 +60,8 @@ Once the user approves:
 
 3. Tell the user:
    - "Definition saved to `.sdd/workflow-defs/<name>.yaml`."
-   - "Run `/gsd workflow validate <name>` to check it against the schema."
-   - "Run `/gsd workflow run <name>` to execute it."
+   - "Run `/sdd workflow validate <name>` to check it against the schema."
+   - "Run `/sdd workflow run <name>` to execute it."
 </phase>
 
 <success_criteria>

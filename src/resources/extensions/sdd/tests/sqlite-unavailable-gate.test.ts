@@ -2,7 +2,7 @@
  * sqlite-unavailable-gate.test.ts — #2419
  *
  * When the SQLite provider fails to open, bootstrapAutoSession must
- * refuse to start auto-mode. Otherwise gsd_task_complete returns
+ * refuse to start auto-mode. Otherwise sdd_task_complete returns
  * "db_unavailable", artifact retry re-dispatches the same task, and
  * the session loops forever.
  *

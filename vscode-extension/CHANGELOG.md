@@ -5,7 +5,7 @@
 ### Added
 
 - **Activity feed** — real-time TreeView showing tool executions (Read, Write, Edit, Bash, Grep, Glob) with status icons, duration, and click-to-open
-- **Workflow controls** — sidebar buttons for Auto, Next, Quick Task, Capture, Status, and Fork that send `/gsd` slash commands
+- **Workflow controls** — sidebar buttons for Auto, Next, Quick Task, Capture, Status, and Fork that send `/sdd` slash commands
 - **Progress notifications** — VS Code notification with cancel button while the agent is working
 - **Context window indicator** — color-coded usage bar (green/yellow/red) in sidebar with configurable threshold warnings
 - **Session forking** — fork from any message via QuickPick using `get_fork_messages` and `fork` RPC commands
@@ -22,16 +22,16 @@
 
 ## [0.1.0]
 
-Initial release — forked from GSD-2 VS Code extension.
+Initial release — forked from SDD-2 VS Code extension.
 
 - Full RPC client — spawns `sdd --mode rpc`, JSON line framing, all RPC commands
 - Sidebar dashboard — connection status, model info, thinking level, token usage, cost, quick actions
-- Chat participant — `@gsd` in VS Code Chat with streaming responses
+- Chat participant — `@sdd` in VS Code Chat with streaming responses
 - File decorations — "G" badge on files modified by the agent
 - Bash terminal — pseudoterminal routing agent Bash tool output
 - Session tree — browse and switch between session files
 - Conversation history — webview panel with full chat log
-- Slash command completion — auto-complete for `/gsd` commands in editors
-- Code lens — "Ask GSD" above functions and classes in TS/JS/Python/Go/Rust
+- Slash command completion — auto-complete for `/sdd` commands in editors
+- Code lens — "Ask SDD" above functions and classes in TS/JS/Python/Go/Rust
 - 25 commands with 6 keyboard shortcuts
 - Auto-start, auto-compaction, and code lens configuration

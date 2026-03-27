@@ -1,12 +1,12 @@
 /**
- * GSD Preferences Wizard — TUI wizard for configuring GSD preferences.
+ * SDD Preferences Wizard — TUI wizard for configuring SDD preferences.
  *
  * Contains: handlePrefsWizard, buildCategorySummaries, all configure* functions,
  * serializePreferencesToFrontmatter, yamlSafeString, ensurePreferencesFile,
  * handlePrefsMode, handleImportClaude, handlePrefs
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -84,7 +84,7 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
       : `missing: ${canonicalGlobal}`;
     const projectStatus = projectPrefs ? `present: ${projectPrefs.path}` : `missing: ${getProjectSDDPreferencesPath()}`;
 
-    const lines = [`GSD skill prefs — global ${globalStatus}; project ${projectStatus}`];
+    const lines = [`SDD skill prefs — global ${globalStatus}; project ${projectStatus}`];
 
     const effective = loadEffectiveSDDPreferences();
     let hasUnresolved = false;
@@ -104,7 +104,7 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
     return;
   }
 
-  ctx.ui.notify("Usage: /gsd prefs [global|project|status|wizard|setup|import-claude [global|project]]", "info");
+  ctx.ui.notify("Usage: /sdd prefs [global|project|status|wizard|setup|import-claude [global|project]]", "info");
 }
 
 export async function handleImportClaude(ctx: ExtensionCommandContext, scope: "global" | "project"): Promise<void> {
@@ -123,7 +123,7 @@ export async function handleImportClaude(ctx: ExtensionCommandContext, scope: "g
   const writePrefs = async (prefs: Record<string, unknown>): Promise<void> => {
     prefs.version = prefs.version || 1;
     const frontmatter = serializePreferencesToFrontmatter(prefs);
-    let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+    let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
     if (existsSync(path)) {
       const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
       if (preserved) body = preserved;
@@ -145,7 +145,7 @@ export async function handlePrefsMode(ctx: ExtensionCommandContext, scope: "glob
   prefs.version = prefs.version || 1;
   const frontmatter = serializePreferencesToFrontmatter(prefs);
 
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
   if (existsSync(path)) {
     const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
     if (preserved) body = preserved;
@@ -624,7 +624,7 @@ export async function handlePrefsWizard(
   const existing = scope === "project" ? loadProjectSDDPreferences() : loadGlobalSDDPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
 
-  ctx.ui.notify(`GSD preferences (${scope}) — pick a category to configure.`, "info");
+  ctx.ui.notify(`SDD preferences (${scope}) — pick a category to configure.`, "info");
 
   while (true) {
     const summaries = buildCategorySummaries(prefs);
@@ -640,7 +640,7 @@ export async function handlePrefsWizard(
       `── Save & Exit ──`,
     ];
 
-    const raw = await ctx.ui.select("GSD Preferences", options);
+    const raw = await ctx.ui.select("SDD Preferences", options);
     const choice = typeof raw === "string" ? raw : "";
     if (!choice || choice.includes("Save & Exit")) break;
 
@@ -659,7 +659,7 @@ export async function handlePrefsWizard(
   const frontmatter = serializePreferencesToFrontmatter(prefs);
 
   // Preserve existing body content (everything after closing ---)
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# SDD Skill Preferences\n\nSee `~/.sdd/agent/extensions/sdd/docs/preferences-reference.md` for full field documentation and examples.\n";
   if (existsSync(path)) {
     const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
     if (preserved) body = preserved;
@@ -773,12 +773,12 @@ export async function ensurePreferencesFile(
   if (!existsSync(path)) {
     const template = await loadFile(join(dirname(fileURLToPath(import.meta.url)), "templates", "PREFERENCES.md"));
     if (!template) {
-      ctx.ui.notify("Could not load GSD preferences template.", "error");
+      ctx.ui.notify("Could not load SDD preferences template.", "error");
       return;
     }
     await saveFile(path, template);
-    ctx.ui.notify(`Created ${scope} GSD skill preferences at ${path}`, "info");
+    ctx.ui.notify(`Created ${scope} SDD skill preferences at ${path}`, "info");
   } else {
-    ctx.ui.notify(`Using existing ${scope} GSD skill preferences at ${path}`, "info");
+    ctx.ui.notify(`Using existing ${scope} SDD skill preferences at ${path}`, "info");
   }
 }

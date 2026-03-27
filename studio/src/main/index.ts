@@ -34,7 +34,7 @@ function createWindow(): BrowserWindow {
   }
 
   console.log('[studio] window created')
-  console.log('GSD Studio ready')
+  console.log('SDD Studio ready')
 
   return window
 }

@@ -1,4 +1,4 @@
-// GSD Extension - Override Tests
+// SDD Extension - Override Tests
 // Tests for parseOverrides, appendOverride, loadActiveOverrides, formatOverridesSection, resolveAllOverrides
 
 import { describe, test, afterEach } from 'node:test';
@@ -12,8 +12,8 @@ import type { Override } from '../files.ts';
 const tempDirs: string[] = [];
 
 function makeTempDir(prefix: string): string {
-  const dir = mkdtempSync(join(tmpdir(), `gsd-overrides-test-${prefix}-`));
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), `sdd-overrides-test-${prefix}-`));
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
   tempDirs.push(dir);
   return dir;
 }
@@ -33,7 +33,7 @@ describe('overrides', () => {
   });
 
   test('parseOverrides: single active override', () => {
-    const content = `# GSD Overrides\n\nUser-issued overrides that supersede plan document content.\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Use Postgres instead of SQLite\n**Scope:** active\n**Applied-at:** M001/S02/T03\n\n---\n`;
+    const content = `# SDD Overrides\n\nUser-issued overrides that supersede plan document content.\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Use Postgres instead of SQLite\n**Scope:** active\n**Applied-at:** M001/S02/T03\n\n---\n`;
     const result = parseOverrides(content);
     assert.deepStrictEqual(result.length, 1, "parses one override");
     assert.deepStrictEqual(result[0].timestamp, "2026-03-14T10:00:00.000Z", "correct timestamp");
@@ -43,7 +43,7 @@ describe('overrides', () => {
   });
 
   test('parseOverrides: multiple overrides, mixed scopes', () => {
-    const content = `# GSD Overrides\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Use Postgres instead of SQLite\n**Scope:** resolved\n**Applied-at:** M001/S02/T03\n\n---\n\n## Override: 2026-03-14T11:00:00.000Z\n\n**Change:** Use JWT instead of session cookies\n**Scope:** active\n**Applied-at:** M001/S03/T01\n\n---\n`;
+    const content = `# SDD Overrides\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Use Postgres instead of SQLite\n**Scope:** resolved\n**Applied-at:** M001/S02/T03\n\n---\n\n## Override: 2026-03-14T11:00:00.000Z\n\n**Change:** Use JWT instead of session cookies\n**Scope:** active\n**Applied-at:** M001/S03/T01\n\n---\n`;
     const result = parseOverrides(content);
     assert.deepStrictEqual(result.length, 2, "parses two overrides");
     assert.deepStrictEqual(result[0].scope, "resolved", "first is resolved");
@@ -54,8 +54,8 @@ describe('overrides', () => {
   test('appendOverride: creates new file', async () => {
     const tmp = makeTempDir("append-new");
     await appendOverride(tmp, "Use Postgres", "M001/S01/T01");
-    const content = readFileSync(join(tmp, ".gsd", "OVERRIDES.md"), "utf-8");
-    assert.ok(content.includes("# GSD Overrides"), "has header");
+    const content = readFileSync(join(tmp, ".sdd", "OVERRIDES.md"), "utf-8");
+    assert.ok(content.includes("# SDD Overrides"), "has header");
     assert.ok(content.includes("**Change:** Use Postgres"), "has change");
     assert.ok(content.includes("**Scope:** active"), "has active scope");
     assert.ok(content.includes("**Applied-at:** M001/S01/T01"), "has appliedAt");
@@ -65,7 +65,7 @@ describe('overrides', () => {
     const tmp = makeTempDir("append-existing");
     await appendOverride(tmp, "First override", "M001/S01/T01");
     await appendOverride(tmp, "Second override", "M001/S02/T02");
-    const content = readFileSync(join(tmp, ".gsd", "OVERRIDES.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".sdd", "OVERRIDES.md"), "utf-8");
     assert.ok(content.includes("**Change:** First override"), "has first override");
     assert.ok(content.includes("**Change:** Second override"), "has second override");
     const parsed = parseOverrides(content);
@@ -80,8 +80,8 @@ describe('overrides', () => {
 
   test('loadActiveOverrides: filters to active only', async () => {
     const tmp = makeTempDir("load-filter");
-    const content = `# GSD Overrides\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Resolved change\n**Scope:** resolved\n**Applied-at:** M001/S01/T01\n\n---\n\n## Override: 2026-03-14T11:00:00.000Z\n\n**Change:** Active change\n**Scope:** active\n**Applied-at:** M001/S02/T01\n\n---\n`;
-    writeFileSync(join(tmp, ".gsd", "OVERRIDES.md"), content, "utf-8");
+    const content = `# SDD Overrides\n\n---\n\n## Override: 2026-03-14T10:00:00.000Z\n\n**Change:** Resolved change\n**Scope:** resolved\n**Applied-at:** M001/S01/T01\n\n---\n\n## Override: 2026-03-14T11:00:00.000Z\n\n**Change:** Active change\n**Scope:** active\n**Applied-at:** M001/S02/T01\n\n---\n`;
+    writeFileSync(join(tmp, ".sdd", "OVERRIDES.md"), content, "utf-8");
     const result = await loadActiveOverrides(tmp);
     assert.deepStrictEqual(result.length, 1, "only one active override");
     assert.deepStrictEqual(result[0].change, "Active change", "correct active change");
@@ -110,7 +110,7 @@ describe('overrides', () => {
     await resolveAllOverrides(tmp);
     active = await loadActiveOverrides(tmp);
     assert.deepStrictEqual(active.length, 0, "no active after resolve");
-    const content = readFileSync(join(tmp, ".gsd", "OVERRIDES.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".sdd", "OVERRIDES.md"), "utf-8");
     const allOverrides = parseOverrides(content);
     assert.deepStrictEqual(allOverrides.length, 2, "still two overrides total");
     assert.ok(allOverrides.every(o => o.scope === "resolved"), "all resolved");

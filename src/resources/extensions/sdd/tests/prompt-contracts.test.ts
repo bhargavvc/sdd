@@ -58,18 +58,18 @@ test("guided-resume-task prompt preserves recovery state until work is supersede
   assert.doesNotMatch(prompt, /Delete the continue file after reading it/i);
 });
 
-// ─── Prompt migration: execute-task → gsd_complete_task ───────────────
+// ─── Prompt migration: execute-task → sdd_complete_task ───────────────
 
-test("execute-task prompt references gsd_complete_task tool", () => {
+test("execute-task prompt references sdd_complete_task tool", () => {
   const prompt = readPrompt("execute-task");
-  assert.match(prompt, /gsd_complete_task/);
+  assert.match(prompt, /sdd_complete_task/);
 });
 
 test("execute-task prompt instructs writing task summary before tool call", () => {
   const prompt = readPrompt("execute-task");
   // The prompt instructs writing the summary file AND calling the tool
   assert.match(prompt, /\{\{taskSummaryPath\}\}/);
-  assert.match(prompt, /gsd_complete_task/);
+  assert.match(prompt, /sdd_complete_task/);
 });
 
 test("execute-task prompt does not instruct LLM to toggle checkboxes manually", () => {
@@ -84,9 +84,9 @@ test("execute-task prompt still contains template variables for context", () => 
   assert.match(prompt, /\{\{planPath\}\}/);
 });
 
-test("guided-execute-task prompt references gsd_task_complete tool", () => {
+test("guided-execute-task prompt references sdd_task_complete tool", () => {
   const prompt = readPrompt("guided-execute-task");
-  assert.match(prompt, /gsd_task_complete/);
+  assert.match(prompt, /sdd_task_complete/);
 });
 
 test("guided-execute-task prompt does not instruct manual file write", () => {
@@ -94,11 +94,11 @@ test("guided-execute-task prompt does not instruct manual file write", () => {
   assert.doesNotMatch(prompt, /Write `?\{\{taskId\}\}-SUMMARY\.md`?.*mark it done/i);
 });
 
-// ─── Prompt migration: complete-slice → gsd_complete_slice ────────────
+// ─── Prompt migration: complete-slice → sdd_complete_slice ────────────
 
-test("complete-slice prompt references gsd_complete_slice tool", () => {
+test("complete-slice prompt references sdd_complete_slice tool", () => {
   const prompt = readPrompt("complete-slice");
-  assert.match(prompt, /gsd_complete_slice/);
+  assert.match(prompt, /sdd_complete_slice/);
 });
 
 test("complete-slice prompt does not instruct LLM to toggle checkboxes manually", () => {
@@ -106,9 +106,9 @@ test("complete-slice prompt does not instruct LLM to toggle checkboxes manually"
   assert.doesNotMatch(prompt, /change \[ \] to \[x\]/);
 });
 
-test("guided-complete-slice prompt references gsd_slice_complete tool", () => {
+test("guided-complete-slice prompt references sdd_slice_complete tool", () => {
   const prompt = readPrompt("guided-complete-slice");
-  assert.match(prompt, /gsd_slice_complete/);
+  assert.match(prompt, /sdd_slice_complete/);
 });
 
 test("complete-slice prompt instructs writing summary and UAT files before tool call", () => {
@@ -116,7 +116,7 @@ test("complete-slice prompt instructs writing summary and UAT files before tool 
   // The prompt instructs writing the summary AND UAT files, then calling the tool
   assert.match(prompt, /\{\{sliceSummaryPath\}\}/);
   assert.match(prompt, /\{\{sliceUatPath\}\}/);
-  assert.match(prompt, /gsd_complete_slice/);
+  assert.match(prompt, /sdd_complete_slice/);
 });
 
 test("complete-slice prompt preserves decisions and knowledge review steps", () => {
@@ -133,13 +133,13 @@ test("complete-slice prompt still contains template variables for context", () =
 
 test("plan-milestone prompt references DB-backed planning tool and explicitly forbids manual roadmap writes", () => {
   const prompt = readPrompt("plan-milestone");
-  assert.match(prompt, /gsd_plan_milestone/);
+  assert.match(prompt, /sdd_plan_milestone/);
   assert.match(prompt, /Do \*\*not\*\* write `?\{\{outputPath\}\}`?, `?ROADMAP\.md`?, or other planning artifacts manually/i);
 });
 
 test("guided-plan-milestone prompt references DB-backed planning tool and explicitly forbids manual roadmap writes", () => {
   const prompt = readPrompt("guided-plan-milestone");
-  assert.match(prompt, /gsd_plan_milestone/);
+  assert.match(prompt, /sdd_plan_milestone/);
   assert.match(prompt, /Do \*\*not\*\* write `?\{\{milestoneId\}\}-ROADMAP\.md`?, `?ROADMAP\.md`?, or other planning artifacts manually/i);
 });
 
@@ -148,10 +148,10 @@ test("plan-slice prompt no longer frames direct PLAN writes as the source of tru
   assert.match(prompt, /Do \*\*not\*\* rely on direct `PLAN\.md` writes as the source of truth/i);
 });
 
-test("plan-slice prompt explicitly names gsd_plan_slice as DB-backed planning tool", () => {
+test("plan-slice prompt explicitly names sdd_plan_slice as DB-backed planning tool", () => {
   const prompt = readPrompt("plan-slice");
-  assert.match(prompt, /gsd_plan_slice/);
-  assert.match(prompt, /gsd_plan_task/);
+  assert.match(prompt, /sdd_plan_slice/);
+  assert.match(prompt, /sdd_plan_task/);
   // The prompt should describe the DB-backed tool as the canonical write path
   assert.match(prompt, /DB-backed tool is the canonical write path/i);
 });
@@ -162,37 +162,37 @@ test("plan-slice prompt does not instruct direct file writes as a primary step",
   assert.doesNotMatch(prompt, /^\d+\.\s+Write `?\{\{outputPath\}\}`?\s*$/m);
 });
 
-test("plan-slice prompt clarifies gsd_plan_slice handles task persistence", () => {
+test("plan-slice prompt clarifies sdd_plan_slice handles task persistence", () => {
   const prompt = readPrompt("plan-slice");
-  // gsd_plan_slice persists tasks in its transaction — no separate gsd_plan_task calls needed
-  assert.match(prompt, /gsd_plan_task/);
-  assert.match(prompt, /gsd_plan_slice` handles task persistence/i);
+  // sdd_plan_slice persists tasks in its transaction — no separate sdd_plan_task calls needed
+  assert.match(prompt, /sdd_plan_task/);
+  assert.match(prompt, /sdd_plan_slice` handles task persistence/i);
 });
 
-test("replan-slice prompt uses gsd_replan_slice as canonical DB-backed tool", () => {
+test("replan-slice prompt uses sdd_replan_slice as canonical DB-backed tool", () => {
   const prompt = readPrompt("replan-slice");
-  assert.match(prompt, /gsd_replan_slice/);
+  assert.match(prompt, /sdd_replan_slice/);
   // Degraded fallback (direct file writes) was removed — DB tools are always available
   assert.doesNotMatch(prompt, /Degraded fallback/i);
 });
 
-test("reassess-roadmap prompt references gsd_reassess_roadmap tool", () => {
+test("reassess-roadmap prompt references sdd_reassess_roadmap tool", () => {
   const prompt = readPrompt("reassess-roadmap");
-  assert.match(prompt, /gsd_reassess_roadmap/);
+  assert.match(prompt, /sdd_reassess_roadmap/);
 });
 
-// ─── Prompt migration: replan-slice → gsd_replan_slice ────────────────
+// ─── Prompt migration: replan-slice → sdd_replan_slice ────────────────
 
-test("replan-slice prompt names gsd_replan_slice as the tool to use", () => {
+test("replan-slice prompt names sdd_replan_slice as the tool to use", () => {
   const prompt = readPrompt("replan-slice");
-  assert.match(prompt, /gsd_replan_slice/);
+  assert.match(prompt, /sdd_replan_slice/);
 });
 
-// ─── Prompt migration: reassess-roadmap → gsd_reassess_roadmap ───────
+// ─── Prompt migration: reassess-roadmap → sdd_reassess_roadmap ───────
 
-test("reassess-roadmap prompt names gsd_reassess_roadmap as the tool to use", () => {
+test("reassess-roadmap prompt names sdd_reassess_roadmap as the tool to use", () => {
   const prompt = readPrompt("reassess-roadmap");
-  assert.match(prompt, /gsd_reassess_roadmap/);
+  assert.match(prompt, /sdd_reassess_roadmap/);
 });
 
 test("reactive-execute prompt references tool calls instead of checkbox updates", () => {

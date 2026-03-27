@@ -1,4 +1,4 @@
-import { Editor, type EditorOptions, type EditorTheme, type TUI, isKittyProtocolActive } from "@gsd/pi-tui";
+import { Editor, type EditorOptions, type EditorTheme, type TUI, isKittyProtocolActive } from "@sdd/pi-tui";
 import type { AppAction, KeybindingsManager } from "../../../core/keybindings.js";
 
 /**

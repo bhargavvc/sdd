@@ -1,4 +1,4 @@
-import { type Component, truncateToWidth, visibleWidth } from "@gsd/pi-tui";
+import { type Component, truncateToWidth, visibleWidth } from "@sdd/pi-tui";
 import type { AgentSession } from "../../../core/agent-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
 import { theme } from "../theme/theme.js";
@@ -125,7 +125,7 @@ export class FooterComponent implements Component {
 		}
 
 		// Per-prompt cost annotation (opt-in via show_token_cost preference, #1515)
-		if (process.env.GSD_SHOW_TOKEN_COST === "1") {
+		if (process.env.SDD_SHOW_TOKEN_COST === "1") {
 			const lastTurnCost = this.session.getLastTurnCost();
 			if (lastTurnCost > 0) {
 				statsParts.push(`(last: ${formatPromptCost(lastTurnCost)})`);

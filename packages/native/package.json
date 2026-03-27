@@ -1,7 +1,7 @@
 {
-  "name": "@gsd/native",
+  "name": "@sdd/native",
   "version": "0.1.0",
-  "description": "Native Rust bindings for GSD \u2014 high-performance native modules via N-API",
+  "description": "Native Rust bindings for SDD \u2014 high-performance native modules via N-API",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -60,9 +60,9 @@
       "types": "./dist/diff/index.d.ts",
       "import": "./dist/diff/index.js"
     },
-    "./gsd-parser": {
-      "types": "./dist/gsd-parser/index.d.ts",
-      "import": "./dist/gsd-parser/index.js"
+    "./sdd-parser": {
+      "types": "./dist/sdd-parser/index.d.ts",
+      "import": "./dist/sdd-parser/index.js"
     },
     "./highlight": {
       "types": "./dist/highlight/index.d.ts",

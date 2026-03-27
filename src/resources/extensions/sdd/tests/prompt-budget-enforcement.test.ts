@@ -25,7 +25,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // ─── Fixture helpers ──────────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-prompt-budget-test-"));
+  return mkdtempSync(join(tmpdir(), "sdd-prompt-budget-test-"));
 }
 
 function cleanup(base: string): void {
@@ -43,7 +43,7 @@ function setupDependencyFixture(
   deps: string[],
   summaries: Record<string, string>,
 ): void {
-  const msDir = join(base, ".gsd", "milestones", mid);
+  const msDir = join(base, ".sdd", "milestones", mid);
   mkdirSync(msDir, { recursive: true });
 
   // Build roadmap content — sid depends on deps
@@ -156,7 +156,7 @@ describe("prompt-budget: inlineDependencySummaries truncation", () => {
   });
 
   it("returns no-dependencies marker when slice has no deps", async () => {
-    const msDir = join(base, ".gsd", "milestones", "M001");
+    const msDir = join(base, ".sdd", "milestones", "M001");
     mkdirSync(msDir, { recursive: true });
     const roadmap = "# Roadmap\n\n## Slices\n\n- [ ] **S01: Solo** `risk:low` `depends:[]`\n";
     writeFileSync(join(msDir, "M001-ROADMAP.md"), roadmap);

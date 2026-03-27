@@ -1,11 +1,11 @@
 /**
  * Live Regression Test Harness — Post-Build Pipeline Validation
  *
- * These tests run AFTER `npm publish` against the installed `gsd` binary.
+ * These tests run AFTER `npm publish` against the installed `sdd` binary.
  * They exercise the dispatch loop state machine end-to-end by:
  *
  * 1. Creating real `.sdd/` directory structures with milestone artifacts
- * 2. Calling `gsd headless query` to verify state derivation
+ * 2. Calling `sdd headless query` to verify state derivation
  * 3. Verifying phase transitions match expected outcomes
  * 4. Testing crash recovery (lock file lifecycle)
  * 5. Testing worktree identity hash consistency
@@ -13,11 +13,11 @@
  * These tests DO NOT require LLM API keys — they test the state machine
  * and infrastructure, not the LLM execution.
  *
- * Run from CI pipeline after `npm install -g gsd-pi@<version>`:
+ * Run from CI pipeline after `npm install -g sdd-pi@<version>`:
  *   node --experimental-strip-types tests/live-regression/run.ts
  *
  * Or locally:
- *   GSD_SMOKE_BINARY=dist/loader.js node --experimental-strip-types tests/live-regression/run.ts
+ *   SDD_SMOKE_BINARY=dist/loader.js node --experimental-strip-types tests/live-regression/run.ts
  */
 
 import { execFileSync, execSync } from "child_process";
@@ -27,7 +27,7 @@ import { tmpdir } from "os";
 
 // ─── Config ───────────────────────────────────────────────────────────────
 
-const binary = process.env.GSD_SMOKE_BINARY || "gsd";
+const binary = process.env.SDD_SMOKE_BINARY || "sdd";
 let passed = 0;
 let failed = 0;
 
@@ -47,15 +47,15 @@ function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function gsd(args: string[], cwd: string, env?: Record<string, string>): { stdout: string; stderr: string; code: number } {
+function sdd(args: string[], cwd: string, env?: Record<string, string>): { stdout: string; stderr: string; code: number } {
   try {
-    const stdout = execFileSync(binary === "gsd" ? "gsd" : "node", 
-      binary === "gsd" ? args : [binary, ...args], {
+    const stdout = execFileSync(binary === "sdd" ? "sdd" : "node", 
+      binary === "sdd" ? args : [binary, ...args], {
       cwd,
       encoding: "utf-8",
       timeout: 30_000,
       stdio: ["pipe", "pipe", "pipe"],
-      env: { ...process.env, ...env, GSD_NON_INTERACTIVE: "1" },
+      env: { ...process.env, ...env, SDD_NON_INTERACTIVE: "1" },
     });
     return { stdout, stderr: "", code: 0 };
   } catch (err: any) {
@@ -64,7 +64,7 @@ function gsd(args: string[], cwd: string, env?: Record<string, string>): { stdou
 }
 
 function createTempProject(name: string): string {
-  const dir = mkdtempSync(join(tmpdir(), `gsd-live-${name}-`));
+  const dir = mkdtempSync(join(tmpdir(), `sdd-live-${name}-`));
   try { execSync("git init && git config user.email test@test.com && git config user.name Test && git commit --allow-empty -m init", { cwd: dir, stdio: "pipe" }); } catch {}
   return dir;
 }
@@ -98,10 +98,10 @@ function buildTaskSummary(id: string): string {
 run("headless query returns valid JSON on initialized project", () => {
   const dir = createTempProject("query");
   try {
-    const gsdDir = join(dir, ".gsd");
+    const gsdDir = join(dir, ".sdd");
     mkdirSync(join(gsdDir, "milestones"), { recursive: true });
     
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.stderr}`);
     
     const json = JSON.parse(result.stdout);
@@ -117,9 +117,9 @@ run("headless query returns valid JSON on initialized project", () => {
 run("headless query: empty project reports pre-planning", () => {
   const dir = createTempProject("empty");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
+    mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
     
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}`);
     
     const json = JSON.parse(result.stdout);
@@ -135,14 +135,14 @@ run("headless query: empty project reports pre-planning", () => {
 run("headless query: milestone with roadmap reports planning phase", () => {
   const dir = createTempProject("planning");
   try {
-    const mDir = join(dir, ".gsd", "milestones", "M001");
+    const mDir = join(dir, ".sdd", "milestones", "M001");
     mkdirSync(join(mDir, "slices", "S01"), { recursive: true });
     writeFileSync(join(mDir, "M001-CONTEXT.md"), "# M001\n\nContext.");
     writeFileSync(join(mDir, "M001-ROADMAP.md"), buildMinimalRoadmap([
       { id: "S01", title: "First Slice", done: false },
     ]));
     
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}`);
     
     const json = JSON.parse(result.stdout);
@@ -159,7 +159,7 @@ run("headless query: milestone with roadmap reports planning phase", () => {
 run("headless query: all tasks done reports summarizing phase", () => {
   const dir = createTempProject("summarizing");
   try {
-    const mDir = join(dir, ".gsd", "milestones", "M001");
+    const mDir = join(dir, ".sdd", "milestones", "M001");
     const sDir = join(mDir, "slices", "S01");
     mkdirSync(join(sDir, "tasks"), { recursive: true });
     writeFileSync(join(mDir, "M001-CONTEXT.md"), "# M001\n\nContext.");
@@ -171,7 +171,7 @@ run("headless query: all tasks done reports summarizing phase", () => {
     ]));
     writeFileSync(join(sDir, "tasks", "T01-SUMMARY.md"), buildTaskSummary("T01"));
     
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}`);
     
     const json = JSON.parse(result.stdout);
@@ -186,14 +186,14 @@ run("headless query: all tasks done reports summarizing phase", () => {
 run("headless query: milestone with summary reports complete", () => {
   const dir = createTempProject("complete");
   try {
-    const mDir = join(dir, ".gsd", "milestones", "M001");
+    const mDir = join(dir, ".sdd", "milestones", "M001");
     mkdirSync(mDir, { recursive: true });
     writeFileSync(join(mDir, "M001-ROADMAP.md"), buildMinimalRoadmap([
       { id: "S01", title: "Done", done: true },
     ]));
     writeFileSync(join(mDir, "M001-SUMMARY.md"), "# M001 Summary\n\nComplete.");
     
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}`);
     
     const json = JSON.parse(result.stdout);
@@ -209,7 +209,7 @@ run("headless query: milestone with summary reports complete", () => {
 run("stale auto.lock with dead PID does not block --version", () => {
   const dir = createTempProject("stale-lock");
   try {
-    const gsdDir = join(dir, ".gsd");
+    const gsdDir = join(dir, ".sdd");
     mkdirSync(gsdDir, { recursive: true });
     // Write a lock with a PID that doesn't exist
     writeFileSync(join(gsdDir, "auto.lock"), JSON.stringify({
@@ -221,7 +221,7 @@ run("stale auto.lock with dead PID does not block --version", () => {
       completedUnits: 0,
     }));
     
-    const result = gsd(["--version"], dir);
+    const result = sdd(["--version"], dir);
     assert(result.code === 0, `--version should succeed even with stale lock, got code ${result.code}`);
     assert(/\d+\.\d+\.\d+/.test(result.stdout.trim()), `should output version, got: ${result.stdout}`);
   } finally {
@@ -234,7 +234,7 @@ run("stale auto.lock with dead PID does not block --version", () => {
 run("crash recovery shows actionable guidance", () => {
   const dir = createTempProject("crash-recovery");
   try {
-    const gsdDir = join(dir, ".gsd");
+    const gsdDir = join(dir, ".sdd");
     mkdirSync(join(gsdDir, "milestones"), { recursive: true });
     writeFileSync(join(gsdDir, "auto.lock"), JSON.stringify({
       pid: 99999999,
@@ -246,7 +246,7 @@ run("crash recovery shows actionable guidance", () => {
     }));
     
     // headless query should still work — lock is for auto-mode, not query
-    const result = gsd(["headless", "query"], dir);
+    const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `query should succeed with stale lock`);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -259,7 +259,7 @@ run("non-TTY invocation exits quickly with clean error", () => {
   const dir = createTempProject("tty-check");
   try {
     const start = Date.now();
-    const result = gsd([], dir); // No args, no TTY
+    const result = sdd([], dir); // No args, no TTY
     const elapsed = Date.now() - start;
     
     assert(result.code === 1, `expected exit 1 for non-TTY, got ${result.code}`);
@@ -279,20 +279,20 @@ run("version skew is detected before TTY check", () => {
   const dir = createTempProject("version-skew");
   try {
     // Create a fake managed-resources.json with a future version
-    const agentDir = join(dir, ".gsd-test-agent");
+    const agentDir = join(dir, ".sdd-test-agent");
     mkdirSync(agentDir, { recursive: true });
     writeFileSync(join(agentDir, "managed-resources.json"), JSON.stringify({
       gsdVersion: "999.0.0",
     }));
     
-    // Set HOME to the temp dir so GSD reads the fake agent dir
+    // Set HOME to the temp dir so SDD reads the fake agent dir
     const fakeHome = dir;
-    mkdirSync(join(fakeHome, ".gsd", "agent"), { recursive: true });
-    writeFileSync(join(fakeHome, ".gsd", "agent", "managed-resources.json"), JSON.stringify({
+    mkdirSync(join(fakeHome, ".sdd", "agent"), { recursive: true });
+    writeFileSync(join(fakeHome, ".sdd", "agent", "managed-resources.json"), JSON.stringify({
       gsdVersion: "999.0.0",
     }));
     
-    const result = gsd([], dir, { HOME: fakeHome });
+    const result = sdd([], dir, { HOME: fakeHome });
     // Should either exit with version mismatch or TTY error — both are fine
     assert(result.code === 1, `expected exit 1, got ${result.code}`);
   } finally {
@@ -302,11 +302,11 @@ run("version skew is detected before TTY check", () => {
 
 // ─── Test: native addon graceful fallback ────────────────────────────────
 
-run("gsd --help works (native addon loads or falls back gracefully)", () => {
-  const result = gsd(["--help"], process.cwd());
+run("sdd --help works (native addon loads or falls back gracefully)", () => {
+  const result = sdd(["--help"], process.cwd());
   assert(result.code === 0, `--help should exit 0, got ${result.code}`);
-  assert(result.stdout.toLowerCase().includes("gsd") || result.stdout.toLowerCase().includes("usage"),
-    `help output should contain gsd or usage`);
+  assert(result.stdout.toLowerCase().includes("sdd") || result.stdout.toLowerCase().includes("usage"),
+    `help output should contain sdd or usage`);
 });
 
 // ─── Summary ─────────────────────────────────────────────────────────────

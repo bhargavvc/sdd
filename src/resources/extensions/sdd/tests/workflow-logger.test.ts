@@ -1,4 +1,4 @@
-// GSD Extension — Workflow Logger Tests
+// SDD Extension — Workflow Logger Tests
 // Tests for the centralized warning/error accumulator.
 
 import { describe, test, beforeEach, afterEach } from "node:test";
@@ -238,11 +238,11 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .gsd/audit-log.jsonl after setLogBasePath", () => {
+    test("writes entry to .sdd/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
       logWarning("engine", "audit test entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".sdd", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -256,7 +256,7 @@ describe("workflow-logger", () => {
       _resetLogs();
       logWarning("engine", "post-reset entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".sdd", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -291,11 +291,11 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .gsd/audit-log.jsonl after setLogBasePath", () => {
+    test("writes entry to .sdd/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
       logWarning("engine", "audit test entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".sdd", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -309,7 +309,7 @@ describe("workflow-logger", () => {
       _resetLogs();
       logWarning("engine", "post-reset entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".sdd", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -327,7 +327,7 @@ describe("workflow-logger", () => {
 
       logWarning("engine", "test warn");
       assert.equal(written.length, 1);
-      assert.ok(written[0].includes("[gsd:engine] WARN: test warn"));
+      assert.ok(written[0].includes("[sdd:engine] WARN: test warn"));
     });
 
     test("writes ERROR prefix to stderr for errors", (t) => {
@@ -338,7 +338,7 @@ describe("workflow-logger", () => {
       t.after(() => { process.stderr.write = orig; });
 
       logError("intercept", "blocked");
-      assert.ok(written[0].includes("[gsd:intercept] ERROR: blocked"));
+      assert.ok(written[0].includes("[sdd:intercept] ERROR: blocked"));
     });
 
     test("includes serialized context in stderr output", (t) => {

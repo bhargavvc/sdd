@@ -35,8 +35,8 @@ import { createTestContext } from "./test-helpers.ts";
 const { assertTrue, assertEq, report } = createTestContext();
 
 function createBase(name: string): string {
-  const base = mkdtempSync(join(tmpdir(), `gsd-wt-1886-${name}-`));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), `sdd-wt-1886-${name}-`));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
@@ -55,12 +55,12 @@ async function main(): Promise<void> {
 
     try {
       // Project root has an older CONTEXT but no VALIDATION
-      const prM004 = join(mainBase, ".gsd", "milestones", "M004");
+      const prM004 = join(mainBase, ".sdd", "milestones", "M004");
       mkdirSync(prM004, { recursive: true });
       writeFileSync(join(prM004, "M004-CONTEXT.md"), "# old context");
 
       // Worktree has CONTEXT + VALIDATION (written by validate-milestone)
-      const wtM004 = join(wtBase, ".gsd", "milestones", "M004");
+      const wtM004 = join(wtBase, ".sdd", "milestones", "M004");
       mkdirSync(wtM004, { recursive: true });
       writeFileSync(join(wtM004, "M004-CONTEXT.md"), "# worktree context");
       writeFileSync(
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
     const wtBase = createBase("wt");
 
     try {
-      const prM004 = join(mainBase, ".gsd", "milestones", "M004");
+      const prM004 = join(mainBase, ".sdd", "milestones", "M004");
       mkdirSync(prM004, { recursive: true });
       writeFileSync(join(prM004, "M004-CONTEXT.md"), "# from project root");
       writeFileSync(join(prM004, "M004-ROADMAP.md"), "# roadmap");
@@ -109,11 +109,11 @@ async function main(): Promise<void> {
       syncProjectRootToWorktree(mainBase, wtBase, "M004");
 
       assertTrue(
-        existsSync(join(wtBase, ".gsd", "milestones", "M004", "M004-CONTEXT.md")),
+        existsSync(join(wtBase, ".sdd", "milestones", "M004", "M004-CONTEXT.md")),
         "#1886: missing CONTEXT.md copied from project root",
       );
       assertTrue(
-        existsSync(join(wtBase, ".gsd", "milestones", "M004", "M004-ROADMAP.md")),
+        existsSync(join(wtBase, ".sdd", "milestones", "M004", "M004-ROADMAP.md")),
         "#1886: missing ROADMAP.md copied from project root",
       );
     } finally {
@@ -133,20 +133,20 @@ async function main(): Promise<void> {
     try {
       // Project root has completed units (authoritative after crash recovery)
       writeFileSync(
-        join(mainBase, ".gsd", "completed-units.json"),
+        join(mainBase, ".sdd", "completed-units.json"),
         JSON.stringify(["validate-milestone/M004"]),
       );
 
       // Worktree has empty completed-units
       writeFileSync(
-        join(wtBase, ".gsd", "completed-units.json"),
+        join(wtBase, ".sdd", "completed-units.json"),
         JSON.stringify([]),
       );
 
       syncProjectRootToWorktree(mainBase, wtBase, "M004");
 
       const wtCompleted = JSON.parse(
-        readFileSync(join(wtBase, ".gsd", "completed-units.json"), "utf-8"),
+        readFileSync(join(wtBase, ".sdd", "completed-units.json"), "utf-8"),
       );
       assertEq(
         wtCompleted,
@@ -169,20 +169,20 @@ async function main(): Promise<void> {
 
     try {
       // Project root milestone dir must exist for sync to run
-      const prM004 = join(mainBase, ".gsd", "milestones", "M004");
+      const prM004 = join(mainBase, ".sdd", "milestones", "M004");
       mkdirSync(prM004, { recursive: true });
 
       // No completed-units.json in project root
       // Worktree has its own
       writeFileSync(
-        join(wtBase, ".gsd", "completed-units.json"),
+        join(wtBase, ".sdd", "completed-units.json"),
         JSON.stringify(["some-unit/M001"]),
       );
 
       syncProjectRootToWorktree(mainBase, wtBase, "M004");
 
       const wtCompleted = JSON.parse(
-        readFileSync(join(wtBase, ".gsd", "completed-units.json"), "utf-8"),
+        readFileSync(join(wtBase, ".sdd", "completed-units.json"), "utf-8"),
       );
       assertEq(
         wtCompleted,

@@ -370,7 +370,7 @@ async function defaultValidateApiKey(
     case "openrouter":
       return await validateBearerRequest(fetchImpl, providerId, "https://openrouter.ai/api/v1/models", apiKey, {
         "HTTP-Referer": "https://localhost",
-        "X-Title": "GSD onboarding",
+        "X-Title": "SDD onboarding",
       });
     case "mistral":
       return await validateBearerRequest(fetchImpl, providerId, "https://api.mistral.ai/v1/models", apiKey);
@@ -380,7 +380,7 @@ async function defaultValidateApiKey(
 }
 
 function resolveRuntimeTestValidateApiKey(env: NodeJS.ProcessEnv): OnboardingServiceDeps["validateApiKey"] | undefined {
-  if (env.GSD_WEB_TEST_FAKE_API_KEY_VALIDATION !== "1") {
+  if (env.SDD_WEB_TEST_FAKE_API_KEY_VALIDATION !== "1") {
     return undefined;
   }
 

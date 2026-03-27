@@ -6,10 +6,10 @@ SDD supports multi-user workflows where several developers work on the same repo
 
 ### 1. Set Team Mode
 
-The simplest way to configure GSD for team use is to set `mode: team` in your project preferences. This enables unique milestone IDs, push branches, and pre-merge checks in one setting:
+The simplest way to configure SDD for team use is to set `mode: team` in your project preferences. This enables unique milestone IDs, push branches, and pre-merge checks in one setting:
 
 ```yaml
-# .gsd/PREFERENCES.md (project-level, committed to git)
+# .sdd/PREFERENCES.md (project-level, committed to git)
 ---
 version: 1
 mode: team
@@ -25,7 +25,7 @@ Alternatively, you can configure each setting individually without using a mode 
 Share planning artifacts (milestones, roadmaps, decisions) while keeping runtime files local:
 
 ```bash
-# ── GSD: Runtime / Ephemeral (per-developer, per-session) ──────
+# ── SDD: Runtime / Ephemeral (per-developer, per-session) ──────
 .sdd/auto.lock
 .sdd/completed-units.json
 .sdd/STATE.md
@@ -38,11 +38,11 @@ Share planning artifacts (milestones, roadmaps, decisions) while keeping runtime
 ```
 
 **What gets shared** (committed to git):
-- `.gsd/PREFERENCES.md` — project preferences
-- `.gsd/PROJECT.md` — living project description
-- `.gsd/REQUIREMENTS.md` — requirement contract
-- `.gsd/DECISIONS.md` — architectural decisions
-- `.gsd/milestones/` — roadmaps, plans, summaries, research
+- `.sdd/PREFERENCES.md` — project preferences
+- `.sdd/PROJECT.md` — living project description
+- `.sdd/REQUIREMENTS.md` — requirement contract
+- `.sdd/DECISIONS.md` — architectural decisions
+- `.sdd/milestones/` — roadmaps, plans, summaries, research
 
 **What stays local** (gitignored):
 - Lock files, metrics, state cache, runtime records, worktrees, activity logs
@@ -50,20 +50,20 @@ Share planning artifacts (milestones, roadmaps, decisions) while keeping runtime
 ### 3. Commit the Preferences
 
 ```bash
-git add .gsd/PREFERENCES.md
-git commit -m "chore: enable GSD team workflow"
+git add .sdd/PREFERENCES.md
+git commit -m "chore: enable SDD team workflow"
 ```
 
 ## `commit_docs: false`
 
-For teams where only some members use GSD, or when company policy requires a clean repo:
+For teams where only some members use SDD, or when company policy requires a clean repo:
 
 ```yaml
 git:
   commit_docs: false
 ```
 
-This adds `.sdd/` to `.gitignore` entirely and keeps all artifacts local. The developer gets the benefits of structured planning without affecting teammates who don't use GSD.
+This adds `.sdd/` to `.gitignore` entirely and keeps all artifacts local. The developer gets the benefits of structured planning without affecting teammates who don't use SDD.
 
 ## Migrating an Existing Project
 
@@ -71,13 +71,13 @@ If you have an existing project with `.sdd/` blanket-ignored:
 
 1. Ensure no milestones are in progress (clean state)
 2. Update `.gitignore` to use the selective pattern above
-3. Add `unique_milestone_ids: true` to `.gsd/PREFERENCES.md`
+3. Add `unique_milestone_ids: true` to `.sdd/PREFERENCES.md`
 4. Optionally rename existing milestones to use unique IDs:
    ```
    I have turned on unique milestone ids, please update all old milestone
    ids to use this new format e.g. M001-abc123 where abc123 is a random
    6 char lowercase alpha numeric string. Update all references in all
-   .gsd file contents, file names and directory names. Validate your work
+   .sdd file contents, file names and directory names. Validate your work
    once done to ensure referential integrity.
    ```
 5. Commit

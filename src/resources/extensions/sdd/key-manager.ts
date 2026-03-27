@@ -1,18 +1,18 @@
 /**
- * API Key Manager — /gsd keys
+ * API Key Manager — /sdd keys
  *
  * Comprehensive CLI for managing API keys: list, add, remove, test, rotate, doctor.
  * Works with AuthStorage from pi-coding-agent — no core package changes needed.
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import {
   AuthStorage,
   type AuthCredential,
   type ApiKeyCredential,
   type OAuthCredential,
-} from "@gsd/pi-coding-agent";
-import { getEnvApiKey } from "@gsd/pi-ai";
+} from "@sdd/pi-coding-agent";
+import { getEnvApiKey } from "@sdd/pi-ai";
 import { existsSync, statSync, chmodSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { mkdirSync } from "node:fs";
@@ -112,7 +112,7 @@ export function describeCredential(cred: AuthCredential): string {
  * Get the auth.json path.
  */
 export function getAuthPath(): string {
-  return join(process.env.HOME ?? "~", ".gsd", "agent", "auth.json");
+  return join(process.env.HOME ?? "~", ".sdd", "agent", "auth.json");
 }
 
 /**
@@ -208,7 +208,7 @@ export function formatKeyDashboard(statuses: KeyStatus[]): string {
     { label: "Remote Integrations", key: "remote" },
   ];
 
-  const lines: string[] = ["GSD API Key Manager\n"];
+  const lines: string[] = ["SDD API Key Manager\n"];
 
   for (const cat of categories) {
     const items = statuses.filter((s) => s.provider.category === cat.key);
@@ -260,7 +260,7 @@ export async function handleAddKey(
   if (providerArg) {
     provider = findProvider(providerArg);
     if (!provider) {
-      ctx.ui.notify(`Unknown provider: "${providerArg}". Use /gsd keys list to see available providers.`, "error");
+      ctx.ui.notify(`Unknown provider: "${providerArg}". Use /sdd keys list to see available providers.`, "error");
       return false;
     }
   } else {
@@ -742,7 +742,7 @@ export function runKeyDoctor(auth: AuthStorage): DoctorFinding[] {
         findings.push({
           severity: "warning",
           provider: provider.id,
-          message: `${provider.label}: empty key stored (from skipped setup) — run /gsd keys add ${provider.id}`,
+          message: `${provider.label}: empty key stored (from skipped setup) — run /sdd keys add ${provider.id}`,
         });
       }
     }
@@ -812,7 +812,7 @@ export function runKeyDoctor(auth: AuthStorage): DoctorFinding[] {
   if (!hasAnyLlm) {
     findings.push({
       severity: "error",
-      message: "No LLM provider configured — run /gsd keys add or /login",
+      message: "No LLM provider configured — run /sdd keys add or /login",
     });
   }
 
@@ -879,7 +879,7 @@ export function formatDoctorFindings(findings: DoctorFinding[]): string {
 // ─── Main Handler ───────────────────────────────────────────────────────────────
 
 /**
- * Main entry point for /gsd keys [subcommand].
+ * Main entry point for /sdd keys [subcommand].
  */
 export async function handleKeys(
   args: string,
@@ -972,14 +972,14 @@ export async function handleKeys(
 
     default:
       ctx.ui.notify(
-        "Usage: /gsd keys [list|add|remove|test|rotate|doctor]\n\n" +
-        "  /gsd keys              Show key status dashboard\n" +
-        "  /gsd keys list         List all configured keys\n" +
-        "  /gsd keys add [id]     Add a key for a provider\n" +
-        "  /gsd keys remove [id]  Remove a key\n" +
-        "  /gsd keys test [id]    Validate key(s) with API call\n" +
-        "  /gsd keys rotate [id]  Replace an existing key\n" +
-        "  /gsd keys doctor       Health check all keys",
+        "Usage: /sdd keys [list|add|remove|test|rotate|doctor]\n\n" +
+        "  /sdd keys              Show key status dashboard\n" +
+        "  /sdd keys list         List all configured keys\n" +
+        "  /sdd keys add [id]     Add a key for a provider\n" +
+        "  /sdd keys remove [id]  Remove a key\n" +
+        "  /sdd keys test [id]    Validate key(s) with API call\n" +
+        "  /sdd keys rotate [id]  Replace an existing key\n" +
+        "  /sdd keys doctor       Health check all keys",
         "info",
       );
       return;

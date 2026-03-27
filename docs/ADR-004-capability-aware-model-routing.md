@@ -4,11 +4,11 @@
 **Date:** 2026-03-26
 **Revised:** 2026-03-26
 **Deciders:** Jeremy McSpadden
-**Related:** ADR-003 (pipeline simplification), [Issue #2655](https://github.com/gsd-build/gsd-2/issues/2655), `docs/dynamic-model-routing.md`
+**Related:** ADR-003 (pipeline simplification), [Issue #2655](https://github.com/sdd-build/sdd-2/issues/2655), `docs/dynamic-model-routing.md`
 
 ## Context
 
-GSD already supports dynamic model routing in auto-mode, but the current router is fundamentally **complexity-tier and cost based**, not **task-capability based**.
+SDD already supports dynamic model routing in auto-mode, but the current router is fundamentally **complexity-tier and cost based**, not **task-capability based**.
 
 Today the selection pipeline is:
 
@@ -36,7 +36,7 @@ Users increasingly configure heterogeneous provider pools through `models.json`,
 - Gemini-class models often perform best on long-context synthesis and research-heavy tasks
 - Fast small models are often best for cheap validation, triage, and lightweight hooks
 
-The current router cannot express those differences. If Claude and Codex are both available at the same tier, GSD either:
+The current router cannot express those differences. If Claude and Codex are both available at the same tier, SDD either:
 
 - treats them as equivalent and picks the cheaper one, or
 - requires the user to hardcode specific phase models manually
@@ -53,7 +53,7 @@ Different users have different subscriptions and provider access. A fixed mappin
 
 ### 3. Capability knowledge is trapped in user intuition
 
-Experienced users know which models are better at coding, debugging, research, long-context work, or instruction following. GSD has no representation for that knowledge, so it cannot route intelligently on the user's behalf.
+Experienced users know which models are better at coding, debugging, research, long-context work, or instruction following. SDD has no representation for that knowledge, so it cannot route intelligently on the user's behalf.
 
 The system already has several building blocks that make a richer router feasible:
 
@@ -232,9 +232,9 @@ Partial overrides are deep-merged with built-in defaults. This uses the same `mo
 
 ### Profile Versioning
 
-Built-in capability profiles are maintained alongside the existing `MODEL_CAPABILITY_TIER` and `MODEL_COST_PER_1K_INPUT` tables in `model-router.ts`. When the `@gsd/pi-ai` model catalog is updated with new models, the capability profile table must be updated in the same PR. A linting rule should flag any model present in `MODEL_CAPABILITY_TIER` but missing from `MODEL_CAPABILITY_PROFILES`.
+Built-in capability profiles are maintained alongside the existing `MODEL_CAPABILITY_TIER` and `MODEL_COST_PER_1K_INPUT` tables in `model-router.ts`. When the `@sdd/pi-ai` model catalog is updated with new models, the capability profile table must be updated in the same PR. A linting rule should flag any model present in `MODEL_CAPABILITY_TIER` but missing from `MODEL_CAPABILITY_PROFILES`.
 
-Profiles are versioned implicitly by GSD release. The existing `models.json` `modelOverrides` mechanism allows users to correct stale defaults immediately without waiting for a GSD update.
+Profiles are versioned implicitly by SDD release. The existing `models.json` `modelOverrides` mechanism allows users to correct stale defaults immediately without waiting for a SDD update.
 
 ### Extension-First Rollout
 
@@ -326,7 +326,7 @@ Models without capability profiles get uniform scores, producing the same cheape
 
 #### 1. More metadata to maintain
 
-Built-in model profiles will drift as model families evolve. Mitigation: profiles live in a single data table, versioned with GSD releases, with a lint rule for completeness.
+Built-in model profiles will drift as model families evolve. Mitigation: profiles live in a single data table, versioned with SDD releases, with a lint rule for completeness.
 
 #### 2. Scoring can create false precision
 
@@ -382,7 +382,7 @@ Capability scoring adds the "what kind of work" signal on top. The two systems a
 
 ### 1. Hardcoded vendor stereotypes become stale
 
-If the default profiles are not reviewed regularly, GSD will encode outdated assumptions about which models are "best" at which tasks.
+If the default profiles are not reviewed regularly, SDD will encode outdated assumptions about which models are "best" at which tasks.
 
 **Mitigation:** Keep defaults in a single data table (not scattered conditionals). Lint for completeness against the model catalog. User overrides via `modelOverrides` provide immediate escape hatch. Document profiles as heuristic rankings, not benchmarks.
 
@@ -425,7 +425,7 @@ Rejected because it optimizes cost within a tier but still treats meaningfully d
 
 ### B. Hardcode task → model mappings
 
-Rejected because it breaks as soon as the user does not have the expected model. This is appropriate for a closed product with a fixed fleet, not for GSD's user-configured provider model.
+Rejected because it breaks as soon as the user does not have the expected model. This is appropriate for a closed product with a fixed fleet, not for SDD's user-configured provider model.
 
 ### C. Route only by user-specified per-phase models
 

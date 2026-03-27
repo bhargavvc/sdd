@@ -19,20 +19,20 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import { migrateHierarchyToDb } from '../md-importer.ts';
 import type { SDDState } from '../types.ts';
 
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-crossval-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-crossval-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeFile(base: string, relativePath: string, content: string): void {
-  const full = join(base, '.gsd', relativePath);
+  const full = join(base, '.sdd', relativePath);
   mkdirSync(join(full, '..'), { recursive: true });
   writeFileSync(full, content);
 }

@@ -1,23 +1,23 @@
-// GSD Directory Writer — Format Functions & Directory Orchestrator
-// Format functions: pure string-returning functions that serialize GSD types into the exact markdown
-// format that GSD-2's parsers expect (parseRoadmap, parsePlan, parseSummary, parseRequirementCounts).
-// writeGSDDirectory: orchestrator that writes a complete .gsd directory tree from a GSDProject.
+// SDD Directory Writer — Format Functions & Directory Orchestrator
+// Format functions: pure string-returning functions that serialize SDD types into the exact markdown
+// format that SDD-2's parsers expect (parseRoadmap, parsePlan, parseSummary, parseRequirementCounts).
+// writeSDDDirectory: orchestrator that writes a complete .sdd directory tree from a SDDProject.
 
 import { join } from 'node:path';
 import { saveFile } from '../files.js';
 import { gsdRoot } from '../paths.js';
 
 import type {
-  GSDMilestone,
-  GSDSlice,
-  GSDTask,
-  GSDRequirement,
-  GSDProject,
+  SDDMilestone,
+  SDDSlice,
+  SDDTask,
+  SDDRequirement,
+  SDDProject,
 } from './types.js';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
-/** Result of writeGSDDirectory — lists all files that were written. */
+/** Result of writeSDDDirectory — lists all files that were written. */
 export interface WrittenFiles {
   /** Absolute paths of all files written */
   paths: string[];
@@ -35,7 +35,7 @@ export interface WrittenFiles {
   };
 }
 
-/** Pre-write statistics computed from a GSDProject without I/O. */
+/** Pre-write statistics computed from a SDDProject without I/O. */
 export interface MigrationPreview {
   milestoneCount: number;
   totalSlices: number;
@@ -109,7 +109,7 @@ function serializeFrontmatter(data: Record<string, unknown>): string {
  * Format a milestone's ROADMAP.md content.
  * Output must parse correctly through parseRoadmap().
  */
-export function formatRoadmap(milestone: GSDMilestone): string {
+export function formatRoadmap(milestone: SDDMilestone): string {
   const lines: string[] = [];
 
   lines.push(`# ${milestone.id}: ${milestone.title}`);
@@ -146,7 +146,7 @@ export function formatRoadmap(milestone: GSDMilestone): string {
  * Format a slice's PLAN.md (S01-PLAN.md).
  * Output must parse correctly through parsePlan().
  */
-export function formatPlan(slice: GSDSlice): string {
+export function formatPlan(slice: SDDSlice): string {
   const lines: string[] = [];
 
   lines.push(`# ${slice.id}: ${slice.title}`);
@@ -187,7 +187,7 @@ export function formatPlan(slice: GSDSlice): string {
  * Format a slice summary (S01-SUMMARY.md).
  * Output must parse correctly through parseSummary().
  */
-export function formatSliceSummary(slice: GSDSlice, milestoneId: string): string {
+export function formatSliceSummary(slice: SDDSlice, milestoneId: string): string {
   if (!slice.summary) return '';
 
   const s = slice.summary;
@@ -227,7 +227,7 @@ export function formatSliceSummary(slice: GSDSlice, milestoneId: string): string
  * Format a task summary (T01-SUMMARY.md).
  * Output must parse correctly through parseSummary().
  */
-export function formatTaskSummary(task: GSDTask, sliceId: string, milestoneId: string): string {
+export function formatTaskSummary(task: SDDTask, sliceId: string, milestoneId: string): string {
   if (!task.summary) return '';
 
   const s = task.summary;
@@ -268,7 +268,7 @@ export function formatTaskSummary(task: GSDTask, sliceId: string, milestoneId: s
  * deriveState() only checks for file existence, not content.
  * Keep it minimal but valid markdown.
  */
-export function formatTaskPlan(task: GSDTask, sliceId: string, milestoneId: string): string {
+export function formatTaskPlan(task: SDDTask, sliceId: string, milestoneId: string): string {
   const lines: string[] = [];
   lines.push(`# ${task.id}: ${task.title}`);
   lines.push('');
@@ -306,12 +306,12 @@ export function formatTaskPlan(task: GSDTask, sliceId: string, milestoneId: stri
  * parseRequirementCounts expects: ## Active/## Validated/## Deferred/## Out of Scope sections
  * with ### R001 — Title headings under each section.
  */
-export function formatRequirements(requirements: GSDRequirement[]): string {
+export function formatRequirements(requirements: SDDRequirement[]): string {
   const lines: string[] = [];
   lines.push('# Requirements');
   lines.push('');
 
-  const groups: Record<string, GSDRequirement[]> = {
+  const groups: Record<string, SDDRequirement[]> = {
     active: [],
     validated: [],
     deferred: [],
@@ -390,11 +390,11 @@ export function formatContext(milestoneId: string): string {
 /**
  * Format STATE.md.
  * deriveState() does not read STATE.md — it recomputes from scratch.
- * Write a minimal stub that will be overwritten on first /gsd status.
+ * Write a minimal stub that will be overwritten on first /sdd status.
  */
-export function formatState(milestones: GSDMilestone[]): string {
+export function formatState(milestones: SDDMilestone[]): string {
   const lines: string[] = [];
-  lines.push('# GSD State');
+  lines.push('# SDD State');
   lines.push('');
   lines.push('<!-- Auto-generated. Updated by deriveState(). -->');
   lines.push('');
@@ -412,14 +412,14 @@ export function formatState(milestones: GSDMilestone[]): string {
 // ─── Directory Writer Orchestrator ─────────────────────────────────────────
 
 /**
- * Write a complete .gsd directory tree from a GSDProject.
+ * Write a complete .sdd directory tree from a SDDProject.
  * Iterates milestones → slices → tasks, calls format functions,
  * and writes each file via saveFile(). Returns a manifest of written paths.
  *
  * Skips research/summary files when null (does not write empty stubs).
  */
-export async function writeGSDDirectory(
-  project: GSDProject,
+export async function writeSDDDirectory(
+  project: SDDProject,
   targetPath: string,
 ): Promise<WrittenFiles> {
   const gsdDir = gsdRoot(targetPath);

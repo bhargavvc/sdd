@@ -21,7 +21,7 @@ import {
 } from "../auto-worktree.ts";
 import { getSliceBranchName } from "../worktree.ts";
 import { abortAndReset } from "../git-self-heal.ts";
-import { runGSDDoctor } from "../doctor.ts";
+import { runSDDDoctor } from "../doctor.ts";
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -38,8 +38,8 @@ function createTempRepo(): string {
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
   writeFileSync(join(dir, "README.md"), "# test\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -179,7 +179,7 @@ describe('worktree-e2e', async () => {
       tempDirs.push(repo);
 
       // Create completed milestone roadmap
-      const msDir = join(repo, ".gsd", "milestones", "M001");
+      const msDir = join(repo, ".sdd", "milestones", "M001");
       mkdirSync(msDir, { recursive: true });
       writeFileSync(join(msDir, "ROADMAP.md"), `---
 id: M001
@@ -205,17 +205,17 @@ _None_
       run("git commit -m \"add milestone\"", repo);
 
       // Create orphaned worktree
-      mkdirSync(join(repo, ".gsd", "worktrees"), { recursive: true });
+      mkdirSync(join(repo, ".sdd", "worktrees"), { recursive: true });
       run("git worktree add -b milestone/M001 .sdd/worktrees/M001", repo);
 
       // Detect
-      const detect = await runGSDDoctor(repo, { isolationMode: "worktree" });
+      const detect = await runSDDDoctor(repo, { isolationMode: "worktree" });
       const orphanIssues = detect.issues.filter(i => i.code === "orphaned_auto_worktree");
       assert.ok(orphanIssues.length > 0, "doctor detects orphaned worktree");
       assert.deepStrictEqual(orphanIssues[0]?.unitId, "M001", "orphaned worktree unitId is M001");
 
       // Fix
-      const fixed = await runGSDDoctor(repo, { fix: true, isolationMode: "worktree" });
+      const fixed = await runSDDDoctor(repo, { fix: true, isolationMode: "worktree" });
       assert.ok(
         fixed.fixesApplied.some(f => f.includes("removed orphaned worktree")),
         "doctor fix removes orphaned worktree",

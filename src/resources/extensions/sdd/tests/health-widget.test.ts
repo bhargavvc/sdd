@@ -12,7 +12,7 @@ import {
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-health-widget-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `sdd-health-widget-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -39,18 +39,18 @@ function activeData(overrides: Partial<HealthWidgetData> = {}): HealthWidgetData
   };
 }
 
-test("detectHealthWidgetProjectState: no .gsd returns none", (t) => {
+test("detectHealthWidgetProjectState: no .sdd returns none", (t) => {
   const dir = makeTempDir("none");
   t.after(() => { cleanup(dir); });
 
   assert.equal(detectHealthWidgetProjectState(dir), "none");
 });
 
-test("detectHealthWidgetProjectState: bootstrapped .gsd without milestones returns initialized", (t) => {
+test("detectHealthWidgetProjectState: bootstrapped .sdd without milestones returns initialized", (t) => {
   const dir = makeTempDir("initialized");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
   assert.equal(detectHealthWidgetProjectState(dir), "initialized");
 });
 
@@ -58,19 +58,19 @@ test("detectHealthWidgetProjectState: milestone without metrics returns active",
   const dir = makeTempDir("active");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
   assert.equal(detectHealthWidgetProjectState(dir), "active");
 });
 
 test("buildHealthLines: none state shows onboarding copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "none" })), [
-    "  GSD  No project loaded — run /gsd to start",
+    "  SDD  No project loaded — run /sdd to start",
   ]);
 });
 
 test("buildHealthLines: initialized state shows continue setup copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "initialized" })), [
-    "  GSD  Project initialized — run /gsd to continue setup",
+    "  SDD  Project initialized — run /sdd to continue setup",
   ]);
 });
 
@@ -102,9 +102,9 @@ test("detectHealthWidgetProjectState: metrics file alone does not imply project"
   const dir = makeTempDir("metrics-only");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
   writeFileSync(
-    join(dir, ".gsd", "metrics.json"),
+    join(dir, ".sdd", "metrics.json"),
     JSON.stringify({ version: 1, projectStartedAt: Date.now(), units: [] }),
     "utf-8",
   );

@@ -1,7 +1,7 @@
 /**
  * discuss-queued-milestones.test.ts — Tests for #2307.
  *
- * /gsd discuss was previously gated on state.activeMilestone, which prevented
+ * /sdd discuss was previously gated on state.activeMilestone, which prevented
  * users from discussing queued (pending) milestones during roadmap grooming.
  *
  * These tests verify:
@@ -29,8 +29,8 @@ import { resolveMilestoneFile } from "../paths.ts";
 // ─── Fixture Helpers ──────────────────────────────────────────────────────────
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-discuss-queued-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-discuss-queued-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
@@ -39,22 +39,22 @@ function cleanup(base: string): void {
 }
 
 function writeMilestoneDir(base: string, mid: string): void {
-  mkdirSync(join(base, ".gsd", "milestones", mid), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", mid), { recursive: true });
 }
 
 function writeContext(base: string, mid: string, content: string): void {
   writeMilestoneDir(base, mid);
-  writeFileSync(join(base, ".gsd", "milestones", mid, `${mid}-CONTEXT.md`), content);
+  writeFileSync(join(base, ".sdd", "milestones", mid, `${mid}-CONTEXT.md`), content);
 }
 
 function writeContextDraft(base: string, mid: string, content: string): void {
   writeMilestoneDir(base, mid);
-  writeFileSync(join(base, ".gsd", "milestones", mid, `${mid}-CONTEXT-DRAFT.md`), content);
+  writeFileSync(join(base, ".sdd", "milestones", mid, `${mid}-CONTEXT-DRAFT.md`), content);
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
   writeMilestoneDir(base, mid);
-  writeFileSync(join(base, ".gsd", "milestones", mid, `${mid}-ROADMAP.md`), content);
+  writeFileSync(join(base, ".sdd", "milestones", mid, `${mid}-ROADMAP.md`), content);
 }
 
 function readGuidedFlowSource(): string {
@@ -174,7 +174,7 @@ describe("discuss-queued-milestones (#2307)", () => {
 
     // The old guard was a simple early-exit:
     //   if (!state.activeMilestone) {
-    //     ctx.ui.notify("No active milestone. Run /gsd to create one first.", "warning");
+    //     ctx.ui.notify("No active milestone. Run /sdd to create one first.", "warning");
     //     return;
     //   }
     //

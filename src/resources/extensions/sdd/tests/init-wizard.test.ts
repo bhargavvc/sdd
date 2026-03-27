@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Init Wizard — project onboarding flow.
+ * Unit tests for SDD Init Wizard — project onboarding flow.
  *
  * Tests the bootstrap logic and preferences file generation
  * without requiring interactive UI (tests the pure functions).
@@ -20,7 +20,7 @@ import { detectProjectState } from "../detection.ts";
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-init-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `sdd-init-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -66,11 +66,11 @@ test("init-wizard: v1 .planning/ triggers v1-planning state", (t) => {
 test("init-wizard: existing .sdd/ with milestones skips init", (t) => {
   const dir = makeTempDir("existing");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
-    mkdirSync(join(dir, ".gsd", "milestones", "M002"), { recursive: true });
+    mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(dir, ".sdd", "milestones", "M002"), { recursive: true });
 
     const detection = detectProjectState(dir);
-    assert.equal(detection.state, "v2-gsd");
+    assert.equal(detection.state, "v2-sdd");
     assert.ok(detection.v2);
     assert.equal(detection.v2!.milestoneCount, 2);
   } finally {
@@ -78,13 +78,13 @@ test("init-wizard: existing .sdd/ with milestones skips init", (t) => {
   }
 });
 
-test("init-wizard: empty .sdd/ (no milestones) returns v2-gsd-empty", (t) => {
-  const dir = makeTempDir("empty-gsd");
+test("init-wizard: empty .sdd/ (no milestones) returns v2-sdd-empty", (t) => {
+  const dir = makeTempDir("empty-sdd");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
+    mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
 
     const detection = detectProjectState(dir);
-    assert.equal(detection.state, "v2-gsd-empty");
+    assert.equal(detection.state, "v2-sdd-empty");
     assert.ok(detection.v2);
     assert.equal(detection.v2!.milestoneCount, 0);
   } finally {
@@ -122,8 +122,8 @@ test("init-wizard: project signals populate from Node.js project", (t) => {
 test("init-wizard: v2 .sdd/ preferences detected", (t) => {
   const dir = makeTempDir("prefs-detect");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), "---\nversion: 1\nmode: solo\n---\n", "utf-8");
+    mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
+    writeFileSync(join(dir, ".sdd", "PREFERENCES.md"), "---\nversion: 1\nmode: solo\n---\n", "utf-8");
 
     const detection = detectProjectState(dir);
     assert.ok(detection.v2);
@@ -136,8 +136,8 @@ test("init-wizard: v2 .sdd/ preferences detected", (t) => {
 test("init-wizard: v2 uppercase PREFERENCES.md also detected", (t) => {
   const dir = makeTempDir("prefs-upper");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
+    mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
+    writeFileSync(join(dir, ".sdd", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
 
     const detection = detectProjectState(dir);
     assert.ok(detection.v2);
@@ -150,8 +150,8 @@ test("init-wizard: v2 uppercase PREFERENCES.md also detected", (t) => {
 test("init-wizard: CONTEXT.md detected in v2", (t) => {
   const dir = makeTempDir("context");
   try {
-    mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "CONTEXT.md"), "# Project Context\n", "utf-8");
+    mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
+    writeFileSync(join(dir, ".sdd", "CONTEXT.md"), "# Project Context\n", "utf-8");
 
     const detection = detectProjectState(dir);
     assert.ok(detection.v2);
@@ -182,11 +182,11 @@ test("init-wizard: v1 with both .planning/ and .sdd/ prioritizes v2", (t) => {
   const dir = makeTempDir("both-v1-v2");
   try {
     mkdirSync(join(dir, ".planning", "phases"), { recursive: true });
-    mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
 
     const detection = detectProjectState(dir);
     // v2 should take priority
-    assert.equal(detection.state, "v2-gsd");
+    assert.equal(detection.state, "v2-sdd");
     // But v1 info should still be available for migration reference
     assert.ok(detection.v1);
   } finally {

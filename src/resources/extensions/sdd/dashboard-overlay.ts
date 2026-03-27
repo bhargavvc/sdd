@@ -1,16 +1,16 @@
 /**
- * GSD Dashboard Overlay
+ * SDD Dashboard Overlay
  *
  * Full-screen overlay showing auto-mode progress: milestone/slice/task
  * breakdown, current unit, completed units, timing, and activity log.
- * Toggled with Ctrl+Alt+G (⌃⌥G on macOS) or opened from /gsd status.
+ * Toggled with Ctrl+Alt+G (⌃⌥G on macOS) or opened from /sdd status.
  */
 
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@sdd/pi-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@sdd/pi-tui";
 import { deriveState } from "./state.js";
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { resolveMilestoneFile, resolveSliceFile } from "./paths.js";
 import { getAutoDashboardData } from "./auto.js";
 import type { AutoDashboardData } from "./auto-dashboard.js";
@@ -45,7 +45,7 @@ function unitLabel(type: string): string {
 }
 
 
-export class GSDDashboardOverlay {
+export class SDDDashboardOverlay {
   private tui: { requestRender: () => void };
   private theme: Theme;
   private onClose: () => void;
@@ -288,7 +288,7 @@ export class GSDDashboardOverlay {
     const hr = () => row(th.fg("dim", "─".repeat(contentWidth)));
     const centered = (content: string) => row(centerLine(content, contentWidth));
 
-    const title = th.fg("accent", th.bold("GSD Dashboard"));
+    const title = th.fg("accent", th.bold("SDD Dashboard"));
     const isRemote = !!this.dashData.remoteSession;
     const status = this.dashData.active
       ? `${Date.now() % 2000 < 1000 ? th.fg("success", "●") : th.fg("dim", "○")} ${th.fg("success", "AUTO")}`
@@ -345,7 +345,7 @@ export class GSDDashboardOverlay {
       )));
       lines.push(blank());
     } else if (this.dashData.paused) {
-      lines.push(row(th.fg("dim", "/gsd auto to resume")));
+      lines.push(row(th.fg("dim", "/sdd auto to resume")));
       lines.push(blank());
     } else if (isRemote) {
       const rs = this.dashData.remoteSession!;
@@ -355,7 +355,7 @@ export class GSDDashboardOverlay {
       lines.push(row(th.fg("text", `Remote session: ${unitDisplay}`)));
       lines.push(blank());
     } else {
-      lines.push(row(th.fg("dim", "No unit running · /gsd auto to start")));
+      lines.push(row(th.fg("dim", "No unit running · /sdd auto to start")));
       lines.push(blank());
     }
 

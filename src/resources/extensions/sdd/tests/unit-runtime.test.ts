@@ -12,12 +12,12 @@ import { clearPathCache } from '../paths.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-const base = mkdtempSync(join(tmpdir(), "gsd-unit-runtime-test-"));
-const tasksDir = join(base, ".gsd", "milestones", "M100", "slices", "S02", "tasks");
+const base = mkdtempSync(join(tmpdir(), "sdd-unit-runtime-test-"));
+const tasksDir = join(base, ".sdd", "milestones", "M100", "slices", "S02", "tasks");
 mkdirSync(tasksDir, { recursive: true });
-writeFileSync(join(base, ".gsd", "STATE.md"), "## Next Action\nExecute T09 for S02: do the thing\n", "utf-8");
+writeFileSync(join(base, ".sdd", "STATE.md"), "## Next Action\nExecute T09 for S02: do the thing\n", "utf-8");
 writeFileSync(
-  join(base, ".gsd", "milestones", "M100", "slices", "S02", "S02-PLAN.md"),
+  join(base, ".sdd", "milestones", "M100", "slices", "S02", "S02-PLAN.md"),
   "# S02: Test Slice\n\n## Tasks\n\n- [ ] **T09: Do the thing** `est:10m`\n  Description.\n",
   "utf-8",
 );
@@ -44,11 +44,11 @@ console.log("\n=== execute-task durability inspection ===");
 
   writeFileSync(join(tasksDir, "T09-SUMMARY.md"), "# done\n", "utf-8");
   writeFileSync(
-    join(base, ".gsd", "milestones", "M100", "slices", "S02", "S02-PLAN.md"),
+    join(base, ".sdd", "milestones", "M100", "slices", "S02", "S02-PLAN.md"),
     "# S02: Test Slice\n\n## Tasks\n\n- [x] **T09: Do the thing** `est:10m`\n  Description.\n",
     "utf-8",
   );
-  writeFileSync(join(base, ".gsd", "STATE.md"), "## Next Action\nExecute T10 for S02: next thing\n", "utf-8");
+  writeFileSync(join(base, ".sdd", "STATE.md"), "## Next Action\nExecute T10 for S02: next thing\n", "utf-8");
   clearPathCache();
 
   status = await inspectExecuteTaskDurability(base, "M100/S02/T09");
@@ -78,7 +78,7 @@ console.log("\n=== hook unit type sanitization (slash in unitType) ===");
   assert.deepStrictEqual(loaded!.phase, "dispatched", "hook phase correct");
   
   // Verify the file is in the units dir, not in a subdirectory
-  const unitsDir = join(base, ".gsd", "runtime", "units");
+  const unitsDir = join(base, ".sdd", "runtime", "units");
   const files = readdirSync(unitsDir);
   const hookFile = files.find((f: string) => f.includes("hook-code-review"));
   assert.ok(hookFile !== undefined, "hook file exists with sanitized name");
@@ -92,16 +92,16 @@ console.log("\n=== hook unit type sanitization (slash in unitType) ===");
 // ─── Must-have durability integration tests ───────────────────────────────
 
 // Create a separate temp base for must-have tests to avoid interference
-const mhBase = mkdtempSync(join(tmpdir(), "gsd-unit-runtime-mh-test-"));
+const mhBase = mkdtempSync(join(tmpdir(), "sdd-unit-runtime-mh-test-"));
 
 console.log("\n=== must-haves: all mentioned in summary ===");
 {
-  const tasksDir2 = join(mhBase, ".gsd", "milestones", "M200", "slices", "S01", "tasks");
+  const tasksDir2 = join(mhBase, ".sdd", "milestones", "M200", "slices", "S01", "tasks");
   mkdirSync(tasksDir2, { recursive: true });
 
   // Slice plan with T01 checked
   writeFileSync(
-    join(mhBase, ".gsd", "milestones", "M200", "slices", "S01", "S01-PLAN.md"),
+    join(mhBase, ".sdd", "milestones", "M200", "slices", "S01", "S01-PLAN.md"),
     "# S01: Test\n\n## Tasks\n\n- [x] **T01: Build parser** `est:10m`\n  Build the parser.\n",
     "utf-8",
   );
@@ -118,7 +118,7 @@ console.log("\n=== must-haves: all mentioned in summary ===");
     "utf-8",
   );
   // STATE.md with next action advanced past T01
-  writeFileSync(join(mhBase, ".gsd", "STATE.md"), "## Next Action\nExecute T02 for S01: next thing\n", "utf-8");
+  writeFileSync(join(mhBase, ".sdd", "STATE.md"), "## Next Action\nExecute T02 for S01: next thing\n", "utf-8");
 
   const status = await inspectExecuteTaskDurability(mhBase, "M200/S01/T01");
   assert.ok(status !== null, "mh-all: status exists");
@@ -132,11 +132,11 @@ console.log("\n=== must-haves: all mentioned in summary ===");
 
 console.log("\n=== must-haves: partially mentioned in summary ===");
 {
-  const tasksDir3 = join(mhBase, ".gsd", "milestones", "M200", "slices", "S02", "tasks");
+  const tasksDir3 = join(mhBase, ".sdd", "milestones", "M200", "slices", "S02", "tasks");
   mkdirSync(tasksDir3, { recursive: true });
 
   writeFileSync(
-    join(mhBase, ".gsd", "milestones", "M200", "slices", "S02", "S02-PLAN.md"),
+    join(mhBase, ".sdd", "milestones", "M200", "slices", "S02", "S02-PLAN.md"),
     "# S02: Test\n\n## Tasks\n\n- [x] **T01: Build thing** `est:10m`\n  Build.\n",
     "utf-8",
   );
@@ -152,7 +152,7 @@ console.log("\n=== must-haves: partially mentioned in summary ===");
     "# T01: Build thing\n\nAdded computeScore function with full test coverage.\n",
     "utf-8",
   );
-  writeFileSync(join(mhBase, ".gsd", "STATE.md"), "## Next Action\nExecute T02 for S02: next thing\n", "utf-8");
+  writeFileSync(join(mhBase, ".sdd", "STATE.md"), "## Next Action\nExecute T02 for S02: next thing\n", "utf-8");
 
   clearPathCache();
   const status = await inspectExecuteTaskDurability(mhBase, "M200/S02/T01");
@@ -166,11 +166,11 @@ console.log("\n=== must-haves: partially mentioned in summary ===");
 
 console.log("\n=== must-haves: no task plan file ===");
 {
-  const tasksDir4 = join(mhBase, ".gsd", "milestones", "M200", "slices", "S03", "tasks");
+  const tasksDir4 = join(mhBase, ".sdd", "milestones", "M200", "slices", "S03", "tasks");
   mkdirSync(tasksDir4, { recursive: true });
 
   writeFileSync(
-    join(mhBase, ".gsd", "milestones", "M200", "slices", "S03", "S03-PLAN.md"),
+    join(mhBase, ".sdd", "milestones", "M200", "slices", "S03", "S03-PLAN.md"),
     "# S03: Test\n\n## Tasks\n\n- [x] **T01: Quick fix** `est:5m`\n  Fix.\n",
     "utf-8",
   );
@@ -180,7 +180,7 @@ console.log("\n=== must-haves: no task plan file ===");
     "# T01: Quick fix\n\nFixed the thing.\n",
     "utf-8",
   );
-  writeFileSync(join(mhBase, ".gsd", "STATE.md"), "## Next Action\nExecute T02 for S03: next thing\n", "utf-8");
+  writeFileSync(join(mhBase, ".sdd", "STATE.md"), "## Next Action\nExecute T02 for S03: next thing\n", "utf-8");
 
   clearPathCache();
   const status = await inspectExecuteTaskDurability(mhBase, "M200/S03/T01");
@@ -191,11 +191,11 @@ console.log("\n=== must-haves: no task plan file ===");
 
 console.log("\n=== must-haves: present but no summary file ===");
 {
-  const tasksDir5 = join(mhBase, ".gsd", "milestones", "M200", "slices", "S04", "tasks");
+  const tasksDir5 = join(mhBase, ".sdd", "milestones", "M200", "slices", "S04", "tasks");
   mkdirSync(tasksDir5, { recursive: true });
 
   writeFileSync(
-    join(mhBase, ".gsd", "milestones", "M200", "slices", "S04", "S04-PLAN.md"),
+    join(mhBase, ".sdd", "milestones", "M200", "slices", "S04", "S04-PLAN.md"),
     "# S04: Test\n\n## Tasks\n\n- [ ] **T01: Build parser** `est:10m`\n  Build.\n",
     "utf-8",
   );
@@ -205,7 +205,7 @@ console.log("\n=== must-haves: present but no summary file ===");
     "# T01: Build parser\n\n## Must-Haves\n\n- [ ] `parseData` function exported\n- [ ] Error handling covers edge cases\n\n## Steps\n\n1. Do stuff\n",
     "utf-8",
   );
-  writeFileSync(join(mhBase, ".gsd", "STATE.md"), "## Next Action\nExecute T01 for S04: build parser\n", "utf-8");
+  writeFileSync(join(mhBase, ".sdd", "STATE.md"), "## Next Action\nExecute T01 for S04: build parser\n", "utf-8");
 
   clearPathCache();
   const status = await inspectExecuteTaskDurability(mhBase, "M200/S04/T01");
@@ -217,11 +217,11 @@ console.log("\n=== must-haves: present but no summary file ===");
 
 console.log("\n=== must-haves: substring matching (no backtick tokens) ===");
 {
-  const tasksDir6 = join(mhBase, ".gsd", "milestones", "M200", "slices", "S05", "tasks");
+  const tasksDir6 = join(mhBase, ".sdd", "milestones", "M200", "slices", "S05", "tasks");
   mkdirSync(tasksDir6, { recursive: true });
 
   writeFileSync(
-    join(mhBase, ".gsd", "milestones", "M200", "slices", "S05", "S05-PLAN.md"),
+    join(mhBase, ".sdd", "milestones", "M200", "slices", "S05", "S05-PLAN.md"),
     "# S05: Test\n\n## Tasks\n\n- [x] **T01: Add diagnostics** `est:10m`\n  Add.\n",
     "utf-8",
   );
@@ -237,7 +237,7 @@ console.log("\n=== must-haves: substring matching (no backtick tokens) ===");
     "# T01: Add diagnostics\n\nImplemented heuristic matching for must-have items. Recovery diagnostic string now includes gap counts.\n",
     "utf-8",
   );
-  writeFileSync(join(mhBase, ".gsd", "STATE.md"), "## Next Action\nExecute T02 for S05: next thing\n", "utf-8");
+  writeFileSync(join(mhBase, ".sdd", "STATE.md"), "## Next Action\nExecute T02 for S05: next thing\n", "utf-8");
 
   clearPathCache();
   const status = await inspectExecuteTaskDurability(mhBase, "M200/S05/T01");

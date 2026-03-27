@@ -15,7 +15,7 @@ import {
   _getAdapter,
   copyWorktreeDb,
   reconcileWorktreeDb,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -23,7 +23,7 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-wt-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-wt-test-'));
 }
 
 function cleanup(...dirs: string[]): void {
@@ -84,8 +84,8 @@ console.log('\n=== worktree-db: copyWorktreeDb ===');
 {
   const srcDir = tempDir();
   const destDir = tempDir();
-  const srcDb = path.join(srcDir, 'gsd.db');
-  const destDb = path.join(destDir, 'nested', 'gsd.db');
+  const srcDb = path.join(srcDir, 'sdd.db');
+  const destDb = path.join(destDir, 'nested', 'sdd.db');
 
   seedMainDb(srcDb);
   closeDatabase();
@@ -111,8 +111,8 @@ console.log('\n=== worktree-db: copyWorktreeDb ===');
 {
   const srcDir = tempDir();
   const destDir = tempDir();
-  const srcDb = path.join(srcDir, 'gsd.db');
-  const destDb = path.join(destDir, 'gsd.db');
+  const srcDb = path.join(srcDir, 'sdd.db');
+  const destDb = path.join(destDir, 'sdd.db');
 
   seedMainDb(srcDb);
   closeDatabase();
@@ -133,7 +133,7 @@ console.log('\n=== worktree-db: copyWorktreeDb ===');
 // Test: returns false when source doesn't exist (no throw)
 {
   const destDir = tempDir();
-  const result = copyWorktreeDb('/nonexistent/path/gsd.db', path.join(destDir, 'gsd.db'));
+  const result = copyWorktreeDb('/nonexistent/path/sdd.db', path.join(destDir, 'sdd.db'));
   assert.deepStrictEqual(result, false, 'returns false for missing source');
   cleanup(destDir);
 }
@@ -142,8 +142,8 @@ console.log('\n=== worktree-db: copyWorktreeDb ===');
 {
   const srcDir = tempDir();
   const destDir = tempDir();
-  const srcDb = path.join(srcDir, 'gsd.db');
-  const deepDest = path.join(destDir, 'a', 'b', 'c', 'gsd.db');
+  const srcDb = path.join(srcDir, 'sdd.db');
+  const deepDest = path.join(destDir, 'a', 'b', 'c', 'sdd.db');
 
   seedMainDb(srcDb);
   closeDatabase();
@@ -165,8 +165,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   // Seed main with D001
   seedMainDb(mainDb);
@@ -204,8 +204,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   seedMainDb(mainDb);
   closeDatabase();
@@ -243,8 +243,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   seedMainDb(mainDb);
   closeDatabase();
@@ -277,8 +277,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   // Seed main with D001
   seedMainDb(mainDb);
@@ -321,7 +321,7 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 // Test: handles missing worktree DB gracefully
 {
   const mainDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
 
   seedMainDb(mainDb);
 
@@ -342,8 +342,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
   fs.mkdirSync(mainDir, { recursive: true });
   fs.mkdirSync(wtDir, { recursive: true });
 
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   seedMainDb(mainDb);
   closeDatabase();
@@ -377,8 +377,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   seedMainDb(mainDb);
   closeDatabase();
@@ -424,8 +424,8 @@ console.log('\n=== worktree-db: reconcileWorktreeDb ===');
 {
   const mainDir = tempDir();
   const wtDir = tempDir();
-  const mainDb = path.join(mainDir, 'gsd.db');
-  const wtDb = path.join(wtDir, 'gsd.db');
+  const mainDb = path.join(mainDir, 'sdd.db');
+  const wtDb = path.join(wtDir, 'sdd.db');
 
   seedMainDb(mainDb);
   closeDatabase();

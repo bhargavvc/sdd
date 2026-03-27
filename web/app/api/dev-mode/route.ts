@@ -5,11 +5,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export function GET(): Response {
-  const hostKind = process.env.GSD_WEB_HOST_KIND ?? "unknown";
-  const packageRoot = process.env.GSD_WEB_PACKAGE_ROOT ?? "";
+  const hostKind = process.env.SDD_WEB_HOST_KIND ?? "unknown";
+  const packageRoot = process.env.SDD_WEB_PACKAGE_ROOT ?? "";
   const isSourceDev = hostKind === "source-dev";
 
-  // When running via `npm run gsd:web` from the monorepo, the host resolves
+  // When running via `npm run sdd:web` from the monorepo, the host resolves
   // as packaged-standalone (because the build exists), but the source web/
   // directory is still present at the package root. A truly published package
   // won't have web/app/ next to dist/.

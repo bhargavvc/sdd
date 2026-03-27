@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to GSD are documented in this file.
+All notable changes to SDD are documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -16,7 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **vscode**: activity feed, workflow controls, session forking, enhanced code lens [2/3] (#2656)
-- **gsd**: enable safety mechanisms by default (snapshots, pre-merge checks) (#2678)
+- **sdd**: enable safety mechanisms by default (snapshots, pre-merge checks) (#2678)
 
 ### Fixed
 - hydrate collected secrets for current session (#2788)
@@ -29,11 +29,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - write milestone reports to project root instead of worktree (#2778)
 - auto-resolve build artifact conflicts in milestone merge (#2777)
 - let rate-limit errors attempt model fallback before pausing (#2775)
-- prevent gsd next from self-killing via stale crash lock (#2784)
+- prevent sdd next from self-killing via stale crash lock (#2784)
 - add shell flag for Windows spawn in VSCode extension (#2781)
 
 ### Changed
-- **gsd**: extract duplicated status guards and validation helpers (#2767)
+- **sdd**: extract duplicated status guards and validation helpers (#2767)
 
 ## [2.52.0] - 2026-03-27
 
@@ -50,33 +50,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - make transaction() re-entrant and add slice_dependencies to initSchema
 - remove preferences.md from ROOT_STATE_FILES to prevent back-sync overwrite
 - wire tool handlers through DB port layer, remove _getAdapter from all tools
-- **gsd**: move state machine guards inside transaction in 5 tool handlers (#2752)
+- **sdd**: move state machine guards inside transaction in 5 tool handlers (#2752)
 - reconcile disk milestones into empty DB before deriveStateFromDb guard (#2686)
-- **gsd**: seed preferences.md into auto-mode worktrees (#2693)
+- **sdd**: seed preferences.md into auto-mode worktrees (#2693)
 - **claude-import**: discover marketplace plugins nested inside container directories (#2718)
 - exempt interactive tools from idle watchdog stall detection (#2676)
 - guard allSlicesDone against vacuous truth on empty slice array (#2679)
 - block complete-milestone dispatch when VALIDATION is needs-remediation (#2682)
-- **gsd**: sync milestone DB status in parkMilestone and unparkMilestone (#2696)
+- **sdd**: sync milestone DB status in parkMilestone and unparkMilestone (#2696)
 - **web**: auth token gate — synthetic 401 on missing token, unauthenticated boot state, and recovery screen (#2740)
 - **remote-questions**: empty-key entry in auth.json shadows valid Discord bot token (#2737)
 - idle watchdog stalled-tool detection overridden by filesystem activity (#2697)
 - surface exhausted Claude SDK streams as errors (#2719)
 - **docker**: overhaul fragile setup, adopt proven container patterns (#2716)
-- **gsd**: write DB before disk in validate-milestone to match engine pattern (#2742)
-- **gsd**: extract and honor milestone argument in /gsd auto and /gsd next (#2729)
+- **sdd**: write DB before disk in validate-milestone to match engine pattern (#2742)
+- **sdd**: extract and honor milestone argument in /sdd auto and /sdd next (#2729)
 - **windows**: prevent EINVAL by disabling detached process groups on Win32 (#2744)
-- **gsd**: delete orphaned verification_evidence rows on complete-task rollback (#2746)
-- **gsd**: wire setLogBasePath into engine init to resurrect audit log (#2745)
+- **sdd**: delete orphaned verification_evidence rows on complete-task rollback (#2746)
+- **sdd**: wire setLogBasePath into engine init to resurrect audit log (#2745)
 - Remove premature pendingTools.delete in webSearchResult handler (#2743)
-- **gsd**: remove redundant assertions that fail TS2367 typecheck
+- **sdd**: remove redundant assertions that fail TS2367 typecheck
 - include preferences.md in worktree sync and initial seed
 
 ### Changed
 - **pi-ai**: replace model-ID pattern matching with capability metadata (#2548)
-- **gsd-db**: comprehensive SQLite audit fixes — indexes, caching, safety, reconciliation
+- **sdd-db**: comprehensive SQLite audit fixes — indexes, caching, safety, reconciliation
 - rename preferences.md to PREFERENCES.md for consistency (#2700) (#2738)
-- **gsd**: unify three overlapping error classifiers into single classify→decide→act pipeline
+- **sdd**: unify three overlapping error classifiers into single classify→decide→act pipeline
 
 ## [2.51.0] - 2026-03-26
 
@@ -104,7 +104,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - update triage-dispatch static analysis tests for enqueueSidecar helper
 - **notifications**: prefer terminal-notifier over osascript on macOS (#2633)
 - classify stream-truncation JSON parse errors as transient (#2636)
-- call ensureDbOpen() before slice queries in /gsd discuss (#2640)
+- call ensureDbOpen() before slice queries in /sdd discuss (#2640)
 - **prompts**: use --body-file for forensics issue creation (#2641)
 - isLockProcessAlive should return true for own PID (#2642)
 - check ASSESSMENT file for UAT verdict in checkNeedsRunUat (#2646)
@@ -144,9 +144,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **skills**: address QA round 3
 - **skills**: address QA round 2
 - **skills**: defer greenfield skill selection to post-design phase
-- **skills**: add migration from ~/.gsd/agent/skills/ to ~/.agents/skills/
-- **gsd extension**: detect initialized projects in health widget
-- **gsd extension**: detect initialized projects in health widget
+- **skills**: add migration from ~/.sdd/agent/skills/ to ~/.agents/skills/
+- **sdd extension**: detect initialized projects in health widget
+- **sdd extension**: detect initialized projects in health widget
 
 ### Changed
 - consolidate docs, remove stale artifacts, and repo hygiene (#2665)
@@ -155,7 +155,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.50.0] - 2026-03-26
 
 ### Added
-- **gsd**: wire structured error propagation through UnitResult
+- **sdd**: wire structured error propagation through UnitResult
 - add parallel quality gate evaluation with evaluating-gates phase
 - add 8-question quality gates to planning and completion templates
 
@@ -165,23 +165,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - use Record<string, any> for hasNonEmptyFields to accept typed DB rows
 - **tests**: replace undefined assertTrue/assertEq with assert.ok/assert.equal
 - **tests**: replace undefined assertTrue/assertEq with assert.ok/deepStrictEqual
-- **gsd**: handle session_switch event so /resume restores GSD state (#2587)
+- **sdd**: handle session_switch event so /resume restores SDD state (#2587)
 - use GitHub Issue Types via GraphQL instead of classification labels
 - **headless**: disable overall timeout for auto-mode, fix lock-guard auto-select (#2586)
-- **auto**: align UAT artifact suffix with gsd_slice_complete output (#2592)
+- **auto**: align UAT artifact suffix with sdd_slice_complete output (#2592)
 - **retry-handler**: stop treating 5xx server errors as credential-level failures
 - **test**: replace stale completedUnits with sessionFile in session-lock test
 - **session-lock**: retry lock file reads before declaring compromise
-- **gsd**: prevent ensureGsdSymlink from creating subdirectory .gsd when git-root .gsd exists
+- **sdd**: prevent ensureGsdSymlink from creating subdirectory .sdd when git-root .sdd exists
 - **auto**: add EAGAIN to INFRA_ERROR_CODES to stop budget-burning retries
 - **search**: enforce hard search budget and survive context compaction
 - **remote-questions**: use static ESM import for AuthStorage hydration
 - add SAFE_SKILL_NAME guard to reject prompt-injection via crafted skill names
-- **gsd**: use explicit parameter syntax in skill activation prompts
+- **sdd**: use explicit parameter syntax in skill activation prompts
 - guard writeIntegrationBranch against workflow-template branches
 - preserve doctor missing-dir checks for active legacy slices
-- **gsd**: downgrade isolation mode when worktree creation fails
-- **gsd**: skip loading files for completed milestones in queue context builder
+- **sdd**: downgrade isolation mode when worktree creation fails
+- **sdd**: skip loading files for completed milestones in queue context builder
 - resolve race conditions in blob-store, discovery-cache, and agent-loop
 - **ai**: resolve WebSocket listener leaks and bound session cache
 - **rpc**: resolve double-set race, missing error ID, and stream handler
@@ -209,7 +209,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.49.0] - 2026-03-25
 
 ### Added
-- add --yolo flag to /gsd auto for non-interactive project init
+- add --yolo flag to /sdd auto for non-interactive project init
 
 ### Fixed
 - use full git log in merge tests to match trailer-based milestone IDs
@@ -218,19 +218,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - verdict gate accepts PARTIAL for mixed/human-experience/live-runtime UATs
 
 ### Changed
-- move GSD metadata from commit subject scopes to git trailers
+- move SDD metadata from commit subject scopes to git trailers
 
 ## [2.48.0] - 2026-03-25
 
 ### Added
-- **discuss**: allow /gsd discuss to target queued milestones
-- enhance /gsd forensics with journal and activity log awareness
+- **discuss**: allow /sdd discuss to target queued milestones
+- enhance /sdd forensics with journal and activity log awareness
 
 ### Fixed
 - make journal scanning intelligent — limit parsed files, line-count older ones
 - **model-registry**: scope custom provider stream handlers to prevent clobbering built-in API handlers
 - **forensics**: filter benign bash exit-code-1 and user skips from error traces
-- **gsd**: clear stale milestone ID reservations at session start
+- **sdd**: clear stale milestone ID reservations at session start
 - render tool calls above text response for external providers
 - **auto**: skip CONTEXT-DRAFT warning for completed/parked milestones
 
@@ -249,7 +249,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - **claude-code-cli**: render tool calls above text response
 - **ci**: update FILE-SYSTEM-MAP.md path after docs→docs-internal move
-- isInheritedRepo false negative when parent has stale .gsd; defense-in-depth local .git check in bootstrap
+- isInheritedRepo false negative when parent has stale .sdd; defense-in-depth local .git check in bootstrap
 - **claude-code-cli**: resolve SDK executable path and update model IDs
 - make planning doctrine demoable definition audience-appropriate
 - **prompts**: migrate remaining 4 prompts to use DB-backed tool API instead of direct write
@@ -261,7 +261,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - **ci**: prevent windows-portability from blocking pipeline
 - **ci**: prevent pipeline race condition on release push
-- **gsd**: create empty DB for fresh projects with empty .sdd/ (#2510)
+- **sdd**: create empty DB for fresh projects with empty .sdd/ (#2510)
 - **remote-questions**: hydrate remote channel tokens from auth.json on startup
 
 ### Changed
@@ -271,64 +271,64 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.46.0] - 2026-03-25
 
 ### Added
-- **gsd**: single-writer engine v3 — state machine guards, actor identity, reversibility
-- **gsd**: single-writer state engine v2 — discipline layer on DB architecture
-- **gsd**: add workflow-logger and wire into engine, tool, manifest, reconcile paths (#2494)
+- **sdd**: single-writer engine v3 — state machine guards, actor identity, reversibility
+- **sdd**: single-writer state engine v2 — discipline layer on DB architecture
+- **sdd**: add workflow-logger and wire into engine, tool, manifest, reconcile paths (#2494)
 
 ### Fixed
-- **gsd**: align prompts with single-writer tool API
-- **gsd**: integration-proof — check DB state not roadmap projection after reset
-- **gsd**: block milestone completion when verification fails (#2500)
+- **sdd**: align prompts with single-writer tool API
+- **sdd**: integration-proof — check DB state not roadmap projection after reset
+- **sdd**: block milestone completion when verification fails (#2500)
 - **ci**: add typecheck:extensions to pretest to prevent silent type drift
-- **gsd**: relax integration-proof cross-validation for table-format roadmap
-- **gsd**: update integration-proof tests for table-format roadmap projections
-- **gsd**: update test assertions for schema v11, prompt changes, and removed completedUnits
-- **gsd**: update test files for removed completedUnits, writeLock signature, and type changes
-- **gsd**: remove stale completedUnits refs, fix writeLock callers, add missing imports
-- **gsd**: harden single-writer engine — close TOCTOU, intercept bypasses, status inconsistencies
+- **sdd**: relax integration-proof cross-validation for table-format roadmap
+- **sdd**: update integration-proof tests for table-format roadmap projections
+- **sdd**: update test assertions for schema v11, prompt changes, and removed completedUnits
+- **sdd**: update test files for removed completedUnits, writeLock signature, and type changes
+- **sdd**: remove stale completedUnits refs, fix writeLock callers, add missing imports
+- **sdd**: harden single-writer engine — close TOCTOU, intercept bypasses, status inconsistencies
 - **write-intercept**: close bare-relative-path bypass in STATE.md regex
 - **voice**: fix misleading portaudio error on PEP 668 Linux systems (#2403) (#2407)
 - **core**: address PR review feedback for non-apikey provider support (#2452)
 - **ci**: retry npm install in pipeline to handle registry propagation delay (#2462)
-- **gsd**: change default isolation mode from worktree to none (#2481)
+- **sdd**: change default isolation mode from worktree to none (#2481)
 - **loader**: add startup checks for Node version and git availability (#2463)
-- **gsd**: add worktree lifecycle events to journal (#2486)
+- **sdd**: add worktree lifecycle events to journal (#2486)
 
 ## [2.45.0] - 2026-03-25
 
 ### Added
 - **web**: make web UI mobile responsive (#2354)
-- **gsd**: add `/gsd rethink` command for conversational project reorganization (#2459)
-- **gsd**: add renderCall/renderResult previews to DB tools (#2273)
+- **sdd**: add `/sdd rethink` command for conversational project reorganization (#2459)
+- **sdd**: add renderCall/renderResult previews to DB tools (#2273)
 - add timestamps on user and assistant messages (#2368)
-- **gsd**: add `/gsd mcp` command for MCP server status and connectivity (#2362)
+- **sdd**: add `/sdd mcp` command for MCP server status and connectivity (#2362)
 - complete offline mode support (#2429)
 - **system-context**: inject global ~/.sdd/agent/KNOWLEDGE.md into system prompt (#2331)
 
 ### Fixed
-- **gsd**: handle retentionDays=0 on Windows + run windows-portability on PRs (#2460)
+- **sdd**: handle retentionDays=0 on Windows + run windows-portability on PRs (#2460)
 - use Array.from instead of Buffer.from for native processStreamChunk state (#2348)
-- **gsd**: isInheritedRepo conflates ~/.gsd with project .gsd when git root is $HOME (#2398)
+- **sdd**: isInheritedRepo conflates ~/.sdd with project .sdd when git root is $HOME (#2398)
 - reconcile disk milestones missing from DB in deriveStateFromDb (#2416) (#2422)
 - **auto**: reset recoveryAttempts on unit re-dispatch (#2322) (#2424)
 - detect and preserve submodule state during worktree teardown (#2337) (#2425)
 - **auto-start**: handle survivor branch recovery in phase=complete (#2358) (#2427)
-- **gsd**: widen test search window for CRLF portability on Windows (#2458)
-- **gsd**: preserve rich task plans on DB roundtrip (#2450) (#2453)
+- **sdd**: widen test search window for CRLF portability on Windows (#2458)
+- **sdd**: preserve rich task plans on DB roundtrip (#2450) (#2453)
 - merge worktree back to main when stopAuto is called after milestone completion (#2317) (#2430)
-- **gsd**: skip doctor directory checks for pending slices (#2446)
-- **gsd**: migrate completion/validation prompts to DB-backed tools (#2449)
-- **gsd**: prevent saveArtifactToDb from overwriting larger files with truncated content (#2442) (#2447)
+- **sdd**: skip doctor directory checks for pending slices (#2446)
+- **sdd**: migrate completion/validation prompts to DB-backed tools (#2449)
+- **sdd**: prevent saveArtifactToDb from overwriting larger files with truncated content (#2442) (#2447)
 - stop auto loop on real code merge conflicts (#2330) (#2428)
 - classify terminated/connection errors as transient in provider error handler (#2309) (#2432)
 - archive completed-units.json on milestone transition and sync metrics.json (#2313) (#2431)
 - supervision timeouts now respect task est: annotations (#2243) (#2434)
 - auto_pr: true now actually creates PRs — fix 3 interacting bugs (#2302) (#2433)
-- **gsd**: insert DB row when generating milestone ID (#2416)
-- **gsd**: reconcile disk-only milestones into DB in deriveStateFromDb (#2416)
+- **sdd**: insert DB row when generating milestone ID (#2416)
+- **sdd**: reconcile disk-only milestones into DB in deriveStateFromDb (#2416)
 - **preferences**: deduplicate unrecognized format warning on repeated loads (#2375)
 - gate auto-mode bootstrap on SQLite availability (#2419) (#2421)
-- block /gsd quick when auto-mode is active (#2420)
+- block /sdd quick when auto-mode is active (#2420)
 - **ci**: add Rust target for all platforms, not just cross-compilation
 - **ci**: restore Rust target triple and separate cross-compilation setup
 - **ci**: separate cross-compilation target from toolchain install
@@ -336,12 +336,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - migrate D-G test files from createTestContext to node:test (#2418)
 - **test**: replace try/finally with beforeEach/afterEach in packages tests (#2390)
-- **test**: migrate gsd/tests s-z from custom harness to node:test (#2397)
-- **test**: migrate gsd/tests o-r from custom harness to node:test (#2401)
-- **test**: migrate gsd/tests i-n from custom harness to node:test (#2399)
-- **test**: migrate gsd/tests a-c from custom harness to node:test (#2400)
-- **test**: replace try/finally with t.after() in gsd/tests (e-i) (#2396)
-- **test**: replace try/finally with t.after() in gsd/tests (a-d) (#2395)
+- **test**: migrate sdd/tests s-z from custom harness to node:test (#2397)
+- **test**: migrate sdd/tests o-r from custom harness to node:test (#2401)
+- **test**: migrate sdd/tests i-n from custom harness to node:test (#2399)
+- **test**: migrate sdd/tests a-c from custom harness to node:test (#2400)
+- **test**: replace try/finally with t.after() in sdd/tests (e-i) (#2396)
+- **test**: replace try/finally with t.after() in sdd/tests (a-d) (#2395)
 - **test**: replace try/finally with t.after() in src/tests (o-z) (#2392)
 - **test**: replace try/finally with t.after() in src/tests (a-n) (#2394)
 
@@ -349,10 +349,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **core**: support for 'non-api-key' provider extensions like Claude Code CLI (#2382)
-- **docker**: add official Docker sandbox template for isolated GSD auto mode (#2360)
-- **gsd**: show per-prompt token cost in footer behind show_token_cost preference (#2357)
+- **docker**: add official Docker sandbox template for isolated SDD auto mode (#2360)
+- **sdd**: show per-prompt token cost in footer behind show_token_cost preference (#2357)
 - **web**: add "Change project root" button to web UI (#2355)
-- **gsd**: Tool-driven write-side state transitions — replace markdown mutation with atomic SQLite tool calls (#2141)
+- **sdd**: Tool-driven write-side state transitions — replace markdown mutation with atomic SQLite tool calls (#2141)
 - **S06/T02**: Strip all 16 lazy createRequire fallback paths from migr…
 - **S05/T04**: Migrate remaining 6 callers (auto-prompts, auto-recovery…
 - **S05/T03**: Migrate 7 warm/cold callers (doctor, doctor-checks, visu…
@@ -362,35 +362,35 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **S04/T02**: Migrate dispatch-guard.ts to DB queries with isDbAvailab…
 - **S01/T03**: Migrate planning prompts to DB-backed tool guidance and…
 - **S01/T01**: Partially advanced schema v8 groundwork and documented t…
-- **gsd**: tool-driven write-side state transitions (M001)
+- **sdd**: tool-driven write-side state transitions (M001)
 
 ### Fixed
 - post-migration cleanup — pragmas, rollbacks, tool gaps, stale code (#2410)
 - **test**: normalize CRLF in auto-stash-merge assertion for Windows
 - **test**: swallow EPERM on Windows temp dir cleanup in auto-stash-merge test
-- **gsd**: add file-based fallbacks for DB-dependent code paths and fix CI test failures
-- **gsd**: remove stale observabilityIssues reference in journal-integration test
+- **sdd**: add file-based fallbacks for DB-dependent code paths and fix CI test failures
+- **sdd**: remove stale observabilityIssues reference in journal-integration test
 - **extensions**: detect TypeScript syntax in .js extension files and suggest renaming to .ts (#2386)
-- **gsd**: prevent planning data loss from destructive upsert and post-unit re-import (#2370)
-- **gsd**: use correct notify severity type ("warning" not "warn")
+- **sdd**: prevent planning data loss from destructive upsert and post-unit re-import (#2370)
+- **sdd**: use correct notify severity type ("warning" not "warn")
 - **web**: resolve compiled .js modules for all subprocess calls under node_modules (#2320)
 - **test**: increase perf assertion threshold to prevent CI flake (#2327)
 - add missing SQLite WAL sidecars and journal to runtime exclusion lists (#2299)
-- **gsd**: remove stale observability validator + fix greenfield worktree check
+- **sdd**: remove stale observability validator + fix greenfield worktree check
 - **memory**: fix memory and resource leaks across TUI, LSP, DB, and automation (#2314)
-- **gsd**: preserve freeform DECISIONS.md content on decision save (#2319)
+- **sdd**: preserve freeform DECISIONS.md content on decision save (#2319)
 - **pi-ai**: restore alibaba-coding-plan provider via models.custom.ts (#2350)
 - **doctor**: skip false env_dependencies error in auto-worktrees (#2318)
-- **gsd**: auto-stash dirty files before squash merge and surface dirty filenames in error (#2298)
-- **gsd**: keep params as any in db-tools executors (CI tsconfig is stricter)
-- **gsd**: replace any types in db-tools executor signatures
-- **gsd**: resolve 4 TS compilation errors from parser migration
-- **gsd**: wrap plan-task DB writes in transaction + untrack .sdd/ artifacts
+- **sdd**: auto-stash dirty files before squash merge and surface dirty filenames in error (#2298)
+- **sdd**: keep params as any in db-tools executors (CI tsconfig is stricter)
+- **sdd**: replace any types in db-tools executor signatures
+- **sdd**: resolve 4 TS compilation errors from parser migration
+- **sdd**: wrap plan-task DB writes in transaction + untrack .sdd/ artifacts
 - **S04/T04**: Add planning-crossval tests proving DB↔rendered↔parsed pa…
 - **S04/T01**: Add schema v9 migration with sequence column on slices/ta…
 - remove .sdd/ milestone artifacts from git index
 - **tests**: update remediation step assertions and crossval fixture
-- **gsd**: address all 7 review findings from PR #2141
+- **sdd**: address all 7 review findings from PR #2141
 - **tests**: remove invalid `seq` property from insertMilestone calls
 
 ### Changed
@@ -422,16 +422,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - prevent banner from printing twice on first run (#2251)
 - **test**: Windows CI — use double quotes in git commit message (#2252)
 - **async-jobs**: suppress duplicate follow-up for awaited job results (#2248) (#2250)
-- **gsd**: remove force-staging of .sdd/milestones/ through symlinks (#2247) (#2249)
-- **gsd**: remove over-broad skill activation heuristic (#2239) (#2244)
+- **sdd**: remove force-staging of .sdd/milestones/ through symlinks (#2247) (#2249)
+- **sdd**: remove over-broad skill activation heuristic (#2239) (#2244)
 - **auth**: fall through to env/fallback when OAuth credential has no registered provider (#2097)
 - **lsp**: bound message buffer and clean up stale client state (#2171)
-- clean up macOS numbered .gsd collision variants (#2205) (#2210)
+- clean up macOS numbered .sdd collision variants (#2205) (#2210)
 - **search**: keep duplicate-search loop guard armed (#2117)
 - clean up extension error listener on session dispose (#2165)
 - **web**: resolve 4 pre-existing onboarding contract test failures (#2209)
 - async bash job timeout hangs indefinitely instead of erroring out (#2214)
-- **gsd**: apply fast service tier outside auto-mode (#2126)
+- **sdd**: apply fast service tier outside auto-mode (#2126)
 - **interactive**: clean up leaked SIGINT and extension selector listeners (#2172)
 - **ci**: standardize GitHub Actions and Node.js versions (#2169)
 - **native**: resolve memory leaks in glob, ttsr, and image overflow (#2170)
@@ -442,7 +442,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **web**: kill stale server process before launch to prevent EADDRINUSE (#1934) (#2034)
 - **git**: force LC_ALL=C in GIT_NO_PROMPT_ENV to support non-English locales (#2035)
 - **forensics**: force gh CLI for issue creation to prevent misrouting (#2067) (#2094)
-- force-stage .sdd/milestones/ artifacts when .gsd is a symlink (#2104) (#2112)
+- force-stage .sdd/milestones/ artifacts when .sdd is a symlink (#2104) (#2112)
 - **pi-ai**: correct Copilot context window and output token limits (#2118)
 
 ### Changed
@@ -451,11 +451,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.42.0] - 2026-03-22
 
 ### Added
-- **gsd**: declarative workflow engine — YAML-defined workflows through the auto-loop (#2024)
-- **gsd**: unified rule registry, event journal, journal query tool, and tool naming convention (#1928)
+- **sdd**: declarative workflow engine — YAML-defined workflows through the auto-loop (#2024)
+- **sdd**: unified rule registry, event journal, journal query tool, and tool naming convention (#1928)
 - **ci**: PR risk checker — classify changed files by system and surface risk level (#1930)
 - ADR attribution — distinguish human vs agent vs collaborative decisions (#1830)
-- add /gsd fast command and gate service tier icon to supported models (#1848) (#1862)
+- add /sdd fast command and gate service tier icon to supported models (#1848) (#1862)
 - add --host, --port, --allowed-origins flags for web mode (#1847) (#1873)
 
 ### Fixed
@@ -505,9 +505,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **auto**: reject execute-task with zero tool calls as hallucinated (#1838)
 - also convert --import resolver path to file URL for Windows
 - use pathToFileURL for Windows-safe ESM import in verification-gate test
-- **gsd**: read depends_on from CONTEXT-DRAFT.md when CONTEXT.md is absent (#1743)
+- **sdd**: read depends_on from CONTEXT-DRAFT.md when CONTEXT.md is absent (#1743)
 - **roadmap**: detect ✓ completion marker in prose slice headers (#1816)
-- **auto**: reverse-sync root-level .gsd files on worktree teardown (#1831)
+- **auto**: reverse-sync root-level .sdd files on worktree teardown (#1831)
 - **tui**: prevent freeze when using @ file finder (#1832)
 - prevent silent data loss when milestone merge fails due to dirty working tree (#1752)
 - **verification**: avoid DEP0190 by passing command to shell explicitly (#1827)
@@ -522,11 +522,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - use realpathSync.native on Windows to resolve 8.3 short paths
 - detect and skip ghost milestone directories in deriveState() (#1817)
 - create milestone directory when triage defers to a not-yet-existing milestone (#1813)
-- add @gsd/pi-tui to test module resolver in dist-redirect (#1811)
+- add @sdd/pi-tui to test module resolver in dist-redirect (#1811)
 - surface unmapped active requirements when all milestones complete (#1805)
 - normalize paths in tests to handle Windows 8.3 short-path forms (#1804)
 - share milestone ID reservation between preview and tool (#1569) (#1802)
-- **tui,gsd**: tool-call loop guard + TUI stack overflow prevention (#1801)
+- **tui,sdd**: tool-call loop guard + TUI stack overflow prevention (#1801)
 - validate paused-session milestone before restoring it (#1664) (#1800)
 - detect REPLAN-TRIGGER.md in deriveState for triage-initiated replans (#1798)
 - dispatch uat targets last completed slice instead of activeSlice (#1693) (#1796)
@@ -559,27 +559,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - prevent getLoadedSkills crash and auto-build workspace packages (#1767)
 - session lock multi-path cleanup and false positive hardening (#1578) (#1765)
 - robust node_modules symlink handling to prevent extension loading failures (#1762)
-- lazy-load @gsd/pi-tui in shared/ui.ts to prevent /exit crash (#1761)
+- lazy-load @sdd/pi-tui in shared/ui.ts to prevent /exit crash (#1761)
 - validate worktree .git file and fix metrics toolCall casing (#1713) (#1754)
 - verify implementation artifacts before milestone completion (#1703) (#1760)
 - make task closeout crash-safe by unchecking orphaned checkboxes (#1650) (#1759)
 - preserve milestone branch on merge-back during transitions (#1573) (#1758)
 - write crash lock after newSession so it records correct session path (#1757)
-- handle symlinked .gsd in git add pathspec exclusions (#1712) (#1756)
+- handle symlinked .sdd in git add pathspec exclusions (#1712) (#1756)
 - guard worktree teardown on empty merge to prevent data loss (#1672) (#1755)
 - resolve symlinks in doctor orphaned-worktree check (#1715) (#1753)
 - silence spurious extension load error for non-extension libraries (#1709) (#1747)
 - reset completion state when post_unit_hooks retry_on signal is consumed (#1746)
-- route needs-discussion phase to showSmartEntry, preventing infinite /gsd loop (#1745)
+- route needs-discussion phase to showSmartEntry, preventing infinite /sdd loop (#1745)
 - **roadmap**: parse table-format slices in roadmap files (#1741)
 - extract milestone title from CONTEXT.md when ROADMAP is missing (#1729)
-- **gsd**: harden auto-mode telemetry — metrics idempotency, elapsed guard, title sanitization (#1722)
-- **gsd**: make saveJsonFile atomic via write-tmp-rename pattern (#1719)
-- **gsd**: syncWorktreeStateBack recurses into tasks/ subdirectory (#1678) (#1718)
+- **sdd**: harden auto-mode telemetry — metrics idempotency, elapsed guard, title sanitization (#1722)
+- **sdd**: make saveJsonFile atomic via write-tmp-rename pattern (#1719)
+- **sdd**: syncWorktreeStateBack recurses into tasks/ subdirectory (#1678) (#1718)
 - prevent parallel worktree path resolution from escaping to home directory (#1677)
 - add web search budget awareness to discuss and queue prompts (#1702)
 - harden auto-mode against stale integration metadata and Windows file locks (#1633)
-- **autocomplete**: repair /gsd skip, add widget/next completions, add discuss to hint (#1675)
+- **autocomplete**: repair /sdd skip, add widget/next completions, add discuss to hint (#1675)
 - **search**: keep loop guard armed after firing to prevent infinite loop restart (#1671) (#1674)
 - **worktree**: detect default branch instead of hardcoding "main" on milestone merge (#1668) (#1669)
 - remove duplicate TUI header rendered on session_start (#1663)
@@ -596,7 +596,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - **pi**: add Skill tool resolution (#1661)
 - health check phase 2 — real-time doctor issue visibility across widget, visualizer, and HTML reports (#1644)
-- upgrade forensics prompt to full-access GSD debugger (#1660)
+- upgrade forensics prompt to full-access SDD debugger (#1660)
 
 ### Fixed
 - prune stale env-utils.js from extensions root, preventing startup load error (#1655)
@@ -612,21 +612,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.39.0] - 2026-03-20
 
 ### Added
-- **gsd**: activate matching skills in dispatched prompts (#1630)
-- **gsd**: add .sdd/RUNTIME.md template for declared runtime context (#1626)
-- **gsd**: create draft PR on milestone completion when git.auto_pr enabled (#1627)
-- **gsd**: add browser-executable and runtime-executable UAT types (#1620)
+- **sdd**: activate matching skills in dispatched prompts (#1630)
+- **sdd**: add .sdd/RUNTIME.md template for declared runtime context (#1626)
+- **sdd**: create draft PR on milestone completion when git.auto_pr enabled (#1627)
+- **sdd**: add browser-executable and runtime-executable UAT types (#1620)
 - apply model preferences in guided flow for milestone planning (#1614)
-- **gsd**: GitHub sync extension — auto-sync to Issues, PRs, Milestones (#1603)
-- add GSD_PROJECT_ID env var to override project hash (#1600)
-- add GSD_HOME env var to override global ~/.gsd directory (#1566)
-- **gsd**: add 13 enhancements to /gsd doctor (#1583)
-- feat(ui): minimal GSD welcome screen on startup (#1584)
+- **sdd**: GitHub sync extension — auto-sync to Issues, PRs, Milestones (#1603)
+- add SDD_PROJECT_ID env var to override project hash (#1600)
+- add SDD_HOME env var to override global ~/.sdd directory (#1566)
+- **sdd**: add 13 enhancements to /sdd doctor (#1583)
+- feat(ui): minimal SDD welcome screen on startup (#1584)
 
 ### Fixed
 - recover + prevent #1364 .sdd/ data-loss (v2.30.0–v2.38.0) (#1635)
 - treat summary as terminal artifact even when roadmap slices are unchecked (#1632)
-- **gsd**: close residual #1364 data-loss vectors on v2.36.0+ (#1637)
+- **sdd**: close residual #1364 data-loss vectors on v2.36.0+ (#1637)
 - auto-resolve npm subpath exports in extension loader (#1624)
 - create node_modules symlink for dynamic import resolution in extensions (#1623)
 - filter cross-milestone errors from health tracker escalation (#1621)
@@ -636,34 +636,34 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resolve ${VAR} env references in MCP client .mcp.json configs (#1609)
 - return "dispatched" after doctor heal to prevent session race (#1580) (#1610)
 - update Anthropic OAuth endpoints to platform.claude.com (#1608)
-- lazy-open GSD database on first tool call in manual sessions (#1606)
-- **gsd**: detect anthropic-vertex in provider doctor (#1598)
-- **gsd**: tighten prompt automation contracts (#1556)
-- **gsd**: harden auto-mode agent loop — session teardown, unit correlation, sidecar perf (#1592)
+- lazy-open SDD database on first tool call in manual sessions (#1606)
+- **sdd**: detect anthropic-vertex in provider doctor (#1598)
+- **sdd**: tighten prompt automation contracts (#1556)
+- **sdd**: harden auto-mode agent loop — session teardown, unit correlation, sidecar perf (#1592)
 - break remaining shared/mod.js barrel imports in report generation chain (#1588)
 - apply pi manifest opt-out to extension-discovery.ts (#1545)
-- detect worktree paths resolved through .gsd symlinks (#1585)
+- detect worktree paths resolved through .sdd symlinks (#1585)
 
 ### Changed
-- **gsd**: unify sidecar mini-loop into main dispatch path (#1617)
+- **sdd**: unify sidecar mini-loop into main dispatch path (#1617)
 - **auto-loop**: initial cleanup — hoist constant, cache prefs per iteration (#1616)
-- **gsd**: add 30K char hard cap on prompt preamble (#1619)
-- **gsd**: replace stuck counter with sliding-window detection (#1618)
+- **sdd**: add 30K char hard cap on prompt preamble (#1619)
+- **sdd**: replace stuck counter with sliding-window detection (#1618)
 - **auto-loop**: 5 code smell fixes (#1602)
-- **gsd**: replace session-scoped promise bridge with per-unit one-shot (#1595)
-- **gsd**: remove prompt compression subsystem (~4,100 lines) (#1597)
-- **gsd**: crashproof stopAuto with independent try/catch per cleanup step (#1596)
+- **sdd**: replace session-scoped promise bridge with per-unit one-shot (#1595)
+- **sdd**: remove prompt compression subsystem (~4,100 lines) (#1597)
+- **sdd**: crashproof stopAuto with independent try/catch per cleanup step (#1596)
 
 ## [2.38.0] - 2026-03-20
 
 ### Added
-- **gsd**: ADR-004 — derived-graph reactive task execution (#1546)
+- **sdd**: ADR-004 — derived-graph reactive task execution (#1546)
 - add anthropic-vertex provider for Claude on Vertex AI (#1533)
 
 ### Fixed
 - **ci**: reduce GitHub Actions minutes ~60-70% (~10k → ~3-4k/month) (#1552)
-- **gsd**: reactive batch verification + dependency-based carry-forward (#1549)
-- **gsd**: enforce backtick file paths in task plan IO sections (#1548)
+- **sdd**: reactive batch verification + dependency-based carry-forward (#1549)
+- **sdd**: enforce backtick file paths in task plan IO sections (#1548)
 
 ## [2.37.1] - 2026-03-20
 
@@ -679,7 +679,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **dashboard**: two-column layout with redesigned widget (#1530)
-- integrate cmux with gsd runtime (#1532)
+- integrate cmux with sdd runtime (#1532)
 
 ### Fixed
 - add session-level search budget to prevent unbounded native web search (#1309) (#1529)
@@ -694,30 +694,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - preserve user messages during abort with origin-aware queue clearing (#1439) (#1521)
 - remove broken SwiftUI skill and add CI reference check (#1476) (#1520)
 - wire escalateTier into auto-loop retry path (#1505) (#1519)
-- prevent bare /gsd from stealing session lock from running auto-mode (#1507) (#1517)
-- wire dead token-profile defaults and add /gsd rate command (#1505) (#1516)
+- prevent bare /sdd from stealing session lock from running auto-mode (#1507) (#1517)
+- wire dead token-profile defaults and add /sdd rate command (#1505) (#1516)
 - prevent false-positive session lock loss during sleep/event loop stalls (#1512) (#1513)
-- **gsd**: filter non-milestone directories from findMilestoneIds (#1494) (#1508)
-- **gsd**: accept 'passed' as terminal validation verdict (#1429) (#1509)
+- **sdd**: filter non-milestone directories from findMilestoneIds (#1494) (#1508)
+- **sdd**: accept 'passed' as terminal validation verdict (#1429) (#1509)
 - add missing imports breaking CI build (#1511)
-- prevent ensureGitignore from adding .gsd when tracked in git (#1364) (#1367)
+- prevent ensureGitignore from adding .sdd when tracked in git (#1364) (#1367)
 - check project root .env when secrets gate runs in worktree (#1387) (#1470)
 - realign cwd before dispatch + clean stale merge state on failure (#1389) (#1400)
 - create milestones/ directory in worktree when missing (#1374)
 - inject network_idle warning into hook prompts (#1345) (#1401)
 - verify symlink after migration + fix test failures (#1377) (#1404)
-- validate CWD instead of project root when running from a GSD worktree (#1317) (#1504)
-- **gsd**: detect initialized health widget projects (#1432)
-- smarter .gsd root discovery — git-root anchor + walk-up replaces symlink hack (#1386)
-- correct GSD-WORKFLOW.md fallback path and sync to agentDir (#1375)
+- validate CWD instead of project root when running from a SDD worktree (#1317) (#1504)
+- **sdd**: detect initialized health widget projects (#1432)
+- smarter .sdd root discovery — git-root anchor + walk-up replaces symlink hack (#1386)
+- correct SDD-WORKFLOW.md fallback path and sync to agentDir (#1375)
 - always include reasoning.encrypted_content for OpenAI reasoning models
-- **gsd**: avoid EISDIR crash in file loader
-- **gsd**: open existing database on inspect
+- **sdd**: avoid EISDIR crash in file loader
+- **sdd**: open existing database on inspect
 
 ## [2.35.0] - 2026-03-19
 
 ### Added
-- **gsd**: add /gsd changelog command with LLM-summarized release notes (#1465)
+- **sdd**: add /sdd changelog command with LLM-summarized release notes (#1465)
 
 ### Fixed
 - restore lsp single-server selector export
@@ -762,7 +762,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - auto-discard bootstrap crash locks and clean auto.lock on exit (#1397)
 - harden quick-task branch lifecycle — disk recovery + integration branch guard (#1342)
 - skip verification retry on spawn infra errors (ETIMEDOUT, ENOENT) (#1340)
-- keep external GSD state stable in worktrees (#1334)
+- keep external SDD state stable in worktrees (#1334)
 - stop excluding all .sdd/ from commits — only exclude runtime files (#1326) (#1328)
 - handle ECOMPROMISED in uncaughtException guard and align retry onCompromised (#1322) (#1332)
 
@@ -783,7 +783,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - align retry lock path with primary lock settings to prevent ECOMPROMISED (#1307)
 - skip symlinks in makeTreeWritable to prevent EPERM on NixOS/nix-darwin (#1303)
-- handle Windows EPERM on .gsd migration rename with copy+delete fallback (#1296)
+- handle Windows EPERM on .sdd migration rename with copy+delete fallback (#1296)
 - add actionable recovery guidance to crash info messages (#1295)
 - resolve main repo root in worktrees for stable identity hash (#1294)
 - merge quick-task branch back to original after completion (#1293)
@@ -804,7 +804,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - skip crash recovery when auto.lock was written by current process (#1289)
 - load worktree-cli extension modules via jiti instead of static ESM imports (#1285)
-- **gsd**: prevent concurrent dispatch during skip chains (#1272) (#1283)
+- **sdd**: prevent concurrent dispatch during skip chains (#1272) (#1283)
 - skip non-artifact UAT dispatch in auto-mode (#1277)
 
 ### Changed
@@ -817,7 +817,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.31.2] - 2026-03-18
 
 ### Fixed
-- **gsd**: stop replaying completed run-uat units (#1270)
+- **sdd**: stop replaying completed run-uat units (#1270)
 
 ## [2.31.1] - 2026-03-18
 
@@ -837,7 +837,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - replace blanket git clean .sdd/ with targeted runtime file removal (#1252)
 - invalidate caches inside discuss loop to detect newly written slice context (#1249)
 - robust prose slice header parsing — handle H1-H4, bold, dots, no-separator variants (#1248)
-- clean up stranded .gsd.lock/ directory to prevent false lock conflicts (#1251)
+- clean up stranded .sdd.lock/ directory to prevent false lock conflicts (#1251)
 
 ### Changed
 - remove dead commit_docs preference (incompatible with external .sdd/ state) (#1258)
@@ -848,7 +848,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - add extension manifest + registry for user-managed enable/disable (#1238)
 - add model health indicator to auto-mode progress widget (#1232)
 - simplify auto pipeline — merge research into planning, mechanical completion (ADR-003) (#1235)
-- add create-gsd-extension skill (#1229)
+- add create-sdd-extension skill (#1229)
 - add built-in skill authoring system (ADR-003) (#1228)
 - **prefs**: two-step provider→model picker in preferences wizard (#1218)
 - workflow templates — right-sized workflows for every task type (#1185)
@@ -856,7 +856,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - align react-best-practices skill name with directory name (#1234)
 - gate slice progression on UAT verdict, not just file existence (#1241)
-- invalidate caches before roadmap check in /gsd discuss (#1240)
+- invalidate caches before roadmap check in /sdd discuss (#1240)
 - use shell: true for LSP spawn on Windows to resolve .cmd executables (#1233)
 - increase headless new-milestone timeout and limit investigation scope (#1230)
 - clean untracked .sdd/ files before squash-merge to prevent failure (#1239)
@@ -880,7 +880,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **ci**: automate prod-release with version bump, changelog, and tag push (#1194)
 - auto-open HTML reports in default browser on manual export (#1164)
 - upgrade to Node.js 24 LTS across CI, Docker, and package config (#1165)
-- add /gsd logs command to browse activity, debug, and metrics logs (#1162)
+- add /sdd logs command to browse activity, debug, and metrics logs (#1162)
 - **browser-tools**: configurable screenshot resolution, format, and quality (#1152)
 - add pre-commit secret scanner and CI secret detection (#1148)
 - **mcporter**: add .sdd/mcp.json per-project MCP config support (#1141)
@@ -890,20 +890,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - park/discard actions for in-progress milestones (#1107)
 - **ci**: implement three-stage promotion pipeline (Dev → Test → Prod) (#1098)
 - cache-ordered prompt assembly and dashboard cache hit rate (#1094)
-- add comprehensive API key manager (/gsd keys) (#1089)
+- add comprehensive API key manager (/sdd keys) (#1089)
 - **ci**: add multi-stage Dockerfile for CI builder and runtime images
-- **gsd**: add directory safeguards for system/home paths (#1053)
+- **sdd**: add directory safeguards for system/home paths (#1053)
 - enhance HTML report with derived metrics, visualizations, and interactivity (#1078)
 - auto-extract lessons to KNOWLEDGE.md on slice/milestone completion (#711) (#1081)
 - auto-create PR on milestone completion (#687) (#1084)
 - wire semantic chunking, add preferences, metrics, and docs
 - add token optimization suite for prompt caching, compression, and smart context selection
-- **autocomplete**: add /thinking completions, GSD subcommand descriptions, and test coverage (#1019)
+- **autocomplete**: add /thinking completions, SDD subcommand descriptions, and test coverage (#1019)
 - add respectGitignoreInPicker setting for @ file picker (#979) (#1016)
 - **prefs**: add search_provider to preferences.md (#1001)
 - add `--events` flag for JSONL stream filtering (#1000)
 - add 10 bundled skills for UI, quality, and code optimization (#999)
-- **ux**: group model list by provider in /gsd prefs wizard (#993)
+- **ux**: group model list by provider in /sdd prefs wizard (#993)
 - add `--answers` flag for headless answer injection (#982)
 - add project onboarding detection and init wizard
 
@@ -928,10 +928,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **ci**: skip init smoke test in non-TTY CI environments (#1172)
 - **ci**: skip publish when version already exists on npm (#1166)
 - **ci**: use local binary for pipeline smoke test (#1163)
-- prevent concurrent GSD sessions from overlapping on same project (#1154)
+- prevent concurrent SDD sessions from overlapping on same project (#1154)
 - exclude completion-transition errors from health escalation at task level (#1157)
 - **ci**: skip git-diff guard in prepublishOnly during CI (#1160)
-- /gsd quick respects git isolation: none preference (#1156)
+- /sdd quick respects git isolation: none preference (#1156)
 - text-based fallbacks for RPC mode where TUI widgets produce empty turns (#1112)
 - **headless-query**: use jiti to load extension .ts modules (#1143)
 - pause auto-mode when env variables needed instead of blocking (#1147)
@@ -946,7 +946,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - dispatch guard skips parked milestones — they no longer block later milestone dispatch (#1126)
 - worktree reassess-roadmap loop — existsSync fallback in checkNeedsReassessment (#1117)
 - **lsp**: use where.exe on Windows to resolve command paths (#1134)
-- **gsd-db**: auto-initialize database when tools are called (#1133)
+- **sdd-db**: auto-initialize database when tools are called (#1133)
 - inline preferences path to fix remote questions setup (#1110) (#1111)
 - **ci**: add safe.directory for containerized pipeline job (#1108)
 - remove .sdd/ from tracking, ignore entire directory
@@ -959,7 +959,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - reject prose Verify: fields from being executed as shell commands (#1066) (#1068)
 - restore session model on error instead of reading stale global prefs (#1065) (#1067)
 - prevent run-uat re-dispatch loop when roadmap checkbox update fails (#1063) (#1064)
-- inline compareSemver in gsd extension to fix broken relative import (#1058)
+- inline compareSemver in sdd extension to fix broken relative import (#1058)
 - disable reasoning for MiniMax-M2.5 in alibaba-coding-plan provider (#1003) (#1055)
 - improve LSP diagnostics when no servers detected (#1082) (#1086)
 - prevent summarizing phase stall by retrying dropped agent_end events (#1072)
@@ -967,7 +967,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - add barrel files for remote-questions, ttsr, and shared extensions (#1048)
 - consolidate frontmatter parsing into shared module (#1040)
 - always ensure tasks/ directory exists for slice units (#900) (#1050)
-- centralize GSD timeout and cache constants (#1038)
+- centralize SDD timeout and cache constants (#1038)
 - improve RemotePromptRecord.ref type safety (#1041)
 - document silent catch handlers in browser-tools (#1037)
 - use literal union types in RuntimeErrorJSON for type safety (#1034)
@@ -978,20 +978,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **security**: use execFile for browser URL opening to prevent shell injection (#1022)
 - prevent duplicate milestone IDs when generating multiple before persisting (#961) (#1018)
 - consolidate duplicate formatting functions (#1011)
-- **gsd**: delete orphaned complexity.ts (#1005)
+- **sdd**: delete orphaned complexity.ts (#1005)
 - **search**: consolidate duplicate Brave API helpers (#1010)
 - merge worktree to main when all milestones complete (#962) (#1007)
-- **gsd**: deduplicate resolveGitHeadPath function (#1015)
+- **sdd**: deduplicate resolveGitHeadPath function (#1015)
 - add missing package.json subpath exports and oauth stubs (#1014)
-- **gsd**: consolidate string-array normalizer functions into shared utility (#1009)
+- **sdd**: consolidate string-array normalizer functions into shared utility (#1009)
 - **browser-tools**: document intentional silent catches, add debug logging for others (#1013)
 - consolidate duplicate VerificationCheck/Result type definitions (#1008)
-- **gsd**: add GIT_NO_PROMPT_ENV to gitFileExec and deduplicate constant (#1006)
+- **sdd**: add GIT_NO_PROMPT_ENV to gitFileExec and deduplicate constant (#1006)
 - **remote-questions**: add null coalesce for optional threadUrl (#1004)
 - auto-resume on transient server errors, not just rate limits (#886) (#957)
 - replace ambiguous compound question in reflection step (#963) (#1002)
-- **gsd**: remove STATE.md update instructions from all prompts (#983)
-- **gsd**: clear all caches after discuss dispatch so picker sees new CONTEXT files (#981)
+- **sdd**: remove STATE.md update instructions from all prompts (#983)
+- **sdd**: clear all caches after discuss dispatch so picker sees new CONTEXT files (#981)
 - **auto**: dispatch retry after verification gate failure (#998)
 - enforce GSDError usage and activate unused error codes (#997)
 - unify extension discovery logic (#995)
@@ -1032,9 +1032,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **resource-loader**: extract syncResourceDir to eliminate triplicated sync logic (#1036)
 - **bg-shell**: split 1604-line god file into tool, command, and lifecycle modules (#1049)
 - **headless**: split 772-line god file into events, UI, and context modules (#1047)
-- **gsd**: extract safeCopy/safeMkdir helpers to replace repetitive try/catch FS patterns (#1043)
-- **gsd**: extract atomicWriteSync utility to replace 6 duplicate write-tmp-rename patterns (#1046)
-- **gsd**: unify duplicate padRight/truncate into shared format-utils (#1045)
+- **sdd**: extract safeCopy/safeMkdir helpers to replace repetitive try/catch FS patterns (#1043)
+- **sdd**: extract atomicWriteSync utility to replace 6 duplicate write-tmp-rename patterns (#1046)
+- **sdd**: unify duplicate padRight/truncate into shared format-utils (#1045)
 - **loader**: consolidate 5 duplicate package.json version reads into cached helper (#1042)
 - **headless**: remove duplicate jsonLine, use serializeJsonLine from pi-coding-agent (#1039)
 - fix unicode regex discrepancy and standardize function naming (#1031)
@@ -1047,9 +1047,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.28.0] - 2026-03-17
 
 ### Added
-- `gsd headless query` command for instant, read-only state inspection — returns phase, cost, progress, and next-unit as parseable JSON without spawning an LLM session
-- `/gsd update` slash command for in-session self-update
-- `/gsd export --html --all` for retrospective milestone reports
+- `sdd headless query` command for instant, read-only state inspection — returns phase, cost, progress, and next-unit as parseable JSON without spawning an LLM session
+- `/sdd update` slash command for in-session self-update
+- `/sdd export --html --all` for retrospective milestone reports
 
 ### Fixed
 - Failure recovery & resume safeguards: atomic file writes, OAuth fetch timeouts (30s), RPC subprocess exit detection, extension command context guards, bash temp file cleanup, settings write queue flush, LSP init retry with backoff, crash detection on session resume, blob garbage collection
@@ -1085,7 +1085,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Web search loop broken with consecutive duplicate guard
 - Transient network errors retried before model fallback
 - Parallel worker PID tracking, spawn-status race, and exit persistence
-- `/gsd discuss` now recommends next undiscussed slice
+- `/sdd discuss` now recommends next undiscussed slice
 - Roadmap parser allows suffix text after `## Slices` heading
 - User's model choice no longer overwritten when API key is temporarily unavailable
 - Reassess-roadmap skip loop broken by preventing re-persistence of evicted keys
@@ -1108,9 +1108,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Model selector grouped by provider with model type, provider, and API docs fields
 - `require_slice_discussion` option to pause auto-mode before each slice for human review
-- Discussion status indicators in `/gsd discuss` slice picker
+- Discussion status indicators in `/sdd discuss` slice picker
 - Worker NDJSON monitoring and budget enforcement for parallel orchestration
-- `gsd_generate_milestone_id` tool for multi-milestone unique ID generation
+- `sdd_generate_milestone_id` tool for multi-milestone unique ID generation
 - Alt+V clipboard image paste shortcut on macOS
 - Hashline edit mode integration into active workflow
 - Fallback parser for prose-style roadmaps without `## Slices` section
@@ -1174,7 +1174,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Headless `new-milestone` command for programmatic milestone creation
 - Interactive update prompt on startup when a new version is available
 - Symlink-based development workflow for `src/resources/`
-- Descriptions added to `/gsd` autocomplete commands
+- Descriptions added to `/sdd` autocomplete commands
 - `validate-milestone` phase and dispatch
 
 ### Fixed
@@ -1199,8 +1199,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **VS Code extension** — full extension with chat participant, RPC integration, marketplace publishing under FluxLabs publisher
-- **`gsd headless`** — redesigned headless mode for full workflow orchestration: auto-responds to prompts, detects completion, supports `--json` output and `--timeout` flags
-- **`gsd sessions`** — interactive session picker for browsing and resuming saved sessions (#721)
+- **`sdd headless`** — redesigned headless mode for full workflow orchestration: auto-responds to prompts, detects completion, supports `--json` output and `--timeout` flags
+- **`sdd sessions`** — interactive session picker for browsing and resuming saved sessions (#721)
 - **10 new browser tools** — `browser_save_pdf`, `browser_save_state`, `browser_restore_state`, `browser_mock_route`, `browser_block_urls`, `browser_clear_routes`, `browser_emulate_device`, `browser_extract`, `browser_visual_diff`, `browser_zoom_region`, `browser_generate_test`, `browser_check_injection`, `browser_action_cache` (#698)
 - **Structured discussion rounds** — `ask_user_questions` in guided-discuss-milestone for better requirement gathering (#688)
 - **`validate-milestone` prompt** — milestone validation prompt and template
@@ -1210,7 +1210,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Background shell performance** — optimized hot path with parallel git queries and lazy workspace validation
 
 ### Fixed
-- Forensics uses `GSD_VERSION` env var instead of fragile package.json path traversal; now worktree-aware to prevent stale root misdiagnosis
+- Forensics uses `SDD_VERSION` env var instead of fragile package.json path traversal; now worktree-aware to prevent stale root misdiagnosis
 - Background commands rewritten to prevent pipe-open hang; stalled-tool detection added with prompt guidance
 - Auto mode breaks infinite skip loop on repeatedly-skipped completed units
 - Roadmap parser expands range syntax in depends (e.g. `S01-S04` → `S01,S02,S03,S04`)
@@ -1227,9 +1227,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.22.0] - 2026-03-16
 
 ### Added
-- **`/gsd forensics`** — post-mortem investigation of auto-mode failures with structured root-cause analysis
-- **Claude marketplace import** — import Claude marketplace plugins as namespaced GSD components
-- **MCP server mode** — run GSD as an MCP server with `--mode mcp`
+- **`/sdd forensics`** — post-mortem investigation of auto-mode failures with structured root-cause analysis
+- **Claude marketplace import** — import Claude marketplace plugins as namespaced SDD components
+- **MCP server mode** — run SDD as an MCP server with `--mode mcp`
 - **`/review` skill** — code review with diff-aware context
 - **`/test` skill** — test generation and execution
 - **`/lint` skill** — linting integration
@@ -1237,7 +1237,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **File watcher** — chokidar-based file watching for live updates
 - **`git.isolation: "none"`** — disable worktree isolation for projects that don't need it
 - **E2E smoke tests** — end-to-end test suite for extension integration
-- **Subcommand help** — inline help text for all GSD subcommands
+- **Subcommand help** — inline help text for all SDD subcommands
 
 ### Fixed
 - `verificationBudget` passed correctly to execute-task prompt template
@@ -1279,23 +1279,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.20.0] - 2026-03-16
 
 ### Added
-- **Telegram remote questions** — receive and respond to GSD questions via Telegram bot alongside existing Slack and Discord channels (#645)
-- **`/gsd quick`** — execute a quick task with GSD guarantees (atomic commits, state tracking) without the full planning overhead (#437)
-- **`/gsd mode`** — workflow mode system with solo and team presets that configure defaults for milestone IDs, git commit behavior, and documentation settings (#651)
-- **`/gsd help`** — categorized command reference with descriptions for all GSD subcommands (#630)
-- **`/gsd doctor`** — 7 runtime health checks with auto-fix for common state corruption issues (#646)
+- **Telegram remote questions** — receive and respond to SDD questions via Telegram bot alongside existing Slack and Discord channels (#645)
+- **`/sdd quick`** — execute a quick task with SDD guarantees (atomic commits, state tracking) without the full planning overhead (#437)
+- **`/sdd mode`** — workflow mode system with solo and team presets that configure defaults for milestone IDs, git commit behavior, and documentation settings (#651)
+- **`/sdd help`** — categorized command reference with descriptions for all SDD subcommands (#630)
+- **`/sdd doctor`** — 7 runtime health checks with auto-fix for common state corruption issues (#646)
 - **Agent instructions injection** — `agent-instructions.md` loaded into every agent session for persistent per-project behavioral guidance (#437)
 - **Skill lifecycle management** — telemetry tracking, health dashboard, and heal-skill command for managing custom skills (#599)
 - **SQLite context store** — surgical prompt injection from structured knowledge base for precise context engineering (#619)
 - **Context-window budget engine** — proportional prompt sizing that allocates context budget across system prompt sections based on relevance (#660)
 - **LSP activated by default** — Language Server Protocol now auto-activates with call hierarchy, formatting, signature help, and synchronized edits (#639)
 - **Extension smoke tests** — CI catches import failures, circular deps, and module resolution issues across all bundled extensions
-- **`gsd --debug` mode** — structured JSONL diagnostic logging for troubleshooting dispatch and state issues (#468)
-- **Worktree post-create hook** — run custom setup scripts when GSD creates a new worktree (#597)
+- **`sdd --debug` mode** — structured JSONL diagnostic logging for troubleshooting dispatch and state issues (#468)
+- **Worktree post-create hook** — run custom setup scripts when SDD creates a new worktree (#597)
 
 ### Fixed
 - **CPU spinning from regex backtracking** — replaced `[\s\S]*?` regex in preferences parser with indexOf-based scanning (#468)
-- **Model config bleed between concurrent GSD instances** — isolated model configuration per session (#650)
+- **Model config bleed between concurrent SDD instances** — isolated model configuration per session (#650)
 - **Onboarding wizard repeats** — skip onboarding for extension-based providers that don't require auth.json credentials (#589)
 - **Session tool rebuild on cwd change** — tools now rebuild correctly when working directory changes mid-session (#633)
 - **Auto mode state derivation after discussion fallthrough** — re-derives state to prevent stale dispatches (#609)
@@ -1311,8 +1311,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.19.0] - 2026-03-16
 
 ### Added
-- **Workflow visualizer** — `/gsd visualize` opens a full-screen TUI overlay with four tabs: Progress (milestone/slice/task tree), Dependencies (ASCII dep graph), Metrics (cost/token bar charts), and Timeline (chronological execution history). Supports Tab/1-4 switching, per-tab scrolling, auto-refresh every 2s, and optional auto-trigger after milestone completion via `auto_visualize` preference (#626)
-- **Mid-execution capture & triage** — `/gsd capture` lets you fire-and-forget thoughts during auto-mode. The system triages accumulated captures at natural seams between tasks, classifies impact into five types (quick-task, inject, defer, replan, note), and proposes action with user confirmation. Dashboard shows pending capture count badge. Capture context injected into replan and reassess prompts (#512)
+- **Workflow visualizer** — `/sdd visualize` opens a full-screen TUI overlay with four tabs: Progress (milestone/slice/task tree), Dependencies (ASCII dep graph), Metrics (cost/token bar charts), and Timeline (chronological execution history). Supports Tab/1-4 switching, per-tab scrolling, auto-refresh every 2s, and optional auto-trigger after milestone completion via `auto_visualize` preference (#626)
+- **Mid-execution capture & triage** — `/sdd capture` lets you fire-and-forget thoughts during auto-mode. The system triages accumulated captures at natural seams between tasks, classifies impact into five types (quick-task, inject, defer, replan, note), and proposes action with user confirmation. Dashboard shows pending capture count badge. Capture context injected into replan and reassess prompts (#512)
 - **Dynamic model routing** — complexity-based model routing classifies units into light/standard/heavy tiers and routes to cheaper models when appropriate, reducing token consumption 20-50% on capped plans. Includes budget-pressure-aware routing, cross-provider cost comparison, escalation on failure, adaptive learning from routing history (rolling 50-entry window with user feedback support), and task plan introspection (code block counting, complexity keyword detection) (#579)
 - **Feature-branch lifecycle integration test** — proves milestone worktrees branch from and merge back to feature branches, never touching main (#624)
 - **Discord integration parity with Slack** — plus new remote-questions documentation (#620)
@@ -1325,12 +1325,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.18.0] - 2026-03-16
 
 ### Added
-- **Milestone queue reorder** — `/gsd queue` supports reordering milestone execution priority with dependency-aware validation, persistent ordering via `.sdd/QUEUE-ORDER.json` (#460)
-- **`.sdd/KNOWLEDGE.md`** — persistent project-specific context file loaded into agent prompts. New `/gsd knowledge` command with `rule`, `pattern`, and `lesson` subcommands for adding entries (#585)
+- **Milestone queue reorder** — `/sdd queue` supports reordering milestone execution priority with dependency-aware validation, persistent ordering via `.sdd/QUEUE-ORDER.json` (#460)
+- **`.sdd/KNOWLEDGE.md`** — persistent project-specific context file loaded into agent prompts. New `/sdd knowledge` command with `rule`, `pattern`, and `lesson` subcommands for adding entries (#585)
 - **Dynamic model discovery** — runtime model enumeration from provider APIs (Ollama, OpenAI, Google, OpenRouter) with per-provider TTL caching and discovery adapters. New `ProviderManagerComponent` TUI for managing providers with auth status and model counts (#581)
 - **Expanded preferences wizard** — all configurable fields now exposed in the setup wizard, model ID validation, and `updatePreferencesModels()` for safe read-modify-write of model config (#580)
 - **Comprehensive documentation** — 12 new docs covering getting started, auto-mode, commands, configuration, token optimization, cost management, git strategy, team workflows, skills, migration, troubleshooting, and architecture (#605)
-- **`resolveProjectRoot()`** — all GSD commands resolve the effective project root from worktree paths instead of using raw `process.cwd()`, preventing path confusion across worktree boundaries (#602)
+- **`resolveProjectRoot()`** — all SDD commands resolve the effective project root from worktree paths instead of using raw `process.cwd()`, preventing path confusion across worktree boundaries (#602)
 - **1,813 lines of new tests** — 13 new test files covering discovery cache, model discovery, model registry, models-json-writer, auto-worktree, derive-state-deps, in-flight tool tracking, knowledge, memory leak guards, preferences wizard fields, queue order, queue reorder E2E, and stale worktree cwd
 
 ### Fixed
@@ -1358,7 +1358,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Updated Ollama cloud provider model catalog
 
 ### Fixed
-- Native binary hangs in GSD auto-mode paths (#453)
+- Native binary hangs in SDD auto-mode paths (#453)
 - Auto-mode can be stopped from a different terminal (#586)
 - Parse cache collision causing false loop detection on `complete-slice` (#583)
 - Exhaustive switch handling and cleanup in Google provider (#587)
@@ -1366,7 +1366,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.16.0] - 2026-03-15
 
 ### Added
-- `/gsd steer` command — hard-steer plan documents during execution without stopping the pipeline
+- `/sdd steer` command — hard-steer plan documents during execution without stopping the pipeline
 - Native git operations via libgit2 — ~70 fewer process spawns per dispatch cycle
 - Native performance optimizations for `deriveState`, JSONL parsing, and path resolution
 - Default model upgraded to Opus 4.6 with 1M context variant
@@ -1423,7 +1423,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Auto-mode stops cleanly when dispatch gap watchdog fails (#537)
 - Synchronous I/O removed from hot paths (#540)
 - Silent catch blocks now capture error references for crash diagnostics (#546)
-- `ctx.log` error in GSD provider recovery path fixed
+- `ctx.log` error in SDD provider recovery path fixed
 - TUI resource leaks patched in loader, cancellable-loader, input, and editor components (#482)
 - Hardcoded ANSI escapes replaced with chalk for consistent terminal handling (#482)
 
@@ -1454,9 +1454,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Discussion manifest** — mechanical process verification for multi-milestone context discussions
-- **Session-internal `/gsd config`** — configure GSD settings within a running session
+- **Session-internal `/sdd config`** — configure SDD settings within a running session
 - **Model selection UI** — select list instead of free-text input for model preferences
-- **Startup performance** — faster GSD launch via optimized initialization
+- **Startup performance** — faster SDD launch via optimized initialization
 
 ### Changed
 - **Branchless worktree architecture** — eliminated slice branches entirely. All work commits sequentially on `milestone/<MID>` within auto-mode worktrees. No branch creation, switching, or merging within a worktree. ~2600 lines of merge/conflict/branch-switching code removed.
@@ -1469,8 +1469,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Dispatch recovery hardening** — artifact fallback when completion key missing, TUI freeze prevention on cascading skips, reentrancy guard, atomic writes, stale runtime record cleanup, git index.lock cleanup
 - **Hook orchestration** — finalize runtime records, add supervision, fix retry
 - **Empty slice plan stays in planning** — no longer incorrectly transitions to summarizing
-- **Prefs wizard** — launch directly from `/gsd prefs`, fix parse/serialize cycle for empty arrays
-- **Discussion routing** — `/gsd discuss` routes to draft when phase is needs-discussion
+- **Prefs wizard** — launch directly from `/sdd prefs`, fix parse/serialize cycle for empty arrays
+- **Discussion routing** — `/sdd discuss` routes to draft when phase is needs-discussion
 
 ### Removed
 - `ensureSliceBranch()`, `switchToMain()`, `mergeSliceToMain()`, `mergeSliceToMilestone()`
@@ -1517,7 +1517,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Auto-mode dispatch loop when `cachedReaddir` returns stale data after unit writes files
 - Parse and path caches cleared alongside state cache after unit completion
 - `bg_shell` hangs indefinitely when `ready_port` server fails to start — now transitions to error state with stderr context
-- Em dash and slash characters in milestone/slice titles corrupting GSD state management
+- Em dash and slash characters in milestone/slice titles corrupting SDD state management
 - Guided-flow self-heals stale runtime records from crashed auto-mode sessions on wizard start
 - CI smoke test ANSI code stripping
 
@@ -1556,7 +1556,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Read resources from dist/ to prevent branch-drift in npm-link setups (#314)
 - Always use native Anthropic web search when available (#374)
 - CI smoke test — wait for registry propagation, show errors (#383)
-- Bypass pre-commit hooks on GSD infrastructure commits to prevent lint-staged empty commit errors (#385)
+- Bypass pre-commit hooks on SDD infrastructure commits to prevent lint-staged empty commit errors (#385)
 
 ## [2.10.12] - 2026-03-14
 
@@ -1564,7 +1564,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Multi-milestone readiness flow with per-milestone discussion gate (#377)
 
 ### Fixed
-- Fix `npx gsd-pi@latest` failing with `ERR_MODULE_NOT_FOUND: Cannot find package '@gsd/pi-coding-agent'`. The loader now creates workspace package symlinks at runtime before importing, so it works even when `npx` skips postinstall scripts (#380)
+- Fix `npx sdd-pi@latest` failing with `ERR_MODULE_NOT_FOUND: Cannot find package '@sdd/pi-coding-agent'`. The loader now creates workspace package symlinks at runtime before importing, so it works even when `npx` skips postinstall scripts (#380)
 
 ## [2.10.11] - 2026-03-14
 
@@ -1581,7 +1581,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Opus 4.6 1M as default model, model selector UX improvements, Discord onboarding (#290)
 
 ### Fixed
-- Fix broken `npm install` / `npx gsd-pi@latest` caused by unpublished `@gsd/*` workspace packages leaking into npm dependencies. Workspace cross-references removed from published package metadata; packages resolve via bundled `node_modules/` at runtime (#369)
+- Fix broken `npm install` / `npx sdd-pi@latest` caused by unpublished `@sdd/*` workspace packages leaking into npm dependencies. Workspace cross-references removed from published package metadata; packages resolve via bundled `node_modules/` at runtime (#369)
 - Add pre-publish tarball install validation (`validate-pack`) to CI and publish pipeline, preventing broken packages from reaching npm
 - Handle empty index after runtime file stripping in squash-merge (#364)
 - Add retry logic for transient network/auth failures instead of crashing (#365)
@@ -1604,7 +1604,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Secrets skip in auto mode no longer crashes (#352)
 - Untracked runtime files discarded before branch switch to prevent checkout conflicts (#346)
 - TUI crash/corruption on code blocks with lines exceeding terminal width (#343)
-- Infinite skip loop in `gsd auto` broken by adding roadmap completion check
+- Infinite skip loop in `sdd auto` broken by adding roadmap completion check
 - Model ID variant suffix stripped correctly for OAuth Anthropic API calls
 - `.sdd/` planning artifacts force-added and `handleAgentEnd` reentrancy guarded (#341)
 
@@ -1655,7 +1655,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Async background jobs extension for non-blocking task execution (#260)
 - Multi-credential round-robin with rate-limit fallback across API keys
 - Bash interceptor to block commands that duplicate dedicated tools (Read, Write, Edit, Grep, Glob)
-- `gsd update` subcommand for self-update (#273)
+- `sdd update` subcommand for self-update (#273)
 - Task isolation for subagent filesystem safety (#254)
 - Native Rust streaming JSON parser (#266)
 - Web search provider selection added to onboarding wizard (#278)
@@ -1664,7 +1664,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Simplified onboarding into two-step auth flow — plain language instead of OAuth jargon (#274)
 
 ### Fixed
-- `optionalDependencies` in published `gsd-pi@2.10.4` were still pinned to `2.10.2`, causing users to install the broken engine binaries that 2.10.4 was meant to fix (#276)
+- `optionalDependencies` in published `sdd-pi@2.10.4` were still pinned to `2.10.2`, causing users to install the broken engine binaries that 2.10.4 was meant to fix (#276)
 - Auto-resolve `.sdd/` planning artifact conflicts during slice merge (#264)
 - Use version ranges for native engine optional dependencies (#286)
 - Guard publish against uncommitted version sync changes
@@ -1688,12 +1688,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - Native Rust TTSR regex engine — pre-compiles all stream rule conditions into a single `RegexSet` for one-pass DFA matching instead of O(rules × conditions) JS regex iteration
 - Native Rust diff engine — fuzzy text matching (`fuzzyFindText`, `normalizeForFuzzyMatch`) and unified diff generation (`generateDiff`) via the `similar` crate, replacing the `diff` npm package
-- Native Rust GSD file parser — frontmatter parsing, section extraction, batch `.sdd/` directory parsing, and structured roadmap parsing with transparent JS fallback
+- Native Rust SDD file parser — frontmatter parsing, section extraction, batch `.sdd/` directory parsing, and structured roadmap parsing with transparent JS fallback
 
 ## [2.10.1] - 2026-03-13
 
 ### Fixed
-- `@gsd/native` package ships pre-compiled JavaScript instead of raw TypeScript, fixing startup crashes on Node.js 20, 22, and 24 (#248)
+- `@sdd/native` package ships pre-compiled JavaScript instead of raw TypeScript, fixing startup crashes on Node.js 20, 22, and 24 (#248)
 
 ## [2.10.0] - 2026-03-13
 
@@ -1735,11 +1735,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - LSP tool — full Language Server Protocol integration with diagnostics, go-to-definition, references, hover, document/workspace symbols, rename, code actions, type definition, and implementation support
 - `/thinking` slash command for toggling thinking level during sessions
-- Interactive wizard mode for `/gsd prefs` with guided configuration
+- Interactive wizard mode for `/sdd prefs` with guided configuration
 - Startup update check with 24-hour cache — notifies when a new version is available
 
 ### Fixed
-- TypeScript type errors across gsd, browser-tools, search-the-web, and misc extension files
+- TypeScript type errors across sdd, browser-tools, search-the-web, and misc extension files
 - Milestone ID generation uses max-based approach instead of length+1 (prevents ID collisions)
 - Non-thinking models handled correctly in `/thinking` command
 - Auto-mode pauses on provider errors to prevent reassess-roadmap loop
@@ -1809,11 +1809,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.7.1] - 2026-03-13
 
 ### Added
-- Model fallback support for auto-mode phases — if the configured model fails, GSD tries alternate models before stopping
+- Model fallback support for auto-mode phases — if the configured model fails, SDD tries alternate models before stopping
 - `/kill` command for immediate process termination
 
 ### Fixed
-- `npm install -g gsd-pi` now works — workspace packages bundled in npm tarball via `bundleDependencies`
+- `npm install -g sdd-pi` now works — workspace packages bundled in npm tarball via `bundleDependencies`
 - External PI ecosystem packages (pi-rtk, pi-context, etc.) can now resolve `@mariozechner/*` imports through jiti aliases
 - Missing `export-html` vendor files (marked.min.js, highlight.min.js) restored
 - Skipped API keys now persist so the setup wizard doesn't repeat on every launch
@@ -1827,7 +1827,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - Vendor Pi SDK source (tui, ai, agent-core, coding-agent) into workspace monorepo under `packages/`, replacing the compiled npm dependency and patch-package workflow. Pi internals are now directly modifiable as TypeScript source.
 - Existing patches (setModel persist option, Windows VT input caching) applied as source edits.
-- Build pipeline runs workspace packages in dependency order before GSD compilation.
+- Build pipeline runs workspace packages in dependency order before SDD compilation.
 - Removed `patch-package` from devDependencies and postinstall.
 
 ## [2.6.0] - 2026-03-12
@@ -1892,7 +1892,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Branded clack-based onboarding wizard on first launch — LLM provider selection (OAuth + API key), optional tool API keys, and setup summary (#118)
-- `gsd config` subcommand to re-run the setup wizard anytime
+- `sdd config` subcommand to re-run the setup wizard anytime
 - Shared `src/logo.ts` module as single source of truth for ASCII banner
 
 ### Fixed
@@ -1921,7 +1921,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Migration no longer requires ROADMAP.md — milestones inferred from phases/ directory when missing (#93, #90)
 - Worktree branch safety — proper namespacing and slice branch base selection (#92)
 - Windows: use `execFile` to avoid single-quote shell issues (#103)
-- Broken `read @GSD-WORKFLOW.md` references replaced with `/gsd` command (#88)
+- Broken `read @SDD-WORKFLOW.md` references replaced with `/sdd` command (#88)
 - Google Search extension updated to use `gemini-2.5-flash` (#83)
 - Duplicate `getCurrentBranch` import in auto.ts (#87)
 - `formatCost` crash on non-number cost values (#74)
@@ -1981,9 +1981,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [0.3.3] - 2026-03-11
 
 ### Added
-- `/gsd next` step mode — walk through units one at a time with a wizard between each
-- `/gsd` bare command defaults to step mode
-- `/exit` command to kill the GSD process immediately
+- `/sdd next` step mode — walk through units one at a time with a wizard between each
+- `/sdd` bare command defaults to step mode
+- `/exit` command to kill the SDD process immediately
 - `/clear` as alias for `/new` (new session)
 - MCPorter extension for lazy on-demand MCP server integration
 - `/voice` extension for real-time speech-to-text
@@ -2000,7 +2000,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Pi extensions loaded from `~/.pi/agent/extensions/` (#51)
 
 ### Removed
-- `/gsd-run` command (replaced by `/gsd` and `/gsd next`)
+- `/sdd-run` command (replaced by `/sdd` and `/sdd next`)
 
 ## [0.3.1] - 2026-03-11
 
@@ -2011,17 +2011,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Managed tools bootstrap and gh auth
 - Session list scoped to current working directory
 - Bash/bg_shell hang and kill issues on Windows (#40)
-- `/gsd-run` hardcoded `~/.pi/` path (#38)
+- `/sdd-run` hardcoded `~/.pi/` path (#38)
 - Windows backspace in masked input + custom browser path support (#36, #34)
 
 ### Changed
-- Renamed "Get Stuff Done" to "Get Shit Done"
+- Renamed "Spec-Driven Development" to "Get Shit Done"
 
 ## [0.3.0] - 2026-03-11
 
 ### Added
 - `/worktree` (`/wt`) — git worktree lifecycle management (#31)
-- `/gsd migrate` — `.planning` to `.gsd` migration tool (#28)
+- `/sdd migrate` — `.planning` to `.sdd` migration tool (#28)
 
 ### Fixed
 - Skipped API keys now persist so wizard doesn't repeat on every launch (#27)
@@ -2060,7 +2060,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - All `.pi/` paths updated to `.sdd/`
 - Default model matching by `id.includes('sonnet')` for dated API IDs
-- Circular gsd-pi self-dependency removed
+- Circular sdd-pi self-dependency removed
 - Pi SDK version check suppressed
 - Selected options stay lit when notes field is focused
 
@@ -2079,100 +2079,100 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - License updated to MIT
 
-[Unreleased]: https://github.com/gsd-build/gsd-2/compare/v2.54.0...HEAD
-[2.54.0]: https://github.com/gsd-build/gsd-2/compare/v2.53.0...v2.54.0
-[2.53.0]: https://github.com/gsd-build/gsd-2/compare/v2.52.0...v2.53.0
-[2.52.0]: https://github.com/gsd-build/gsd-2/compare/v2.51.0...v2.52.0
-[2.51.0]: https://github.com/gsd-build/gsd-2/compare/v2.50.0...v2.51.0
-[2.50.0]: https://github.com/gsd-build/gsd-2/compare/v2.49.0...v2.50.0
-[2.49.0]: https://github.com/gsd-build/gsd-2/compare/v2.48.0...v2.49.0
-[2.48.0]: https://github.com/gsd-build/gsd-2/compare/v2.47.0...v2.48.0
-[2.47.0]: https://github.com/gsd-build/gsd-2/compare/v2.46.1...v2.47.0
-[2.46.1]: https://github.com/gsd-build/gsd-2/compare/v2.46.0...v2.46.1
-[2.46.0]: https://github.com/gsd-build/gsd-2/compare/v2.45.0...v2.46.0
-[2.45.0]: https://github.com/gsd-build/gsd-2/compare/v2.44.0...v2.45.0
-[2.44.0]: https://github.com/gsd-build/gsd-2/compare/v2.43.0...v2.44.0
-[2.43.0]: https://github.com/gsd-build/gsd-2/compare/v2.42.0...v2.43.0
-[2.42.0]: https://github.com/gsd-build/gsd-2/compare/v2.41.0...v2.42.0
-[2.41.0]: https://github.com/gsd-build/gsd-2/compare/v2.40.0...v2.41.0
-[2.40.0]: https://github.com/gsd-build/gsd-2/compare/v2.39.0...v2.40.0
-[2.39.0]: https://github.com/gsd-build/gsd-2/compare/v2.38.0...v2.39.0
-[2.38.0]: https://github.com/gsd-build/gsd-2/compare/v2.37.1...v2.38.0
-[2.37.1]: https://github.com/gsd-build/gsd-2/compare/v2.37.0...v2.37.1
-[2.37.0]: https://github.com/gsd-build/gsd-2/compare/v2.36.0...v2.37.0
-[2.36.0]: https://github.com/gsd-build/gsd-2/compare/v2.35.0...v2.36.0
-[2.35.0]: https://github.com/gsd-build/gsd-2/compare/v2.34.0...v2.35.0
-[2.34.0]: https://github.com/gsd-build/gsd-2/compare/v2.33.1...v2.34.0
-[2.33.1]: https://github.com/gsd-build/gsd-2/compare/v2.33.0...v2.33.1
-[2.33.0]: https://github.com/gsd-build/gsd-2/compare/v2.32.0...v2.33.0
-[2.32.0]: https://github.com/gsd-build/gsd-2/compare/v2.31.2...v2.32.0
-[2.31.2]: https://github.com/gsd-build/gsd-2/compare/v2.31.1...v2.31.2
-[2.31.1]: https://github.com/gsd-build/gsd-2/compare/v2.31.0...v2.31.1
-[2.31.0]: https://github.com/gsd-build/gsd-2/compare/v2.30.0...v2.31.0
-[2.30.0]: https://github.com/gsd-build/gsd-2/compare/v2.29.0...v2.30.0
-[2.29.0]: https://github.com/gsd-build/gsd-2/compare/v2.28.0...v2.29.0
-[2.28.0]: https://github.com/gsd-build/gsd-2/compare/v2.27.0...v2.28.0
-[2.27.0]: https://github.com/gsd-build/gsd-2/compare/v2.26.0...v2.27.0
-[2.26.0]: https://github.com/gsd-build/gsd-2/compare/v2.25.0...v2.26.0
-[2.25.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.25.0
-[2.24.0]: https://github.com/gsd-build/gsd-2/compare/v2.23.0...v2.24.0
-[2.23.0]: https://github.com/gsd-build/gsd-2/compare/v2.22.0...v2.23.0
-[2.21.0]: https://github.com/gsd-build/gsd-2/compare/v2.20.0...v2.21.0
-[2.19.0]: https://github.com/gsd-build/gsd-2/compare/v2.18.0...v2.19.0
-[2.18.0]: https://github.com/gsd-build/gsd-2/compare/v2.17.0...v2.18.0
-[2.17.0]: https://github.com/gsd-build/gsd-2/compare/v2.16.0...v2.17.0
-[2.16.0]: https://github.com/gsd-build/gsd-2/compare/v2.15.1...v2.16.0
-[2.15.1]: https://github.com/gsd-build/gsd-2/releases/tag/v2.15.1
-[2.15.0]: https://github.com/gsd-build/gsd-2/compare/v2.14.4...v2.15.0
-[2.14.4]: https://github.com/gsd-build/gsd-2/compare/v2.14.3...v2.14.4
-[2.14.3]: https://github.com/gsd-build/gsd-2/compare/v2.14.2...v2.14.3
-[2.14.2]: https://github.com/gsd-build/gsd-2/compare/v2.14.1...v2.14.2
-[2.14.1]: https://github.com/gsd-build/gsd-2/compare/v2.14.0...v2.14.1
-[2.14.0]: https://github.com/gsd-build/gsd-2/compare/v2.13.1...v2.14.0
-[2.13.1]: https://github.com/gsd-build/gsd-2/compare/v2.13.0...v2.13.1
-[2.13.0]: https://github.com/gsd-build/gsd-2/compare/v2.12.0...v2.13.0
-[2.12.0]: https://github.com/gsd-build/gsd-2/compare/v2.11.1...v2.12.0
-[2.11.1]: https://github.com/gsd-build/gsd-2/compare/v2.11.0...v2.11.1
-[2.11.0]: https://github.com/gsd-build/gsd-2/compare/v2.10.12...v2.11.0
-[2.10.12]: https://github.com/gsd-build/gsd-2/compare/v2.10.11...v2.10.12
-[2.10.11]: https://github.com/gsd-build/gsd-2/compare/v2.10.10...v2.10.11
-[2.10.10]: https://github.com/gsd-build/gsd-2/compare/v2.10.9...v2.10.10
-[2.10.9]: https://github.com/gsd-build/gsd-2/compare/v2.10.8...v2.10.9
-[2.10.8]: https://github.com/gsd-build/gsd-2/compare/v2.10.7...v2.10.8
-[2.10.7]: https://github.com/gsd-build/gsd-2/compare/v2.10.6...v2.10.7
-[2.10.6]: https://github.com/gsd-build/gsd-2/compare/v2.10.5...v2.10.6
-[2.10.5]: https://github.com/gsd-build/gsd-2/compare/v2.10.4...v2.10.5
-[2.10.4]: https://github.com/gsd-build/gsd-2/compare/v2.10.2...v2.10.4
-[2.10.2]: https://github.com/gsd-build/gsd-2/compare/v2.10.1...v2.10.2
-[2.10.1]: https://github.com/gsd-build/gsd-2/compare/v2.10.0...v2.10.1
-[2.10.0]: https://github.com/gsd-build/gsd-2/compare/v2.9.0...v2.10.0
-[2.9.0]: https://github.com/gsd-build/gsd-2/compare/v2.8.3...v2.9.0
-[2.8.3]: https://github.com/gsd-build/gsd-2/compare/v2.8.2...v2.8.3
-[2.8.2]: https://github.com/gsd-build/gsd-2/compare/v2.8.1...v2.8.2
-[2.8.1]: https://github.com/gsd-build/gsd-2/compare/v2.8.0...v2.8.1
-[2.8.0]: https://github.com/gsd-build/gsd-2/compare/v2.7.1...v2.8.0
-[2.7.1]: https://github.com/gsd-build/gsd-2/compare/v2.7.0...v2.7.1
-[2.7.0]: https://github.com/gsd-build/gsd-2/compare/v2.6.0...v2.7.0
-[2.6.0]: https://github.com/gsd-build/gsd-2/compare/v2.5.1...v2.6.0
-[2.20.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.20.0
-[2.22.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.22.0
-[2.5.1]: https://github.com/gsd-build/gsd-2/compare/v2.5.0...v2.5.1
-[2.5.0]: https://github.com/gsd-build/gsd-2/compare/v2.4.0...v2.5.0
-[2.4.0]: https://github.com/gsd-build/gsd-2/compare/v2.3.11...v2.4.0
-[2.3.11]: https://github.com/gsd-build/gsd-2/compare/v2.3.10...v2.3.11
-[2.3.10]: https://github.com/gsd-build/gsd-2/compare/v2.3.9...v2.3.10
-[2.3.9]: https://github.com/gsd-build/gsd-2/compare/v2.3.8...v2.3.9
-[2.3.8]: https://github.com/gsd-build/gsd-2/compare/v2.3.7...v2.3.8
-[2.3.7]: https://github.com/gsd-build/gsd-2/compare/v2.3.6...v2.3.7
-[2.3.6]: https://github.com/gsd-build/gsd-2/compare/v2.3.5...v2.3.6
-[2.3.5]: https://github.com/gsd-build/gsd-2/compare/v2.3.4...v2.3.5
-[2.3.4]: https://github.com/gsd-build/gsd-2/compare/v0.3.3...v2.3.4
-[0.3.3]: https://github.com/gsd-build/gsd-2/compare/v0.3.1...v0.3.3
-[0.3.1]: https://github.com/gsd-build/gsd-2/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/gsd-build/gsd-2/compare/v0.2.9...v0.3.0
-[0.2.9]: https://github.com/gsd-build/gsd-2/compare/v0.2.8...v0.2.9
-[0.2.8]: https://github.com/gsd-build/gsd-2/compare/v0.2.6...v0.2.8
-[0.2.6]: https://github.com/gsd-build/gsd-2/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/gsd-build/gsd-2/compare/v0.2.4...v0.2.5
-[0.2.4]: https://github.com/gsd-build/gsd-2/compare/v0.1.6...v0.2.4
-[0.1.6]: https://github.com/gsd-build/gsd-2/releases/tag/v0.1.6
+[Unreleased]: https://github.com/sdd-build/sdd-2/compare/v2.54.0...HEAD
+[2.54.0]: https://github.com/sdd-build/sdd-2/compare/v2.53.0...v2.54.0
+[2.53.0]: https://github.com/sdd-build/sdd-2/compare/v2.52.0...v2.53.0
+[2.52.0]: https://github.com/sdd-build/sdd-2/compare/v2.51.0...v2.52.0
+[2.51.0]: https://github.com/sdd-build/sdd-2/compare/v2.50.0...v2.51.0
+[2.50.0]: https://github.com/sdd-build/sdd-2/compare/v2.49.0...v2.50.0
+[2.49.0]: https://github.com/sdd-build/sdd-2/compare/v2.48.0...v2.49.0
+[2.48.0]: https://github.com/sdd-build/sdd-2/compare/v2.47.0...v2.48.0
+[2.47.0]: https://github.com/sdd-build/sdd-2/compare/v2.46.1...v2.47.0
+[2.46.1]: https://github.com/sdd-build/sdd-2/compare/v2.46.0...v2.46.1
+[2.46.0]: https://github.com/sdd-build/sdd-2/compare/v2.45.0...v2.46.0
+[2.45.0]: https://github.com/sdd-build/sdd-2/compare/v2.44.0...v2.45.0
+[2.44.0]: https://github.com/sdd-build/sdd-2/compare/v2.43.0...v2.44.0
+[2.43.0]: https://github.com/sdd-build/sdd-2/compare/v2.42.0...v2.43.0
+[2.42.0]: https://github.com/sdd-build/sdd-2/compare/v2.41.0...v2.42.0
+[2.41.0]: https://github.com/sdd-build/sdd-2/compare/v2.40.0...v2.41.0
+[2.40.0]: https://github.com/sdd-build/sdd-2/compare/v2.39.0...v2.40.0
+[2.39.0]: https://github.com/sdd-build/sdd-2/compare/v2.38.0...v2.39.0
+[2.38.0]: https://github.com/sdd-build/sdd-2/compare/v2.37.1...v2.38.0
+[2.37.1]: https://github.com/sdd-build/sdd-2/compare/v2.37.0...v2.37.1
+[2.37.0]: https://github.com/sdd-build/sdd-2/compare/v2.36.0...v2.37.0
+[2.36.0]: https://github.com/sdd-build/sdd-2/compare/v2.35.0...v2.36.0
+[2.35.0]: https://github.com/sdd-build/sdd-2/compare/v2.34.0...v2.35.0
+[2.34.0]: https://github.com/sdd-build/sdd-2/compare/v2.33.1...v2.34.0
+[2.33.1]: https://github.com/sdd-build/sdd-2/compare/v2.33.0...v2.33.1
+[2.33.0]: https://github.com/sdd-build/sdd-2/compare/v2.32.0...v2.33.0
+[2.32.0]: https://github.com/sdd-build/sdd-2/compare/v2.31.2...v2.32.0
+[2.31.2]: https://github.com/sdd-build/sdd-2/compare/v2.31.1...v2.31.2
+[2.31.1]: https://github.com/sdd-build/sdd-2/compare/v2.31.0...v2.31.1
+[2.31.0]: https://github.com/sdd-build/sdd-2/compare/v2.30.0...v2.31.0
+[2.30.0]: https://github.com/sdd-build/sdd-2/compare/v2.29.0...v2.30.0
+[2.29.0]: https://github.com/sdd-build/sdd-2/compare/v2.28.0...v2.29.0
+[2.28.0]: https://github.com/sdd-build/sdd-2/compare/v2.27.0...v2.28.0
+[2.27.0]: https://github.com/sdd-build/sdd-2/compare/v2.26.0...v2.27.0
+[2.26.0]: https://github.com/sdd-build/sdd-2/compare/v2.25.0...v2.26.0
+[2.25.0]: https://github.com/sdd-build/sdd-2/releases/tag/v2.25.0
+[2.24.0]: https://github.com/sdd-build/sdd-2/compare/v2.23.0...v2.24.0
+[2.23.0]: https://github.com/sdd-build/sdd-2/compare/v2.22.0...v2.23.0
+[2.21.0]: https://github.com/sdd-build/sdd-2/compare/v2.20.0...v2.21.0
+[2.19.0]: https://github.com/sdd-build/sdd-2/compare/v2.18.0...v2.19.0
+[2.18.0]: https://github.com/sdd-build/sdd-2/compare/v2.17.0...v2.18.0
+[2.17.0]: https://github.com/sdd-build/sdd-2/compare/v2.16.0...v2.17.0
+[2.16.0]: https://github.com/sdd-build/sdd-2/compare/v2.15.1...v2.16.0
+[2.15.1]: https://github.com/sdd-build/sdd-2/releases/tag/v2.15.1
+[2.15.0]: https://github.com/sdd-build/sdd-2/compare/v2.14.4...v2.15.0
+[2.14.4]: https://github.com/sdd-build/sdd-2/compare/v2.14.3...v2.14.4
+[2.14.3]: https://github.com/sdd-build/sdd-2/compare/v2.14.2...v2.14.3
+[2.14.2]: https://github.com/sdd-build/sdd-2/compare/v2.14.1...v2.14.2
+[2.14.1]: https://github.com/sdd-build/sdd-2/compare/v2.14.0...v2.14.1
+[2.14.0]: https://github.com/sdd-build/sdd-2/compare/v2.13.1...v2.14.0
+[2.13.1]: https://github.com/sdd-build/sdd-2/compare/v2.13.0...v2.13.1
+[2.13.0]: https://github.com/sdd-build/sdd-2/compare/v2.12.0...v2.13.0
+[2.12.0]: https://github.com/sdd-build/sdd-2/compare/v2.11.1...v2.12.0
+[2.11.1]: https://github.com/sdd-build/sdd-2/compare/v2.11.0...v2.11.1
+[2.11.0]: https://github.com/sdd-build/sdd-2/compare/v2.10.12...v2.11.0
+[2.10.12]: https://github.com/sdd-build/sdd-2/compare/v2.10.11...v2.10.12
+[2.10.11]: https://github.com/sdd-build/sdd-2/compare/v2.10.10...v2.10.11
+[2.10.10]: https://github.com/sdd-build/sdd-2/compare/v2.10.9...v2.10.10
+[2.10.9]: https://github.com/sdd-build/sdd-2/compare/v2.10.8...v2.10.9
+[2.10.8]: https://github.com/sdd-build/sdd-2/compare/v2.10.7...v2.10.8
+[2.10.7]: https://github.com/sdd-build/sdd-2/compare/v2.10.6...v2.10.7
+[2.10.6]: https://github.com/sdd-build/sdd-2/compare/v2.10.5...v2.10.6
+[2.10.5]: https://github.com/sdd-build/sdd-2/compare/v2.10.4...v2.10.5
+[2.10.4]: https://github.com/sdd-build/sdd-2/compare/v2.10.2...v2.10.4
+[2.10.2]: https://github.com/sdd-build/sdd-2/compare/v2.10.1...v2.10.2
+[2.10.1]: https://github.com/sdd-build/sdd-2/compare/v2.10.0...v2.10.1
+[2.10.0]: https://github.com/sdd-build/sdd-2/compare/v2.9.0...v2.10.0
+[2.9.0]: https://github.com/sdd-build/sdd-2/compare/v2.8.3...v2.9.0
+[2.8.3]: https://github.com/sdd-build/sdd-2/compare/v2.8.2...v2.8.3
+[2.8.2]: https://github.com/sdd-build/sdd-2/compare/v2.8.1...v2.8.2
+[2.8.1]: https://github.com/sdd-build/sdd-2/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/sdd-build/sdd-2/compare/v2.7.1...v2.8.0
+[2.7.1]: https://github.com/sdd-build/sdd-2/compare/v2.7.0...v2.7.1
+[2.7.0]: https://github.com/sdd-build/sdd-2/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/sdd-build/sdd-2/compare/v2.5.1...v2.6.0
+[2.20.0]: https://github.com/sdd-build/sdd-2/releases/tag/v2.20.0
+[2.22.0]: https://github.com/sdd-build/sdd-2/releases/tag/v2.22.0
+[2.5.1]: https://github.com/sdd-build/sdd-2/compare/v2.5.0...v2.5.1
+[2.5.0]: https://github.com/sdd-build/sdd-2/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/sdd-build/sdd-2/compare/v2.3.11...v2.4.0
+[2.3.11]: https://github.com/sdd-build/sdd-2/compare/v2.3.10...v2.3.11
+[2.3.10]: https://github.com/sdd-build/sdd-2/compare/v2.3.9...v2.3.10
+[2.3.9]: https://github.com/sdd-build/sdd-2/compare/v2.3.8...v2.3.9
+[2.3.8]: https://github.com/sdd-build/sdd-2/compare/v2.3.7...v2.3.8
+[2.3.7]: https://github.com/sdd-build/sdd-2/compare/v2.3.6...v2.3.7
+[2.3.6]: https://github.com/sdd-build/sdd-2/compare/v2.3.5...v2.3.6
+[2.3.5]: https://github.com/sdd-build/sdd-2/compare/v2.3.4...v2.3.5
+[2.3.4]: https://github.com/sdd-build/sdd-2/compare/v0.3.3...v2.3.4
+[0.3.3]: https://github.com/sdd-build/sdd-2/compare/v0.3.1...v0.3.3
+[0.3.1]: https://github.com/sdd-build/sdd-2/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/sdd-build/sdd-2/compare/v0.2.9...v0.3.0
+[0.2.9]: https://github.com/sdd-build/sdd-2/compare/v0.2.8...v0.2.9
+[0.2.8]: https://github.com/sdd-build/sdd-2/compare/v0.2.6...v0.2.8
+[0.2.6]: https://github.com/sdd-build/sdd-2/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/sdd-build/sdd-2/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/sdd-build/sdd-2/compare/v0.1.6...v0.2.4
+[0.1.6]: https://github.com/sdd-build/sdd-2/releases/tag/v0.1.6

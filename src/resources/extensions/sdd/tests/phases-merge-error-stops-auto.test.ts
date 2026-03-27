@@ -76,7 +76,7 @@ assertTrue(
 // ── Test 4: Non-conflict handler notifies user ──────────────────────────
 
 // Each non-conflict block should call ctx.ui.notify with error severity
-const notifyErrorPattern = /Merge failed:.*Resolve and run \/gsd auto to resume/g;
+const notifyErrorPattern = /Merge failed:.*Resolve and run \/sdd auto to resume/g;
 const notifyCount = [...phasesSrc.matchAll(notifyErrorPattern)].length;
 assertTrue(
   notifyCount >= 3,

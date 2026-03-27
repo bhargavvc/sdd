@@ -10,8 +10,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
-import type { ExtensionAPI, Theme } from "@gsd/pi-coding-agent";
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth, wrapTextWithAnsi } from "@gsd/pi-tui";
+import type { ExtensionAPI, Theme } from "@sdd/pi-coding-agent";
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth, wrapTextWithAnsi } from "@sdd/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { makeUI } from "./shared/tui.js";
 import { maskEditorLine, type ProgressStatus } from "./shared/mod.js";
@@ -75,7 +75,7 @@ async function writeEnvKey(filePath: string, key: string, value: string): Promis
 // ─── Exported utilities ───────────────────────────────────────────────────────
 
 // Re-export from env-utils.ts so existing consumers still work.
-// The implementation lives in env-utils.ts to avoid pulling @gsd/pi-tui
+// The implementation lives in env-utils.ts to avoid pulling @sdd/pi-tui
 // into modules that only need env-checking (e.g. files.ts during reports).
 import { checkExistingEnvKeys } from "./sdd/env-utils.js";
 export { checkExistingEnvKeys };

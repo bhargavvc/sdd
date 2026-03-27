@@ -8,7 +8,7 @@ import {
   insertSlice,
   upsertMilestonePlanning,
   upsertSlicePlanning,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { invalidateStateCache } from "../state.js";
 import { renderRoadmapFromDb } from "../markdown-renderer.js";
 import { renderAllProjections } from "../workflow-projections.js";
@@ -258,7 +258,7 @@ export async function handlePlanMilestone(
     roadmapPath = renderResult.roadmapPath;
   } catch (renderErr) {
     process.stderr.write(
-      `gsd-db: plan_milestone — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
+      `sdd-db: plan_milestone — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
     );
     invalidateStateCache();
     return { error: `render failed: ${(renderErr as Error).message}` };
@@ -281,7 +281,7 @@ export async function handlePlanMilestone(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: plan-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `sdd: plan-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

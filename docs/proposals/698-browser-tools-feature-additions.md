@@ -1,6 +1,6 @@
 # Browser-Tools Feature Additions — Implementation Requirements
 
-> Ref: [#698](https://github.com/gsd-build/gsd-2/issues/698)
+> Ref: [#698](https://github.com/sdd-build/sdd-2/issues/698)
 > Status: **Shipped** — all 10 features implemented and merged to main
 
 ## Current State

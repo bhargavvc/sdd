@@ -1,5 +1,5 @@
 /**
- * MCP Server — registers 6 GSD orchestration tools on McpServer.
+ * MCP Server — registers 6 SDD orchestration tools on McpServer.
  *
  * Uses dynamic imports for @modelcontextprotocol/sdk because TS Node16
  * cannot resolve the SDK's subpath exports statically (same pattern as
@@ -16,7 +16,7 @@ import type { SessionManager } from './session-manager.js';
 // ---------------------------------------------------------------------------
 
 const MCP_PKG = '@modelcontextprotocol/sdk';
-const SERVER_NAME = 'gsd';
+const SERVER_NAME = 'sdd';
 const SERVER_VERSION = '2.51.0';
 
 // ---------------------------------------------------------------------------
@@ -34,36 +34,36 @@ function errorContent(message: string): { isError: true; content: Array<{ type: 
 }
 
 // ---------------------------------------------------------------------------
-// gsd_query filesystem reader
+// sdd_query filesystem reader
 // ---------------------------------------------------------------------------
 
 async function readProjectState(projectDir: string, _query: string): Promise<Record<string, unknown>> {
-  const gsdDir = join(resolve(projectDir), '.gsd');
+  const sddDir = join(resolve(projectDir), '.sdd');
   const result: Record<string, unknown> = { projectDir: resolve(projectDir) };
 
   // STATE.md — current execution state
   try {
-    result.state = await readFile(join(gsdDir, 'STATE.md'), 'utf-8');
+    result.state = await readFile(join(sddDir, 'STATE.md'), 'utf-8');
   } catch {
     result.state = null;
   }
 
   // PROJECT.md — project description
   try {
-    result.project = await readFile(join(gsdDir, 'PROJECT.md'), 'utf-8');
+    result.project = await readFile(join(sddDir, 'PROJECT.md'), 'utf-8');
   } catch {
     result.project = null;
   }
 
   // REQUIREMENTS.md — requirement contract
   try {
-    result.requirements = await readFile(join(gsdDir, 'REQUIREMENTS.md'), 'utf-8');
+    result.requirements = await readFile(join(sddDir, 'REQUIREMENTS.md'), 'utf-8');
   } catch {
     result.requirements = null;
   }
 
   // List milestones with basic metadata
-  const milestonesDir = join(gsdDir, 'milestones');
+  const milestonesDir = join(sddDir, 'milestones');
   try {
     const entries = await readdir(milestonesDir, { withFileTypes: true });
     const milestones: Array<{ id: string; hasRoadmap: boolean; hasSummary: boolean }> = [];
@@ -106,7 +106,7 @@ interface McpServerInstance {
 // ---------------------------------------------------------------------------
 
 /**
- * Create and configure an MCP server with 6 GSD orchestration tools.
+ * Create and configure an MCP server with 6 SDD orchestration tools.
  *
  * Returns the McpServer instance — call `connect(transport)` to start serving.
  * Uses dynamic imports for the MCP SDK to avoid TS subpath resolution issues.
@@ -124,14 +124,14 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_execute — start a new GSD auto-mode session
+  // sdd_execute — start a new SDD auto-mode session
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_execute',
-    'Start a GSD auto-mode session for a project directory. Returns a sessionId for tracking.',
+    'sdd_execute',
+    'Start a SDD auto-mode session for a project directory. Returns a sessionId for tracking.',
     {
       projectDir: z.string().describe('Absolute path to the project directory'),
-      command: z.string().optional().describe('Command to send (default: "/gsd auto")'),
+      command: z.string().optional().describe('Command to send (default: "/sdd auto")'),
       model: z.string().optional().describe('Model ID override'),
       bare: z.boolean().optional().describe('Run in bare mode (skip user config)'),
     },
@@ -149,13 +149,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_status — poll session status
+  // sdd_status — poll session status
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_status',
-    'Get the current status of a GSD session including progress, recent events, and pending blockers.',
+    'sdd_status',
+    'Get the current status of a SDD session including progress, recent events, and pending blockers.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from sdd_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -193,13 +193,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_result — get accumulated session result
+  // sdd_result — get accumulated session result
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_result',
-    'Get the result of a GSD session. Returns partial results if the session is still running.',
+    'sdd_result',
+    'Get the result of a SDD session. Returns partial results if the session is still running.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from sdd_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -213,13 +213,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_cancel — cancel a running session
+  // sdd_cancel — cancel a running session
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_cancel',
-    'Cancel a running GSD session. Aborts the current operation and stops the process.',
+    'sdd_cancel',
+    'Cancel a running SDD session. Aborts the current operation and stops the process.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from sdd_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -233,11 +233,11 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_query — read project state from filesystem (no session needed)
+  // sdd_query — read project state from filesystem (no session needed)
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_query',
-    'Query GSD project state from the filesystem. Returns STATE.md, PROJECT.md, requirements, and milestone listing. Does not require an active session.',
+    'sdd_query',
+    'Query SDD project state from the filesystem. Returns STATE.md, PROJECT.md, requirements, and milestone listing. Does not require an active session.',
     {
       projectDir: z.string().describe('Absolute path to the project directory'),
       query: z.string().describe('What to query (e.g. "status", "milestones", "requirements")'),
@@ -254,13 +254,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_resolve_blocker — resolve a pending blocker
+  // sdd_resolve_blocker — resolve a pending blocker
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_resolve_blocker',
-    'Resolve a pending blocker in a GSD session by sending a response to the UI request.',
+    'sdd_resolve_blocker',
+    'Resolve a pending blocker in a SDD session by sending a response to the UI request.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from sdd_execute'),
       response: z.string().describe('Response to send for the pending blocker'),
     },
     async (args: Record<string, unknown>) => {

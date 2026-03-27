@@ -13,7 +13,7 @@
  *   with `detached: process.platform !== "win32"` (process-manager.ts);
  *   this test ensures all other spawn sites are aligned.
  *
- * See: gsd-build/gsd-2#XXXX
+ * See: sdd-build/sdd-2#XXXX
  */
 
 import test from "node:test";

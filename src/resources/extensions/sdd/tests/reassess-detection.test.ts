@@ -10,9 +10,9 @@ import { invalidateAllCaches } from "../cache.ts";
 import type { SDDState } from "../types.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-reassess-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S02", "tasks"), { recursive: true });
+  const base = join(tmpdir(), `sdd-test-reassess-${randomUUID()}`);
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S02", "tasks"), { recursive: true });
   return base;
 }
 
@@ -21,19 +21,19 @@ function cleanup(base: string): void {
 }
 
 function writeRoadmap(base: string, content: string): void {
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), content);
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), content);
 }
 
 function writeSummary(base: string, sid: string): void {
   writeFileSync(
-    join(base, ".gsd", "milestones", "M001", "slices", sid, `${sid}-SUMMARY.md`),
+    join(base, ".sdd", "milestones", "M001", "slices", sid, `${sid}-SUMMARY.md`),
     `---\nid: ${sid}\n---\n# ${sid} Summary\nDone.`,
   );
 }
 
 function writeAssessment(base: string, sid: string): void {
   writeFileSync(
-    join(base, ".gsd", "milestones", "M001", "slices", sid, `${sid}-ASSESSMENT.md`),
+    join(base, ".sdd", "milestones", "M001", "slices", sid, `${sid}-ASSESSMENT.md`),
     `# ${sid} Assessment\nNo changes needed.`,
   );
 }

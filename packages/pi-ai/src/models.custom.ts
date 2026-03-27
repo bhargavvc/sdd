@@ -4,7 +4,7 @@
 // third-party catalog. Providers that use proprietary endpoints and are not
 // listed on models.dev must be defined here so they survive regeneration.
 //
-// See: https://github.com/gsd-build/gsd-2/issues/2339
+// See: https://github.com/sdd-build/sdd-2/issues/2339
 //
 // To add a custom provider:
 //   1. Add its model definitions below following the existing pattern.

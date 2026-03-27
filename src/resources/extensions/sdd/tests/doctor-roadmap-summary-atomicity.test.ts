@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runGSDDoctor } from "../doctor.ts";
+import { runSDDDoctor } from "../doctor.ts";
 
 function makeTmp(name: string): string {
   const dir = join(tmpdir(), `doctor-roadmap-summary-${name}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -21,8 +21,8 @@ function makeTmp(name: string): string {
 }
 
 function buildScaffold(base: string) {
-  const gsd = join(base, ".gsd");
-  const m = join(gsd, "milestones", "M001");
+  const sdd = join(base, ".sdd");
+  const m = join(sdd, "milestones", "M001");
   const s = join(m, "slices", "S01", "tasks");
   mkdirSync(s, { recursive: true });
 
@@ -64,17 +64,17 @@ test("fixLevel:task — roadmap checkbox is never toggled by doctor (reconciliat
 
   buildScaffold(tmp);
 
-  const report = await runGSDDoctor(tmp, { fix: true, fixLevel: "task" });
+  const report = await runSDDDoctor(tmp, { fix: true, fixLevel: "task" });
 
   // Roadmap must remain unchecked — doctor no longer touches checkboxes
-  const roadmapContent = readFileSync(join(tmp, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), "utf8");
+  const roadmapContent = readFileSync(join(tmp, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), "utf8");
   assert.ok(
     roadmapContent.includes("- [ ] **S01"),
     "roadmap should remain unchecked — doctor no longer toggles checkboxes"
   );
 
   // No summary or UAT stubs created
-  const sliceSummaryPath = join(tmp, ".gsd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
+  const sliceSummaryPath = join(tmp, ".sdd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
   assert.ok(!existsSync(sliceSummaryPath), "summary should NOT be created");
 });
 
@@ -84,16 +84,16 @@ test("fixLevel:all — roadmap checkbox is never toggled by doctor (reconciliati
 
   buildScaffold(tmp);
 
-  const report = await runGSDDoctor(tmp, { fix: true });
+  const report = await runSDDDoctor(tmp, { fix: true });
 
   // Even at fixLevel:all, doctor no longer creates stubs or toggles checkboxes
-  const roadmapContent = readFileSync(join(tmp, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), "utf8");
+  const roadmapContent = readFileSync(join(tmp, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), "utf8");
   assert.ok(
     roadmapContent.includes("- [ ] **S01"),
     "roadmap should remain unchecked — reconciliation removed"
   );
 
-  const sliceSummaryPath = join(tmp, ".gsd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
+  const sliceSummaryPath = join(tmp, ".sdd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
   assert.ok(!existsSync(sliceSummaryPath), "summary should NOT be created");
 });
 
@@ -103,8 +103,8 @@ test("consecutive doctor runs produce no reconciliation codes", async (t) => {
 
   buildScaffold(tmp);
 
-  await runGSDDoctor(tmp, { fix: true, fixLevel: "task" });
-  const report2 = await runGSDDoctor(tmp, { fix: true, fixLevel: "task" });
+  await runSDDDoctor(tmp, { fix: true, fixLevel: "task" });
+  const report2 = await runSDDDoctor(tmp, { fix: true, fixLevel: "task" });
 
   const REMOVED_CODES = [
     "task_done_missing_summary",

@@ -1,5 +1,5 @@
 /**
- * GSD bootstrappers for .gitignore and PREFERENCES.md
+ * SDD bootstrappers for .gitignore and PREFERENCES.md
  *
  * Ensures baseline .gitignore exists with universally-correct patterns.
  * Creates an empty PREFERENCES.md template if it doesn't exist.
@@ -14,11 +14,11 @@ import { gsdRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 /**
- * GSD runtime patterns for git index cleanup.
+ * SDD runtime patterns for git index cleanup.
  * With external state (symlink), these are a no-op in most cases,
  * but retained for backwards compatibility during migration.
  */
-const GSD_RUNTIME_PATTERNS = [
+const SDD_RUNTIME_PATTERNS = [
   ".sdd/activity/",
   ".sdd/forensics/",
   ".sdd/runtime/",
@@ -28,9 +28,9 @@ const GSD_RUNTIME_PATTERNS = [
   ".sdd/metrics.json",
   ".sdd/completed-units.json",
   ".sdd/STATE.md",
-  ".sdd/gsd.db",
-  ".sdd/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".sdd/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".sdd/sdd.db",
+  ".sdd/sdd.db-shm",   // SQLite WAL sidecar — always created alongside sdd.db (#2296)
+  ".sdd/sdd.db-wal",   // SQLite WAL sidecar — always created alongside sdd.db (#2296)
   ".sdd/journal/",     // daily-rotated JSONL event journal (#2296)
   ".sdd/doctor-history.jsonl", // doctor run history (#2296)
   ".sdd/DISCUSSION-MANIFEST.json",
@@ -39,8 +39,8 @@ const GSD_RUNTIME_PATTERNS = [
 ] as const;
 
 const BASELINE_PATTERNS = [
-  // ── GSD state directory (symlink to external storage) ──
-  ".gsd",
+  // ── SDD state directory (symlink to external storage) ──
+  ".sdd",
 
   // ── OS junk ──
   ".DS_Store",
@@ -87,7 +87,7 @@ const BASELINE_PATTERNS = [
 /**
  * Check whether `.sdd/` contains files tracked by git.
  * If so, the project intentionally keeps `.sdd/` in version control
- * and we must NOT add `.gsd` to `.gitignore` or attempt migration.
+ * and we must NOT add `.sdd` to `.gitignore` or attempt migration.
  *
  * Returns true if git tracks at least one file under `.sdd/`.
  * Returns false (safe to ignore) if:
@@ -97,9 +97,9 @@ const BASELINE_PATTERNS = [
  *   - No tracked files found under `.sdd/`
  */
 export function hasGitTrackedGsdFiles(basePath: string): boolean {
-  const localGsd = join(basePath, ".gsd");
+  const localGsd = join(basePath, ".sdd");
 
-  // If .gsd doesn't exist or is already a symlink, no tracked files concern
+  // If .sdd doesn't exist or is already a symlink, no tracked files concern
   if (!existsSync(localGsd)) return false;
   try {
     if (lstatSync(localGsd).isSymbolicLink()) return false;
@@ -109,7 +109,7 @@ export function hasGitTrackedGsdFiles(basePath: string): boolean {
 
   // Check if git tracks any files under .sdd/
   try {
-    const tracked = nativeLsFiles(basePath, ".gsd");
+    const tracked = nativeLsFiles(basePath, ".sdd");
     if (tracked.length > 0) return true;
 
     // nativeLsFiles swallows git failures and returns []. An empty result
@@ -135,8 +135,8 @@ export function hasGitTrackedGsdFiles(basePath: string): boolean {
  * Returns true if the file was created or modified, false if already complete.
  *
  * **Safety check:** If `.sdd/` contains git-tracked files (i.e., the project
- * intentionally keeps `.sdd/` in version control), the `.gsd` ignore pattern
- * is excluded to prevent data loss. Only the `.gsd` pattern is affected —
+ * intentionally keeps `.sdd/` in version control), the `.sdd` ignore pattern
+ * is excluded to prevent data loss. Only the `.sdd` pattern is affected —
  * all other baseline patterns are still applied normally.
  */
 export function ensureGitignore(
@@ -162,10 +162,10 @@ export function ensureGitignore(
   );
 
   // Determine which patterns to apply. If .sdd/ has tracked files,
-  // exclude the ".gsd" pattern to prevent deleting tracked state.
+  // exclude the ".sdd" pattern to prevent deleting tracked state.
   const gsdIsTracked = hasGitTrackedGsdFiles(basePath);
   const patternsToApply = gsdIsTracked
-    ? BASELINE_PATTERNS.filter((p) => p !== ".gsd")
+    ? BASELINE_PATTERNS.filter((p) => p !== ".sdd")
     : BASELINE_PATTERNS;
 
   // Find patterns not yet present
@@ -176,7 +176,7 @@ export function ensureGitignore(
   // Build the block to append
   const block = [
     "",
-    "# ── GSD baseline (auto-generated) ──",
+    "# ── SDD baseline (auto-generated) ──",
     ...missing,
     "",
   ].join("\n");
@@ -202,7 +202,7 @@ export function ensureGitignore(
  * version control.
  */
 export function untrackRuntimeFiles(basePath: string): void {
-  const runtimePaths = GSD_RUNTIME_PATTERNS;
+  const runtimePaths = SDD_RUNTIME_PATTERNS;
 
   for (const pattern of runtimePaths) {
     // Use -r for directory patterns (trailing slash), strip the slash for the command
@@ -216,7 +216,7 @@ export function untrackRuntimeFiles(basePath: string): void {
 }
 
 /**
- * Ensure basePath/.gsd/PREFERENCES.md exists as an empty template.
+ * Ensure basePath/.sdd/PREFERENCES.md exists as an empty template.
  * Creates the file with frontmatter only if it doesn't exist.
  * Returns true if created, false if already exists.
  *
@@ -243,7 +243,7 @@ skill_discovery: {}
 auto_supervisor: {}
 ---
 
-# GSD Skill Preferences
+# SDD Skill Preferences
 
 Project-specific guidance for skill selection and execution preferences.
 
@@ -251,7 +251,7 @@ See \`~/.sdd/agent/extensions/sdd/docs/preferences-reference.md\` for full field
 
 ## Fields
 
-- \`always_use_skills\`: Skills that must be available during all GSD operations
+- \`always_use_skills\`: Skills that must be available during all SDD operations
 - \`prefer_skills\`: Skills to prioritize when multiple options exist
 - \`avoid_skills\`: Skills to minimize or avoid (with lower priority than prefer)
 - \`skill_rules\`: Context-specific rules (e.g., "use tool X for Y type of work")

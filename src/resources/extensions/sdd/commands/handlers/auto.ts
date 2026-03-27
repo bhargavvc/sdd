@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -11,7 +11,7 @@ import { findMilestoneIds } from "../../milestone-id-utils.js";
 
 /**
  * Parse --yolo flag and optional file path from the auto command string.
- * Supports: `/gsd auto --yolo path/to/file.md` or `/gsd auto -y path/to/file.md`
+ * Supports: `/sdd auto --yolo path/to/file.md` or `/sdd auto -y path/to/file.md`
  */
 function parseYoloFlag(trimmed: string): { yoloSeedFile: string | null; rest: string } {
   const yoloRe = /(?:--yolo|-y)\s+("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+)/;
@@ -43,21 +43,21 @@ export function parseMilestoneTarget(input: string): { milestoneId: string | nul
 }
 
 /**
- * Set GSD_MILESTONE_LOCK to target a specific milestone, then run `fn`.
+ * Set SDD_MILESTONE_LOCK to target a specific milestone, then run `fn`.
  * Clears the env var when `fn` resolves or rejects, so the lock does not
  * leak into subsequent commands in the same process.
  */
 async function withMilestoneLock(milestoneId: string, fn: () => Promise<void>): Promise<void> {
-  const previous = process.env.GSD_MILESTONE_LOCK;
-  process.env.GSD_MILESTONE_LOCK = milestoneId;
+  const previous = process.env.SDD_MILESTONE_LOCK;
+  process.env.SDD_MILESTONE_LOCK = milestoneId;
   try {
     await fn();
   } finally {
     // Restore previous value (undefined → delete, else restore).
     if (previous === undefined) {
-      delete process.env.GSD_MILESTONE_LOCK;
+      delete process.env.SDD_MILESTONE_LOCK;
     } else {
-      process.env.GSD_MILESTONE_LOCK = previous;
+      process.env.SDD_MILESTONE_LOCK = previous;
     }
   }
 }
@@ -128,7 +128,7 @@ export async function handleAutoCommand(trimmed: string, ctx: ExtensionCommandCo
       const { showHeadlessMilestoneCreation } = await import("../../guided-flow.js");
       await showHeadlessMilestoneCreation(ctx, pi, projectRoot(), seedContent);
     } else if (milestoneId) {
-      // Target a specific milestone — use GSD_MILESTONE_LOCK so state
+      // Target a specific milestone — use SDD_MILESTONE_LOCK so state
       // derivation only sees this milestone (#2521).
       await withMilestoneLock(milestoneId, () =>
         startAuto(ctx, pi, projectRoot(), verboseMode),
@@ -158,7 +158,7 @@ export async function handleAutoCommand(trimmed: string, ctx: ExtensionCommandCo
   if (trimmed === "pause") {
     if (!isAutoActive()) {
       if (isAutoPaused()) {
-        ctx.ui.notify("Auto-mode is already paused. /gsd auto to resume.", "info");
+        ctx.ui.notify("Auto-mode is already paused. /sdd auto to resume.", "info");
       } else {
         ctx.ui.notify("Auto-mode is not running.", "info");
       }

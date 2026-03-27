@@ -1,4 +1,4 @@
-// GSD Extension — Unit ID Parsing
+// SDD Extension — Unit ID Parsing
 // Centralizes the milestone/slice/task decomposition of unit ID strings.
 
 export interface ParsedUnitId {

@@ -1,5 +1,5 @@
 /**
- * Type definitions, constants, and configuration shapes for GSD preferences.
+ * Type definitions, constants, and configuration shapes for SDD preferences.
  *
  * All interfaces, type aliases, and static lookup tables live here so that
  * both the validation and runtime modules can import them without pulling
@@ -107,7 +107,7 @@ export type UnitType = (typeof KNOWN_UNIT_TYPES)[number];
 
 export const SKILL_ACTIONS = new Set(["use", "prefer", "avoid"]);
 
-export interface GSDSkillRule {
+export interface SDDSkillRule {
   when: string;
   use?: string[];
   prefer?: string[];
@@ -118,7 +118,7 @@ export interface GSDSkillRule {
  * Model configuration for a single phase.
  * Supports primary model with optional fallbacks for resilience.
  */
-export interface GSDPhaseModelConfig {
+export interface SDDPhaseModelConfig {
   /** Primary model ID (e.g., "claude-opus-4-6") */
   model: string;
   /** Provider name to disambiguate when the same model ID exists across providers (e.g., "bedrock", "anthropic") */
@@ -129,9 +129,9 @@ export interface GSDPhaseModelConfig {
 
 /**
  * Legacy model config -- simple string per phase.
- * Kept for backward compatibility; will be migrated to GSDModelConfigV2 on load.
+ * Kept for backward compatibility; will be migrated to SDDModelConfigV2 on load.
  */
-export interface GSDModelConfig {
+export interface SDDModelConfig {
   research?: string;
   planning?: string;
   execution?: string;
@@ -144,13 +144,13 @@ export interface GSDModelConfig {
  * Extended model config with per-phase fallback support.
  * Each phase can specify a primary model and ordered fallbacks.
  */
-export interface GSDModelConfigV2 {
-  research?: string | GSDPhaseModelConfig;
-  planning?: string | GSDPhaseModelConfig;
-  execution?: string | GSDPhaseModelConfig;
-  execution_simple?: string | GSDPhaseModelConfig;
-  completion?: string | GSDPhaseModelConfig;
-  subagent?: string | GSDPhaseModelConfig;
+export interface SDDModelConfigV2 {
+  research?: string | SDDPhaseModelConfig;
+  planning?: string | SDDPhaseModelConfig;
+  execution?: string | SDDPhaseModelConfig;
+  execution_simple?: string | SDDPhaseModelConfig;
+  completion?: string | SDDPhaseModelConfig;
+  subagent?: string | SDDPhaseModelConfig;
 }
 
 /** Normalized model selection with resolved fallbacks */
@@ -197,15 +197,15 @@ export interface ExperimentalPreferences {
   rtk?: boolean;
 }
 
-export interface GSDPreferences {
+export interface SDDPreferences {
   version?: number;
   mode?: WorkflowMode;
   always_use_skills?: string[];
   prefer_skills?: string[];
   avoid_skills?: string[];
-  skill_rules?: GSDSkillRule[];
+  skill_rules?: SDDSkillRule[];
   custom_instructions?: string[];
-  models?: GSDModelConfig | GSDModelConfigV2;
+  models?: SDDModelConfig | SDDModelConfigV2;
   skill_discovery?: SkillDiscoveryMode;
   skill_staleness_days?: number;  // Skills unused for N days get deprioritized (#599). 0 = disabled. Default: 60.
   auto_supervisor?: AutoSupervisorConfig;
@@ -240,11 +240,11 @@ export interface GSDPreferences {
   reactive_execution?: ReactiveExecutionConfig;
   /** Parallel quality gate evaluation during slice planning. Disabled by default. */
   gate_evaluation?: GateEvaluationConfig;
-  /** GitHub sync configuration. Opt-in: syncs GSD events to GitHub Issues, Milestones, and PRs. */
+  /** GitHub sync configuration. Opt-in: syncs SDD events to GitHub Issues, Milestones, and PRs. */
   github?: GitHubSyncConfig;
   /** OpenAI service tier preference. "priority" = 2x cost, faster. "flex" = 0.5x cost, slower. Only affects gpt-5.4 models. */
   service_tier?: "priority" | "flex";
-  /** Opt-in: search existing issues and PRs before filing from /gsd forensics. Uses additional AI tokens. */
+  /** Opt-in: search existing issues and PRs before filing from /sdd forensics. Uses additional AI tokens. */
   forensics_dedup?: boolean;
   /** Opt-in: show per-prompt and cumulative session token cost in the footer. Default: false. */
   show_token_cost?: boolean;

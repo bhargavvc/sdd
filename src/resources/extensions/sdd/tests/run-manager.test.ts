@@ -45,7 +45,7 @@ function writeDefinition(
   name: string,
   content: string,
 ): void {
-  const defsDir = join(basePath, ".gsd", "workflow-defs");
+  const defsDir = join(basePath, ".sdd", "workflow-defs");
   mkdirSync(defsDir, { recursive: true });
   writeFileSync(join(defsDir, `${name}.yaml`), content, "utf-8");
 }
@@ -114,7 +114,7 @@ describe("createRun", () => {
     assert.ok(!existsSync(join(runDir, "PARAMS.json")), "PARAMS.json should not exist without overrides");
 
     // Run directory path matches convention
-    assert.ok(runDir.includes(join(".gsd", "workflow-runs", "test-workflow")), "path should follow convention");
+    assert.ok(runDir.includes(join(".sdd", "workflow-runs", "test-workflow")), "path should follow convention");
   });
 
   it("writes PARAMS.json and substituted prompts when overrides provided", () => {
@@ -215,7 +215,7 @@ describe("listRuns", () => {
 
     const run1 = createRun(base, "test-workflow");
     // Ensure different timestamp by creating run dir manually with earlier timestamp
-    const earlyDir = join(base, ".gsd", "workflow-runs", "test-workflow", "2020-01-01T00-00-00");
+    const earlyDir = join(base, ".sdd", "workflow-runs", "test-workflow", "2020-01-01T00-00-00");
     mkdirSync(earlyDir, { recursive: true });
     // Copy GRAPH.yaml to make it a valid run
     const graphContent = readFileSync(join(run1, "GRAPH.yaml"), "utf-8");

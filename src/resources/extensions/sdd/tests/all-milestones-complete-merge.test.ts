@@ -45,7 +45,7 @@ function run(command: string, cwd: string): string {
 
 function createTempRepo(): string {
   const dir = realpathSync(
-    mkdtempSync(join(tmpdir(), "gsd-all-complete-test-")),
+    mkdtempSync(join(tmpdir(), "sdd-all-complete-test-")),
   );
   run("git init", dir);
   run("git config user.email test@test.com", dir);
@@ -61,7 +61,7 @@ function createTempRepo(): string {
 }
 
 function createMilestoneArtifacts(dir: string, mid: string): void {
-  const msDir = join(dir, ".gsd", "milestones", mid);
+  const msDir = join(dir, ".sdd", "milestones", mid);
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "CONTEXT.md"), `# ${mid} Context\n`);
   const roadmap = [
@@ -159,7 +159,7 @@ test("single milestone worktree is merged to main when all complete (#962)", (t)
   // Simulate the fix: merge before stopping (what the "all complete" path now does)
   const roadmapPath = join(
     tempDir,
-    ".gsd",
+    ".sdd",
     "milestones",
     "M001",
     "M001-ROADMAP.md",
@@ -220,7 +220,7 @@ test("last milestone worktree is merged when it's the final one (#962)", (t) => 
   run("git add .", wt1);
   run('git commit -m "feat(M001): m001 work"', wt1);
   const roadmap1 = readFileSync(
-    join(tempDir, ".gsd", "milestones", "M001", "M001-ROADMAP.md"),
+    join(tempDir, ".sdd", "milestones", "M001", "M001-ROADMAP.md"),
     "utf-8",
   );
   mergeMilestoneToMain(tempDir, "M001", roadmap1);
@@ -231,7 +231,7 @@ test("last milestone worktree is merged when it's the final one (#962)", (t) => 
   run("git add .", wt2);
   run('git commit -m "feat(M002): m002 work"', wt2);
   const roadmap2 = readFileSync(
-    join(tempDir, ".gsd", "milestones", "M002", "M002-ROADMAP.md"),
+    join(tempDir, ".sdd", "milestones", "M002", "M002-ROADMAP.md"),
     "utf-8",
   );
   mergeMilestoneToMain(tempDir, "M002", roadmap2);

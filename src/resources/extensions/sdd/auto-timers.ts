@@ -6,9 +6,9 @@
  * via startUnitSupervision() and torn down by the caller via clearUnitTimeout().
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
 import { readUnitRuntimeRecord, writeUnitRuntimeRecord } from "./unit-runtime.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { resolveAutoSupervisorConfig } from "./preferences.js";
 import type { SDDPreferences } from "./preferences.js";
 import { computeBudgets, resolveExecutorContextWindow } from "./context-budget.js";
@@ -122,7 +122,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
     });
     pi.sendMessage(
       {
-        customType: "gsd-auto-wrapup",
+        customType: "sdd-auto-wrapup",
         display: s.verbose,
         content: [
           "**TIME BUDGET WARNING — keep going only if progress is real.**",
@@ -289,7 +289,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
 
     pi.sendMessage(
       {
-        customType: "gsd-auto-wrapup",
+        customType: "sdd-auto-wrapup",
         display: s.verbose,
         content: [
           "**CONTEXT BUDGET WARNING — wrap up this unit now.**",

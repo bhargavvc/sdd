@@ -1,4 +1,4 @@
-// GSD Extension — sync-lock unit tests
+// SDD Extension — sync-lock unit tests
 // Tests acquireSyncLock() and releaseSyncLock().
 
 import test from 'node:test';
@@ -9,7 +9,7 @@ import * as os from 'node:os';
 import { acquireSyncLock, releaseSyncLock } from '../sync-lock.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-sync-lock-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-sync-lock-'));
 }
 
 function cleanupDir(dirPath: string): void {
@@ -20,7 +20,7 @@ function cleanupDir(dirPath: string): void {
 
 test('sync-lock: acquireSyncLock returns { acquired: true } when no lock exists', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     const result = acquireSyncLock(base);
     assert.strictEqual(result.acquired, true);
@@ -31,10 +31,10 @@ test('sync-lock: acquireSyncLock returns { acquired: true } when no lock exists'
 
 test('sync-lock: acquireSyncLock creates lock file at .sdd/sync.lock', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     acquireSyncLock(base);
-    const lockPath = path.join(base, '.gsd', 'sync.lock');
+    const lockPath = path.join(base, '.sdd', 'sync.lock');
     assert.ok(fs.existsSync(lockPath), 'sync.lock should exist after acquire');
   } finally {
     cleanupDir(base);
@@ -43,10 +43,10 @@ test('sync-lock: acquireSyncLock creates lock file at .sdd/sync.lock', () => {
 
 test('sync-lock: lock file contains pid and acquired_at fields', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     acquireSyncLock(base);
-    const lockPath = path.join(base, '.gsd', 'sync.lock');
+    const lockPath = path.join(base, '.sdd', 'sync.lock');
     const content = JSON.parse(fs.readFileSync(lockPath, 'utf-8'));
     assert.strictEqual(typeof content.pid, 'number');
     assert.strictEqual(typeof content.acquired_at, 'string');
@@ -59,10 +59,10 @@ test('sync-lock: lock file contains pid and acquired_at fields', () => {
 
 test('sync-lock: releaseSyncLock removes lock file', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     acquireSyncLock(base);
-    const lockPath = path.join(base, '.gsd', 'sync.lock');
+    const lockPath = path.join(base, '.sdd', 'sync.lock');
     assert.ok(fs.existsSync(lockPath), 'lock file should exist before release');
     releaseSyncLock(base);
     assert.ok(!fs.existsSync(lockPath), 'lock file should not exist after release');
@@ -73,7 +73,7 @@ test('sync-lock: releaseSyncLock removes lock file', () => {
 
 test('sync-lock: releaseSyncLock is a no-op when no lock file exists', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     // Should not throw
     releaseSyncLock(base);
@@ -86,7 +86,7 @@ test('sync-lock: releaseSyncLock is a no-op when no lock file exists', () => {
 
 test('sync-lock: can re-acquire after release', () => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
   try {
     const r1 = acquireSyncLock(base);
     assert.strictEqual(r1.acquired, true, 'first acquire should succeed');
@@ -103,8 +103,8 @@ test('sync-lock: can re-acquire after release', () => {
 
 test('sync-lock: overrides stale lock file (mtime backdated)', (t) => {
   const base = tempDir();
-  fs.mkdirSync(path.join(base, '.gsd'), { recursive: true });
-  const lockPath = path.join(base, '.gsd', 'sync.lock');
+  fs.mkdirSync(path.join(base, '.sdd'), { recursive: true });
+  const lockPath = path.join(base, '.sdd', 'sync.lock');
   try {
     // Write a lock file with a very old mtime (simulating staleness)
     fs.writeFileSync(lockPath, JSON.stringify({ pid: 99999, acquired_at: new Date(0).toISOString() }));

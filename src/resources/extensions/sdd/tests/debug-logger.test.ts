@@ -19,8 +19,8 @@ import {
 } from '../debug-logger.ts';
 
 function createTempGsdDir(): string {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-debug-test-'));
-  mkdirSync(join(tmp, '.gsd'), { recursive: true });
+  const tmp = mkdtempSync(join(tmpdir(), 'sdd-debug-test-'));
+  mkdirSync(join(tmp, '.sdd'), { recursive: true });
   return tmp;
 }
 
@@ -156,7 +156,7 @@ test('writeDebugSummary includes all counters and disables debug', () => {
 
 test('auto-prunes old debug logs', () => {
   const tmp = createTempGsdDir();
-  const debugDir = join(tmp, '.gsd', 'debug');
+  const debugDir = join(tmp, '.sdd', 'debug');
   mkdirSync(debugDir, { recursive: true });
 
   // Create 6 old log files

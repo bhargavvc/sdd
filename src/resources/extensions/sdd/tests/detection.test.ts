@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Detection — project state and ecosystem detection.
+ * Unit tests for SDD Detection — project state and ecosystem detection.
  *
  * Exercises the pure detection functions in detection.ts:
  * - detectProjectState() with various folder layouts
@@ -22,7 +22,7 @@ import {
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-detection-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `sdd-detection-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -48,24 +48,24 @@ test("detectProjectState: empty directory returns state=none", (t) => {
   assert.equal(result.v2, undefined);
 });
 
-test("detectProjectState: directory with .sdd/milestones/M001 returns v2-gsd", (t) => {
-  const dir = makeTempDir("v2-gsd");
+test("detectProjectState: directory with .sdd/milestones/M001 returns v2-sdd", (t) => {
+  const dir = makeTempDir("v2-sdd");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
   const result = detectProjectState(dir);
-  assert.equal(result.state, "v2-gsd");
+  assert.equal(result.state, "v2-sdd");
   assert.ok(result.v2);
   assert.equal(result.v2!.milestoneCount, 1);
 });
 
-test("detectProjectState: directory with empty .sdd/milestones returns v2-gsd-empty", (t) => {
+test("detectProjectState: directory with empty .sdd/milestones returns v2-sdd-empty", (t) => {
   const dir = makeTempDir("v2-empty");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
+  mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
   const result = detectProjectState(dir);
-  assert.equal(result.state, "v2-gsd-empty");
+  assert.equal(result.state, "v2-sdd-empty");
   assert.ok(result.v2);
   assert.equal(result.v2!.milestoneCount, 0);
 });
@@ -88,18 +88,18 @@ test("detectProjectState: v2 takes priority over v1 when both exist", (t) => {
   const dir = makeTempDir("both");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".sdd", "milestones", "M001"), { recursive: true });
   mkdirSync(join(dir, ".planning"), { recursive: true });
   const result = detectProjectState(dir);
-  assert.equal(result.state, "v2-gsd");
+  assert.equal(result.state, "v2-sdd");
 });
 
 test("detectProjectState: detects preferences in .sdd/", (t) => {
   const dir = makeTempDir("prefs");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
+  mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
   const result = detectProjectState(dir);
   assert.ok(result.v2);
   assert.equal(result.v2!.hasPreferences, true);

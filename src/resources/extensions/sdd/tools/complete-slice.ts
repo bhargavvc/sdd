@@ -1,5 +1,5 @@
 /**
- * complete-slice handler — the core operation behind gsd_slice_complete.
+ * complete-slice handler — the core operation behind sdd_slice_complete.
  *
  * Validates inputs, checks all tasks are complete, writes slice row to DB in
  * a transaction, then (outside the transaction) renders SUMMARY.md + UAT.md
@@ -21,7 +21,7 @@ import {
   getMilestone,
   updateSliceStatus,
   setSliceSummaryMd,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { resolveSliceFile, resolveSlicePath, clearPathCache } from "../paths.js";
 import { checkOwnership, sliceUnitKey } from "../unit-ownership.js";
 import { saveFile, clearParseCache } from "../files.js";
@@ -233,7 +233,7 @@ export async function handleCompleteSlice(
 
     const slice = getSlice(params.milestoneId, params.sliceId);
     if (slice && isClosedStatus(slice.status)) {
-      guardError = `slice ${params.sliceId} is already complete — use gsd_slice_reopen first if you need to redo it`;
+      guardError = `slice ${params.sliceId} is already complete — use sdd_slice_reopen first if you need to redo it`;
       return;
     }
 
@@ -275,7 +275,7 @@ export async function handleCompleteSlice(
     summaryPath = join(sliceDir, `${params.sliceId}-SUMMARY.md`);
   } else {
     // Slice dir doesn't exist on disk yet — build path manually and ensure dirs
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".sdd");
     const manualSliceDir = join(gsdDir, "milestones", params.milestoneId, "slices", params.sliceId);
     mkdirSync(manualSliceDir, { recursive: true });
     summaryPath = join(manualSliceDir, `${params.sliceId}-SUMMARY.md`);
@@ -292,13 +292,13 @@ export async function handleCompleteSlice(
     const roadmapToggled = await renderRoadmapCheckboxes(basePath, params.milestoneId);
     if (!roadmapToggled) {
       process.stderr.write(
-        `gsd-db: complete_slice — could not find roadmap for ${params.milestoneId}, skipping checkbox toggle\n`,
+        `sdd-db: complete_slice — could not find roadmap for ${params.milestoneId}, skipping checkbox toggle\n`,
       );
     }
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_slice — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `sdd-db: complete_slice — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     updateSliceStatus(params.milestoneId, params.sliceId, 'pending');
     invalidateStateCache();
@@ -327,7 +327,7 @@ export async function handleCompleteSlice(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: complete-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `sdd: complete-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

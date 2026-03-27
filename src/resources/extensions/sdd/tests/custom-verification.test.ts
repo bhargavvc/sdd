@@ -231,8 +231,8 @@ describe("shell-command policy", () => {
     const fake = createFakeRtk({
       "echo raw": "echo rewritten",
     });
-    const previous = process.env.GSD_RTK_PATH;
-    process.env.GSD_RTK_PATH = fake.path;
+    const previous = process.env.SDD_RTK_PATH;
+    process.env.SDD_RTK_PATH = fake.path;
 
     try {
       const def = makeDef([
@@ -253,8 +253,8 @@ describe("shell-command policy", () => {
       const result = runCustomVerification(runDir, "step-1");
       assert.equal(result, "continue");
     } finally {
-      if (previous === undefined) delete process.env.GSD_RTK_PATH;
-      else process.env.GSD_RTK_PATH = previous;
+      if (previous === undefined) delete process.env.SDD_RTK_PATH;
+      else process.env.SDD_RTK_PATH = previous;
       fake.cleanup();
     }
   });

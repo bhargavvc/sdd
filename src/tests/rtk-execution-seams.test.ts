@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { rewriteCommandWithRtk as rewriteSharedCommandWithRtk } from "../resources/extensions/shared/rtk.ts";
-import { runVerificationGate } from "../resources/extensions/gsd/verification-gate.ts";
+import { runVerificationGate } from "../resources/extensions/sdd/verification-gate.ts";
 import { AsyncJobManager } from "../resources/extensions/async-jobs/job-manager.ts";
 import { createAsyncBashTool } from "../resources/extensions/async-jobs/async-bash-tool.ts";
 import { cleanupAll, startProcess } from "../resources/extensions/bg-shell/process-manager.ts";
@@ -38,20 +38,20 @@ async function waitForOutputMatch(
 
 function withFakeRtk<T>(mapping: Record<string, string | { status?: number; stdout?: string }>, run: () => Promise<T> | T): Promise<T> | T {
   const fake = createFakeRtk(mapping);
-  const previousPath = process.env.GSD_RTK_PATH;
-  const previousDisabled = process.env.GSD_RTK_DISABLED;
-  const previousTimeout = process.env.GSD_RTK_REWRITE_TIMEOUT_MS;
-  process.env.GSD_RTK_PATH = fake.path;
-  process.env.GSD_RTK_REWRITE_TIMEOUT_MS = "20000";
-  delete process.env.GSD_RTK_DISABLED;
+  const previousPath = process.env.SDD_RTK_PATH;
+  const previousDisabled = process.env.SDD_RTK_DISABLED;
+  const previousTimeout = process.env.SDD_RTK_REWRITE_TIMEOUT_MS;
+  process.env.SDD_RTK_PATH = fake.path;
+  process.env.SDD_RTK_REWRITE_TIMEOUT_MS = "20000";
+  delete process.env.SDD_RTK_DISABLED;
 
   const finalize = () => {
-    if (previousPath === undefined) delete process.env.GSD_RTK_PATH;
-    else process.env.GSD_RTK_PATH = previousPath;
-    if (previousDisabled === undefined) delete process.env.GSD_RTK_DISABLED;
-    else process.env.GSD_RTK_DISABLED = previousDisabled;
-    if (previousTimeout === undefined) delete process.env.GSD_RTK_REWRITE_TIMEOUT_MS;
-    else process.env.GSD_RTK_REWRITE_TIMEOUT_MS = previousTimeout;
+    if (previousPath === undefined) delete process.env.SDD_RTK_PATH;
+    else process.env.SDD_RTK_PATH = previousPath;
+    if (previousDisabled === undefined) delete process.env.SDD_RTK_DISABLED;
+    else process.env.SDD_RTK_DISABLED = previousDisabled;
+    if (previousTimeout === undefined) delete process.env.SDD_RTK_REWRITE_TIMEOUT_MS;
+    else process.env.SDD_RTK_REWRITE_TIMEOUT_MS = previousTimeout;
     fake.cleanup();
   };
 
@@ -70,7 +70,7 @@ function withFakeRtk<T>(mapping: Record<string, string | { status?: number; stdo
 
 function withManagedFakeRtk<T>(mapping: Record<string, string | { status?: number; stdout?: string }>, run: (env: NodeJS.ProcessEnv, managedPath: string) => Promise<T> | T): Promise<T> | T {
   const fake = createFakeRtk(mapping);
-  const managedHome = mkdtempSync(join(tmpdir(), "gsd-rtk-managed-home-"));
+  const managedHome = mkdtempSync(join(tmpdir(), "sdd-rtk-managed-home-"));
   const managedDir = join(managedHome, "agent", "bin");
   const managedPath = join(managedDir, process.platform === "win32" ? "rtk.cmd" : "rtk");
   mkdirSync(managedDir, { recursive: true });
@@ -79,31 +79,31 @@ function withManagedFakeRtk<T>(mapping: Record<string, string | { status?: numbe
     chmodSync(managedPath, 0o755);
   }
 
-  const previousHome = process.env.GSD_HOME;
-  const previousPath = process.env.GSD_RTK_PATH;
-  const previousDisabled = process.env.GSD_RTK_DISABLED;
-  const previousTimeout = process.env.GSD_RTK_REWRITE_TIMEOUT_MS;
-  process.env.GSD_HOME = managedHome;
-  process.env.GSD_RTK_REWRITE_TIMEOUT_MS = "20000";
-  delete process.env.GSD_RTK_PATH;
-  delete process.env.GSD_RTK_DISABLED;
+  const previousHome = process.env.SDD_HOME;
+  const previousPath = process.env.SDD_RTK_PATH;
+  const previousDisabled = process.env.SDD_RTK_DISABLED;
+  const previousTimeout = process.env.SDD_RTK_REWRITE_TIMEOUT_MS;
+  process.env.SDD_HOME = managedHome;
+  process.env.SDD_RTK_REWRITE_TIMEOUT_MS = "20000";
+  delete process.env.SDD_RTK_PATH;
+  delete process.env.SDD_RTK_DISABLED;
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    GSD_HOME: managedHome,
-    GSD_RTK_REWRITE_TIMEOUT_MS: "20000",
+    SDD_HOME: managedHome,
+    SDD_RTK_REWRITE_TIMEOUT_MS: "20000",
   };
-  delete env.GSD_RTK_PATH;
+  delete env.SDD_RTK_PATH;
 
   const finalize = () => {
-    if (previousHome === undefined) delete process.env.GSD_HOME;
-    else process.env.GSD_HOME = previousHome;
-    if (previousPath === undefined) delete process.env.GSD_RTK_PATH;
-    else process.env.GSD_RTK_PATH = previousPath;
-    if (previousDisabled === undefined) delete process.env.GSD_RTK_DISABLED;
-    else process.env.GSD_RTK_DISABLED = previousDisabled;
-    if (previousTimeout === undefined) delete process.env.GSD_RTK_REWRITE_TIMEOUT_MS;
-    else process.env.GSD_RTK_REWRITE_TIMEOUT_MS = previousTimeout;
+    if (previousHome === undefined) delete process.env.SDD_HOME;
+    else process.env.SDD_HOME = previousHome;
+    if (previousPath === undefined) delete process.env.SDD_RTK_PATH;
+    else process.env.SDD_RTK_PATH = previousPath;
+    if (previousDisabled === undefined) delete process.env.SDD_RTK_DISABLED;
+    else process.env.SDD_RTK_DISABLED = previousDisabled;
+    if (previousTimeout === undefined) delete process.env.SDD_RTK_REWRITE_TIMEOUT_MS;
+    else process.env.SDD_RTK_REWRITE_TIMEOUT_MS = previousTimeout;
     fake.cleanup();
     rmSync(managedHome, { recursive: true, force: true });
   };
@@ -123,7 +123,7 @@ function withManagedFakeRtk<T>(mapping: Record<string, string | { status?: numbe
 
 // NOTE: The bash tool itself no longer does RTK rewriting directly. That's now
 // handled by the bash_transform extension hook in register-hooks.ts. The seam
-// tests below verify the GSD-layer surfaces that still call rewriteCommandWithRtk
+// tests below verify the SDD-layer surfaces that still call rewriteCommandWithRtk
 // directly: shared/rtk.ts, verification-gate, async-bash, and bg-shell.
 
 test("shared RTK helper rewrites commands via fake RTK binary", async () => {
@@ -133,7 +133,7 @@ test("shared RTK helper rewrites commands via fake RTK binary", async () => {
   });
 });
 
-test("shared RTK helper falls back to the managed RTK path when GSD_RTK_PATH is unset", async () => {
+test("shared RTK helper falls back to the managed RTK path when SDD_RTK_PATH is unset", async () => {
   await withManagedFakeRtk({ "echo raw": "echo rewritten" }, async (env) => {
     assert.equal(rewriteSharedCommandWithRtk("echo raw", env), "echo rewritten");
   });

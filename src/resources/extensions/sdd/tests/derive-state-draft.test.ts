@@ -19,44 +19,44 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-draft-test-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-draft-test-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeContextDraft(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT-DRAFT.md`), content);
 }
 
 function writeContext(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT.md`), content);
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(join(dir, 'tasks'), { recursive: true });
   writeFileSync(join(dir, "tasks", "T01-PLAN.md"), "# T01 Plan\n");
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
 }
 
 function writeMilestoneSummary(base: string, mid: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), content);
 }
 
 function writeMilestoneValidation(base: string, mid: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), `---\nverdict: pass\nremediation_round: 0\n---\n\n# Validation\nPassed.`);
 }
@@ -193,8 +193,8 @@ async function main(): Promise<void> {
       writeContextDraft(base, 'M002', '# M002 Draft\n\nSeed.');
 
       // M003: milestone directory with CONTEXT — should be pending
-      mkdirSync(join(base, '.gsd', 'milestones', 'M003'), { recursive: true });
-      writeFileSync(join(base, '.gsd', 'milestones', 'M003', 'M003-CONTEXT.md'), '# M003\n\nPending milestone.');
+      mkdirSync(join(base, '.sdd', 'milestones', 'M003'), { recursive: true });
+      writeFileSync(join(base, '.sdd', 'milestones', 'M003', 'M003-CONTEXT.md'), '# M003\n\nPending milestone.');
 
       const state = await deriveState(base);
 
@@ -254,7 +254,7 @@ async function main(): Promise<void> {
     const base = createFixtureBase();
     try {
       // M001: just a directory, no files at all — ghost milestone, skipped
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
 
       const state = await deriveState(base);
 
@@ -274,8 +274,8 @@ async function main(): Promise<void> {
     const base = createFixtureBase();
     try {
       // M001: has CONTEXT but no roadmap/summary → becomes active first
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
-      writeFileSync(join(base, '.gsd', 'milestones', 'M001', 'M001-CONTEXT.md'), '# M001\n\nFirst milestone.');
+      mkdirSync(join(base, '.sdd', 'milestones', 'M001'), { recursive: true });
+      writeFileSync(join(base, '.sdd', 'milestones', 'M001', 'M001-CONTEXT.md'), '# M001\n\nFirst milestone.');
 
       // M002: has CONTEXT-DRAFT but isn't active (M001 is first)
       writeContextDraft(base, 'M002', '# M002 Draft\n\nSeed.');

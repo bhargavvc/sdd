@@ -1,14 +1,14 @@
 /**
- * GSD Changelog — Fetch and display categorized release notes from GitHub
+ * SDD Changelog — Fetch and display categorized release notes from GitHub
  *
- * Fetches releases from the gsd-build/gsd-2 GitHub repository,
+ * Fetches releases from the sdd-build/sdd-2 GitHub repository,
  * prompts the user for a version filter, and sends raw release notes
  * into the conversation for the LLM to summarize.
  *
  * Entry point: handleChangelog() called from commands.ts
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -103,7 +103,7 @@ function formatRelease(release: GitHubRelease): string {
 
 // ─── Entry Point ──────────────────────────────────────────────────────────────
 
-const RELEASES_URL = "https://api.github.com/repos/gsd-build/gsd-2/releases?per_page=100";
+const RELEASES_URL = "https://api.github.com/repos/sdd-build/sdd-2/releases?per_page=100";
 
 export async function handleChangelog(
   args: string,
@@ -114,7 +114,7 @@ export async function handleChangelog(
   let releases: GitHubRelease[];
   try {
     const response = await fetch(RELEASES_URL, {
-      headers: { "User-Agent": "gsd-changelog" },
+      headers: { "User-Agent": "sdd-changelog" },
     });
 
     if (!response.ok) {
@@ -138,7 +138,7 @@ export async function handleChangelog(
   }
 
   // ── Determine version filter ────────────────────────────────────────────
-  const currentVersion = process.env.GSD_VERSION || "";
+  const currentVersion = process.env.SDD_VERSION || "";
   let sinceVersion: string | undefined;
   let showCurrentOnly = false;
 
@@ -167,7 +167,7 @@ export async function handleChangelog(
   if (showCurrentOnly) {
     if (!currentVersion) {
       ctx.ui.notify(
-        "GSD_VERSION is not set — cannot determine current release. Provide a version instead.",
+        "SDD_VERSION is not set — cannot determine current release. Provide a version instead.",
         "warning",
       );
       return;
@@ -198,7 +198,7 @@ export async function handleChangelog(
     : `for current release ${matched[0].name || matched[0].tag_name}`;
 
   const prompt = [
-    `Here are the raw GSD changelog entries ${versionRange}.`,
+    `Here are the raw SDD changelog entries ${versionRange}.`,
     "Summarize the most important changes — group by category (Added, Changed, Fixed, etc.),",
     "keep only the most impactful items (max 5 per category), skip trivial changes,",
     "and include the version where each item appeared. Keep it concise and scannable.",
@@ -207,7 +207,7 @@ export async function handleChangelog(
   ].join("\n");
 
   pi.sendMessage(
-    { customType: "gsd-changelog", content: prompt, display: true },
+    { customType: "sdd-changelog", content: prompt, display: true },
     { triggerTurn: true },
   );
 }

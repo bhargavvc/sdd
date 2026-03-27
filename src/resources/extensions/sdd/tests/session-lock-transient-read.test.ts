@@ -35,8 +35,8 @@ async function main(): Promise<void> {
   // ─── 1. readExistingLockDataWithRetry succeeds on first read when file is fine ─
   console.log('\n=== 1. readExistingLockDataWithRetry reads file normally ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const lockFile = join(gsdRoot(base), 'auto.lock');
@@ -62,8 +62,8 @@ async function main(): Promise<void> {
   // ─── 2. readExistingLockDataWithRetry returns null for truly missing file ──
   console.log('\n=== 2. readExistingLockDataWithRetry returns null for missing file ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const lockFile = join(gsdRoot(base), 'auto.lock');
@@ -78,8 +78,8 @@ async function main(): Promise<void> {
   // ─── 3. readExistingLockDataWithRetry recovers after transient rename ──────
   console.log('\n=== 3. readExistingLockDataWithRetry recovers after transient unavailability ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const lockFile = join(gsdRoot(base), 'auto.lock');
@@ -115,8 +115,8 @@ async function main(): Promise<void> {
   // ─── 4. readExistingLockDataWithRetry recovers from transient permission error ─
   console.log('\n=== 4. readExistingLockDataWithRetry recovers from transient permission error ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const lockFile = join(gsdRoot(base), 'auto.lock');
@@ -152,8 +152,8 @@ async function main(): Promise<void> {
   // ─── 5. getSessionLockStatus does not false-positive on transient read failure ─
   console.log('\n=== 5. getSessionLockStatus tolerates transient lock file unavailability ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const result = acquireSessionLock(base);
@@ -192,8 +192,8 @@ async function main(): Promise<void> {
   // ─── 6. Retry defaults: 3 attempts with 200ms delay ────────────────────────
   console.log('\n=== 6. Default retry params: function works with defaults ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-transient-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-transient-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const lockFile = join(gsdRoot(base), 'auto.lock');

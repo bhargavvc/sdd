@@ -12,7 +12,7 @@
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
-} from "@gsd/pi-coding-agent";
+} from "@sdd/pi-coding-agent";
 import { deriveState } from "./state.js";
 import { loadFile, getManifestStatus } from "./files.js";
 import {
@@ -58,7 +58,7 @@ import { initRoutingHistory } from "./routing-history.js";
 import { restoreHookState, resetHookState } from "./post-unit-hooks.js";
 import { resetProactiveHealing, setLevelChangeCallback } from "./doctor-proactive.js";
 import { snapshotSkills } from "./skill-discovery.js";
-import { isDbAvailable, getMilestone } from "./gsd-db.js";
+import { isDbAvailable, getMilestone } from "./sdd-db.js";
 import { hideFooter } from "./auto-dashboard.js";
 import {
   debugLog,
@@ -132,11 +132,11 @@ export async function bootstrapAutoSession(
   }
 
   try {
-    // Validate GSD_PROJECT_ID early so the user gets immediate feedback
-    const customProjectId = process.env.GSD_PROJECT_ID;
+    // Validate SDD_PROJECT_ID early so the user gets immediate feedback
+    const customProjectId = process.env.SDD_PROJECT_ID;
     if (customProjectId && !validateProjectId(customProjectId)) {
       ctx.ui.notify(
-        `GSD_PROJECT_ID must contain only alphanumeric characters, hyphens, and underscores. Got: "${customProjectId}"`,
+        `SDD_PROJECT_ID must contain only alphanumeric characters, hyphens, and underscores. Got: "${customProjectId}"`,
         "error",
       );
       return releaseLockAndReturn();
@@ -146,7 +146,7 @@ export async function bootstrapAutoSession(
     // nativeIsRepo() uses `git rev-parse` which traverses up to parent dirs,
     // so a parent repo can make it return true even when base has no .git of
     // its own. Check for a local .git instead (defense-in-depth for the case
-    // where isInheritedRepo() returns a false negative, e.g. stale .gsd at
+    // where isInheritedRepo() returns a false negative, e.g. stale .sdd at
     // the parent git root). See #2393 and related issue.
     const hasLocalGit = existsSync(join(base, ".git"));
     if (!hasLocalGit || isInheritedRepo(base)) {
@@ -156,7 +156,7 @@ export async function bootstrapAutoSession(
     }
 
     // Migrate legacy in-project .sdd/ to external state directory.
-    // Migration MUST run before ensureGitignore to avoid adding ".gsd" to
+    // Migration MUST run before ensureGitignore to avoid adding ".sdd" to
     // .gitignore when .sdd/ is git-tracked (data-loss bug #1364).
     recoverFailedMigration(base);
     const migration = migrateToExternalState(base);
@@ -168,19 +168,19 @@ export async function bootstrapAutoSession(
 
     // Ensure .gitignore has baseline patterns.
     // ensureGitignore checks for git-tracked .sdd/ files and skips the
-    // ".gsd" pattern if the project intentionally tracks .sdd/ in git.
+    // ".sdd" pattern if the project intentionally tracks .sdd/ in git.
     const gitPrefs = loadEffectiveSDDPreferences()?.preferences?.git;
     const manageGitignore = gitPrefs?.manage_gitignore;
     ensureGitignore(base, { manageGitignore });
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
     // Bootstrap .sdd/ if it doesn't exist
-    const gsdDir = join(base, ".gsd");
+    const gsdDir = join(base, ".sdd");
     if (!existsSync(gsdDir)) {
       mkdirSync(join(gsdDir, "milestones"), { recursive: true });
       try {
         nativeAddAll(base);
-        nativeCommit(base, "chore: init gsd");
+        nativeCommit(base, "chore: init sdd");
       } catch {
         /* nothing to commit */
       }
@@ -238,7 +238,7 @@ export async function bootstrapAutoSession(
     }
 
     // ── Debug mode ──
-    if (!isDebugEnabled() && process.env.GSD_DEBUG === "1") {
+    if (!isDebugEnabled() && process.env.SDD_DEBUG === "1") {
       enableDebug(base);
     }
     if (isDebugEnabled()) {
@@ -289,7 +289,7 @@ export async function bootstrapAutoSession(
       (state.phase === "pre-planning" || state.phase === "complete") &&
       shouldUseWorktreeIsolation() &&
       !detectWorktreeName(base) &&
-      !base.includes(`${pathSep}.gsd${pathSep}worktrees${pathSep}`)
+      !base.includes(`${pathSep}.sdd${pathSep}worktrees${pathSep}`)
     ) {
       const milestoneBranch = `milestone/${state.activeMilestone.id}`;
       const { nativeBranchExists } = await import("./native-git-bridge.js");
@@ -321,7 +321,7 @@ export async function bootstrapAutoSession(
         hasSurvivorBranch = false;
       } else {
         ctx.ui.notify(
-          "Discussion completed but milestone draft was not promoted. Run /gsd to try again.",
+          "Discussion completed but milestone draft was not promoted. Run /sdd to try again.",
           "warning",
         );
         return releaseLockAndReturn();
@@ -359,7 +359,7 @@ export async function bootstrapAutoSession(
           _consecutiveCompleteBootstraps = 0;
           ctx.ui.notify(
             "All milestones are complete and the discussion didn't produce a new one. " +
-            "Run /gsd to start a new milestone manually.",
+            "Run /sdd to start a new milestone manually.",
             "warning",
           );
           return releaseLockAndReturn();
@@ -391,7 +391,7 @@ export async function bootstrapAutoSession(
             state = postState;
           } else {
             ctx.ui.notify(
-              "Discussion completed but no milestone context was written. Run /gsd to try the discussion again, or /gsd auto after creating the milestone manually.",
+              "Discussion completed but no milestone context was written. Run /sdd to try the discussion again, or /sdd auto after creating the milestone manually.",
               "warning",
             );
             return releaseLockAndReturn();
@@ -416,7 +416,7 @@ export async function bootstrapAutoSession(
             state = postState;
           } else {
             ctx.ui.notify(
-              "Discussion completed but milestone context is still missing. Run /gsd to try again.",
+              "Discussion completed but milestone context is still missing. Run /sdd to try again.",
               "warning",
             );
             return releaseLockAndReturn();
@@ -438,7 +438,7 @@ export async function bootstrapAutoSession(
           state = postState;
         } else {
           ctx.ui.notify(
-            "Discussion completed but milestone draft was not promoted. Run /gsd to try again.",
+            "Discussion completed but milestone draft was not promoted. Run /sdd to try again.",
             "warning",
           );
           return releaseLockAndReturn();
@@ -499,13 +499,13 @@ export async function bootstrapAutoSession(
 
     const isUnderGsdWorktrees = (p: string): boolean => {
       // Direct layout: /.sdd/worktrees/
-      const marker = `${pathSep}.gsd${pathSep}worktrees${pathSep}`;
+      const marker = `${pathSep}.sdd${pathSep}worktrees${pathSep}`;
       if (p.includes(marker)) return true;
-      const worktreesSuffix = `${pathSep}.gsd${pathSep}worktrees`;
+      const worktreesSuffix = `${pathSep}.sdd${pathSep}worktrees`;
       if (p.endsWith(worktreesSuffix)) return true;
       // Symlink-resolved layout: /.sdd/projects/<hash>/worktrees/
       const symlinkRe = new RegExp(
-        `\\${pathSep}\\.gsd\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees(?:\\${pathSep}|$)`,
+        `\\${pathSep}\\.sdd\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees(?:\\${pathSep}|$)`,
       );
       return symlinkRe.test(p);
     };
@@ -526,14 +526,14 @@ export async function bootstrapAutoSession(
     }
 
     // ── DB lifecycle ──
-    const gsdDbPath = join(s.basePath, ".gsd", "gsd.db");
-    const gsdDirPath = join(s.basePath, ".gsd");
+    const gsdDbPath = join(s.basePath, ".sdd", "sdd.db");
+    const gsdDirPath = join(s.basePath, ".sdd");
     if (existsSync(gsdDirPath) && !existsSync(gsdDbPath)) {
       const hasDecisions = existsSync(join(gsdDirPath, "DECISIONS.md"));
       const hasRequirements = existsSync(join(gsdDirPath, "REQUIREMENTS.md"));
       const hasMilestones = existsSync(join(gsdDirPath, "milestones"));
       try {
-        const { openDatabase: openDb } = await import("./gsd-db.js");
+        const { openDatabase: openDb } = await import("./sdd-db.js");
         openDb(gsdDbPath);
         if (hasDecisions || hasRequirements || hasMilestones) {
           const { migrateFromMarkdown } = await import("./md-importer.js");
@@ -541,30 +541,30 @@ export async function bootstrapAutoSession(
         }
       } catch (err) {
         process.stderr.write(
-          `gsd-migrate: auto-migration failed: ${(err as Error).message}\n`,
+          `sdd-migrate: auto-migration failed: ${(err as Error).message}\n`,
         );
       }
     }
     if (existsSync(gsdDbPath) && !isDbAvailable()) {
       try {
-        const { openDatabase: openDb } = await import("./gsd-db.js");
+        const { openDatabase: openDb } = await import("./sdd-db.js");
         openDb(gsdDbPath);
       } catch (err) {
         process.stderr.write(
-          `gsd-db: failed to open existing database: ${(err as Error).message}\n`,
+          `sdd-db: failed to open existing database: ${(err as Error).message}\n`,
         );
       }
     }
 
     // Gate: abort bootstrap if the DB file exists but the provider is
     // still unavailable after both open attempts above. Without this,
-    // auto-mode starts but every gsd_task_complete / gsd_slice_complete
+    // auto-mode starts but every sdd_task_complete / sdd_slice_complete
     // call returns "db_unavailable", triggering artifact-retry which
     // re-dispatches the same task — producing an infinite loop (#2419).
     if (existsSync(gsdDbPath) && !isDbAvailable()) {
       ctx.ui.notify(
         "SQLite database exists but failed to open. Auto-mode cannot proceed without a working database provider. " +
-          "Check for corrupt gsd.db or missing native SQLite bindings.",
+          "Check for corrupt sdd.db or missing native SQLite bindings.",
         "error",
       );
       return releaseLockAndReturn();
@@ -590,7 +590,7 @@ export async function bootstrapAutoSession(
       snapshotSkills();
     }
 
-    ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+    ctx.ui.setStatus("sdd-auto", s.stepMode ? "next" : "auto");
     ctx.ui.setFooter(hideFooter);
     const modeLabel = s.stepMode ? "Step-mode" : "Auto-mode";
     const pendingCount = (state.registry ?? []).filter(
@@ -657,7 +657,7 @@ export async function bootstrapAutoSession(
 
     // Pre-flight: validate milestone queue
     try {
-      const msDir = join(base, ".gsd", "milestones");
+      const msDir = join(base, ".sdd", "milestones");
       if (existsSync(msDir)) {
         const milestoneIds = readdirSync(msDir, { withFileTypes: true })
           .filter((d) => d.isDirectory() && /^M\d{3}/.test(d.name))

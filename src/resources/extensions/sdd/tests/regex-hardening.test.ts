@@ -98,23 +98,23 @@ async function main(): Promise<void> {
   }
 
   // (c) SLICE_BRANCH_RE — from worktree.ts
-  //     Pattern: /^gsd\/(?:([a-zA-Z0-9_-]+)\/)?(M\d+(?:-[a-z0-9]{6})?)\/(S\d+)$/
+  //     Pattern: /^sdd\/(?:([a-zA-Z0-9_-]+)\/)?(M\d+(?:-[a-z0-9]{6})?)\/(S\d+)$/
   {
     console.log('  (c) SLICE_BRANCH_RE');
 
     // Classic format — no worktree prefix
     {
-      const m = 'gsd/M001/S01'.match(SLICE_BRANCH_RE);
-      assertTrue(m !== null, 'matches gsd/M001/S01');
-      assertEq(m?.[1], undefined, 'no worktree prefix for gsd/M001/S01');
+      const m = 'sdd/M001/S01'.match(SLICE_BRANCH_RE);
+      assertTrue(m !== null, 'matches sdd/M001/S01');
+      assertEq(m?.[1], undefined, 'no worktree prefix for sdd/M001/S01');
       assertEq(m?.[2], 'M001', 'captures M001');
       assertEq(m?.[3], 'S01', 'captures S01');
     }
 
     // Unique format — no worktree prefix
     {
-      const m = 'gsd/M001-abc123/S01'.match(SLICE_BRANCH_RE);
-      assertTrue(m !== null, 'matches gsd/M001-abc123/S01');
+      const m = 'sdd/M001-abc123/S01'.match(SLICE_BRANCH_RE);
+      assertTrue(m !== null, 'matches sdd/M001-abc123/S01');
       assertEq(m?.[1], undefined, 'no worktree prefix for unique format');
       assertEq(m?.[2], 'M001-abc123', 'captures M001-abc123');
       assertEq(m?.[3], 'S01', 'captures S01');
@@ -122,8 +122,8 @@ async function main(): Promise<void> {
 
     // Classic format — with worktree prefix
     {
-      const m = 'gsd/worktree/M001/S01'.match(SLICE_BRANCH_RE);
-      assertTrue(m !== null, 'matches gsd/worktree/M001/S01');
+      const m = 'sdd/worktree/M001/S01'.match(SLICE_BRANCH_RE);
+      assertTrue(m !== null, 'matches sdd/worktree/M001/S01');
       assertEq(m?.[1], 'worktree', 'captures worktree prefix');
       assertEq(m?.[2], 'M001', 'captures M001 with worktree');
       assertEq(m?.[3], 'S01', 'captures S01 with worktree');
@@ -131,17 +131,17 @@ async function main(): Promise<void> {
 
     // Unique format — with worktree prefix
     {
-      const m = 'gsd/worktree/M001-abc123/S01'.match(SLICE_BRANCH_RE);
-      assertTrue(m !== null, 'matches gsd/worktree/M001-abc123/S01');
+      const m = 'sdd/worktree/M001-abc123/S01'.match(SLICE_BRANCH_RE);
+      assertTrue(m !== null, 'matches sdd/worktree/M001-abc123/S01');
       assertEq(m?.[1], 'worktree', 'captures worktree prefix with unique format');
       assertEq(m?.[2], 'M001-abc123', 'captures M001-abc123 with worktree');
       assertEq(m?.[3], 'S01', 'captures S01 with worktree and unique format');
     }
 
     // Rejects
-    assertTrue(!SLICE_BRANCH_RE.test('gsd/S01'), 'rejects gsd/S01 (no milestone)');
+    assertTrue(!SLICE_BRANCH_RE.test('sdd/S01'), 'rejects sdd/S01 (no milestone)');
     assertTrue(!SLICE_BRANCH_RE.test('main'), 'rejects main');
-    assertTrue(!SLICE_BRANCH_RE.test('gsd/M001'), 'rejects gsd/M001 (no slice)');
+    assertTrue(!SLICE_BRANCH_RE.test('sdd/M001'), 'rejects sdd/M001 (no slice)');
     assertTrue(!SLICE_BRANCH_RE.test('feature/M001/S01'), 'rejects feature/ prefix');
   }
 

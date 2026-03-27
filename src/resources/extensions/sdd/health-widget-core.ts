@@ -1,5 +1,5 @@
 /**
- * Pure GSD health widget logic.
+ * Pure SDD health widget logic.
  *
  * Separates project-state detection and line rendering from the widget's
  * runtime integrations so the regressions can be tested directly.
@@ -25,7 +25,7 @@ export function detectHealthWidgetProjectState(basePath: string): HealthWidgetPr
   if (!existsSync(gsdRoot(basePath))) return "none";
 
   const { state } = detectProjectState(basePath);
-  return state === "v2-gsd" ? "active" : "initialized";
+  return state === "v2-sdd" ? "active" : "initialized";
 }
 
 function formatCost(n: number): string {
@@ -38,11 +38,11 @@ function formatCost(n: number): string {
  */
 export function buildHealthLines(data: HealthWidgetData): string[] {
   if (data.projectState === "none") {
-    return ["  GSD  No project loaded — run /gsd to start"];
+    return ["  SDD  No project loaded — run /sdd to start"];
   }
 
   if (data.projectState === "initialized") {
-    return ["  GSD  Project initialized — run /gsd to continue setup"];
+    return ["  SDD  Project initialized — run /sdd to continue setup"];
   }
 
   const parts: string[] = [];

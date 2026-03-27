@@ -13,7 +13,7 @@ const onboarding = await import("../web/onboarding-service.ts");
 const bootRoute = await import("../../web/app/api/boot/route.ts");
 const onboardingRoute = await import("../../web/app/api/onboarding/route.ts");
 const commandRoute = await import("../../web/app/api/session/command/route.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@sdd/pi-coding-agent");
 
 const ONBOARDING_ENV_KEYS = [
   "GITHUB_TOKEN",
@@ -116,10 +116,10 @@ function projectRequest(projectCwd: string, url: string, init?: RequestInit): Re
 }
 
 function makeWorkspaceFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-onboarding-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-web-onboarding-"));
   const projectCwd = join(root, "project");
   const sessionsDir = join(root, "sessions");
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001");
+  const milestoneDir = join(projectCwd, ".sdd", "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S02");
   const tasksDir = join(sliceDir, "tasks");
 
@@ -292,9 +292,9 @@ function configureBridgeFixture(fixture: { projectCwd: string; sessionsDir: stri
 
   bridge.configureBridgeServiceForTests({
     env: {
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      SDD_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),

@@ -1,5 +1,5 @@
 /**
- * GSD Worktree Command — /worktree
+ * SDD Worktree Command — /worktree
  *
  * Create, list, merge, and remove git worktrees under .sdd/worktrees/.
  *
@@ -10,7 +10,7 @@
  *   /worktree remove <name> — remove a worktree and its branch
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 import { loadPrompt } from "./prompt-loader.js";
 import { autoCommitCurrentBranch, getMainBranch, resolveGitHeadPath, nudgeGitBranchCache } from "./worktree.js";
 import { runWorktreePostCreateHook } from "./auto-worktree.js";
@@ -23,7 +23,7 @@ import {
   mergeWorktreeToMain,
   diffWorktreeAll,
   diffWorktreeNumstat,
-  getWorktreeGSDDiff,
+  getWorktreeSDDDiff,
   getWorktreeCodeDiff,
   getWorktreeLog,
   worktreeBranchName,
@@ -50,7 +50,7 @@ export function getWorktreeOriginalCwd(): string | null {
 export function getActiveWorktreeName(): string | null {
   if (!originalCwd) return null;
   const cwd = process.cwd();
-  const wtDir = join(originalCwd, ".gsd", "worktrees");
+  const wtDir = join(originalCwd, ".sdd", "worktrees");
   if (!cwd.startsWith(wtDir)) return null;
   const rel = cwd.slice(wtDir.length + 1);
   const name = rel.split("/")[0] ?? rel.split("\\")[0];
@@ -243,7 +243,7 @@ export function registerWorktreeCommand(pi: ExtensionAPI): void {
   // but process.cwd() is still inside the worktree. Detect this and recover.
   if (!originalCwd) {
     const cwd = process.cwd();
-    const marker = `${sep}.gsd${sep}worktrees${sep}`;
+    const marker = `${sep}.sdd${sep}worktrees${sep}`;
     const markerIdx = cwd.indexOf(marker);
     if (markerIdx !== -1) {
       originalCwd = cwd.slice(0, markerIdx);
@@ -272,7 +272,7 @@ export function registerWorktreeCommand(pi: ExtensionAPI): void {
 // ─── Handlers ──────────────────────────────────────────────────────────────
 
 /**
- * Check if the worktree has existing GSD milestones that would
+ * Check if the worktree has existing SDD milestones that would
  * cause auto-mode to continue previous work instead of starting fresh.
  */
 function hasExistingMilestones(wtPath: string): boolean {
@@ -288,10 +288,10 @@ function hasExistingMilestones(wtPath: string): boolean {
 }
 
 /**
- * Clear GSD planning artifacts so auto-mode starts fresh with the discuss flow.
+ * Clear SDD planning artifacts so auto-mode starts fresh with the discuss flow.
  * Keeps the .sdd/ directory structure intact but removes milestones and root planning files.
  */
-function clearGSDPlans(wtPath: string): void {
+function clearSDDPlans(wtPath: string): void {
   const mDir = milestonesDir(wtPath);
   if (existsSync(mDir)) {
     rmSync(mDir, { recursive: true, force: true });
@@ -344,16 +344,16 @@ async function handleCreate(
       const keepExisting = await showConfirm(ctx, {
         title: "Worktree Setup",
         message: [
-          `This worktree inherited existing GSD milestones from the main branch.`,
+          `This worktree inherited existing SDD milestones from the main branch.`,
           ``,
           `  Continue — keep milestones and pick up where main left off`,
-          `  Start fresh — clear milestones so /gsd auto starts a new project`,
+          `  Start fresh — clear milestones so /sdd auto starts a new project`,
         ].join("\n"),
         confirmLabel: "Continue",
         declineLabel: "Start fresh",
       });
       if (!keepExisting) {
-        clearGSDPlans(info.path);
+        clearSDDPlans(info.path);
         clearedPlans = true;
       }
     }
@@ -362,7 +362,7 @@ async function handleCreate(
       ? `  ${CLR.muted("Auto-committed on previous branch before switching.")}`
       : "";
     const freshNote = clearedPlans
-      ? `  ${CLR.ok("✓")} Cleared milestones — ${CLR.hint("/gsd auto")} will start fresh.`
+      ? `  ${CLR.ok("✓")} Cleared milestones — ${CLR.hint("/sdd auto")} will start fresh.`
       : "";
     ctx.ui.notify(
       [
@@ -508,7 +508,7 @@ async function handleList(
     const worktrees = listWorktrees(mainBase);
 
     if (worktrees.length === 0) {
-      ctx.ui.notify("No GSD worktrees found. Create one with /worktree <name>.", "info");
+      ctx.ui.notify("No SDD worktrees found. Create one with /worktree <name>.", "info");
       return;
     }
 
@@ -521,7 +521,7 @@ async function handleList(
     } catch { /* health check failed — show list without status */ }
 
     const cwd = process.cwd();
-    const lines = [CLR.header("GSD Worktrees"), ""];
+    const lines = [CLR.header("SDD Worktrees"), ""];
     for (const wt of worktrees) {
       const isCurrent = cwd === wt.path
         || (existsSync(cwd) && existsSync(wt.path)
@@ -585,7 +585,7 @@ async function handleMerge(
     // Gather merge context — full repo diff, not just .sdd/
     const diffSummary = diffWorktreeAll(basePath, name);
     const numstat = diffWorktreeNumstat(basePath, name);
-    const gsdDiff = getWorktreeGSDDiff(basePath, name);
+    const gsdDiff = getWorktreeSDDDiff(basePath, name);
     const codeDiff = getWorktreeCodeDiff(basePath, name);
     const commitLog = getWorktreeLog(basePath, name);
 
@@ -604,14 +604,14 @@ async function handleMerge(
     let totalRemoved = 0;
     for (const s of numstat) { totalAdded += s.added; totalRemoved += s.removed; }
 
-    // Split files into code vs GSD for the preview
-    const isGSD = (f: string) => f.startsWith(".sdd/");
-    const codeChanges = diffSummary.added.filter(f => !isGSD(f)).length
-      + diffSummary.modified.filter(f => !isGSD(f)).length
-      + diffSummary.removed.filter(f => !isGSD(f)).length;
-    const gsdChanges = diffSummary.added.filter(isGSD).length
-      + diffSummary.modified.filter(isGSD).length
-      + diffSummary.removed.filter(isGSD).length;
+    // Split files into code vs SDD for the preview
+    const isSDD = (f: string) => f.startsWith(".sdd/");
+    const codeChanges = diffSummary.added.filter(f => !isSDD(f)).length
+      + diffSummary.modified.filter(f => !isSDD(f)).length
+      + diffSummary.removed.filter(f => !isSDD(f)).length;
+    const gsdChanges = diffSummary.added.filter(isSDD).length
+      + diffSummary.modified.filter(isSDD).length
+      + diffSummary.removed.filter(isSDD).length;
 
     // Format a file line with +/- stats
     const formatFileLine = (prefix: string, file: string): string => {
@@ -624,7 +624,7 @@ async function handleMerge(
     const previewLines = [
       `Merge ${CLR.name(name)} → ${CLR.branch(mainBranch)}`,
       "",
-      `  ${totalChanges} file${totalChanges === 1 ? "" : "s"} changed, ${CLR.ok(`+${totalAdded}`)} ${RED}-${totalRemoved}${RESET} lines ${CLR.muted(`(${codeChanges} code, ${gsdChanges} GSD)`)}`,
+      `  ${totalChanges} file${totalChanges === 1 ? "" : "s"} changed, ${CLR.ok(`+${totalAdded}`)} ${RED}-${totalRemoved}${RESET} lines ${CLR.muted(`(${codeChanges} code, ${gsdChanges} SDD)`)}`,
     ];
 
     const appendFileList = (label: string, files: string[], prefix: string, limit = 10) => {
@@ -661,14 +661,14 @@ async function handleMerge(
     // --- Deterministic merge path (preferred) ---
     // Try a direct squash-merge first. Only fall back to LLM on conflict.
     const commitType = inferCommitType(name);
-    const commitMessage = `${commitType}: merge worktree ${name}\n\nGSD-Worktree: ${name}`;
+    const commitMessage = `${commitType}: merge worktree ${name}\n\nSDD-Worktree: ${name}`;
 
     // Reconcile worktree DB into main DB before squash merge
-    const wtDbPath = join(worktreePath(basePath, name), ".gsd", "gsd.db");
-    const mainDbPath = join(basePath, ".gsd", "gsd.db");
+    const wtDbPath = join(worktreePath(basePath, name), ".sdd", "sdd.db");
+    const mainDbPath = join(basePath, ".sdd", "sdd.db");
     if (existsSync(wtDbPath) && existsSync(mainDbPath)) {
       try {
-        const { reconcileWorktreeDb } = await import("./gsd-db.js");
+        const { reconcileWorktreeDb } = await import("./sdd-db.js");
         reconcileWorktreeDb(mainDbPath, wtDbPath);
       } catch { /* non-fatal */ }
     }
@@ -724,14 +724,14 @@ async function handleMerge(
       addedFiles: formatFiles(diffSummary.added),
       modifiedFiles: formatFiles(diffSummary.modified),
       removedFiles: formatFiles(diffSummary.removed),
-      gsdDiff: gsdDiff || "(no GSD artifact changes)",
+      gsdDiff: gsdDiff || "(no SDD artifact changes)",
       codeDiff: codeDiff || "(no code changes)",
     });
 
     // Dispatch to the LLM
     pi.sendMessage(
       {
-        customType: "gsd-worktree-merge",
+        customType: "sdd-worktree-merge",
         content: prompt,
         display: false,
       },
@@ -739,7 +739,7 @@ async function handleMerge(
     );
 
     ctx.ui.notify(
-      `${CLR.ok("✓")} Merge helper started for ${CLR.name(name)} ${CLR.muted(`(${codeChanges} code + ${gsdChanges} GSD artifact change${totalChanges === 1 ? "" : "s"})`)}`,
+      `${CLR.ok("✓")} Merge helper started for ${CLR.name(name)} ${CLR.muted(`(${codeChanges} code + ${gsdChanges} SDD artifact change${totalChanges === 1 ? "" : "s"})`)}`,
       "info",
     );
   } catch (error) {

@@ -1,7 +1,7 @@
 /**
  * Structured Data Formatter — compact notation for prompt injection.
  *
- * Converts GSD data structures into a token-efficient format that removes
+ * Converts SDD data structures into a token-efficient format that removes
  * markdown table overhead, redundant labels, and formatting while remaining
  * perfectly readable by LLMs.
  *
@@ -14,7 +14,7 @@
  */
 
 // ---------------------------------------------------------------------------
-// Types (inline — no imports from other GSD modules)
+// Types (inline — no imports from other SDD modules)
 // ---------------------------------------------------------------------------
 
 interface DecisionInput {

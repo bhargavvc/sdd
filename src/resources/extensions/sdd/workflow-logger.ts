@@ -1,4 +1,4 @@
-// GSD Extension — Workflow Logger
+// SDD Extension — Workflow Logger
 // Centralized warning/error accumulator for the workflow engine pipeline.
 // Captures structured entries that the auto-loop can drain after each unit
 // to surface root causes for stuck loops, silent degradation, and blocked writes.
@@ -177,7 +177,7 @@ export function formatForNotification(entries: readonly LogEntry[]): string {
 export function readAuditLog(basePath?: string): LogEntry[] {
   const bp = basePath ?? _auditBasePath;
   if (!bp) return [];
-  const auditPath = join(bp, ".gsd", "audit-log.jsonl");
+  const auditPath = join(bp, ".sdd", "audit-log.jsonl");
   if (!existsSync(auditPath)) return [];
   try {
     const content = readFileSync(auditPath, "utf-8");
@@ -220,7 +220,7 @@ function _push(
   // Always forward to stderr so terminal watchers see it (see module header for policy)
   const prefix = severity === "error" ? "ERROR" : "WARN";
   const ctxStr = context ? ` ${JSON.stringify(context)}` : "";
-  process.stderr.write(`[gsd:${component}] ${prefix}: ${message}${ctxStr}\n`);
+  process.stderr.write(`[sdd:${component}] ${prefix}: ${message}${ctxStr}\n`);
 
   // Buffer for auto-loop to drain
   _buffer.push(entry);
@@ -231,12 +231,12 @@ function _push(
   // Persist to .sdd/audit-log.jsonl so entries survive context resets
   if (_auditBasePath) {
     try {
-      const auditDir = join(_auditBasePath, ".gsd");
+      const auditDir = join(_auditBasePath, ".sdd");
       mkdirSync(auditDir, { recursive: true });
       appendFileSync(join(auditDir, "audit-log.jsonl"), JSON.stringify(entry) + "\n", "utf-8");
     } catch (auditErr) {
       // Best-effort — never let audit write failures bubble up
-      process.stderr.write(`[gsd:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
+      process.stderr.write(`[sdd:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
     }
   }
 }

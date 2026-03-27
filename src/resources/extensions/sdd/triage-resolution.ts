@@ -1,5 +1,5 @@
 /**
- * GSD Triage Resolution — Execute triage classifications
+ * SDD Triage Resolution — Execute triage classifications
  *
  * Provides resolution executors for each capture classification type:
  *
@@ -89,7 +89,7 @@ export function executeReplan(
 ): boolean {
   try {
     const triggerPath = join(
-      basePath, ".gsd", "milestones", mid, "slices", sid, `${sid}-REPLAN-TRIGGER.md`,
+      basePath, ".sdd", "milestones", mid, "slices", sid, `${sid}-REPLAN-TRIGGER.md`,
     );
     const ts = new Date().toISOString();
     const content = [
@@ -109,7 +109,7 @@ export function executeReplan(
     // Also write replan_triggered_at column for DB-backed detection
     try {
       const req = createRequire(import.meta.url);
-      const { isDbAvailable, _getAdapter } = req("./gsd-db.js");
+      const { isDbAvailable, _getAdapter } = req("./sdd-db.js");
       if (isDbAvailable()) {
         const adapter = _getAdapter();
         if (adapter) {
@@ -262,7 +262,7 @@ export function loadReplanCaptures(basePath: string): CaptureEntry[] {
  */
 export function buildQuickTaskPrompt(capture: CaptureEntry): string {
   return [
-    `You are executing a quick one-off task captured during a GSD auto-mode session.`,
+    `You are executing a quick one-off task captured during a SDD auto-mode session.`,
     ``,
     `## Quick Task`,
     ``,

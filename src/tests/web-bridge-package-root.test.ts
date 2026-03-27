@@ -1,7 +1,7 @@
 /**
  * Regression tests for the default package root fallback in bridge-service.
  *
- * Issue: gsd-build/gsd-2#1881
+ * Issue: sdd-build/sdd-2#1881
  * The standalone Next.js bundle bakes import.meta.url at build time with the
  * CI runner's absolute path.  On Windows, fileURLToPath() rejects the Unix
  * file:// URL at module load time, 500-ing all API routes.
@@ -16,22 +16,22 @@ import { resolve } from "node:path";
 
 const bridge = await import("../web/bridge-service.ts");
 
-test("resolveBridgeRuntimeConfig uses GSD_WEB_PACKAGE_ROOT when set", () => {
+test("resolveBridgeRuntimeConfig uses SDD_WEB_PACKAGE_ROOT when set", () => {
   const env = {
-    GSD_WEB_PACKAGE_ROOT: "/custom/package/root",
-    GSD_WEB_PROJECT_CWD: "/some/project",
+    SDD_WEB_PACKAGE_ROOT: "/custom/package/root",
+    SDD_WEB_PROJECT_CWD: "/some/project",
   } as unknown as NodeJS.ProcessEnv;
 
   const config = bridge.resolveBridgeRuntimeConfig(env);
   assert.equal(config.packageRoot, "/custom/package/root");
 });
 
-test("resolveBridgeRuntimeConfig falls back to lazy default when GSD_WEB_PACKAGE_ROOT is absent", () => {
+test("resolveBridgeRuntimeConfig falls back to lazy default when SDD_WEB_PACKAGE_ROOT is absent", () => {
   // Reset the memoized value so we exercise the lazy computation path.
   bridge.resetDefaultPackageRootForTests();
 
   const env = {
-    GSD_WEB_PROJECT_CWD: "/some/project",
+    SDD_WEB_PROJECT_CWD: "/some/project",
   } as unknown as NodeJS.ProcessEnv;
 
   // Should not throw — the lazy getter catches cross-platform failures.
@@ -44,7 +44,7 @@ test("lazy default package root is an absolute path", () => {
   bridge.resetDefaultPackageRootForTests();
 
   const env = {
-    GSD_WEB_PROJECT_CWD: "/some/project",
+    SDD_WEB_PROJECT_CWD: "/some/project",
   } as unknown as NodeJS.ProcessEnv;
 
   const config = bridge.resolveBridgeRuntimeConfig(env);

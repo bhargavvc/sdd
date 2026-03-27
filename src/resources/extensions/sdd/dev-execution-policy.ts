@@ -14,7 +14,7 @@ export class DevExecutionPolicy implements ExecutionPolicy {
     _basePath: string,
     _milestoneId: string,
   ): Promise<void> {
-    // no-op — workspace preparation handled by existing GSD logic
+    // no-op — workspace preparation handled by existing SDD logic
   }
 
   async selectModel(

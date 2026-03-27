@@ -1,11 +1,11 @@
 [package]
-name = "gsd-ast"
+name = "sdd-ast"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "AST-aware structural search and rewrite via ast-grep for GSD native engine"
+description = "AST-aware structural search and rewrite via ast-grep for SDD native engine"
 
 [dependencies]
 ast-grep-core = { version = "0.39", default-features = false, features = ["tree-sitter"] }

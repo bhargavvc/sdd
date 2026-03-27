@@ -4,16 +4,16 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync } from "node:
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { runGSDDoctor } from "../doctor.js";
+import { runSDDDoctor } from "../doctor.js";
 import { formatDoctorReportJson } from "../doctor-format.js";
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function makeBase(): { base: string; gsd: string; mDir: string } {
-  const base = mkdtempSync(join(tmpdir(), "gsd-doctor-enh-"));
-  const gsd = join(base, ".gsd");
-  const mDir = join(gsd, "milestones", "M001");
+function makeBase(): { base: string; sdd: string; mDir: string } {
+  const base = mkdtempSync(join(tmpdir(), "sdd-doctor-enh-"));
+  const sdd = join(base, ".sdd");
+  const mDir = join(sdd, "milestones", "M001");
   mkdirSync(join(mDir, "slices"), { recursive: true });
-  return { base, gsd, mDir };
+  return { base, sdd, mDir };
 }
 
 function writeRoadmap(mDir: string, content: string): void {
@@ -36,7 +36,7 @@ describe('doctor-enhancements', async () => {
     writeSlice(mDir, "S01", "# S01: Slice A\n\n**Goal:** A\n**Demo:** A\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
     writeSlice(mDir, "S02", "# S02: Slice B\n\n**Goal:** B\n**Demo:** B\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "circular_slice_dependency"),
       "detects circular dependency S01 → S02 → S01",
@@ -50,7 +50,7 @@ describe('doctor-enhancements', async () => {
     writeRoadmap(mDir, `# M001: Dup Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: First** `est:10m`\n  Task one.\n- [ ] **T01: Duplicate** `est:10m`\n  Task dup.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "duplicate_task_id"),
       "detects duplicate task ID T01",
@@ -66,7 +66,7 @@ describe('doctor-enhancements', async () => {
     // Create an extra slice directory not in roadmap
     mkdirSync(join(mDir, "slices", "S99"), { recursive: true });
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "orphaned_slice_directory" && i.message.includes("S99")),
       "detects orphaned slice directory S99",
@@ -84,7 +84,7 @@ describe('doctor-enhancements', async () => {
     // T99 summary (NOT in plan)
     writeFileSync(join(sDir, "tasks", "T99-SUMMARY.md"), "---\nstatus: done\n---\n# T99\nExtra.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "task_file_not_in_plan" && i.message.includes("T99")),
       "detects task summary T99 not in plan",
@@ -101,7 +101,7 @@ describe('doctor-enhancements', async () => {
     // Add a REPLAN file even though all tasks are done
     writeFileSync(join(sDir, "S01-REPLAN.md"), "# S01 REPLAN\nSomething changed.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "stale_replan_file"),
       "detects stale REPLAN when all tasks are done",
@@ -111,13 +111,13 @@ describe('doctor-enhancements', async () => {
 
   // ── 6. Metrics ledger corrupt ───────────────────────────────────────────────
   test('metrics ledger corrupt', async () => {
-    const { base, gsd, mDir } = makeBase();
+    const { base, sdd, mDir } = makeBase();
     writeRoadmap(mDir, `# M001: Metrics Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
     // Write invalid metrics.json
-    writeFileSync(join(gsd, "metrics.json"), '{"version":2,"data":[]}');
+    writeFileSync(join(sdd, "metrics.json"), '{"version":2,"data":[]}');
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "metrics_ledger_corrupt"),
       "detects corrupt metrics ledger (version != 1)",
@@ -134,7 +134,7 @@ describe('doctor-enhancements', async () => {
     const bigContent = "# Big File\n" + "x".repeat(101 * 1024);
     writeFileSync(join(sDir, "BIGFILE.md"), bigContent);
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "large_planning_file"),
       "detects large planning file over 100KB",
@@ -154,7 +154,7 @@ describe('doctor-enhancements', async () => {
       `---\nstatus: done\ncompleted_at: ${futureDate}\n---\n# T01\nDone.\n`,
     );
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(
       result.issues.some(i => i.code === "future_timestamp"),
       "detects future completed_at timestamp",
@@ -168,7 +168,7 @@ describe('doctor-enhancements', async () => {
     writeRoadmap(mDir, `# M001: JSON Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     const json = formatDoctorReportJson(result);
 
     let parsed: unknown;
@@ -194,7 +194,7 @@ describe('doctor-enhancements', async () => {
     writeRoadmap(mDir, `# M001: Dry Run Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
-    const result = await runGSDDoctor(base, { fix: true, dryRun: true });
+    const result = await runSDDDoctor(base, { fix: true, dryRun: true });
     // dry-run with fix:true still runs the doctor; shouldFix() returns false
     // so no reconciliation fixes are applied through that path
     assert.ok(result.issues !== undefined, "dry-run still produces issue list");
@@ -209,7 +209,7 @@ describe('doctor-enhancements', async () => {
     writeRoadmap(mDir, `# M001: Timing Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
-    const result = await runGSDDoctor(base, { fix: false });
+    const result = await runSDDDoctor(base, { fix: false });
     assert.ok(result.timing !== undefined, "report includes timing");
     assert.ok(typeof result.timing?.git === "number", "timing.git is a number");
     assert.ok(typeof result.timing?.runtime === "number", "timing.runtime is a number");
@@ -221,13 +221,13 @@ describe('doctor-enhancements', async () => {
 
   // ── 12. Doctor history ───────────────────────────────────────────────────────
   test('doctor history', async () => {
-    const { base, gsd, mDir } = makeBase();
+    const { base, sdd, mDir } = makeBase();
     writeRoadmap(mDir, `# M001: History Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
-    await runGSDDoctor(base, { fix: false });
+    await runSDDDoctor(base, { fix: false });
 
-    const historyPath = join(gsd, "doctor-history.jsonl");
+    const historyPath = join(sdd, "doctor-history.jsonl");
     assert.ok(existsSync(historyPath), "doctor-history.jsonl is created after run");
 
     const { readDoctorHistory } = await import("../doctor.js");

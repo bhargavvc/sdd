@@ -1,4 +1,4 @@
-You are executing a GSD quick task — a lightweight, focused unit of work outside the milestone/slice ceremony.
+You are executing a SDD quick task — a lightweight, focused unit of work outside the milestone/slice ceremony.
 
 ## QUICK TASK: {{description}}
 
@@ -8,7 +8,7 @@ You are executing a GSD quick task — a lightweight, focused unit of work outsi
 ## Instructions
 
 1. Read the task description above carefully. This is a focused, self-contained task.
-2. If a `GSD Skill Preferences` block is present in system context, follow it.
+2. If a `SDD Skill Preferences` block is present in system context, follow it.
 3. Read relevant code before modifying. Understand existing patterns.
 4. Execute the task completely:
    - Build the real thing, not stubs or placeholders.
@@ -23,7 +23,7 @@ You are executing a GSD quick task — a lightweight, focused unit of work outsi
    - Commit logical units separately if the task involves distinct changes.
    - Quick tasks run outside the auto-mode lifecycle — there is no system auto-commit, so commit directly here.
 7. Write a brief summary to `{{summaryPath}}`:
-   - Quick tasks operate outside the milestone/slice/task DB structure, so `gsd_summary_save` (which requires a `milestone_id`) cannot be used here. Write the file directly.
+   - Quick tasks operate outside the milestone/slice/task DB structure, so `sdd_summary_save` (which requires a `milestone_id`) cannot be used here. Write the file directly.
 
 ```markdown
 # Quick Task: {{description}}

@@ -91,7 +91,7 @@ function persistSwitchRoot(
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const tempRoot = mkdtempSync(join(tmpdir(), "gsd-switch-root-"));
+const tempRoot = mkdtempSync(join(tmpdir(), "sdd-switch-root-"));
 
 const rootA = join(tempRoot, "root-a");
 mkdirSync(rootA);

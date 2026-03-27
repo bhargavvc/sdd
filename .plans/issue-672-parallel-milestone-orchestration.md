@@ -1,6 +1,6 @@
 # Issue #672: Parallel Milestone Orchestration
 
-**Issue:** https://github.com/gsd-build/gsd-2/issues/672
+**Issue:** https://github.com/sdd-build/sdd-2/issues/672
 **Contributor:** @deseltrus (7 merged PRs, proven contributor)
 **Status:** WIP — foundation modules built, orchestrator core in progress
 **Default:** `parallel.enabled: false` — opt-in, zero impact to existing users

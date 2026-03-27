@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import {
   getOrchestratorState,
@@ -16,7 +16,7 @@ import { formatMergeResults, mergeAllCompleted, mergeCompletedMilestone } from "
 import { loadEffectiveSDDPreferences, resolveParallelConfig } from "../../preferences.js";
 import { projectRoot } from "../context.js";
 function emitParallelMessage(pi: ExtensionAPI, content: string): void {
-  pi.sendMessage({ customType: "gsd-parallel", content, display: true });
+  pi.sendMessage({ customType: "sdd-parallel", content, display: true });
 }
 
 export async function handleParallelCommand(trimmed: string, _ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<boolean> {
@@ -111,7 +111,7 @@ export async function handleParallelCommand(trimmed: string, _ctx: ExtensionComm
     return true;
   }
 
-  emitParallelMessage(pi, `Unknown parallel subcommand "${subcommand}". Usage: /gsd parallel [start|status|stop|pause|resume|merge]`);
+  emitParallelMessage(pi, `Unknown parallel subcommand "${subcommand}". Usage: /sdd parallel [start|status|stop|pause|resume|merge]`);
   return true;
 }
 

@@ -2,7 +2,7 @@ import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 import type { DoctorIssue } from "./doctor-types.js";
-import { isDbAvailable, _getAdapter } from "./gsd-db.js";
+import { isDbAvailable, _getAdapter } from "./sdd-db.js";
 import { resolveMilestoneFile } from "./paths.js";
 import { deriveState } from "./state.js";
 import { readEvents } from "./workflow-events.js";
@@ -147,7 +147,7 @@ export async function checkEngineHealth(
   // relative to the event log and re-render them.
   try {
     if (isDbAvailable()) {
-      const eventLogPath = join(basePath, ".gsd", "event-log.jsonl");
+      const eventLogPath = join(basePath, ".sdd", "event-log.jsonl");
       const events = readEvents(eventLogPath);
       if (events.length > 0) {
         const lastEventTs = new Date(events[events.length - 1]!.ts).getTime();

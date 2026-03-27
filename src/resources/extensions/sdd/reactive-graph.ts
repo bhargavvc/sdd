@@ -11,7 +11,7 @@
 
 import type { TaskIO, DerivedTaskNode, ReactiveExecutionState } from "./types.js";
 import { loadFile, parseTaskPlanIO } from "./files.js";
-import { isDbAvailable, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getSliceTasks } from "./sdd-db.js";
 import { parsePlan } from "./parsers-legacy.js";
 import { resolveTasksDir, resolveTaskFiles } from "./paths.js";
 import { join } from "node:path";
@@ -269,7 +269,7 @@ export async function loadSliceTaskIO(
 // ─── State Persistence ────────────────────────────────────────────────────
 
 function reactiveStatePath(basePath: string, mid: string, sid: string): string {
-  return join(basePath, ".gsd", "runtime", `${mid}-${sid}-reactive.json`);
+  return join(basePath, ".sdd", "runtime", `${mid}-${sid}-reactive.json`);
 }
 
 function isReactiveState(data: unknown): data is ReactiveExecutionState {

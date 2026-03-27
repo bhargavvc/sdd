@@ -37,7 +37,7 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
   const messageArgs = options.mode === "interactive" ? options.messages ?? [] : [];
 
   const sourceEntry = join(options.packageRoot, "src", "loader.ts");
-  const resolveTsLoader = join(options.packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  const resolveTsLoader = join(options.packageRoot, "src", "resources", "extensions", "sdd", "tests", "resolve-ts.mjs");
   const builtEntry = join(options.packageRoot, "dist", "loader.js");
 
   const sourceCliEntry =
@@ -72,5 +72,5 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
     if (builtCliEntry) return builtCliEntry;
   }
 
-  throw new Error(`GSD CLI entry not found; checked=${sourceEntry},${builtEntry}`);
+  throw new Error(`SDD CLI entry not found; checked=${sourceEntry},${builtEntry}`);
 }

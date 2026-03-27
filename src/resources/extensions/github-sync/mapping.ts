@@ -14,7 +14,7 @@ import type { SyncMapping, MilestoneSyncRecord, SliceSyncRecord, SyncEntityRecor
 const MAPPING_FILENAME = "github-sync.json";
 
 function mappingPath(basePath: string): string {
-  return join(basePath, ".gsd", MAPPING_FILENAME);
+  return join(basePath, ".sdd", MAPPING_FILENAME);
 }
 
 // ─── Load / Save ────────────────────────────────────────────────────────────

@@ -20,20 +20,20 @@ import { validatePreferences } from "./preferences-validation.js";
 import { loadEffectiveSDDPreferences } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-skills.js keep working
-export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
+export type { SDDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
 
 /**
  * Known skill directories, in priority order.
  * Global skills (~/.agents/skills/) take precedence over project skills.
- * Legacy ~/.gsd/agent/skills/ is included as a fallback for pre-migration installs.
+ * Legacy ~/.sdd/agent/skills/ is included as a fallback for pre-migration installs.
  */
 export function getSkillSearchDirs(cwd: string): Array<{ dir: string; method: SkillResolution["method"] }> {
   const dirs: Array<{ dir: string; method: SkillResolution["method"] }> = [
     { dir: join(homedir(), ".agents", "skills"), method: "user-skill" },
     { dir: join(cwd, ".agents", "skills"), method: "project-skill" },
   ];
-  // Legacy fallback — read skills from old GSD directory only if migration hasn't completed
-  const legacyDir = join(homedir(), ".gsd", "agent", "skills");
+  // Legacy fallback — read skills from old SDD directory only if migration hasn't completed
+  const legacyDir = join(homedir(), ".sdd", "agent", "skills");
   if (existsSync(legacyDir) && !existsSync(join(legacyDir, ".migrated-to-agents"))) {
     dirs.push({ dir: legacyDir, method: "user-skill" });
   }

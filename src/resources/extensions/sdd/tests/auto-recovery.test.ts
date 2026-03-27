@@ -22,13 +22,13 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { renderPlanFromDb } from "../markdown-renderer.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-${randomUUID()}`);
+  const base = join(tmpdir(), `sdd-test-${randomUUID()}`);
   // Create .sdd/milestones/M001/slices/S01/tasks/ structure
-  mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
   return base;
 }
 
@@ -149,7 +149,7 @@ test("buildLoopRemediationSteps returns steps for execute-task", (t) => {
   const steps = buildLoopRemediationSteps("execute-task", "M001/S01/T01", base);
   assert.ok(steps);
   assert.ok(steps!.includes("T01"));
-  assert.ok(steps!.includes("gsd undo-task"));
+  assert.ok(steps!.includes("sdd undo-task"));
 });
 
 test("buildLoopRemediationSteps returns steps for plan-slice", (t) => {
@@ -159,7 +159,7 @@ test("buildLoopRemediationSteps returns steps for plan-slice", (t) => {
   const steps = buildLoopRemediationSteps("plan-slice", "M001/S01", base);
   assert.ok(steps);
   assert.ok(steps!.includes("PLAN"));
-  assert.ok(steps!.includes("gsd recover"));
+  assert.ok(steps!.includes("sdd recover"));
 });
 
 test("buildLoopRemediationSteps returns steps for complete-slice", (t) => {
@@ -169,7 +169,7 @@ test("buildLoopRemediationSteps returns steps for complete-slice", (t) => {
   const steps = buildLoopRemediationSteps("complete-slice", "M001/S01", base);
   assert.ok(steps);
   assert.ok(steps!.includes("S01"));
-  assert.ok(steps!.includes("gsd reset-slice"));
+  assert.ok(steps!.includes("sdd reset-slice"));
 });
 
 test("buildLoopRemediationSteps returns null for unknown type", (t) => {
@@ -214,11 +214,11 @@ test("verifyExpectedArtifact detects roadmap [x] change despite parse cache", (t
   assert.equal(sliceBefore!.done, false);
 
   // Now write the post-edit roadmap to disk and create required artifacts
-  const roadmapPath = join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md");
+  const roadmapPath = join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md");
   writeFileSync(roadmapPath, roadmapAfter);
-  const summaryPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
+  const summaryPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-SUMMARY.md");
   writeFileSync(summaryPath, "# Summary\nDone.");
-  const uatPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-UAT.md");
+  const uatPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-UAT.md");
   writeFileSync(uatPath, "# UAT\nPassed.");
 
   // verifyExpectedArtifact should see the [x] despite the parse cache
@@ -233,7 +233,7 @@ test("verifyExpectedArtifact rejects plan-slice with empty scaffold", (t) => {
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   mkdirSync(sliceDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), "# S01: Test Slice\n\n## Tasks\n\n");
   assert.strictEqual(
@@ -247,7 +247,7 @@ test("verifyExpectedArtifact accepts plan-slice with actual tasks", (t) => {
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), [
@@ -271,7 +271,7 @@ test("verifyExpectedArtifact accepts plan-slice with completed tasks", (t) => {
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), [
@@ -297,8 +297,8 @@ test("verifyExpectedArtifact plan-slice passes when all task plan files exist", 
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const tasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
-  const planPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+  const tasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
+  const planPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
   const planContent = [
     "# S01: Test Slice",
     "",
@@ -319,8 +319,8 @@ test("verifyExpectedArtifact plan-slice fails when a task plan file is missing (
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const tasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
-  const planPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+  const tasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
+  const planPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
   const planContent = [
     "# S01: Test Slice",
     "",
@@ -341,7 +341,7 @@ test("verifyExpectedArtifact plan-slice fails for plan with no tasks (#699)", (t
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const planPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
+  const planPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-PLAN.md");
   const planContent = [
     "# S01: Test Slice",
     "",
@@ -361,7 +361,7 @@ test("verifyExpectedArtifact accepts plan-slice with heading-style tasks (### T0
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), [
@@ -390,7 +390,7 @@ test("verifyExpectedArtifact accepts plan-slice with colon-style heading tasks (
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), [
@@ -414,7 +414,7 @@ test("verifyExpectedArtifact execute-task passes for heading-style plan entry (#
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  const sliceDir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+  const sliceDir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(sliceDir, "S01-PLAN.md"), [
@@ -436,7 +436,7 @@ test("verifyExpectedArtifact execute-task passes for heading-style plan entry (#
 
 test("verifyExpectedArtifact plan-slice passes for rendered slice/task plan artifacts from DB", async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
   openDatabase(dbPath);
   try {
     insertMilestone({ id: "M001", title: "Milestone", status: "active" });
@@ -465,7 +465,7 @@ test("verifyExpectedArtifact plan-slice passes for rendered slice/task plan arti
         estimate: "30m",
         files: ["src/resources/extensions/sdd/markdown-renderer.ts"],
         verify: "node --test markdown-renderer.test.ts",
-        inputs: ["src/resources/extensions/sdd/gsd-db.ts"],
+        inputs: ["src/resources/extensions/sdd/sdd-db.ts"],
         expectedOutput: ["src/resources/extensions/sdd/tests/markdown-renderer.test.ts"],
         observabilityImpact: "Renderer tests cover the failure mode.",
       },
@@ -509,7 +509,7 @@ test("verifyExpectedArtifact plan-slice passes for rendered slice/task plan arti
 
 test("verifyExpectedArtifact plan-slice fails after deleting a rendered task plan file", async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, ".gsd", "gsd.db");
+  const dbPath = join(base, ".sdd", "sdd.db");
   openDatabase(dbPath);
   try {
     insertMilestone({ id: "M001", title: "Milestone", status: "active" });
@@ -538,7 +538,7 @@ test("verifyExpectedArtifact plan-slice fails after deleting a rendered task pla
         estimate: "30m",
         files: ["src/resources/extensions/sdd/markdown-renderer.ts"],
         verify: "node --test markdown-renderer.test.ts",
-        inputs: ["src/resources/extensions/sdd/gsd-db.ts"],
+        inputs: ["src/resources/extensions/sdd/sdd-db.ts"],
         expectedOutput: ["src/resources/extensions/sdd/tests/markdown-renderer.test.ts"],
         observabilityImpact: "Renderer tests cover the failure mode.",
       },
@@ -582,13 +582,13 @@ test("#793: invalidateAllCaches clears all caches so deriveState sees fresh disk
 
   const mid = "M001";
   const sid = "S01";
-  const planDir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const planDir = join(base, ".sdd", "milestones", mid, "slices", sid);
   const tasksDir = join(planDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
-  mkdirSync(join(base, ".gsd", "milestones", mid), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", mid), { recursive: true });
 
   writeFileSync(
-    join(base, ".gsd", "milestones", mid, `${mid}-ROADMAP.md`),
+    join(base, ".sdd", "milestones", mid, `${mid}-ROADMAP.md`),
     `# M001: Test Milestone\n\n**Vision:** test.\n\n## Slices\n\n- [ ] **${sid}: Slice One** \`risk:low\` \`depends:[]\`\n  > After this: done.\n`,
   );
   const planUnchecked = `# ${sid}: Slice One\n\n**Goal:** test.\n\n## Tasks\n\n- [ ] **T01: Task One** \`est:10m\`\n- [ ] **T02: Task Two** \`est:10m\`\n`;
@@ -626,7 +626,7 @@ test("#793: invalidateAllCaches clears all caches so deriveState sees fresh disk
 import { execFileSync } from "node:child_process";
 
 function makeGitBase(): string {
-  const base = join(tmpdir(), `gsd-test-git-${randomUUID()}`);
+  const base = join(tmpdir(), `sdd-test-git-${randomUUID()}`);
   mkdirSync(base, { recursive: true });
   execFileSync("git", ["init", "--initial-branch=main"], { cwd: base, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@test.com"], { cwd: base, stdio: "ignore" });
@@ -644,9 +644,9 @@ test("hasImplementationArtifacts returns false when only .sdd/ files committed (
 
   // Create a feature branch and commit only .sdd/ files
   execFileSync("git", ["checkout", "-b", "feat/test-milestone"], { cwd: base, stdio: "ignore" });
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap");
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-SUMMARY.md"), "# Summary");
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap");
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-SUMMARY.md"), "# Summary");
   execFileSync("git", ["add", "."], { cwd: base, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "chore: add plan files"], { cwd: base, stdio: "ignore" });
 
@@ -660,8 +660,8 @@ test("hasImplementationArtifacts returns true when implementation files committe
 
   // Create a feature branch with both .sdd/ and implementation files
   execFileSync("git", ["checkout", "-b", "feat/test-impl"], { cwd: base, stdio: "ignore" });
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap");
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-ROADMAP.md"), "# Roadmap");
   mkdirSync(join(base, "src"), { recursive: true });
   writeFileSync(join(base, "src", "feature.ts"), "export function feature() {}");
   execFileSync("git", ["add", "."], { cwd: base, stdio: "ignore" });
@@ -672,7 +672,7 @@ test("hasImplementationArtifacts returns true when implementation files committe
 });
 
 test("hasImplementationArtifacts returns true on non-git directory (fail-open)", (t) => {
-  const base = join(tmpdir(), `gsd-test-nogit-${randomUUID()}`);
+  const base = join(tmpdir(), `sdd-test-nogit-${randomUUID()}`);
   mkdirSync(base, { recursive: true });
   t.after(() => cleanup(base));
 
@@ -687,9 +687,9 @@ test("verifyExpectedArtifact complete-milestone fails with only .sdd/ files (#17
   t.after(() => cleanup(base));
 
   // Create feature branch with only .sdd/ files
-  execFileSync("git", ["checkout", "-b", "feat/ms-only-gsd"], { cwd: base, stdio: "ignore" });
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-SUMMARY.md"), "# Milestone Summary\nDone.");
+  execFileSync("git", ["checkout", "-b", "feat/ms-only-sdd"], { cwd: base, stdio: "ignore" });
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-SUMMARY.md"), "# Milestone Summary\nDone.");
   execFileSync("git", ["add", "."], { cwd: base, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "chore: milestone plan files"], { cwd: base, stdio: "ignore" });
 
@@ -703,8 +703,8 @@ test("verifyExpectedArtifact complete-milestone passes with impl files (#1703)",
 
   // Create feature branch with implementation files AND milestone summary
   execFileSync("git", ["checkout", "-b", "feat/ms-with-impl"], { cwd: base, stdio: "ignore" });
-  mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
-  writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-SUMMARY.md"), "# Milestone Summary\nDone.");
+  mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
+  writeFileSync(join(base, ".sdd", "milestones", "M001", "M001-SUMMARY.md"), "# Milestone Summary\nDone.");
   mkdirSync(join(base, "src"), { recursive: true });
   writeFileSync(join(base, "src", "app.ts"), "console.log('hello');");
   execFileSync("git", ["add", "."], { cwd: base, stdio: "ignore" });

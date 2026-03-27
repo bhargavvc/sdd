@@ -1,7 +1,7 @@
 # Token Optimization Suite — Implementation Plan
 
 ## Overview
-Comprehensive token optimization across the GSD dispatch pipeline. Six phases targeting
+Comprehensive token optimization across the SDD dispatch pipeline. Six phases targeting
 prompt caching, accurate token counting, structured data compression, prompt compression,
 semantic context selection, and context distillation.
 
@@ -9,7 +9,7 @@ semantic context selection, and context distillation.
 **Goal:** Restructure dispatch prompt assembly for maximum cache hit rates.
 
 ### What
-Anthropic prompt caching gives 90% savings on cached input tokens. Currently, GSD places
+Anthropic prompt caching gives 90% savings on cached input tokens. Currently, SDD places
 `cache_control` on system prompts and the last user message (in `packages/pi-ai/src/providers/anthropic.ts`).
 But dispatch prompts in `auto-prompts.ts` mix static and dynamic content throughout,
 reducing cache prefix reuse.

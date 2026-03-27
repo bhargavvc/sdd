@@ -13,7 +13,7 @@
  *   npx tsx scripts/preview-dashboard.ts --narrow      # force 80 cols
  */
 
-import { truncateToWidth, visibleWidth } from "@gsd/pi-tui";
+import { truncateToWidth, visibleWidth } from "@sdd/pi-tui";
 import { makeUI, GLYPH, INDENT } from "../src/resources/extensions/shared/mod.js";
 
 // ── Minimal ANSI color theme (no Theme class dependency) ────────────────
@@ -120,13 +120,13 @@ function render(w: number, healthState: { icon: string; color: string; summary: 
   // Top bar
   lines.push(...ui.bar());
 
-  // Header: GSD AUTO + health ... elapsed + ETA
+  // Header: SDD AUTO + health ... elapsed + ETA
   const dot = theme.fg("accent", GLYPH.statusActive);
   const healthIcon = healthState.color === "success" ? "o"
     : healthState.color === "warning" ? "!"
       : "x";
   const healthStr = `  ${theme.fg(healthState.color, healthIcon)} ${theme.fg(healthState.color, healthState.summary)}`;
-  const headerLeft = `${pad}${dot} ${theme.fg("accent", theme.bold("GSD"))}  ${theme.fg("success", modeTag)}${healthStr}`;
+  const headerLeft = `${pad}${dot} ${theme.fg("accent", theme.bold("SDD"))}  ${theme.fg("success", modeTag)}${healthStr}`;
   const headerRight = `${theme.fg("dim", elapsed)} ${theme.fg("dim", "·")} ${theme.fg("dim", etaShort)}`;
   lines.push(rightAlign(headerLeft, headerRight, w));
 

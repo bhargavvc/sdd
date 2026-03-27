@@ -12,7 +12,7 @@ import {
   getDecisionById,
   getRequirementById,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 import {
   parseDecisionsTable,
   parseRequirementsSections,
@@ -32,9 +32,9 @@ import type { Decision, Requirement } from '../types.ts';
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-dbwriter-'));
-  // Create .gsd directory structure
-  fs.mkdirSync(path.join(dir, '.gsd'), { recursive: true });
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-dbwriter-'));
+  // Create .sdd directory structure
+  fs.mkdirSync(path.join(dir, '.sdd'), { recursive: true });
   return dir;
 }
 
@@ -67,7 +67,7 @@ const SAMPLE_DECISIONS: Decision[] = [
     when_context: 'M001',
     scope: 'arch',
     decision: 'DB location',
-    choice: '.sdd/gsd.db',
+    choice: '.sdd/sdd.db',
     rationale: 'Derived state',
     revisable: 'No',
     made_by: 'agent',
@@ -306,7 +306,7 @@ describe('db-writer', () => {
 
   test('saveDecisionToDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -327,7 +327,7 @@ describe('db-writer', () => {
       assert.deepStrictEqual(dbDecision?.choice, 'Option A', 'DB decision has correct choice');
 
       // Verify markdown file was written
-      const mdPath = path.join(tmpDir, '.gsd', 'DECISIONS.md');
+      const mdPath = path.join(tmpDir, '.sdd', 'DECISIONS.md');
       assert.ok(fs.existsSync(mdPath), 'DECISIONS.md file created');
 
       const mdContent = fs.readFileSync(mdPath, 'utf-8');
@@ -364,7 +364,7 @@ describe('db-writer', () => {
 
   test('updateRequirementInDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -399,7 +399,7 @@ describe('db-writer', () => {
       assert.deepStrictEqual(updated?.description, 'Test requirement', 'description preserved after update');
 
       // Verify markdown file was written
-      const mdPath = path.join(tmpDir, '.gsd', 'REQUIREMENTS.md');
+      const mdPath = path.join(tmpDir, '.sdd', 'REQUIREMENTS.md');
       assert.ok(fs.existsSync(mdPath), 'REQUIREMENTS.md file created');
 
       const mdContent = fs.readFileSync(mdPath, 'utf-8');
@@ -418,7 +418,7 @@ describe('db-writer', () => {
 
   test('updateRequirementInDb — not found', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -445,7 +445,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -473,7 +473,7 @@ describe('db-writer', () => {
 
       // Verify file on disk
       const filePath = path.join(
-        tmpDir, '.gsd', 'milestones', 'M001', 'slices', 'S06', 'tasks', 'T01-SUMMARY.md',
+        tmpDir, '.sdd', 'milestones', 'M001', 'slices', 'S06', 'tasks', 'T01-SUMMARY.md',
       );
       assert.ok(fs.existsSync(filePath), 'artifact file written to disk');
       assert.deepStrictEqual(fs.readFileSync(filePath, 'utf-8'), content, 'file content matches');
@@ -485,7 +485,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb — shrinkage guard preserves larger existing file', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -494,7 +494,7 @@ describe('db-writer', () => {
 
       // Pre-create the file with full content (simulating a prior `write` tool call)
       const relPath = 'milestones/M001/M001-RESEARCH.md';
-      const filePath = path.join(tmpDir, '.gsd', relPath);
+      const filePath = path.join(tmpDir, '.sdd', relPath);
       fs.mkdirSync(path.dirname(filePath), { recursive: true });
       fs.writeFileSync(filePath, fullContent);
 
@@ -531,7 +531,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb — allows overwrite when new content is similar size', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
     openDatabase(dbPath);
 
     try {
@@ -539,7 +539,7 @@ describe('db-writer', () => {
       const newContent = '# Summary v2\n\nUpdated content here with more details.\n';
 
       const relPath = 'milestones/M001/M001-SUMMARY.md';
-      const filePath = path.join(tmpDir, '.gsd', relPath);
+      const filePath = path.join(tmpDir, '.sdd', relPath);
       fs.mkdirSync(path.dirname(filePath), { recursive: true });
       fs.writeFileSync(filePath, oldContent);
 

@@ -1,20 +1,20 @@
 {
   "name": "@gsd-build/engine-darwin-x64",
   "version": "2.54.0",
-  "description": "GSD native engine binary for macOS Intel",
+  "description": "SDD native engine binary for macOS Intel",
   "os": [
     "darwin"
   ],
   "cpu": [
     "x64"
   ],
-  "main": "gsd_engine.node",
+  "main": "sdd_engine.node",
   "files": [
-    "gsd_engine.node"
+    "sdd_engine.node"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gsd-build/gsd-2.git"
+    "url": "git+https://github.com/sdd-build/sdd-2.git"
   }
 }

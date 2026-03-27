@@ -1,7 +1,7 @@
 /**
  * cache-staleness-regression.test.ts — Regression tests for stale cache bugs.
  *
- * The GSD parser caches are critical for performance but have caused multiple
+ * The SDD parser caches are critical for performance but have caused multiple
  * production bugs when not invalidated at the right time.
  *
  * Regression coverage for:
@@ -22,8 +22,8 @@ import { deriveState, invalidateStateCache } from '../state.ts';
 import { invalidateAllCaches } from '../cache.ts';
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-cache-stale-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), 'sdd-cache-stale-'));
+  mkdirSync(join(base, '.sdd', 'milestones'), { recursive: true });
   return base;
 }
 
@@ -32,13 +32,13 @@ function cleanup(base: string): void {
 }
 
 function writeMilestoneFile(base: string, mid: string, suffix: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid);
+  const dir = join(base, '.sdd', 'milestones', mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-${suffix}.md`), content);
 }
 
 function writeSliceFile(base: string, mid: string, sid: string, suffix: string, content: string): void {
-  const dir = join(base, '.gsd', 'milestones', mid, 'slices', sid);
+  const dir = join(base, '.sdd', 'milestones', mid, 'slices', sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-${suffix}.md`), content);
 }
@@ -88,7 +88,7 @@ describe("cache-staleness-regression", () => {
     const base = createBase();
     try {
       // Create a milestone in needs-discussion phase (CONTEXT-DRAFT, no CONTEXT)
-      const mDir = join(base, '.gsd', 'milestones', 'M001');
+      const mDir = join(base, '.sdd', 'milestones', 'M001');
       mkdirSync(mDir, { recursive: true });
       writeFileSync(join(mDir, 'M001-CONTEXT-DRAFT.md'), '# Draft\n\nSome ideas.\n');
 
@@ -174,7 +174,7 @@ describe("cache-staleness-regression", () => {
         '- [ ] **T02: Second Task** `est:1h`',
       ].join('\n'));
       // Write task plan files
-      const tasksDir = join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+      const tasksDir = join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
       mkdirSync(tasksDir, { recursive: true });
       writeFileSync(join(tasksDir, 'T01-PLAN.md'), '# T01\nDo thing.');
       writeFileSync(join(tasksDir, 'T02-PLAN.md'), '# T02\nDo other thing.');
@@ -224,7 +224,7 @@ describe("cache-staleness-regression", () => {
         '',
         '- [ ] **T01: Task** `est:1h`',
       ].join('\n'));
-      const tasksDir = join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+      const tasksDir = join(base, '.sdd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
       mkdirSync(tasksDir, { recursive: true });
       writeFileSync(join(tasksDir, 'T01-PLAN.md'), '# T01\nDo it.');
 

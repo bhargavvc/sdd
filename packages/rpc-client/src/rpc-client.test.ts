@@ -260,7 +260,7 @@ describe("RpcClient construction", () => {
 
 	it("creates with custom options", () => {
 		const client = new RpcClient({
-			cliPath: "/usr/local/bin/gsd",
+			cliPath: "/usr/local/bin/sdd",
 			cwd: "/tmp",
 			env: { NODE_ENV: "test" },
 			provider: "anthropic",

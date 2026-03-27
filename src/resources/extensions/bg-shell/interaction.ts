@@ -13,7 +13,7 @@ export async function queryShellEnv(
 	timeout: number,
 	signal?: AbortSignal,
 ): Promise<{ cwd: string; env: Record<string, string>; shell: string } | null> {
-	const sentinel = `__GSD_ENV_${randomUUID().slice(0, 8)}__`;
+	const sentinel = `__SDD_ENV_${randomUUID().slice(0, 8)}__`;
 	const startIndex = bg.output.length;
 
 	const cmd = [
@@ -121,9 +121,9 @@ export async function runOnSession(
 	signal?: AbortSignal,
 ): Promise<{ exitCode: number; output: string; timedOut: boolean }> {
 	const sentinel = randomUUID().slice(0, 8);
-	const startMarker = `__GSD_SENTINEL_${sentinel}_START__`;
-	const endMarker = `__GSD_SENTINEL_${sentinel}_END__`;
-	const exitVar = `__GSD_EXIT_${sentinel}__`;
+	const startMarker = `__SDD_SENTINEL_${sentinel}_START__`;
+	const endMarker = `__SDD_SENTINEL_${sentinel}_END__`;
+	const exitVar = `__SDD_EXIT_${sentinel}__`;
 
 	// Snapshot current output buffer position
 	const startIndex = bg.output.length;

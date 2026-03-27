@@ -9,7 +9,7 @@ function shellQuote(value: string): string {
 }
 
 export function createFakeRtk(mapping: Record<string, FakeRtkResponse>): { path: string; cleanup: () => void } {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-fake-rtk-"));
+  const dir = mkdtempSync(join(tmpdir(), "sdd-fake-rtk-"));
   const payload = JSON.stringify(mapping);
 
   const jsSource = `#!/usr/bin/env node

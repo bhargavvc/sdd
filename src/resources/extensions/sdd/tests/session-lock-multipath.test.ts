@@ -29,8 +29,8 @@ describe('session-lock-multipath', async () => {
   // ─── 1. Lock dir registry tracks gsdDir on acquisition ──────────────────
   console.log('\n=== 1. Lock dir registry tracks gsdDir on acquisition ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-multipath-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-multipath-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       const result = acquireSessionLock(base);
@@ -53,11 +53,11 @@ describe('session-lock-multipath', async () => {
   // ─── 2. Release cleans lock files at all registered paths ────────────────
   console.log('\n=== 2. Release cleans lock files at all registered paths ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-multipath-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-multipath-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     // Simulate a secondary lock dir (e.g. worktree .sdd/ or projects registry)
-    const secondaryDir = join(base, 'secondary-gsd');
+    const secondaryDir = join(base, 'secondary-sdd');
     mkdirSync(secondaryDir, { recursive: true });
 
     try {
@@ -86,7 +86,7 @@ describe('session-lock-multipath', async () => {
       assert.ok(!existsSync(primaryLockFile), 'primary auto.lock removed after release');
 
       const primaryLockDir = gsdRoot(base) + '.lock';
-      assert.ok(!existsSync(primaryLockDir), 'primary .gsd.lock/ removed after release');
+      assert.ok(!existsSync(primaryLockDir), 'primary .sdd.lock/ removed after release');
     } finally {
       rmSync(base, { recursive: true, force: true });
     }
@@ -95,8 +95,8 @@ describe('session-lock-multipath', async () => {
   // ─── 3. Re-entrant acquisition on same path registers once ───────────────
   console.log('\n=== 3. Re-entrant acquisition registers path once ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-multipath-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-multipath-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       acquireSessionLock(base);
@@ -117,10 +117,10 @@ describe('session-lock-multipath', async () => {
   // ─── 4. Multiple different base paths all get registered ─────────────────
   console.log('\n=== 4. Multiple base paths all get registered ===');
   {
-    const base1 = mkdtempSync(join(tmpdir(), 'gsd-multipath-a-'));
-    const base2 = mkdtempSync(join(tmpdir(), 'gsd-multipath-b-'));
-    mkdirSync(join(base1, '.gsd'), { recursive: true });
-    mkdirSync(join(base2, '.gsd'), { recursive: true });
+    const base1 = mkdtempSync(join(tmpdir(), 'sdd-multipath-a-'));
+    const base2 = mkdtempSync(join(tmpdir(), 'sdd-multipath-b-'));
+    mkdirSync(join(base1, '.sdd'), { recursive: true });
+    mkdirSync(join(base2, '.sdd'), { recursive: true });
 
     try {
       const r1 = acquireSessionLock(base1);
@@ -146,8 +146,8 @@ describe('session-lock-multipath', async () => {
   // ─── 5. Acquire → release cycle fully cleans lock artifacts ──────────────
   console.log('\n=== 5. Full acquire/release cycle cleans all artifacts ===');
   {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-multipath-'));
-    mkdirSync(join(base, '.gsd'), { recursive: true });
+    const base = mkdtempSync(join(tmpdir(), 'sdd-multipath-'));
+    mkdirSync(join(base, '.sdd'), { recursive: true });
 
     try {
       acquireSessionLock(base);
@@ -157,7 +157,7 @@ describe('session-lock-multipath', async () => {
       const lockFile = join(gsdRoot(base), 'auto.lock');
       const lockDir = gsdRoot(base) + '.lock';
       assert.ok(!existsSync(lockFile), 'auto.lock cleaned');
-      assert.ok(!existsSync(lockDir), '.gsd.lock/ cleaned');
+      assert.ok(!existsSync(lockDir), '.sdd.lock/ cleaned');
       assert.deepStrictEqual(_getRegisteredLockDirs().length, 0, 'registry empty');
     } finally {
       rmSync(base, { recursive: true, force: true });

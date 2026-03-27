@@ -3,7 +3,7 @@
   "templates": {
     "full-project": {
       "name": "Full Project",
-      "description": "Complete GSD workflow with roadmap, milestones, slices, and full ceremony",
+      "description": "Complete SDD workflow with roadmap, milestones, slices, and full ceremony",
       "file": "full-project.md",
       "phases": ["init", "discuss", "plan", "execute", "verify"],
       "triggers": ["new project", "greenfield", "from scratch", "build an app", "create a new"],

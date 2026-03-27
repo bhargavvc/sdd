@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 
 test("initResources creates node_modules symlink in agent dir", async (t) => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-"));
   const fakeAgentDir = join(tmp, "agent");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -26,7 +26,7 @@ test("initResources creates node_modules symlink in agent dir", async (t) => {
 
 test("initResources replaces a real directory blocking node_modules with a symlink", async (t) => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-realdir-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-realdir-"));
   const fakeAgentDir = join(tmp, "agent");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -52,7 +52,7 @@ test("initResources replaces a real directory blocking node_modules with a symli
 
 test("initResources replaces a stale symlink with a correct one", async (t) => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-stale-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-stale-"));
   const fakeAgentDir = join(tmp, "agent");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -64,7 +64,7 @@ test("initResources replaces a stale symlink with a correct one", async (t) => {
 
   // Remove and replace with a stale symlink pointing to a non-existent path
   unlinkSync(nodeModulesPath);
-  symlinkSync("/tmp/nonexistent-gsd-node-modules-" + Date.now(), nodeModulesPath);
+  symlinkSync("/tmp/nonexistent-sdd-node-modules-" + Date.now(), nodeModulesPath);
 
   const staleTarget = readlinkSync(nodeModulesPath);
   assert.notEqual(staleTarget, correctTarget, "stale symlink should point elsewhere");
@@ -78,7 +78,7 @@ test("initResources replaces a stale symlink with a correct one", async (t) => {
 
 test("initResources replaces symlink whose target was deleted", async (t) => {
   const { initResources } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-symlink-missing-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-symlink-missing-"));
   const fakeAgentDir = join(tmp, "agent");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));

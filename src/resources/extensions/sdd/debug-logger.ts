@@ -1,5 +1,5 @@
-// GSD Extension — Debug Logger
-// Structured JSONL debug logging for diagnosing stuck/slow GSD sessions.
+// SDD Extension — Debug Logger
+// Structured JSONL debug logging for diagnosing stuck/slow SDD sessions.
 // Zero overhead when disabled — all public functions are no-ops.
 
 import { appendFileSync, mkdirSync, readdirSync, unlinkSync } from 'node:fs';
@@ -34,7 +34,7 @@ const MAX_DEBUG_LOGS = 5;
 
 /**
  * Enable debug logging. Creates the log file and prunes old logs.
- * Can be activated via `--debug` flag or `GSD_DEBUG=1` env var.
+ * Can be activated via `--debug` flag or `SDD_DEBUG=1` env var.
  */
 export function enableDebug(basePath: string): void {
   const debugDir = join(gsdRoot(basePath), 'debug');

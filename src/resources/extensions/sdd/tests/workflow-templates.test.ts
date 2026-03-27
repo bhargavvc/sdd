@@ -1,4 +1,4 @@
-// GSD Workflow Templates — Unit Tests
+// SDD Workflow Templates — Unit Tests
 //
 // Tests registry loading, template resolution, auto-detection, and listing.
 
@@ -127,7 +127,7 @@ console.log('\n── List Templates ──');
   assert.ok(output.includes('bugfix'), 'Should list bugfix');
   assert.ok(output.includes('spike'), 'Should list spike');
   assert.ok(output.includes('hotfix'), 'Should list hotfix');
-  assert.ok(output.includes('/gsd start'), 'Should include usage hint');
+  assert.ok(output.includes('/sdd start'), 'Should include usage hint');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -11,7 +11,7 @@ import {
   updateSliceFields,
   insertAssessment,
   deleteSlice,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { invalidateStateCache } from "../state.js";
 import { renderRoadmapFromDb, renderAssessmentFromDb } from "../markdown-renderer.js";
 import { renderAllProjections } from "../workflow-projections.js";
@@ -106,7 +106,7 @@ export async function handleReassessRoadmap(
   // ── Compute assessment artifact path ──────────────────────────────
   // Assessment lives in the completed slice's directory
   const assessmentRelPath = join(
-    ".gsd", "milestones", params.milestoneId,
+    ".sdd", "milestones", params.milestoneId,
     "slices", params.completedSliceId,
     `${params.completedSliceId}-ASSESSMENT.md`,
   );
@@ -236,7 +236,7 @@ export async function handleReassessRoadmap(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: reassess-roadmap post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `sdd: reassess-roadmap post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

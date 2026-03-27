@@ -13,15 +13,15 @@ import type { TokenProfile, InlineLevel } from "./types.js";
 
 import type {
   SDDPreferences,
-  GSDModelConfigV2,
-  GSDPhaseModelConfig,
+  SDDModelConfigV2,
+  SDDPhaseModelConfig,
   ResolvedModelConfig,
   AutoSupervisorConfig,
 } from "./preferences-types.js";
 import { loadEffectiveSDDPreferences, getGlobalSDDPreferencesPath } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-models.js keep working
-export type { GSDPhaseModelConfig, GSDModelConfig, GSDModelConfigV2, ResolvedModelConfig } from "./preferences-types.js";
+export type { SDDPhaseModelConfig, SDDModelConfig, SDDModelConfigV2, ResolvedModelConfig } from "./preferences-types.js";
 
 /**
  * Resolve which model ID to use for a given auto-mode unit type.
@@ -43,9 +43,9 @@ export function resolveModelForUnit(unitType: string): string | undefined {
 export function resolveModelWithFallbacksForUnit(unitType: string): ResolvedModelConfig | undefined {
   const prefs = loadEffectiveSDDPreferences();
   if (!prefs?.preferences.models) return undefined;
-  const m = prefs.preferences.models as GSDModelConfigV2;
+  const m = prefs.preferences.models as SDDModelConfigV2;
 
-  let phaseConfig: string | GSDPhaseModelConfig | undefined;
+  let phaseConfig: string | SDDPhaseModelConfig | undefined;
   switch (unitType) {
     case "research-milestone":
     case "research-slice":
@@ -138,11 +138,11 @@ export function validateModelId(modelId: string): boolean {
 }
 
 /**
- * Update the models section of the global GSD preferences file.
+ * Update the models section of the global SDD preferences file.
  * Performs a safe read-modify-write: reads current content, updates the models
  * YAML block, and writes back. Creates the file if it doesn't exist.
  */
-export function updatePreferencesModels(models: GSDModelConfigV2): void {
+export function updatePreferencesModels(models: SDDModelConfigV2): void {
   const prefsPath = getGlobalSDDPreferencesPath();
 
   let content = "";
@@ -156,7 +156,7 @@ export function updatePreferencesModels(models: GSDModelConfigV2): void {
     if (typeof value === "string") {
       lines.push(`  ${phase}: ${value}`);
     } else if (value && typeof value === "object") {
-      const config = value as GSDPhaseModelConfig;
+      const config = value as SDDPhaseModelConfig;
       lines.push(`  ${phase}:`);
       lines.push(`    model: ${config.model}`);
       if (config.provider) {

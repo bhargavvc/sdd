@@ -10,13 +10,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT"
 
-# --- Guard: workspace packages must not have @gsd/* cross-deps ---
-echo "==> Checking workspace packages for @gsd/* cross-deps..."
+# --- Guard: workspace packages must not have @sdd/* cross-deps ---
+echo "==> Checking workspace packages for @sdd/* cross-deps..."
 CROSS_FAILED=0
 for ws_pkg in native pi-agent-core pi-ai pi-coding-agent pi-tui; do
   RESULT=$(node -e "
     const pkg = require('./packages/${ws_pkg}/package.json');
-    const deps = Object.keys(pkg.dependencies || {}).filter(d => d.startsWith('@gsd/'));
+    const deps = Object.keys(pkg.dependencies || {}).filter(d => d.startsWith('@sdd/'));
     if (deps.length) { console.log(deps.join(', ')); process.exit(1); }
   " 2>&1) || {
     echo "    LEAKED in ${ws_pkg}: $RESULT"
@@ -25,11 +25,11 @@ for ws_pkg in native pi-agent-core pi-ai pi-coding-agent pi-tui; do
   }
 done
 if [ "$CROSS_FAILED" = "1" ]; then
-  echo "ERROR: Workspace packages have @gsd/* cross-dependencies."
+  echo "ERROR: Workspace packages have @sdd/* cross-dependencies."
   echo "    These cause 404s when npm resolves them from the registry."
   exit 1
 fi
-echo "    No @gsd/* cross-dependencies."
+echo "    No @sdd/* cross-dependencies."
 
 # --- Pack tarball ---
 echo "==> Packing tarball..."

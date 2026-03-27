@@ -1,7 +1,7 @@
 /**
- * GSD Git Service
+ * SDD Git Service
  *
- * Core git operations for GSD: types, constants, and pure helpers.
+ * Core git operations for SDD: types, constants, and pure helpers.
  * Higher-level operations (commit, staging, branching) build on these.
  *
  * This module centralizes the GitPreferences interface, runtime exclusion
@@ -33,7 +33,7 @@ import {
   nativeUpdateRef,
   nativeAddPaths,
 } from "./native-git-bridge.js";
-import { GSDError, GSD_MERGE_CONFLICT, GSD_GIT_ERROR } from "./errors.js";
+import { SDDError, SDD_MERGE_CONFLICT, SDD_GIT_ERROR } from "./errors.js";
 import { getErrorMessage } from "./error-utils.js";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -55,10 +55,10 @@ export interface GitPreferences {
    *  - "none": no git isolation — commits land on the user's current branch directly
    */
   isolation?: "worktree" | "branch" | "none";
-  /** When false, GSD will not modify .gitignore at all — no baseline patterns
+  /** When false, SDD will not modify .gitignore at all — no baseline patterns
    *  are added and no self-healing occurs. Use this if you manage your own
-   *  .gitignore and don't want GSD touching it.
-   *  Default: true (GSD ensures baseline patterns are present).
+   *  .gitignore and don't want SDD touching it.
+   *  Default: true (SDD ensures baseline patterns are present).
    */
   manage_gitignore?: boolean;
   /** Script to run after a worktree is created (#597).
@@ -102,9 +102,9 @@ export interface TaskCommitContext {
 
 /**
  * Build a meaningful conventional commit message from task execution context.
- * Format: `{type}: {description}` (clean conventional commit — no GSD IDs in subject).
+ * Format: `{type}: {description}` (clean conventional commit — no SDD IDs in subject).
  *
- * GSD metadata is placed in a `GSD-Task:` git trailer at the end of the body,
+ * SDD metadata is placed in a `SDD-Task:` git trailer at the end of the body,
  * following the same convention as `Signed-off-by:` or `Co-Authored-By:`.
  *
  * The description is the task summary one-liner if available (it describes
@@ -133,8 +133,8 @@ export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
     bodyParts.push(fileLines);
   }
 
-  // Trailers: GSD-Task first, then Resolves
-  bodyParts.push(`GSD-Task: ${ctx.taskId}`);
+  // Trailers: SDD-Task first, then Resolves
+  bodyParts.push(`SDD-Task: ${ctx.taskId}`);
 
   if (ctx.issueNumber) {
     bodyParts.push(`Resolves #${ctx.issueNumber}`);
@@ -144,11 +144,11 @@ export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
 }
 
 /**
- * Thrown when a slice merge hits code conflicts in non-.gsd files.
+ * Thrown when a slice merge hits code conflicts in non-.sdd files.
  * The working tree is left in a conflicted state (no reset) so the
  * caller can dispatch a fix-merge session to resolve it.
  */
-export class MergeConflictError extends GSDError {
+export class MergeConflictError extends SDDError {
   readonly conflictedFiles: string[];
   readonly strategy: "squash" | "merge";
   readonly branch: string;
@@ -161,9 +161,9 @@ export class MergeConflictError extends GSDError {
     mainBranch: string,
   ) {
     super(
-      GSD_MERGE_CONFLICT,
+      SDD_MERGE_CONFLICT,
       `${strategy === "merge" ? "Merge" : "Squash-merge"} of "${branch}" into "${mainBranch}" ` +
-      `failed with conflicts in ${conflictedFiles.length} non-.gsd file(s): ${conflictedFiles.join(", ")}`,
+      `failed with conflicts in ${conflictedFiles.length} non-.sdd file(s): ${conflictedFiles.join(", ")}`,
     );
     this.name = "MergeConflictError";
     this.conflictedFiles = conflictedFiles;
@@ -183,7 +183,7 @@ export interface PreMergeCheckResult {
 // ─── Constants ─────────────────────────────────────────────────────────────
 
 /**
- * GSD runtime paths that should be excluded from smart staging.
+ * SDD runtime paths that should be excluded from smart staging.
  * These are transient/generated artifacts that should never be committed.
  * Matches the union of SKIP_PATHS + SKIP_EXACT in worktree-manager.ts
  * and the first 7 entries in gitignore.ts BASELINE_PATTERNS.
@@ -196,9 +196,9 @@ export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
   ".sdd/metrics.json",
   ".sdd/completed-units.json",
   ".sdd/STATE.md",
-  ".sdd/gsd.db",
-  ".sdd/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".sdd/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".sdd/sdd.db",
+  ".sdd/sdd.db-shm",   // SQLite WAL sidecar — always created alongside sdd.db (#2296)
+  ".sdd/sdd.db-wal",   // SQLite WAL sidecar — always created alongside sdd.db (#2296)
   ".sdd/journal/",     // daily-rotated JSONL event journal (#2296)
   ".sdd/doctor-history.jsonl", // doctor run history (#2296)
   ".sdd/DISCUSSION-MANIFEST.json",
@@ -259,7 +259,7 @@ export function writeIntegrationBranch(
   if (QUICK_BRANCH_RE.test(branch)) return;
   // Don't record workflow-template branches (hotfix, bugfix, spike, etc.) —
   // same root cause as quick-task branches (#2498). All templates create
-  // gsd/<templateId>/<slug> branches that are ephemeral.
+  // sdd/<templateId>/<slug> branches that are ephemeral.
   if (WORKFLOW_BRANCH_RE.test(branch)) return;
   // Validate
   if (!VALID_BRANCH_NAME.test(branch)) return;
@@ -403,7 +403,7 @@ export function runGit(basePath: string, args: string[], options: { allowFailure
   } catch (error) {
     if (options.allowFailure) return "";
     const message = getErrorMessage(error);
-    throw new GSDError(GSD_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}: ${filterGitSvnNoise(message)}`);
+    throw new SDDError(SDD_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}: ${filterGitSvnNoise(message)}`);
   }
 }
 
@@ -446,7 +446,7 @@ export class GitServiceImpl {
   }
 
   /**
-   * Smart staging: `git add -A` excluding GSD runtime paths via pathspec.
+   * Smart staging: `git add -A` excluding SDD runtime paths via pathspec.
    * Falls back to plain `git add -A` if the exclusion pathspec fails.
    * @param extraExclusions Additional pathspec exclusions beyond RUNTIME_EXCLUSION_PATHS.
    */
@@ -538,7 +538,7 @@ export class GitServiceImpl {
 
     const message = taskContext
       ? buildTaskCommitMessage(taskContext)
-      : `chore: auto-commit after ${unitType}\n\nGSD-Unit: ${unitId}`;
+      : `chore: auto-commit after ${unitType}\n\nSDD-Unit: ${unitId}`;
     nativeCommit(this.basePath, message, { allowEmpty: false });
     return message;
   }
@@ -550,7 +550,7 @@ export class GitServiceImpl {
    * branches are created from and merged back into.
    *
    * This is often `main` or `master`, but not necessarily. When a user
-   * starts GSD on a feature branch like `f-123-new-thing`, that branch
+   * starts SDD on a feature branch like `f-123-new-thing`, that branch
    * is recorded as the integration target, and all slice branches merge
    * back into it — not the repo's default branch. The name "main branch"
    * in variable names is historical; think of it as "integration branch".
@@ -606,7 +606,7 @@ export class GitServiceImpl {
   /**
    * Create a snapshot ref for the given label (typically a slice branch name).
    * Enabled by default; opt out with prefs.snapshots === false.
-   * Ref path: refs/gsd/snapshots/<label>/<timestamp>
+   * Ref path: refs/sdd/snapshots/<label>/<timestamp>
    * The ref points at HEAD, capturing the current commit before destructive operations.
    */
   createSnapshot(label: string): void {

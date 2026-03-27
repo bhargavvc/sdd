@@ -1,4 +1,4 @@
-import { parseStreamingJson as nativeParseStreamingJson } from "@gsd/native";
+import { parseStreamingJson as nativeParseStreamingJson } from "@sdd/native";
 
 /**
  * Attempts to parse potentially incomplete JSON during streaming.

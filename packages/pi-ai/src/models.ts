@@ -15,7 +15,7 @@ for (const [provider, models] of Object.entries(MODELS)) {
 
 // Merge manually-maintained custom providers that are NOT in models.dev.
 // Custom models are additive — they never overwrite generated entries.
-// See: https://github.com/gsd-build/gsd-2/issues/2339
+// See: https://github.com/sdd-build/sdd-2/issues/2339
 for (const [provider, models] of Object.entries(CUSTOM_MODELS)) {
 	if (!modelRegistry.has(provider)) {
 		modelRegistry.set(provider, new Map<string, Model<Api>>());

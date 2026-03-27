@@ -1,7 +1,7 @@
 /**
- * GSD Directory Validation — Safeguards against running in dangerous directories.
+ * SDD Directory Validation — Safeguards against running in dangerous directories.
  *
- * Prevents GSD from creating .sdd/ structures in system paths, home directories,
+ * Prevents SDD from creating .sdd/ structures in system paths, home directories,
  * or other locations where writing project scaffolding would be harmful.
  */
 
@@ -12,7 +12,7 @@ import { resolve } from "node:path";
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
 export interface DirectoryValidationResult {
-  /** Whether the directory is safe for GSD operations */
+  /** Whether the directory is safe for SDD operations */
   safe: boolean;
   /** Severity: "blocked" = hard stop, "warning" = user can override */
   severity: "ok" | "blocked" | "warning";
@@ -22,7 +22,7 @@ export interface DirectoryValidationResult {
 
 // ─── Blocked Paths ──────────────────────────────────────────────────────────────
 
-/** Paths where GSD must never create .sdd/ — no override possible. */
+/** Paths where SDD must never create .sdd/ — no override possible. */
 const UNIX_BLOCKED_PATHS = new Set([
   "/",
   "/bin",
@@ -64,7 +64,7 @@ const WINDOWS_BLOCKED_PATHS = new Set([
 // ─── Core Validation ────────────────────────────────────────────────────────────
 
 /**
- * Validate whether a directory is safe for GSD to operate in.
+ * Validate whether a directory is safe for SDD to operate in.
  *
  * Checks in order:
  * 1. Blocked system paths (hard stop)
@@ -97,7 +97,7 @@ export function validateDirectory(dirPath: string): DirectoryValidationResult {
     return {
       safe: false,
       severity: "blocked",
-      reason: `Refusing to run in system directory: ${normalized}. GSD must be run inside a project directory.`,
+      reason: `Refusing to run in system directory: ${normalized}. SDD must be run inside a project directory.`,
     };
   }
 
@@ -113,7 +113,7 @@ export function validateDirectory(dirPath: string): DirectoryValidationResult {
     return {
       safe: false,
       severity: "blocked",
-      reason: `Refusing to run in your home directory (${normalized}). GSD must be run inside a project directory, not $HOME.`,
+      reason: `Refusing to run in your home directory (${normalized}). SDD must be run inside a project directory, not $HOME.`,
     };
   }
 
@@ -140,7 +140,7 @@ export function validateDirectory(dirPath: string): DirectoryValidationResult {
       return {
         safe: false,
         severity: "warning",
-        reason: `This directory has ${entries.length} entries, which suggests it may not be a project directory. Are you sure you want to initialize GSD here?`,
+        reason: `This directory has ${entries.length} entries, which suggests it may not be a project directory. Are you sure you want to initialize SDD here?`,
       };
     }
   } catch {
@@ -151,7 +151,7 @@ export function validateDirectory(dirPath: string): DirectoryValidationResult {
 }
 
 /**
- * Assert that a directory is safe for GSD operations.
+ * Assert that a directory is safe for SDD operations.
  * Throws with a descriptive message if the directory is blocked.
  * Returns the validation result for warnings (caller decides how to handle).
  */

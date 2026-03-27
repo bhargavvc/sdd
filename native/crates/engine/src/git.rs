@@ -1,6 +1,6 @@
 //! Native git operations via libgit2.
 //!
-//! Provides high-performance git operations for GSD, eliminating the need
+//! Provides high-performance git operations for SDD, eliminating the need
 //! to spawn `git` child processes via execSync. Both read and write
 //! operations are implemented natively.
 //!
@@ -685,7 +685,7 @@ pub fn git_worktree_list(repo_path: String) -> Result<Vec<GitWorktreeEntry>> {
 }
 
 /// List branches matching an optional glob pattern.
-/// Replaces: `git branch --list milestone/*`, `git branch --list gsd/*`
+/// Replaces: `git branch --list milestone/*`, `git branch --list sdd/*`
 #[napi]
 pub fn git_branch_list(repo_path: String, pattern: Option<String>) -> Result<Vec<String>> {
     let repo = open_repo(&repo_path)?;
@@ -711,13 +711,13 @@ pub fn git_branch_list(repo_path: String, pattern: Option<String>) -> Result<Vec
     Ok(names)
 }
 
-/// Simple branch pattern matching for patterns like "milestone/*", "gsd/*/*"
+/// Simple branch pattern matching for patterns like "milestone/*", "sdd/*/*"
 fn matches_branch_pattern(name: &str, pattern: &str) -> bool {
     // Handle simple prefix/* patterns
     if let Some(prefix) = pattern.strip_suffix("/*") {
-        // For "gsd/*/*", this becomes "gsd/*" after first strip
+        // For "sdd/*/*", this becomes "sdd/*" after first strip
         if prefix.contains('*') {
-            // Recursive: "gsd/*/*" → name must start with "gsd/" and have at least 2 segments after
+            // Recursive: "sdd/*/*" → name must start with "sdd/" and have at least 2 segments after
             if let Some(inner_prefix) = prefix.strip_suffix("/*") {
                 return name.starts_with(&format!("{inner_prefix}/"))
                     && name[inner_prefix.len() + 1..].contains('/');
@@ -730,7 +730,7 @@ fn matches_branch_pattern(name: &str, pattern: &str) -> bool {
 }
 
 /// List branches that have been merged into the given target branch.
-/// Replaces: `git branch --merged main --list gsd/*`
+/// Replaces: `git branch --merged main --list sdd/*`
 #[napi]
 pub fn git_branch_list_merged(
     repo_path: String,

@@ -32,7 +32,7 @@ const RISK_TIERS = {
     'Auto Engine', 'MCP Server/Client', 'Native/Rust Tools',
   ],
   high: [
-    'GSD Workflow', 'Tool System', 'AI Providers', 'Extension Registry',
+    'SDD Workflow', 'Tool System', 'AI Providers', 'Extension Registry',
     'Session Management', 'Extensions', 'Modes', 'Event System',
     'Node.js Bindings', 'Compaction',
   ],
@@ -89,7 +89,7 @@ function parseMap(mapPath) {
     const rawPath = cols[0];
     const rawSystems = cols[1] || '';
 
-    // Skip bold section headers like **GSD Extension (Core Workflow Engine)**
+    // Skip bold section headers like **SDD Extension (Core Workflow Engine)**
     if (rawPath.startsWith('**') || rawPath === '') continue;
 
     // Clean up path — remove parenthetical notes like "(50+ files)"
@@ -124,7 +124,7 @@ function normalizePath(filePath) {
  * Check if a changed file matches a map entry pattern.
  * Supports:
  *   - Exact suffix match:  src/cli.ts  matches  src/cli.ts
- *   - Glob prefix match:   gsd/auto/*  matches  gsd/auto/anything.ts
+ *   - Glob prefix match:   sdd/auto/*  matches  sdd/auto/anything.ts
  *   - Wildcard extension:  *.tsx       matches  any .tsx
  */
 function fileMatchesPattern(filePath, pattern) {

@@ -4,7 +4,7 @@
  * that appears 6+ times in auto.ts.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { snapshotUnitMetrics } from "./metrics.js";
 import { saveActivityLog } from "./activity-log.js";
 
@@ -38,7 +38,7 @@ export async function closeoutUnit(
       const llmCallFn = buildMemoryLLMCall(ctx);
       if (llmCallFn) {
         extractMemoriesFromUnit(activityFile, unitType, unitId, llmCallFn).catch((err) => {
-          if (process.env.GSD_DEBUG) console.error(`[gsd] memory extraction failed for ${unitType}/${unitId}:`, err);
+          if (process.env.SDD_DEBUG) console.error(`[sdd] memory extraction failed for ${unitType}/${unitId}:`, err);
         });
       }
     } catch { /* non-fatal */ }

@@ -1,7 +1,7 @@
 /**
- * GitHub Sync extension for GSD.
+ * GitHub Sync extension for SDD.
  *
- * Opt-in extension that syncs GSD lifecycle events to GitHub:
+ * Opt-in extension that syncs SDD lifecycle events to GitHub:
  * milestones → GH Milestones + tracking issues, slices → draft PRs,
  * tasks → sub-issues with auto-close on commit.
  *
@@ -10,7 +10,7 @@
  * and status display.
  */
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { bootstrapSync } from "./sync.js";
 import { loadSyncMapping } from "./mapping.js";
 import { ghIsAvailable } from "./cli.js";
@@ -39,7 +39,7 @@ export default function (pi: ExtensionAPI) {
   });
 }
 
-async function showStatus(ctx: import("@gsd/pi-coding-agent").ExtensionCommandContext) {
+async function showStatus(ctx: import("@sdd/pi-coding-agent").ExtensionCommandContext) {
   if (!ghIsAvailable()) {
     ctx.ui.notify("GitHub sync: `gh` CLI not installed or not authenticated.", "warning");
     return;
@@ -69,7 +69,7 @@ async function showStatus(ctx: import("@gsd/pi-coding-agent").ExtensionCommandCo
   );
 }
 
-async function runBootstrap(ctx: import("@gsd/pi-coding-agent").ExtensionCommandContext) {
+async function runBootstrap(ctx: import("@sdd/pi-coding-agent").ExtensionCommandContext) {
   if (!ghIsAvailable()) {
     ctx.ui.notify("GitHub sync: `gh` CLI not installed or not authenticated.", "warning");
     return;

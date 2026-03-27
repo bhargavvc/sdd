@@ -1,4 +1,4 @@
-// GSD — projection renderer regression tests
+// SDD — projection renderer regression tests
 // Verifies that "done" vs "complete" status mismatch doesn't recur.
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { renderPlanContent, renderRoadmapContent } from '../workflow-projections.ts';
-import type { SliceRow, TaskRow } from '../gsd-db.ts';
+import type { SliceRow, TaskRow } from '../sdd-db.ts';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
