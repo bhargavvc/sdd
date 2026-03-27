@@ -175,13 +175,70 @@ grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" src/ --include="*.ts" 2>/dev/null | grep -v
   fi
 done
 
-# Fix branding text
-grep -rl 'Get Shit Done\|Get Stuff Done' src/ --include="*.ts" 2>/dev/null | while read -r f; do
+# Fix branding text (src/ AND web/)
+grep -rl 'Get Shit Done\|Get Stuff Done' src/ web/ --include="*.ts" --include="*.tsx" 2>/dev/null | while read -r f; do
   sed -i \
     -e 's/Get Shit Done/Spec-Driven Development/g' \
     -e 's/Get Stuff Done/Spec-Driven Development/g' \
     "$f"
 done
+
+# Fix web/ components — PascalCase and camelCase (Lesson: web/ has its own patterns)
+echo "  Fixing web/ components..."
+grep -rl "${OLD_UC}\|${OLD_CC}\|${OLD_LC}[A-Z]" web/ --include="*.ts" --include="*.tsx" 2>/dev/null \
+  | grep -v node_modules | while read -r f; do
+  sed -i \
+    -e "s/${OLD_UC}WorkspaceStore/${NEW_UC}WorkspaceStore/g" \
+    -e "s/${OLD_UC}WorkspaceProvider/${NEW_UC}WorkspaceProvider/g" \
+    -e "s/use${OLD_UC}WorkspaceState/use${NEW_UC}WorkspaceState/g" \
+    -e "s/use${OLD_UC}WorkspaceActions/use${NEW_UC}WorkspaceActions/g" \
+    -e "s/${OLD_UC}AppShell/${NEW_UC}AppShell/g" \
+    -e "s/${OLD_UC}ActionDef/${NEW_UC}ActionDef/g" \
+    -e "s/Initial${OLD_CC}Header/Initial${NEW_CC}Header/g" \
+    -e "s/filterInitial${OLD_CC}/filterInitial${NEW_CC}/g" \
+    -e "s/hideInitial${OLD_CC}/hideInitial${NEW_CC}/g" \
+    -e "s/${OLD_LC}Tree/${NEW_LC}Tree/g" \
+    -e "s/${OLD_LC}Expanded/${NEW_LC}Expanded/g" \
+    -e "s/get${OLD_CC}Root/get${NEW_CC}Root/g" \
+    -e "s/${OLD_UC}/${NEW_UC}/g" \
+    -e "s/${OLD_CC}/${NEW_CC}/g" \
+    -e "s/\b${OLD_LC}\b/${NEW_LC}/g" \
+    "$f"
+  # Restore @gsd-build
+  if grep -q "${NEW_LC}-build" "$f" 2>/dev/null; then
+    sed -i -e "s/@${NEW_LC}-build/@${OLD_LC}-build/g" "$f"
+  fi
+done
+
+# Fix header filter title pattern
+HEADER_FILTER="web/lib/initial-${NEW_LC}-header-filter.ts"
+if [ -f "$HEADER_FILTER" ]; then
+  sed -i "s/Get Shit Done v/Spec-Driven Development v/g" "$HEADER_FILTER"
+fi
+
+# Fix Dockerfiles (Lesson: not in standard extension list)
+find . -name "Dockerfile*" -not -path './.git/*' 2>/dev/null | while read -r f; do
+  if grep -q "${OLD_LC}\|${OLD_UC}" "$f" 2>/dev/null; then
+    sed -i \
+      -e "s/${OLD_LC}-pi/${NEW_LC}-pi/g" \
+      -e "s/${OLD_UC}_VERSION/${NEW_UC}_VERSION/g" \
+      -e "s/${OLD_UC}_/${NEW_UC}_/g" \
+      "$f"
+    echo "  Fixed: $f"
+  fi
+done
+
+# Fix packages/ camelCase (Lesson: packages/ also has gsdDir, gsdBin)
+grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" packages/ --include="*.ts" 2>/dev/null \
+  | grep -v node_modules | while read -r f; do
+  sed -i \
+    -e "s/${OLD_LC}Dir/${NEW_LC}Dir/g" \
+    -e "s/${OLD_LC}Bin/${NEW_LC}Bin/g" \
+    -e "s/${OLD_LC}Path/${NEW_LC}Path/g" \
+    -e "s/${OLD_LC}Home/${NEW_LC}Home/g" \
+    "$f"
+done
+
 echo "  Done."
 
 # ─── STEP 3: Fix logo if needed ──────────────────────────────────────────────
