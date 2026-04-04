@@ -102,12 +102,14 @@ Setting `prefer_skills: []` does **not** disable skill discovery — it just mea
 
 - `custom_instructions`: extra durable instructions related to skill use. For operational project knowledge (recurring rules, gotchas, patterns), use `.sdd/KNOWLEDGE.md` instead — it's injected into every agent prompt automatically and agents can append to it during execution.
 
-- `models`: per-stage model selection for auto-mode. Keys: `research`, `planning`, `execution`, `execution_simple`, `completion`, `subagent`. Values can be:
+- `models`: per-stage model selection (applies to both auto-mode and guided-flow dispatches). Keys: `research`, `planning`, `discuss`, `execution`, `execution_simple`, `completion`, `validation`, `subagent`. Values can be:
   - Simple string: `"claude-sonnet-4-6"` — single model, no fallbacks
   - Provider-qualified string: `"bedrock/claude-sonnet-4-6"` — targets a specific provider when the same model ID exists across multiple providers
   - Object with fallbacks: `{ model: "claude-opus-4-6", fallbacks: ["glm-5", "minimax-m2.5"] }` — tries fallbacks in order if primary fails
   - Object with provider: `{ model: "claude-opus-4-6", provider: "bedrock" }` — explicit provider targeting in object format
-  - Omit a key to use whatever model is currently active. Fallbacks are tried when model switching fails (provider unavailable, rate limited, etc.).
+  - Omit a key to use whatever model is currently active (except `discuss` and `validation` which fall back to `planning` when unset). Fallbacks are tried when model switching fails (provider unavailable, rate limited, etc.).
+  - `discuss` — used for milestone/slice discussion (interactive context gathering). Falls back to `planning` if unset.
+  - `validation` — used for gate evaluation, roadmap reassessment, milestone validation, and doc rewrites. Falls back to `planning` if unset.
 
 - `skill_staleness_days`: number — skills unused for this many days get deprioritized during discovery. Set to `0` to disable staleness tracking. Default: `60`.
 
@@ -187,6 +189,13 @@ Setting `prefer_skills: []` does **not** disable skill discovery — it just mea
   - `budget_pressure`: boolean — downgrade model tier when budget is under pressure. Default: `true`.
   - `cross_provider`: boolean — allow routing across different providers. Default: `true`.
   - `hooks`: boolean — enable routing hooks. Default: `true`.
+  - `capability_routing`: boolean — enable capability-profile scoring for model selection within a tier. Requires `enabled: true`. Default: `false`.
+
+- `context_management`: configures context hygiene for auto-mode sessions. Keys:
+  - `observation_masking`: boolean — mask old tool results to reduce context bloat. Default: `true`.
+  - `observation_mask_turns`: number — keep this many recent turns verbatim (1-50). Default: `8`.
+  - `compaction_threshold_percent`: number — trigger compaction at this % of context window (0.5-0.95). Lower values fire compaction earlier, reducing drift. Default: `0.70`.
+  - `tool_result_max_chars`: number — max chars per tool result in GSD sessions (200-10000). Default: `800`.
 
 - `auto_visualize`: boolean — show a visualizer hint after each milestone completion in auto-mode. Default: `false`.
 

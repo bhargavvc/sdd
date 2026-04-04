@@ -4,11 +4,12 @@
  * and fallback chains.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
-import type { SDDPreferences } from "./preferences.js";
+import type { Api, Model } from "@gsd/pi-ai";
+import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { GSDPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";
-import { classifyUnitComplexity, tierLabel } from "./complexity-classifier.js";
+import { classifyUnitComplexity, tierLabel, extractTaskMetadata } from "./complexity-classifier.js";
 import { resolveModelForComplexity, escalateTier } from "./model-router.js";
 import { getLedger, getProjectTotals } from "./metrics.js";
 import { unitPhaseLabel } from "./auto-dashboard.js";
@@ -16,6 +17,8 @@ import { unitPhaseLabel } from "./auto-dashboard.js";
 export interface ModelSelectionResult {
   /** Routing metadata for metrics recording */
   routing: { tier: string; modelDowngraded: boolean } | null;
+  /** Concrete model applied before dispatch so it can be restored after a fresh session. */
+  appliedModel: Model<Api> | null;
 }
 
 export function resolvePreferredModelConfig(
@@ -58,6 +61,7 @@ export async function selectAndApplyModel(
 ): Promise<ModelSelectionResult> {
   const modelConfig = resolvePreferredModelConfig(unitType, autoModeStartModel);
   let routing: { tier: string; modelDowngraded: boolean } | null = null;
+  let appliedModel: Model<Api> | null = null;
 
   if (modelConfig) {
     const availableModels = ctx.modelRegistry.getAvailable();
@@ -103,7 +107,15 @@ export async function selectAndApplyModel(
           }
         }
 
-        const routingResult = resolveModelForComplexity(classification, modelConfig, routingConfig, availableModelIds);
+        // Extract task metadata for capability scoring
+        const taskMeta = unitType === "execute-task"
+          ? extractTaskMetadata(unitId, basePath)
+          : undefined;
+
+        const routingResult = resolveModelForComplexity(
+          classification, modelConfig, routingConfig, availableModelIds,
+          unitType, taskMeta,
+        );
 
         if (routingResult.wasDowngraded) {
           effectiveModelConfig = {
@@ -111,8 +123,9 @@ export async function selectAndApplyModel(
             fallbacks: routingResult.fallbacks,
           };
           if (verbose) {
+            const method = routingResult.selectionMethod === "capability-scored" ? "capability-scored" : "tier-only";
             ctx.ui.notify(
-              `Dynamic routing [${tierLabel(classification.tier)}]: ${routingResult.modelId} (${classification.reason})`,
+              `Dynamic routing [${tierLabel(classification.tier)}]: ${routingResult.modelId} (${method} — ${classification.reason})`,
               "info",
             );
           }
@@ -146,6 +159,7 @@ export async function selectAndApplyModel(
 
       const ok = await pi.setModel(model, { persist: false });
       if (ok) {
+        appliedModel = model;
         const fallbackNote = modelId === effectiveModelConfig.primary
           ? ""
           : ` (fallback from ${effectiveModelConfig.primary})`;
@@ -172,12 +186,17 @@ export async function selectAndApplyModel(
       const ok = await pi.setModel(startModel, { persist: false });
       if (!ok) {
         const byId = availableModels.find(m => m.id === autoModeStartModel.id);
-        if (byId) await pi.setModel(byId, { persist: false });
+        if (byId) {
+          const fallbackOk = await pi.setModel(byId, { persist: false });
+          if (fallbackOk) appliedModel = byId;
+        }
+      } else {
+        appliedModel = startModel;
       }
     }
   }
 
-  return { routing };
+  return { routing, appliedModel };
 }
 
 /**
@@ -212,9 +231,30 @@ export function resolveModelId<T extends { id: string; provider: string }>(
     );
   }
 
-  // Bare ID — prefer current provider, then first available
-  const exactProviderMatch = availableModels.find(
-    m => m.id === modelId && m.provider === currentProvider,
-  );
-  return exactProviderMatch ?? availableModels.find(m => m.id === modelId);
+  // Bare ID — resolve with provider precedence to avoid silent misrouting.
+  // Extension providers (e.g. claude-code) expose the same model IDs as their
+  // upstream API providers but route through a subprocess with different
+  // context, tool visibility, and cost characteristics (#2905).  Bare IDs in
+  // PREFERENCES.md must resolve to the canonical API provider, not to an
+  // extension wrapper that happens to be the current session provider.
+  const candidates = availableModels.filter(m => m.id === modelId);
+  if (candidates.length === 0) return undefined;
+  if (candidates.length === 1) return candidates[0];
+
+  // Extension / CLI-wrapper providers that should never win bare-ID resolution
+  // when a first-class API provider also offers the same model.
+  const EXTENSION_PROVIDERS = new Set(["claude-code"]);
+
+  // Prefer currentProvider only when it is a first-class API provider
+  if (currentProvider && !EXTENSION_PROVIDERS.has(currentProvider)) {
+    const providerMatch = candidates.find(m => m.provider === currentProvider);
+    if (providerMatch) return providerMatch;
+  }
+
+  // Prefer "anthropic" as the canonical provider for Anthropic models
+  const anthropicMatch = candidates.find(m => m.provider === "anthropic");
+  if (anthropicMatch) return anthropicMatch;
+
+  // Fall back to first non-extension candidate, or any candidate
+  return candidates.find(m => !EXTENSION_PROVIDERS.has(m.provider)) ?? candidates[0];
 }

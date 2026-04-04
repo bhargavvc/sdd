@@ -102,6 +102,8 @@ A stale lock (PID is dead) means the previous auto-mode session crashed mid-unit
 
 A unit dispatched more than once (`type/id` appears multiple times) indicates a stuck loop — the unit completed but artifact verification failed.
 
+{{dedupSection}}
+
 ## Investigation Protocol
 
 1. **Start with the pre-parsed forensic report** above. The anomaly section contains automated findings — treat these as leads, not conclusions.
@@ -133,9 +135,7 @@ Explain your findings:
 - **Code snippet** — the problematic code and what it should do instead
 - **Recovery** — what the user can do right now to get unstuck
 
-{{dedupSection}}
-
-Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on sdd-build/sdd-2?"
+Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on gsd-build/gsd-2?"
 
 **CRITICAL: The `github_issues` tool ONLY targets the current user's repository — it has no `repo` parameter. You MUST use `gh issue create --repo sdd-build/sdd-2` via the `bash` tool to file on the correct repo. Do NOT use the `github_issues` tool for this.**
 

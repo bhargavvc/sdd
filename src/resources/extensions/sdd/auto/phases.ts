@@ -26,7 +26,7 @@ import { runUnit } from "./run-unit.js";
 import { debugLog } from "../debug-logger.js";
 import { PROJECT_FILES } from "../detection.js";
 import { MergeConflictError } from "../git-service.js";
-import { join } from "node:path";
+import { join, basename } from "node:path";
 import { existsSync, cpSync } from "node:fs";
 import { logWarning, logError } from "../workflow-logger.js";
 import { sddRoot } from "../paths.js";
@@ -42,6 +42,17 @@ import { writeUnitRuntimeRecord } from "../unit-runtime.js";
  * Exported for testing as _resolveReportBasePath.
  */
 export function _resolveReportBasePath(s: Pick<AutoSession, "originalBasePath" | "basePath">): string {
+  return s.originalBasePath || s.basePath;
+}
+
+/**
+ * Resolve the authoritative project base for dispatch guards.
+ * Prior-milestone completion lives at the project root, even when the active
+ * unit is running inside an auto worktree.
+ */
+export function _resolveDispatchGuardBasePath(
+  s: Pick<AutoSession, "originalBasePath" | "basePath">,
+): string {
   return s.originalBasePath || s.basePath;
 }
 
@@ -219,6 +230,7 @@ export async function runPreDispatch(
       `Milestone ${s.currentMilestoneId} complete!`,
       "success",
       "milestone",
+      basename(s.originalBasePath || s.basePath),
     );
     deps.logCmuxEvent(
       prefs,
@@ -377,6 +389,7 @@ export async function runPreDispatch(
         "All milestones complete!",
         "success",
         "milestone",
+        basename(s.originalBasePath || s.basePath),
       );
       deps.logCmuxEvent(
         prefs,
@@ -399,8 +412,8 @@ export async function runPreDispatch(
     } else if (state.phase === "blocked") {
       const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
       await deps.stopAuto(ctx, pi, blockerMsg);
-      ctx.ui.notify(`${blockerMsg}. Fix and run /sdd auto.`, "warning");
-      deps.sendDesktopNotification("SDD", blockerMsg, "error", "attention");
+      ctx.ui.notify(`${blockerMsg}. Fix and run /gsd auto.`, "warning");
+      deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
       deps.logCmuxEvent(prefs, blockerMsg, "error");
     } else {
       const ids = incomplete.map((m: { id: string }) => m.id).join(", ");
@@ -481,6 +494,7 @@ export async function runPreDispatch(
       `Milestone ${mid} complete!`,
       "success",
       "milestone",
+      basename(s.originalBasePath || s.basePath),
     );
     deps.logCmuxEvent(
       prefs,
@@ -497,8 +511,8 @@ export async function runPreDispatch(
   if (state.phase === "blocked") {
     const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
     await closeoutAndStop(ctx, pi, s, deps, blockerMsg);
-    ctx.ui.notify(`${blockerMsg}. Fix and run /sdd auto.`, "warning");
-    deps.sendDesktopNotification("SDD", blockerMsg, "error", "attention");
+    ctx.ui.notify(`${blockerMsg}. Fix and run /gsd auto.`, "warning");
+    deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
     deps.logCmuxEvent(prefs, blockerMsg, "error");
     debugLog("autoLoop", { phase: "exit", reason: "blocked" });
     deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "terminal", data: { reason: "blocked", blockers: state.blockers } });
@@ -667,9 +681,10 @@ export async function runDispatch(
     prompt = preDispatchResult.prompt;
   }
 
+  const guardBasePath = _resolveDispatchGuardBasePath(s);
   const priorSliceBlocker = deps.getPriorSliceCompletionBlocker(
-    s.basePath,
-    deps.getMainBranch(s.basePath),
+    guardBasePath,
+    deps.getMainBranch(guardBasePath),
     unitType,
     unitId,
   );
@@ -694,7 +709,7 @@ export async function runDispatch(
 // ─── runGuards ────────────────────────────────────────────────────────────────
 
 /**
- * Phase 2: Guards — budget ceiling, context window, secrets re-check.
+ * Phase 2: Guards — stop directives, budget ceiling, context window, secrets re-check.
  * Returns break to exit the loop, or next to proceed to dispatch.
  */
 export async function runGuards(
@@ -703,12 +718,63 @@ export async function runGuards(
 ): Promise<PhaseResult> {
   const { ctx, pi, s, deps, prefs } = ic;
 
+  // ── Stop/Backtrack directive guard (#3487) ──
+  // Check for unexecuted stop or backtrack captures BEFORE dispatching any unit.
+  // This ensures user "halt" directives are honored immediately.
+  try {
+    const { loadStopCaptures, markCaptureExecuted } = await import("../captures.js");
+    const stopCaptures = loadStopCaptures(s.basePath);
+    if (stopCaptures.length > 0) {
+      const first = stopCaptures[0];
+      const isBacktrack = first.classification === "backtrack";
+      const label = isBacktrack
+        ? `Backtrack directive: ${first.text}`
+        : `Stop directive: ${first.text}`;
+
+      ctx.ui.notify(label, "warning");
+      deps.sendDesktopNotification(
+        "GSD", label, "warning", "stop-directive",
+        basename(s.originalBasePath || s.basePath),
+      );
+
+      // Mark all stop/backtrack captures as executed so they don't re-fire
+      for (const cap of stopCaptures) {
+        markCaptureExecuted(s.basePath, cap.id);
+      }
+
+      // For backtrack captures, write the backtrack trigger before pausing
+      if (isBacktrack) {
+        try {
+          const { executeBacktrack } = await import("../triage-resolution.js");
+          executeBacktrack(s.basePath, mid, first);
+        } catch (e) {
+          debugLog("guards", { phase: "backtrack-execution-error", error: String(e) });
+        }
+      }
+
+      await deps.pauseAuto(ctx, pi);
+      debugLog("autoLoop", { phase: "exit", reason: isBacktrack ? "user-backtrack" : "user-stop" });
+      return { action: "break", reason: isBacktrack ? "user-backtrack" : "user-stop" };
+    }
+  } catch (e) {
+    debugLog("guards", { phase: "stop-guard-error", error: String(e) });
+  }
+
   // Budget ceiling guard
   const budgetCeiling = prefs?.budget_ceiling;
   if (budgetCeiling !== undefined && budgetCeiling > 0) {
     const currentLedger = deps.getLedger() as { units: unknown } | null;
-    const totalCost = currentLedger
-      ? deps.getProjectTotals(currentLedger.units).cost
+    // In parallel worker mode, only count cost from the current auto-mode session
+    // to avoid hitting the ceiling due to historical project-wide spend (#2184).
+    let costUnits = currentLedger?.units;
+    if (process.env.GSD_PARALLEL_WORKER && s.autoStartTime && Array.isArray(costUnits)) {
+      const sessionStartISO = new Date(s.autoStartTime).toISOString();
+      costUnits = costUnits.filter(
+        (u: { startedAt?: string }) => u.startedAt != null && u.startedAt >= sessionStartISO,
+      );
+    }
+    const totalCost = costUnits
+      ? deps.getProjectTotals(costUnits).cost
       : 0;
     const budgetPct = totalCost / budgetCeiling;
     const budgetAlertLevel = deps.getBudgetAlertLevel(budgetPct);
@@ -734,7 +800,7 @@ export async function runGuards(
         // 100% — special enforcement logic (halt/pause/warn)
         const msg = `Budget ceiling ${deps.formatCost(budgetCeiling)} reached (spent ${deps.formatCost(totalCost)}).`;
         if (budgetEnforcementAction === "halt") {
-          deps.sendDesktopNotification("SDD", msg, "error", "budget");
+          deps.sendDesktopNotification("GSD", msg, "error", "budget", basename(s.originalBasePath || s.basePath));
           await deps.stopAuto(ctx, pi, "Budget ceiling reached");
           debugLog("autoLoop", { phase: "exit", reason: "budget-halt" });
           return { action: "break", reason: "budget-halt" };
@@ -744,14 +810,14 @@ export async function runGuards(
             `${msg} Pausing auto-mode — /sdd auto to override and continue.`,
             "warning",
           );
-          deps.sendDesktopNotification("SDD", msg, "warning", "budget");
+          deps.sendDesktopNotification("GSD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
           deps.logCmuxEvent(prefs, msg, "warning");
           await deps.pauseAuto(ctx, pi);
           debugLog("autoLoop", { phase: "exit", reason: "budget-pause" });
           return { action: "break", reason: "budget-pause" };
         }
         ctx.ui.notify(`${msg} Continuing (enforcement: warn).`, "warning");
-        deps.sendDesktopNotification("SDD", msg, "warning", "budget");
+        deps.sendDesktopNotification("GSD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
         deps.logCmuxEvent(prefs, msg, "warning");
       } else if (threshold.pct < 100) {
         // Sub-100% — simple notification
@@ -762,6 +828,7 @@ export async function runGuards(
           msg,
           threshold.notifyLevel,
           "budget",
+          basename(s.originalBasePath || s.basePath),
         );
         deps.logCmuxEvent(prefs, msg, threshold.cmuxLevel);
       }
@@ -791,6 +858,7 @@ export async function runGuards(
         `Context ${contextUsage.percent}% — paused`,
         "warning",
         "attention",
+        basename(s.originalBasePath || s.basePath),
       );
       await deps.pauseAuto(ctx, pi);
       debugLog("autoLoop", { phase: "exit", reason: "context-window" });
@@ -908,6 +976,23 @@ export async function runUnitPhase(
     },
   );
 
+  // Select and apply model (with tier escalation on retry — normal units only)
+  const modelResult = await deps.selectAndApplyModel(
+    ctx,
+    pi,
+    unitType,
+    unitId,
+    s.basePath,
+    prefs,
+    s.verbose,
+    s.autoModeStartModel,
+    sidecarItem ? undefined : { isRetry, previousTier },
+  );
+  s.currentUnitRouting =
+    modelResult.routing as AutoSession["currentUnitRouting"];
+  s.currentUnitModel =
+    modelResult.appliedModel as AutoSession["currentUnitModel"];
+
   // Status bar + progress widget
   ctx.ui.setStatus("sdd-auto", "auto");
   if (mid)
@@ -980,21 +1065,6 @@ export async function runUnitPhase(
     logWarning("engine", "Prompt reorder failed", { error: msg });
   }
 
-  // Select and apply model (with tier escalation on retry — normal units only)
-  const modelResult = await deps.selectAndApplyModel(
-    ctx,
-    pi,
-    unitType,
-    unitId,
-    s.basePath,
-    prefs,
-    s.verbose,
-    s.autoModeStartModel,
-    sidecarItem ? undefined : { isRetry, previousTier },
-  );
-  s.currentUnitRouting =
-    modelResult.routing as AutoSession["currentUnitRouting"];
-
   // Apply sidecar/pre-dispatch hook model override (takes priority over standard model selection)
   const hookModelOverride = sidecarItem?.model ?? iterData.hookModelOverride;
   if (hookModelOverride) {
@@ -1003,6 +1073,7 @@ export async function runUnitPhase(
     if (match) {
       const ok = await pi.setModel(match, { persist: false });
       if (ok) {
+        s.currentUnitModel = match as AutoSession["currentUnitModel"];
         ctx.ui.notify(`Hook model override: ${match.provider}/${match.id}`, "info");
       } else {
         ctx.ui.notify(
@@ -1118,14 +1189,18 @@ export async function runUnitPhase(
   // ── Immediate unit closeout (metrics, activity log, memory) ────────
   // Run right after runUnit() returns so telemetry is never lost to a
   // crash between iterations.
-  await deps.closeoutUnit(
-    ctx,
-    s.basePath,
-    unitType,
-    unitId,
-    s.currentUnit.startedAt,
-    deps.buildSnapshotOpts(unitType, unitId),
-  );
+  // Guard: stopAuto() may have nulled s.currentUnit via s.reset() while
+  // this coroutine was suspended at `await runUnit(...)` (#2939).
+  if (s.currentUnit) {
+    await deps.closeoutUnit(
+      ctx,
+      s.basePath,
+      unitType,
+      unitId,
+      s.currentUnit.startedAt,
+      deps.buildSnapshotOpts(unitType, unitId),
+    );
+  }
 
   // ── Zero tool-call guard (#1833) ──────────────────────────────────
   // An execute-task agent that completes with 0 tool calls made no
@@ -1135,7 +1210,7 @@ export async function runUnitPhase(
     const currentLedger = deps.getLedger() as { units: Array<{ type: string; id: string; startedAt: number; toolCalls: number }> } | null;
     if (currentLedger?.units) {
       const lastUnit = [...currentLedger.units].reverse().find(
-        (u: { type: string; id: string; startedAt: number; toolCalls: number }) => u.type === unitType && u.id === unitId && u.startedAt === s.currentUnit!.startedAt,
+        (u: { type: string; id: string; startedAt: number; toolCalls: number }) => u.type === unitType && u.id === unitId && u.startedAt === s.currentUnit?.startedAt,
       );
       if (lastUnit && lastUnit.toolCalls === 0) {
         debugLog("runUnitPhase", {
@@ -1150,7 +1225,7 @@ export async function runUnitPhase(
         );
         // Fall through to next iteration where dispatch will re-derive
         // and re-dispatch this task.
-        return { action: "next", data: { unitStartedAt: s.currentUnit.startedAt } };
+        return { action: "next", data: { unitStartedAt: s.currentUnit?.startedAt } };
       }
     }
   }
@@ -1172,9 +1247,26 @@ export async function runUnitPhase(
     s.unitRecoveryCount.delete(`${unitType}/${unitId}`);
   }
 
+  // Write phase handoff anchor after successful research/planning completion
+  const anchorPhases = new Set(["research-milestone", "research-slice", "plan-milestone", "plan-slice"]);
+  if (artifactVerified && mid && anchorPhases.has(unitType)) {
+    try {
+      const { writePhaseAnchor } = await import("../phase-anchor.js");
+      writePhaseAnchor(s.basePath, mid, {
+        phase: unitType,
+        milestoneId: mid,
+        generatedAt: new Date().toISOString(),
+        intent: `Completed ${unitType} for ${unitId}`,
+        decisions: [],
+        blockers: [],
+        nextSteps: [],
+      });
+    } catch { /* non-fatal — anchor is advisory */ }
+  }
+
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified, ...(unitResult.errorContext ? { errorContext: unitResult.errorContext } : {}) }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
 
-  return { action: "next", data: { unitStartedAt: s.currentUnit.startedAt } };
+  return { action: "next", data: { unitStartedAt: s.currentUnit?.startedAt } };
 }
 
 // ─── runFinalize ──────────────────────────────────────────────────────────────

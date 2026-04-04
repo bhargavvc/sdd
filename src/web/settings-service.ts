@@ -142,6 +142,7 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
           SDD_SETTINGS_BASE: projectCwd,
         },
         maxBuffer: SETTINGS_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

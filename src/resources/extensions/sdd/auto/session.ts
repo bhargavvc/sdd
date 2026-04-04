@@ -16,7 +16,8 @@
  * `let` or `var` declarations.
  */
 
-import type { ExtensionCommandContext } from "@sdd/pi-coding-agent";
+import type { Api, Model } from "@gsd/pi-ai";
+import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
 import type { GitServiceImpl } from "../git-service.js";
 import type { CaptureEntry } from "../captures.js";
 import type { BudgetAlertLevel } from "../auto-budget.js";
@@ -103,6 +104,7 @@ export class AutoSession {
 
   // ── Model state ──────────────────────────────────────────────────────────
   autoModeStartModel: StartModel | null = null;
+  currentUnitModel: Model<Api> | null = null;
   originalModelId: string | null = null;
   originalModelProvider: string | null = null;
   lastBudgetAlertLevel: BudgetAlertLevel = 0;
@@ -190,6 +192,7 @@ export class AutoSession {
 
     // Model
     this.autoModeStartModel = null;
+    this.currentUnitModel = null;
     this.originalModelId = null;
     this.originalModelProvider = null;
     this.lastBudgetAlertLevel = 0;

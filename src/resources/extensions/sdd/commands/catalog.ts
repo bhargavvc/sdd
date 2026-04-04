@@ -14,8 +14,8 @@ export interface SddCommandDefinition {
 
 type CompletionMap = Record<string, readonly SddCommandDefinition[]>;
 
-export const SDD_COMMAND_DESCRIPTION =
-  "SDD — Spec-Driven Development: /sdd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
+export const GSD_COMMAND_DESCRIPTION =
+  "GSD — Get Shit Done: /gsd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink|codebase";
 
 export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
@@ -59,7 +59,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "inspect", desc: "Show SQLite DB diagnostics" },
   { cmd: "knowledge", desc: "Add persistent project knowledge (rule, pattern, or lesson)" },
   { cmd: "new-milestone", desc: "Create a milestone from a specification document (headless)" },
-  { cmd: "parallel", desc: "Parallel milestone orchestration (start, status, stop, merge)" },
+  { cmd: "parallel", desc: "Parallel milestone orchestration (start, status, stop, merge, watch)" },
   { cmd: "cmux", desc: "Manage cmux integration (status, sidebar, notifications, splits)" },
   { cmd: "park", desc: "Park a milestone — skip without deleting" },
   { cmd: "unpark", desc: "Reactivate a parked milestone" },
@@ -71,6 +71,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "mcp", desc: "MCP server status and connectivity check (status, check <server>)" },
   { cmd: "rethink", desc: "Conversational project reorganization — reorder, park, discard, add milestones" },
   { cmd: "workflow", desc: "Custom workflow lifecycle (new, run, list, validate, pause, resume)" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.gsd/CODEBASE.md)" },
 ];
 
 const NESTED_COMPLETIONS: CompletionMap = {
@@ -100,6 +101,7 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "pause", desc: "Pause a specific worker" },
     { cmd: "resume", desc: "Resume a paused worker" },
     { cmd: "merge", desc: "Merge completed milestone branches" },
+    { cmd: "watch", desc: "Live TUI dashboard monitoring all workers" },
   ],
   setup: [
     { cmd: "llm", desc: "Configure LLM provider settings" },
@@ -223,6 +225,14 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "validate", desc: "Validate a workflow definition YAML" },
     { cmd: "pause", desc: "Pause custom workflow auto-mode" },
     { cmd: "resume", desc: "Resume paused custom workflow auto-mode" },
+  ],
+  codebase: [
+    { cmd: "generate", desc: "Generate or regenerate CODEBASE.md" },
+    { cmd: "generate --max-files", desc: "Generate with custom file limit (default: 500)" },
+    { cmd: "update", desc: "Incremental update (preserves descriptions)" },
+    { cmd: "update --max-files", desc: "Update with custom file limit" },
+    { cmd: "stats", desc: "Show file count, description coverage, and generation time" },
+    { cmd: "help", desc: "Show usage and available subcommands" },
   ],
 };
 

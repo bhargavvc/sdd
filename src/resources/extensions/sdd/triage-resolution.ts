@@ -10,7 +10,7 @@
  * Also provides detectFileOverlap() for surfacing downstream impact on quick tasks.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 import { sddRoot, milestonesDir } from "./paths.js";
@@ -22,6 +22,7 @@ import {
   loadActionableCaptures,
   markCaptureResolved,
   markCaptureExecuted,
+  stampCaptureMilestone,
 } from "./captures.js";
 
 // ─── Resolution Executors ─────────────────────────────────────────────────────
@@ -126,6 +127,129 @@ export function executeReplan(
   } catch {
     return false;
   }
+}
+
+// ─── Backtrack (Milestone Regression) ────────────────────────────────────────
+
+/**
+ * Execute a backtrack directive — user wants to abandon current milestone
+ * and return to a previous one (milestone regression).
+ *
+ * Writes a BACKTRACK-TRIGGER.md marker at `.gsd/BACKTRACK-TRIGGER.md` with
+ * the target milestone, reason, and timestamp. The state machine (deriveState)
+ * detects this and transitions the project to the target milestone, resetting
+ * its slices to allow re-planning.
+ *
+ * Returns the extracted target milestone ID, or null if extraction failed.
+ */
+export function executeBacktrack(
+  basePath: string,
+  currentMilestoneId: string,
+  capture: CaptureEntry,
+): string | null {
+  try {
+    // Extract target milestone from capture text or resolution
+    const targetMatch = (capture.resolution ?? capture.text)
+      .match(/\b(M\d{3}(?:-[a-z0-9]{6})?)\b/);
+    const targetMilestoneId = targetMatch?.[1] ?? null;
+
+    const ts = new Date().toISOString();
+    const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+    const content = [
+      `# Backtrack Trigger`,
+      ``,
+      `**Source:** Capture ${capture.id}`,
+      `**Capture:** ${capture.text}`,
+      `**Rationale:** ${capture.rationale ?? "User-initiated milestone backtrack"}`,
+      `**From:** ${currentMilestoneId}`,
+      `**Target:** ${targetMilestoneId ?? "(user to specify)"}`,
+      `**Triggered:** ${ts}`,
+      ``,
+      `Auto-mode was paused by this backtrack directive. The user directed`,
+      `that the current milestone (${currentMilestoneId}) be abandoned and work`,
+      `should return to ${targetMilestoneId ?? "a previous milestone"}.`,
+      ``,
+      `## Recovery Steps`,
+      ``,
+      `1. Review what went wrong in ${currentMilestoneId}`,
+      `2. Identify missing features/requirements from the target milestone`,
+      `3. Resume auto-mode — the state machine will re-enter discussion for the target`,
+    ].join("\n");
+
+    writeFileSync(triggerPath, content, "utf-8");
+
+    // If we have a valid target, also reset that milestone's completion status
+    // so deriveState() will re-enter it as the active milestone.
+    if (targetMilestoneId) {
+      try {
+        const targetDir = join(milestonesDir(basePath), targetMilestoneId);
+        if (existsSync(targetDir)) {
+          // Write a regression marker so the state machine knows this milestone
+          // needs re-discussion, not just re-execution
+          const regressionPath = join(targetDir, `${targetMilestoneId}-REGRESSION.md`);
+          writeFileSync(regressionPath, [
+            `# Milestone Regression`,
+            ``,
+            `**From:** ${currentMilestoneId}`,
+            `**Reason:** ${capture.text}`,
+            `**Triggered:** ${ts}`,
+            ``,
+            `This milestone is being revisited because downstream milestone`,
+            `${currentMilestoneId} failed or missed critical features that should`,
+            `have been part of this milestone's scope.`,
+            ``,
+            `The discuss phase should re-evaluate requirements and identify gaps.`,
+          ].join("\n"), "utf-8");
+        }
+      } catch { /* best-effort */ }
+    }
+
+    return targetMilestoneId;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Read the backtrack trigger file if it exists.
+ * Returns the parsed target milestone and metadata, or null.
+ */
+export function readBacktrackTrigger(basePath: string): {
+  target: string | null;
+  from: string | null;
+  capture: string;
+  triggeredAt: string;
+} | null {
+  const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+  if (!existsSync(triggerPath)) return null;
+
+  try {
+    const content = readFileSync(triggerPath, "utf-8");
+    const target = content.match(/\*\*Target:\*\*\s*(.+)/)?.[1]?.trim() ?? null;
+    const from = content.match(/\*\*From:\*\*\s*(.+)/)?.[1]?.trim() ?? null;
+    const capture = content.match(/\*\*Capture:\*\*\s*(.+)/)?.[1]?.trim() ?? "";
+    const triggeredAt = content.match(/\*\*Triggered:\*\*\s*(.+)/)?.[1]?.trim() ?? "";
+    return {
+      target: target === "(user to specify)" ? null : target,
+      from,
+      capture,
+      triggeredAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Remove the backtrack trigger after it has been processed.
+ */
+export function clearBacktrackTrigger(basePath: string): void {
+  const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+  try {
+    if (existsSync(triggerPath)) {
+      unlinkSync(triggerPath);
+    }
+  } catch { /* best-effort */ }
 }
 
 // ─── File Overlap Detection ───────────────────────────────────────────────────
@@ -271,11 +395,15 @@ export function buildQuickTaskPrompt(capture: CaptureEntry): string {
     ``,
     `## Instructions`,
     ``,
-    `1. Execute this task as a small, self-contained change.`,
-    `2. Do NOT modify any \`.sdd/\` plan files — this is a one-off, not a planned task.`,
-    `3. Commit your changes with a descriptive message.`,
-    `4. Keep changes minimal and focused on the capture text.`,
-    `5. When done, say: "Quick task complete."`,
+    `1. **Verify the issue still exists.** Before making any changes, inspect the`,
+    `   relevant code to confirm the problem described above is actually present in`,
+    `   the current codebase. If the issue has already been fixed (e.g., by planned`,
+    `   milestone work), report "Already resolved — no changes needed." and stop.`,
+    `2. Execute this task as a small, self-contained change.`,
+    `3. Do NOT modify any \`.gsd/\` plan files — this is a one-off, not a planned task.`,
+    `4. Commit your changes with a descriptive message.`,
+    `5. Keep changes minimal and focused on the capture text.`,
+    `6. When done, say: "Quick task complete."`,
   ].join("\n");
 }
 
@@ -293,6 +421,10 @@ export interface TriageExecutionResult {
   deferredMilestones: number;
   /** Captures classified as quick-task that need dispatch */
   quickTasks: CaptureEntry[];
+  /** Number of stop directives (will pause auto-mode via guard) */
+  stopped: number;
+  /** Backtrack captures (will trigger milestone regression via guard) */
+  backtracks: CaptureEntry[];
   /** Details of each action taken, for logging */
   actions: string[];
 }
@@ -321,10 +453,24 @@ export function executeTriageResolutions(
     replanned: 0,
     deferredMilestones: 0,
     quickTasks: [],
+    stopped: 0,
+    backtracks: [],
     actions: [],
   };
 
-  const actionable = loadActionableCaptures(basePath);
+  const actionable = loadActionableCaptures(basePath, mid || undefined);
+
+  // Reconciliation: stamp actionable captures that are missing the Milestone field
+  // with the current milestone ID.  This covers captures resolved by the triage LLM
+  // before the prompt included the Milestone instruction, and acts as a safety net
+  // when the LLM omits the field (#2872).
+  if (mid) {
+    for (const capture of actionable) {
+      if (!capture.resolvedInMilestone) {
+        stampCaptureMilestone(basePath, capture.id, mid);
+      }
+    }
+  }
 
   // Also process deferred captures that target milestone IDs — create
   // milestone directories so deriveState() discovers them.
@@ -389,6 +535,20 @@ export function executeTriageResolutions(
         result.actions.push(`Quick-task queued from ${capture.id}: "${capture.text}"`);
         break;
       }
+    }
+  }
+
+  // Count stop/backtrack captures — these are handled by the pre-dispatch guard
+  // in runGuards(), not here. We just report them for logging purposes.
+  const allCaptures = loadAllCaptures(basePath);
+  for (const cap of allCaptures) {
+    if (cap.status !== "resolved" || cap.executed) continue;
+    if (cap.classification === "stop") {
+      result.stopped++;
+      result.actions.push(`Stop directive from ${cap.id}: "${cap.text}" — will pause on next dispatch`);
+    } else if (cap.classification === "backtrack") {
+      result.backtracks.push(cap);
+      result.actions.push(`Backtrack directive from ${cap.id}: "${cap.text}" — will trigger milestone regression on next dispatch`);
     }
   }
 

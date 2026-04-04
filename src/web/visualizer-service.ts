@@ -98,6 +98,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
           SDD_VISUALIZER_BASE: projectCwd,
         },
         maxBuffer: VISUALIZER_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

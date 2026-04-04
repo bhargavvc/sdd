@@ -169,8 +169,9 @@ export function printHelp(version: string): void {
   process.stdout.write('  update                   Update SDD to the latest version\n')
   process.stdout.write('  sessions                 List and resume a past session\n')
   process.stdout.write('  worktree <cmd>           Manage worktrees (list, merge, clean, remove)\n')
-  process.stdout.write('  headless [cmd] [args]    Run /sdd commands without TUI (default: auto)\n')
-  process.stdout.write('\nRun sdd <subcommand> --help for subcommand-specific help.\n')
+  process.stdout.write('  auto [args]              Run auto-mode without TUI (pipeable)\n')
+  process.stdout.write('  headless [cmd] [args]    Run /gsd commands without TUI (default: auto)\n')
+  process.stdout.write('\nRun gsd <subcommand> --help for subcommand-specific help.\n')
 }
 
 export function printSubcommandHelp(subcommand: string, version: string): boolean {

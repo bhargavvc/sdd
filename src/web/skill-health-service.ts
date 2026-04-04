@@ -61,6 +61,7 @@ export async function collectSkillHealthData(projectCwdOverride?: string): Promi
           SDD_SKILL_HEALTH_BASE: projectCwd,
         },
         maxBuffer: SKILL_HEALTH_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

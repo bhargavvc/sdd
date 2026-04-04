@@ -21,6 +21,13 @@ import type {
   GateEvaluationConfig,
 } from "./types.js";
 import type { DynamicRoutingConfig } from "./model-router.js";
+
+export interface ContextManagementConfig {
+  observation_masking?: boolean;          // default: true
+  observation_mask_turns?: number;        // default: 8, range: 1-50
+  compaction_threshold_percent?: number;  // default: 0.70, range: 0.5-0.95
+  tool_result_max_chars?: number;         // default: 800, range: 200-10000
+}
 import type { GitHubSyncConfig } from "../github-sync/types.js";
 
 // ─── Workflow Modes ──────────────────────────────────────────────────────────
@@ -93,6 +100,8 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "service_tier",
   "forensics_dedup",
   "show_token_cost",
+  "stale_commit_threshold_minutes",
+  "context_management",
   "experimental",
 ]);
 
@@ -100,7 +109,8 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
 export const KNOWN_UNIT_TYPES = [
   "research-milestone", "plan-milestone", "research-slice", "plan-slice",
   "execute-task", "reactive-execute", "gate-evaluate", "complete-slice", "replan-slice", "reassess-roadmap",
-  "run-uat", "complete-milestone",
+  "run-uat", "complete-milestone", "validate-milestone", "rewrite-docs",
+  "discuss-milestone", "discuss-slice", "worktree-merge",
 ] as const;
 export type UnitType = (typeof KNOWN_UNIT_TYPES)[number];
 
@@ -134,9 +144,11 @@ export interface SDDPhaseModelConfig {
 export interface SDDModelConfig {
   research?: string;
   planning?: string;
+  discuss?: string;
   execution?: string;
   execution_simple?: string;
   completion?: string;
+  validation?: string;
   subagent?: string;
 }
 
@@ -144,13 +156,15 @@ export interface SDDModelConfig {
  * Extended model config with per-phase fallback support.
  * Each phase can specify a primary model and ordered fallbacks.
  */
-export interface SDDModelConfigV2 {
-  research?: string | SDDPhaseModelConfig;
-  planning?: string | SDDPhaseModelConfig;
-  execution?: string | SDDPhaseModelConfig;
-  execution_simple?: string | SDDPhaseModelConfig;
-  completion?: string | SDDPhaseModelConfig;
-  subagent?: string | SDDPhaseModelConfig;
+export interface GSDModelConfigV2 {
+  research?: string | GSDPhaseModelConfig;
+  planning?: string | GSDPhaseModelConfig;
+  discuss?: string | GSDPhaseModelConfig;
+  execution?: string | GSDPhaseModelConfig;
+  execution_simple?: string | GSDPhaseModelConfig;
+  completion?: string | GSDPhaseModelConfig;
+  validation?: string | GSDPhaseModelConfig;
+  subagent?: string | GSDPhaseModelConfig;
 }
 
 /** Normalized model selection with resolved fallbacks */
@@ -221,6 +235,7 @@ export interface SDDPreferences {
   post_unit_hooks?: PostUnitHookConfig[];
   pre_dispatch_hooks?: PreDispatchHookConfig[];
   dynamic_routing?: DynamicRoutingConfig;
+  context_management?: ContextManagementConfig;
   token_profile?: TokenProfile;
   phases?: PhaseSkipPreferences;
   auto_visualize?: boolean;
@@ -248,6 +263,13 @@ export interface SDDPreferences {
   forensics_dedup?: boolean;
   /** Opt-in: show per-prompt and cumulative session token cost in the footer. Default: false. */
   show_token_cost?: boolean;
+  /**
+   * Minutes without a commit before flagging uncommitted changes as stale.
+   * When the threshold is exceeded and the working tree is dirty, doctor will
+   * auto-commit a safety snapshot tagged with `[gsd safety]`. Default: 30.
+   * Set to 0 to disable.
+   */
+  stale_commit_threshold_minutes?: number;
   /**
    * Opt-in experimental features. All features here are disabled by default.
    * See the preferences reference for details on each feature.

@@ -1,10 +1,32 @@
 import * as vscode from "vscode";
 import { SddClient, ThinkingLevel } from "./sdd-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
-import { SddSidebarProvider } from "./sidebar.js";
+import { GsdSidebarProvider } from "./sidebar.js";
+import { GsdFileDecorationProvider } from "./file-decorations.js";
+import { GsdBashTerminal } from "./bash-terminal.js";
+import { GsdSessionTreeProvider } from "./session-tree.js";
+import { GsdConversationHistoryPanel } from "./conversation-history.js";
+import { GsdSlashCompletionProvider } from "./slash-completion.js";
+import { GsdCodeLensProvider } from "./code-lens.js";
+import { GsdActivityFeedProvider } from "./activity-feed.js";
+import { GsdChangeTracker } from "./change-tracker.js";
+import { GsdScmProvider } from "./scm-provider.js";
+import { GsdDiagnosticBridge } from "./diagnostics.js";
+import { GsdLineDecorationManager } from "./line-decorations.js";
+import { GsdGitIntegration } from "./git-integration.js";
+import { GsdPermissionManager } from "./permissions.js";
 
-let client: SddClient | undefined;
-let sidebarProvider: SddSidebarProvider | undefined;
+let client: GsdClient | undefined;
+let sidebarProvider: GsdSidebarProvider | undefined;
+let fileDecorations: GsdFileDecorationProvider | undefined;
+let sessionTreeProvider: GsdSessionTreeProvider | undefined;
+let activityFeedProvider: GsdActivityFeedProvider | undefined;
+let changeTracker: GsdChangeTracker | undefined;
+let scmProvider: GsdScmProvider | undefined;
+let diagnosticBridge: GsdDiagnosticBridge | undefined;
+let lineDecorations: GsdLineDecorationManager | undefined;
+let gitIntegration: GsdGitIntegration | undefined;
+let permissionManager: GsdPermissionManager | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
@@ -52,6 +74,147 @@ export function activate(context: vscode.ExtensionContext): void {
 			sidebarProvider,
 		),
 	);
+
+	// -- File decorations --------------------------------------------------
+
+	fileDecorations = new GsdFileDecorationProvider(client);
+	context.subscriptions.push(
+		fileDecorations,
+		vscode.window.registerFileDecorationProvider(fileDecorations),
+	);
+
+	// -- Bash terminal -----------------------------------------------------
+
+	const bashTerminal = new GsdBashTerminal(client);
+	context.subscriptions.push(bashTerminal);
+
+	// -- Session tree view -------------------------------------------------
+
+	sessionTreeProvider = new GsdSessionTreeProvider(client);
+	context.subscriptions.push(
+		sessionTreeProvider,
+		vscode.window.registerTreeDataProvider(GsdSessionTreeProvider.viewId, sessionTreeProvider),
+	);
+
+	// -- Activity feed -----------------------------------------------------
+
+	activityFeedProvider = new GsdActivityFeedProvider(client);
+	context.subscriptions.push(
+		activityFeedProvider,
+		vscode.window.registerTreeDataProvider(GsdActivityFeedProvider.viewId, activityFeedProvider),
+	);
+
+	// -- Change tracker & SCM provider -------------------------------------
+
+	changeTracker = new GsdChangeTracker(client);
+	context.subscriptions.push(changeTracker);
+
+	scmProvider = new GsdScmProvider(changeTracker, cwd);
+	context.subscriptions.push(scmProvider);
+
+	// -- Diagnostics -------------------------------------------------------
+
+	diagnosticBridge = new GsdDiagnosticBridge(client);
+	context.subscriptions.push(diagnosticBridge);
+
+	// -- Line-level decorations --------------------------------------------
+
+	lineDecorations = new GsdLineDecorationManager(changeTracker!);
+	context.subscriptions.push(lineDecorations);
+
+	// -- Git integration ---------------------------------------------------
+
+	gitIntegration = new GsdGitIntegration(changeTracker!, cwd);
+	context.subscriptions.push(gitIntegration);
+
+	// -- Permissions -------------------------------------------------------
+
+	permissionManager = new GsdPermissionManager(client);
+	context.subscriptions.push(permissionManager);
+
+	// -- Progress notifications --------------------------------------------
+
+	let currentProgress: { resolve: () => void } | undefined;
+
+	client.onEvent((evt) => {
+		const showProgress = vscode.workspace.getConfiguration("gsd").get<boolean>("showProgressNotifications", true);
+		if (!showProgress) return;
+
+		if (evt.type === "agent_start" && !currentProgress) {
+			vscode.window.withProgress(
+				{
+					location: vscode.ProgressLocation.Notification,
+					title: "GSD Agent",
+					cancellable: true,
+				},
+				(progress, token) => {
+					token.onCancellationRequested(() => {
+						client?.abort().catch(() => {});
+					});
+
+					// Listen for tool events to update progress message
+					const toolListener = client!.onEvent((toolEvt) => {
+						if (toolEvt.type === "tool_execution_start") {
+							const toolName = String(toolEvt.toolName ?? "");
+							progress.report({ message: `Running ${toolName}...` });
+						}
+					});
+
+					return new Promise<void>((resolve) => {
+						currentProgress = { resolve };
+						// Also clean up if disposed
+						token.onCancellationRequested(() => {
+							toolListener.dispose();
+							currentProgress = undefined;
+							resolve();
+						});
+					}).finally(() => {
+						toolListener.dispose();
+					});
+				},
+			);
+		} else if (evt.type === "agent_end" && currentProgress) {
+			currentProgress.resolve();
+			currentProgress = undefined;
+		}
+	});
+
+	// -- Context window warning --------------------------------------------
+
+	let lastContextWarning = 0;
+	client.onEvent(async (evt) => {
+		if (evt.type !== "message_end") return;
+		const showWarning = vscode.workspace.getConfiguration("gsd").get<boolean>("showContextWarning", true);
+		if (!showWarning) return;
+
+		// Throttle: at most once per 60 seconds
+		if (Date.now() - lastContextWarning < 60_000) return;
+
+		try {
+			const [state, stats] = await Promise.all([
+				client!.getState().catch(() => null),
+				client!.getSessionStats().catch(() => null),
+			]);
+			const contextWindow = state?.model?.contextWindow ?? 0;
+			const totalTokens = (stats?.inputTokens ?? 0) + (stats?.outputTokens ?? 0);
+			if (contextWindow <= 0) return;
+
+			const threshold = vscode.workspace.getConfiguration("gsd").get<number>("contextWarningThreshold", 80);
+			const pct = Math.round((totalTokens / contextWindow) * 100);
+			if (pct >= threshold) {
+				lastContextWarning = Date.now();
+				const action = await vscode.window.showWarningMessage(
+					`Context window ${pct}% full (${Math.round(totalTokens / 1000)}k / ${Math.round(contextWindow / 1000)}k). Consider compacting.`,
+					"Compact Now",
+				);
+				if (action === "Compact Now") {
+					await vscode.commands.executeCommand("gsd.compact");
+				}
+			}
+		} catch {
+			// ignore
+		}
+	});
 
 	// -- Chat participant ---------------------------------------------------
 
@@ -383,6 +546,135 @@ export function activate(context: vscode.ExtensionContext): void {
 		);
 	}
 
+	// -- SCM commands -------------------------------------------------------
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.acceptAllChanges", () => {
+			changeTracker?.acceptAll();
+			vscode.window.showInformationMessage("All agent changes accepted.");
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.discardAllChanges", async () => {
+			if (!changeTracker?.hasChanges) {
+				vscode.window.showInformationMessage("No agent changes to discard.");
+				return;
+			}
+			const confirm = await vscode.window.showWarningMessage(
+				`Discard all agent changes (${changeTracker.modifiedFiles.length} files)?`,
+				{ modal: true },
+				"Discard",
+			);
+			if (confirm === "Discard") {
+				const count = await changeTracker.discardAll();
+				vscode.window.showInformationMessage(`Reverted ${count} file${count !== 1 ? "s" : ""}.`);
+			}
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.discardFileChanges", async (resourceState: vscode.SourceControlResourceState) => {
+			if (!changeTracker || !resourceState?.resourceUri) return;
+			const filePath = resourceState.resourceUri.fsPath;
+			const success = await changeTracker.discardFile(filePath);
+			if (success) {
+				vscode.window.showInformationMessage(`Reverted ${vscode.workspace.asRelativePath(filePath)}`);
+			}
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.acceptFileChanges", (resourceState: vscode.SourceControlResourceState) => {
+			if (!changeTracker || !resourceState?.resourceUri) return;
+			changeTracker.acceptFile(resourceState.resourceUri.fsPath);
+		}),
+	);
+
+	// -- Checkpoint commands ------------------------------------------------
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.restoreCheckpoint", async (checkpointId: number) => {
+			if (!changeTracker) return;
+			const checkpoint = changeTracker.checkpoints.find((c) => c.id === checkpointId);
+			if (!checkpoint) return;
+
+			const confirm = await vscode.window.showWarningMessage(
+				`Restore to "${checkpoint.label}"? This will revert files to their state at ${new Date(checkpoint.timestamp).toLocaleTimeString()}.`,
+				{ modal: true },
+				"Restore",
+			);
+			if (confirm === "Restore") {
+				const count = await changeTracker.restoreCheckpoint(checkpointId);
+				vscode.window.showInformationMessage(`Restored ${count} file${count !== 1 ? "s" : ""} to checkpoint.`);
+			}
+		}),
+	);
+
+	// -- Diagnostic commands ------------------------------------------------
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.fixProblemsInFile", async () => {
+			if (!requireConnected()) return;
+			try {
+				await diagnosticBridge!.fixProblemsInFile();
+			} catch (err) {
+				handleError(err, "Failed to fix problems");
+			}
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.fixAllProblems", async () => {
+			if (!requireConnected()) return;
+			try {
+				await diagnosticBridge!.fixAllProblems();
+			} catch (err) {
+				handleError(err, "Failed to fix problems");
+			}
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.clearDiagnostics", () => {
+			diagnosticBridge?.clearFindings();
+		}),
+	);
+
+	// -- Permission commands ------------------------------------------------
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.cycleApprovalMode", () => {
+			permissionManager?.cycleMode();
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.selectApprovalMode", () => {
+			permissionManager?.selectMode();
+		}),
+	);
+
+	// -- Git commands -------------------------------------------------------
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.commitAgentChanges", () => {
+			gitIntegration?.commitAgentChanges();
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.createAgentBranch", () => {
+			gitIntegration?.createAgentBranch();
+		}),
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("gsd.showAgentDiff", () => {
+			gitIntegration?.showAgentDiff();
+		}),
+	);
+
 	// -- Auto-start ---------------------------------------------------------
 
 	if (config.get<boolean>("autoStart", false)) {
@@ -393,6 +685,24 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {
 	client?.dispose();
 	sidebarProvider?.dispose();
+	fileDecorations?.dispose();
+	sessionTreeProvider?.dispose();
+	activityFeedProvider?.dispose();
+	changeTracker?.dispose();
+	scmProvider?.dispose();
+	diagnosticBridge?.dispose();
+	lineDecorations?.dispose();
+	gitIntegration?.dispose();
+	permissionManager?.dispose();
 	client = undefined;
 	sidebarProvider = undefined;
+	fileDecorations = undefined;
+	sessionTreeProvider = undefined;
+	activityFeedProvider = undefined;
+	changeTracker = undefined;
+	scmProvider = undefined;
+	diagnosticBridge = undefined;
+	lineDecorations = undefined;
+	gitIntegration = undefined;
+	permissionManager = undefined;
 }

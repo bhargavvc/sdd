@@ -45,6 +45,13 @@ reason: "<reason>"
 ### Unpark a milestone
 Remove the `{ID}-PARKED.md` file from the milestone directory to reactivate it.
 
+### Skip a slice
+Mark a slice as skipped so auto-mode advances past it without executing. Use the `gsd_skip_slice` tool:
+```
+gsd_skip_slice({ milestone_id: "M003", slice_id: "S02", reason: "Descoped — feature moved to M005" })
+```
+Skipped slices are treated as closed by the state machine (like "complete" but distinct). Use when a slice is no longer needed or has been superseded. The slice data is preserved for reference.
+
 ### Discard a milestone
 **Permanently** delete a milestone directory and prune it from QUEUE-ORDER.json. **Always confirm with the user before discarding.** Warn explicitly if the milestone has completed work.
 
@@ -79,5 +86,5 @@ If a proposed order would violate constraints, explain the issue and suggest alt
 - Do NOT modify completed milestones — they're done
 - Do NOT park completed milestones — it would corrupt dependency satisfaction
 - Park is preferred over discard when a milestone has any completed work
-- Always persist queue order changes to `.sdd/QUEUE-ORDER.json`
-- After changes, run `git add .sdd/ && git commit -m "docs(sdd): rethink milestone plan"` to persist (rethink runs interactively outside auto-mode, so no system auto-commit)
+- Always persist queue order changes to `.gsd/QUEUE-ORDER.json`
+- {{commitInstruction}}

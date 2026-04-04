@@ -32,11 +32,13 @@ sdd -e ./path/to/extension.ts
 
 ## Step 3: Verify File Location
 
-Extensions must be in auto-discovery paths:
-- `~/.sdd/agent/extensions/*.ts`
-- `~/.sdd/agent/extensions/*/index.ts`
-- `.sdd/extensions/*.ts`
-- `.sdd/extensions/*/index.ts`
+Community extensions must be in auto-discovery paths:
+- `~/.pi/agent/extensions/*.ts`
+- `~/.pi/agent/extensions/*/index.ts`
+- `.gsd/extensions/*.ts`
+- `.gsd/extensions/*/index.ts`
+
+Note: `~/.gsd/agent/extensions/` is reserved for bundled extensions synced from the gsd-pi package.
 
 The file must `export default function(pi: ExtensionAPI) { ... }`.
 

@@ -371,7 +371,6 @@ export function ProjectsPanel({
     // loading toast managed by WorkspaceChrome
     onOpenChange(false)
     manager.switchProject(project.path)
-    window.dispatchEvent(new CustomEvent("sdd:navigate-view", { detail: { view: "dashboard" } }))
   }
 
   // Sort: active-sdd first, then by name

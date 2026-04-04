@@ -13,6 +13,7 @@
 
 import type { ExtensionContext, ExtensionAPI } from "@sdd/pi-coding-agent";
 import { deriveState } from "./state.js";
+import { logWarning, logError } from "./workflow-logger.js";
 import { loadFile, parseSummary, resolveAllOverrides } from "./files.js";
 import { loadPrompt } from "./prompt-loader.js";
 import {
@@ -45,7 +46,7 @@ import {
   persistHookState,
   resolveHookArtifactPath,
 } from "./post-unit-hooks.js";
-import { hasPendingCaptures, loadPendingCaptures } from "./captures.js";
+import { hasPendingCaptures, loadPendingCaptures, revertExecutorResolvedCaptures } from "./captures.js";
 import { debugLog } from "./debug-logger.js";
 import { runSafely } from "./auto-utils.js";
 import type { AutoSession, SidecarItem } from "./auto/session.js";
@@ -74,7 +75,7 @@ function enqueueSidecar(
  *  Auto-commit is skipped for these — their state files are picked up by the
  *  next actual task commit via `smartStage()`. */
 const LIFECYCLE_ONLY_UNITS = new Set([
-  "research-milestone", "discuss-milestone", "plan-milestone",
+  "research-milestone", "discuss-milestone", "discuss-slice", "plan-milestone",
   "validate-milestone", "research-slice", "plan-slice",
   "replan-slice", "complete-slice", "run-uat",
   "reassess-roadmap", "rewrite-docs",
@@ -412,10 +413,10 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
           );
         }
         for (const action of triageResult.actions) {
-          process.stderr.write(`sdd-triage: ${action}\n`);
+          logWarning("engine", `triage resolution: ${action}`);
         }
       } catch (err) {
-        process.stderr.write(`sdd-triage: resolution execution failed: ${(err as Error).message}\n`);
+        logError("engine", "triage resolution failed", { error: (err as Error).message });
       }
     }
 
@@ -423,7 +424,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
     try {
       const rogueFiles = detectRogueFileWrites(s.currentUnit.type, s.currentUnit.id, s.basePath);
       for (const rogue of rogueFiles) {
-        process.stderr.write(`sdd-rogue: detected rogue file write: ${rogue.path} (unit: ${rogue.unitId})\n`);
+        logWarning("engine", "rogue file write detected", { path: rogue.path, unitId: rogue.unitId });
         ctx.ui.notify(`Rogue file write detected: ${rogue.path}`, "warning");
       }
     } catch (e) {
@@ -465,7 +466,20 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
       // When artifact verification fails for a unit type that has a known expected
       // artifact, return "retry" so the caller re-dispatches with failure context
       // instead of blindly re-dispatching the same unit (#1571).
-      if (!triggerArtifactVerified) {
+      //
+      // HOWEVER, if the DB is unavailable (db_unavailable), the artifact was never
+      // written because the completion tool failed at the infra level. Retrying
+      // can never succeed and produces a costly re-dispatch loop (#2517).
+      if (!triggerArtifactVerified && !isDbAvailable()) {
+        // DB infra failure — do NOT retry; the completion tool returned
+        // db_unavailable so the artifact was never written. Retrying would
+        // produce an infinite re-dispatch loop (#2517).
+        debugLog("postUnit", { phase: "artifact-verify-skip-db-unavailable", unitType: s.currentUnit.type, unitId: s.currentUnit.id });
+        ctx.ui.notify(
+          `Artifact missing for ${s.currentUnit.type} ${s.currentUnit.id} but DB is unavailable — skipping retry to avoid loop (#2517)`,
+          "error",
+        );
+      } else if (!triggerArtifactVerified) {
         const hasExpectedArtifact = resolveExpectedArtifactPath(s.currentUnit.type, s.currentUnit.id, s.basePath) !== null;
         if (hasExpectedArtifact) {
           const retryKey = `${s.currentUnit.type}:${s.currentUnit.id}`;
@@ -577,6 +591,53 @@ export async function postUnitPostVerification(pctx: PostUnitContext): Promise<"
 
         // Fall through to normal dispatch — deriveState will re-derive the unit
       }
+    }
+  }
+
+  // ── Fast-path stop detection (#3487) ──
+  // Before waiting for triage, check if any PENDING captures contain explicit
+  // stop/halt language. If so, pause immediately — don't wait for triage.
+  if (s.currentUnit && s.currentUnit.type !== "triage-captures") {
+    try {
+      const pending = loadPendingCaptures(s.basePath);
+      // Match only when the capture text starts with a stop/halt directive word,
+      // or the entire text is short and dominated by such a word. This avoids
+      // false positives on captures like "add a pause button" or "stop the timer
+      // from re-rendering" — those are feature descriptions, not halt directives.
+      const STOP_PATTERN = /^(stop|halt|abort|don'?t continue|pause|cease)\b/i;
+      const stopCapture = pending.find(c => STOP_PATTERN.test(c.text.trim()));
+      if (stopCapture) {
+        ctx.ui.notify(
+          `Stop directive detected in pending capture ${stopCapture.id}: "${stopCapture.text}" — pausing auto-mode.`,
+          "warning",
+        );
+        debugLog("postUnit", { phase: "fast-stop", captureId: stopCapture.id });
+        await pauseAuto(ctx, pi);
+        return "stopped";
+      }
+    } catch (e) {
+      debugLog("postUnit", { phase: "fast-stop-error", error: String(e) });
+    }
+  }
+
+  // ── Capture protection: revert executor-silenced captures (#3487) ──
+  // Non-triage agents can write **Status:** resolved to CAPTURES.md, bypassing
+  // the triage pipeline. Revert those to pending before the triage check.
+  if (
+    s.currentUnit &&
+    s.currentUnit.type !== "triage-captures"
+  ) {
+    try {
+      const reverted = revertExecutorResolvedCaptures(s.basePath);
+      if (reverted > 0) {
+        debugLog("postUnit", { phase: "capture-protection", reverted });
+        ctx.ui.notify(
+          `Reverted ${reverted} capture${reverted === 1 ? "" : "s"} silenced by executor — re-queuing for triage.`,
+          "warning",
+        );
+      }
+    } catch (e) {
+      debugLog("postUnit", { phase: "capture-protection-error", error: String(e) });
     }
   }
 

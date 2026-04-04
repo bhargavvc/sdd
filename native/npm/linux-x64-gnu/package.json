@@ -1,7 +1,7 @@
 {
   "name": "@gsd-build/engine-linux-x64-gnu",
-  "version": "2.54.0",
-  "description": "SDD native engine binary for Linux x64 (glibc)",
+  "version": "2.59.0",
+  "description": "GSD native engine binary for Linux x64 (glibc)",
   "os": [
     "linux"
   ],

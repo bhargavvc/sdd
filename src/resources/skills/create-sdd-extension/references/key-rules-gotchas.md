@@ -25,12 +25,13 @@ Non-negotiable rules and common gotchas when building SDD extensions.
 - Extension errors are logged but don't crash SDD — tool_call handler errors fail-safe (block the tool)
 </common_patterns>
 
-<sdd_paths>
-**SDD extension paths:**
-- Global: `~/.sdd/agent/extensions/*.ts`
-- Global (subdir): `~/.sdd/agent/extensions/*/index.ts`
-- Project-local: `.sdd/extensions/*.ts`
-- Project-local (subdir): `.sdd/extensions/*/index.ts`
+<gsd_paths>
+**GSD extension paths (community/user-installed extensions):**
+- Global: `~/.pi/agent/extensions/*.ts`
+- Global (subdir): `~/.pi/agent/extensions/*/index.ts`
+- Project-local: `.gsd/extensions/*.ts`
+- Project-local (subdir): `.gsd/extensions/*/index.ts`
 
-The upstream pi docs reference `~/.pi` paths — SDD uses `~/.sdd` everywhere instead.
-</sdd_paths>
+Note: `~/.gsd/agent/extensions/` is reserved for bundled extensions synced from the gsd-pi package.
+Community extensions placed there are silently ignored by the loader.
+</gsd_paths>

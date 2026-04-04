@@ -3,27 +3,21 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import type { SddClient, AgentEvent } from "./sdd-client.js";
 
-interface ChatMessage {
-	role: "user" | "assistant";
-	content: string;
+/**
+ * Send a message through VS Code's Chat panel so the user sees the response.
+ * Opens the Chat panel and pre-fills the @gsd participant with the message.
+ */
+async function sendViaChat(message: string): Promise<void> {
+	await vscode.commands.executeCommand("workbench.action.chat.open", { query: message });
 }
 
-interface MilestoneInfo {
-	id: string;
-	title: string;
-	status: "active" | "complete" | "pending" | "parked";
-	slicesDone: number;
-	slicesTotal: number;
-}
-
-interface ProjectState {
-	hasProject: boolean;
-	milestones: MilestoneInfo[];
-	activeMilestone: MilestoneInfo | null;
-}
-
-export class SddSidebarProvider implements vscode.WebviewViewProvider {
-	public static readonly viewId = "sdd-sidebar";
+/**
+ * WebviewViewProvider that renders a compact, card-based sidebar panel.
+ * Designed for information density without clutter — collapsible sections,
+ * hidden empty data, and consolidated action buttons.
+ */
+export class GsdSidebarProvider implements vscode.WebviewViewProvider {
+	public static readonly viewId = "gsd-sidebar";
 
 	private view?: vscode.WebviewView;
 	private disposables: vscode.Disposable[] = [];
@@ -111,6 +105,59 @@ export class SddSidebarProvider implements vscode.WebviewViewProvider {
 							await this.client.setAutoCompaction(!state.autoCompactionEnabled).catch(() => {});
 						}
 					}
+					break;
+				case "toggleAutoRetry":
+					if (this.client.isConnected) {
+						await this.client.setAutoRetry(!this.client.autoRetryEnabled).catch(() => {});
+						this.refresh();
+					}
+					break;
+				case "setSessionName":
+					await vscode.commands.executeCommand("gsd.setSessionName");
+					break;
+				case "copyLastResponse":
+					await vscode.commands.executeCommand("gsd.copyLastResponse");
+					break;
+				case "autoMode":
+					await sendViaChat("@gsd /gsd auto");
+					break;
+				case "nextUnit":
+					await sendViaChat("@gsd /gsd next");
+					break;
+				case "quickTask": {
+					const quickInput = await vscode.window.showInputBox({
+						prompt: "Describe the quick task",
+						placeHolder: "e.g. fix the typo in README",
+					});
+					if (quickInput) {
+						await sendViaChat(`@gsd /gsd quick ${quickInput}`);
+					}
+					break;
+				}
+				case "capture": {
+					const thought = await vscode.window.showInputBox({
+						prompt: "Capture a thought",
+						placeHolder: "e.g. we should also handle the edge case for...",
+					});
+					if (thought) {
+						await sendViaChat(`@gsd /gsd capture ${thought}`);
+					}
+					break;
+				}
+				case "status":
+					await sendViaChat("@gsd /gsd status");
+					break;
+				case "forkSession":
+					await vscode.commands.executeCommand("gsd.forkSession");
+					break;
+				case "toggleSteeringMode":
+					await vscode.commands.executeCommand("gsd.toggleSteeringMode");
+					break;
+				case "toggleFollowUpMode":
+					await vscode.commands.executeCommand("gsd.toggleFollowUpMode");
+					break;
+				case "showHistory":
+					await vscode.commands.executeCommand("gsd.showHistory");
 					break;
 			}
 		});
@@ -349,604 +396,477 @@ export class SddSidebarProvider implements vscode.WebviewViewProvider {
 	}
 
 	async refresh(): Promise<void> {
-		await this.pushFullState();
+		if (!this.view) {
+			return;
+		}
+
+		let modelName = "N/A";
+		let modelShort = "";
+		let sessionId = "N/A";
+		let sessionName = "";
+		let messageCount = 0;
+		let pendingMessageCount = 0;
+		let thinkingLevel: ThinkingLevel = "off";
+		let isStreaming = false;
+		let isCompacting = false;
+		let autoCompaction = false;
+		let autoRetry = false;
+		let stats: SessionStats | null = null;
+		let contextWindow = 0;
+		let steeringMode: "all" | "one-at-a-time" = "all";
+		let followUpMode: "all" | "one-at-a-time" = "all";
+
+		if (this.client.isConnected) {
+			autoRetry = this.client.autoRetryEnabled;
+			try {
+				const state = await this.client.getState();
+				modelName = state.model
+					? `${state.model.provider}/${state.model.id}`
+					: "Not set";
+				modelShort = state.model?.id ?? "";
+				sessionId = state.sessionId;
+				sessionName = state.sessionName ?? "";
+				messageCount = state.messageCount;
+				pendingMessageCount = state.pendingMessageCount;
+				thinkingLevel = state.thinkingLevel as ThinkingLevel;
+				isStreaming = state.isStreaming;
+				isCompacting = state.isCompacting;
+				autoCompaction = state.autoCompactionEnabled;
+				contextWindow = state.model?.contextWindow ?? 0;
+				steeringMode = state.steeringMode;
+				followUpMode = state.followUpMode;
+			} catch {
+				// State fetch failed, show defaults
+			}
+
+			try {
+				stats = await this.client.getSessionStats();
+			} catch {
+				// Stats fetch failed
+			}
+		}
+
+		const connected = this.client.isConnected;
+
+		this.view.webview.html = this.getHtml({
+			connected,
+			modelName,
+			modelShort,
+			sessionId,
+			sessionName,
+			messageCount,
+			pendingMessageCount,
+			thinkingLevel,
+			isStreaming,
+			isCompacting,
+			autoCompaction,
+			autoRetry,
+			stats,
+			contextWindow,
+			steeringMode,
+			followUpMode,
+		});
 	}
 
 	dispose(): void {
 		for (const d of this.disposables) d.dispose();
 	}
 
-	private getHtml(): string {
+	private getHtml(info: {
+		connected: boolean;
+		modelName: string;
+		modelShort: string;
+		sessionId: string;
+		sessionName: string;
+		messageCount: number;
+		pendingMessageCount: number;
+		thinkingLevel: ThinkingLevel;
+		isStreaming: boolean;
+		isCompacting: boolean;
+		autoCompaction: boolean;
+		autoRetry: boolean;
+		stats: SessionStats | null;
+		contextWindow: number;
+		steeringMode: "all" | "one-at-a-time";
+		followUpMode: "all" | "one-at-a-time";
+	}): string {
+		const statusColor = info.connected ? "#4ec9b0" : "#f44747";
+		const statusLabel = info.isStreaming ? "Working" : info.isCompacting ? "Compacting" : info.connected ? "Connected" : "Disconnected";
+
+		// Model short name for header
+		const modelDisplay = info.modelShort || "N/A";
+
+		// Session display — name or truncated ID
+		const sessionDisplay = info.sessionName || (info.sessionId !== "N/A" ? info.sessionId.slice(0, 8) : "N/A");
+
+		// Cost for header
+		const costDisplay = info.stats?.totalCost !== undefined && info.stats.totalCost > 0
+			? `$${info.stats.totalCost.toFixed(4)}`
+			: "";
+
+		// Context window
+		const totalTokens = (info.stats?.inputTokens ?? 0) + (info.stats?.outputTokens ?? 0);
+		const contextPct = info.contextWindow > 0 ? Math.min(100, Math.round((totalTokens / info.contextWindow) * 100)) : 0;
+		const contextColor = contextPct > 80 ? "#f44747" : contextPct > 50 ? "#cca700" : "#4ec9b0";
+
+		// Only show stats that have real data
+		const hasStats = info.stats && (
+			(info.stats.inputTokens !== undefined && info.stats.inputTokens > 0) ||
+			(info.stats.outputTokens !== undefined && info.stats.outputTokens > 0)
+		);
+
 		const nonce = getNonce();
-		return /* html */`<!DOCTYPE html>
+
+		// Build stat rows only for non-zero values
+		let statRows = "";
+		if (hasStats && info.stats) {
+			const pairs: [string, string][] = [];
+			if (info.stats.inputTokens) pairs.push(["In", formatNum(info.stats.inputTokens)]);
+			if (info.stats.outputTokens) pairs.push(["Out", formatNum(info.stats.outputTokens)]);
+			if (info.stats.cacheReadTokens) pairs.push(["Cache R", formatNum(info.stats.cacheReadTokens)]);
+			if (info.stats.cacheWriteTokens) pairs.push(["Cache W", formatNum(info.stats.cacheWriteTokens)]);
+			if (info.stats.turnCount) pairs.push(["Turns", String(info.stats.turnCount)]);
+			if (info.stats.duration) pairs.push(["Time", `${Math.round(info.stats.duration / 1000)}s`]);
+			if (info.stats.totalCost !== undefined && info.stats.totalCost > 0) pairs.push(["Cost", `$${info.stats.totalCost.toFixed(4)}`]);
+
+			statRows = pairs.map(([k, v]) =>
+				`<span class="stat-label">${k}</span><span class="stat-value">${v}</span>`
+			).join("");
+		}
+
+		return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
-<style>
-:root {
-	--sdd-navy: #1a1a2e;
-	--sdd-navy-light: #222240;
-	--sdd-navy-mid: #2a2a48;
-	--sdd-coral: #ff6b6b;
-	--sdd-coral-dim: #cc5555;
-	--sdd-teal: #4ec9b0;
-	--sdd-yellow: #e2b93d;
-	--sdd-text: #e0e0ec;
-	--sdd-text-dim: #8888a8;
-	--sdd-border: #333355;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-	font-family: var(--vscode-font-family);
-	font-size: var(--vscode-font-size);
-	color: var(--sdd-text);
-	background: var(--sdd-navy);
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	position: relative;
-}
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+	<style>
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: var(--vscode-font-family);
+			font-size: var(--vscode-font-size);
+			color: var(--vscode-foreground);
+			padding: 8px;
+		}
 
-/* ── Status Bar ─────────────────────────────────── */
-#status-bar {
-	display: flex; align-items: center; gap: 8px;
-	padding: 8px 12px;
-	background: var(--sdd-navy-light);
-	border-bottom: 1px solid var(--sdd-border);
-	flex-shrink: 0;
-}
-.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.dot-on { background: var(--sdd-teal); box-shadow: 0 0 6px var(--sdd-teal); }
-.dot-off { background: var(--sdd-coral); box-shadow: 0 0 6px var(--sdd-coral); }
-#model-label {
-	font-size: 11px; color: var(--sdd-text-dim);
-	flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-#btn-toggle {
-	font-size: 11px; padding: 3px 10px;
-	border: 1px solid var(--sdd-coral); border-radius: 3px;
-	cursor: pointer; background: transparent; color: var(--sdd-coral);
-	flex-shrink: 0; transition: all 0.15s;
-}
-#btn-toggle:hover { background: var(--sdd-coral); color: #fff; }
+		/* ---- Header card ---- */
+		.header {
+			padding: 10px 12px;
+			border-radius: 6px;
+			background: var(--vscode-editor-background);
+			border: 1px solid var(--vscode-panel-border);
+			margin-bottom: 8px;
+		}
+		.header-top {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		.status-dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: ${statusColor};
+			flex-shrink: 0;
+		}
+		.status-label {
+			font-size: 11px;
+			opacity: 0.7;
+			flex-shrink: 0;
+		}
+		.header-model {
+			margin-left: auto;
+			font-size: 11px;
+			font-weight: 600;
+			opacity: 0.85;
+			cursor: pointer;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.header-model:hover { opacity: 1; }
+		.header-cost {
+			font-size: 11px;
+			font-variant-numeric: tabular-nums;
+			opacity: 0.6;
+			flex-shrink: 0;
+		}
+		.header-sub {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			margin-top: 6px;
+			font-size: 11px;
+			opacity: 0.6;
+		}
+		.header-sub .sep { opacity: 0.3; }
+		.session-name {
+			cursor: pointer;
+			max-width: 120px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		.session-name:hover { opacity: 1; text-decoration: underline; }
 
-/* ── Messages Area ──────────────────────────────── */
-#messages {
-	flex: 1; overflow-y: auto; padding: 12px;
-	display: flex; flex-direction: column; gap: 10px;
-}
-#messages::-webkit-scrollbar { width: 5px; }
-#messages::-webkit-scrollbar-track { background: transparent; }
-#messages::-webkit-scrollbar-thumb { background: var(--sdd-border); border-radius: 3px; }
+		/* ---- Streaming banner ---- */
+		.streaming {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 10px;
+			margin-bottom: 8px;
+			background: color-mix(in srgb, var(--vscode-focusBorder) 15%, transparent);
+			border: 1px solid var(--vscode-focusBorder);
+			border-radius: 6px;
+			font-size: 12px;
+		}
+		.spinner {
+			width: 10px; height: 10px;
+			border: 2px solid var(--vscode-focusBorder);
+			border-top-color: transparent;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+			flex-shrink: 0;
+		}
+		@keyframes spin { to { transform: rotate(360deg); } }
+		.streaming-abort {
+			margin-left: auto;
+			font-size: 10px;
+			padding: 2px 8px;
+			border: 1px solid var(--vscode-foreground);
+			background: transparent;
+			color: var(--vscode-foreground);
+			border-radius: 3px;
+			cursor: pointer;
+			opacity: 0.6;
+		}
+		.streaming-abort:hover { opacity: 1; }
 
-/* ── Empty State / Dashboard ────────────────────── */
-.dashboard {
-	display: flex; flex-direction: column; gap: 14px; padding: 4px 0;
-}
-.dash-header {
-	text-align: center; padding: 12px 0 4px;
-}
-.dash-logo {
-	font-size: 26px; font-weight: 800; color: var(--sdd-coral); letter-spacing: 2px;
-}
-.dash-sub {
-	font-size: 10px; color: var(--sdd-text-dim); margin-top: 3px;
-}
-.dash-tips {
-	font-size: 10px; color: var(--sdd-text-dim); margin-top: 8px;
-	line-height: 1.6; text-align: left; padding: 6px 10px;
-	background: rgba(78,201,176,0.06); border: 1px solid var(--sdd-border);
-	border-radius: 6px;
-}
-.tip-icon { margin-right: 2px; }
+		/* ---- Context bar (inline in header) ---- */
+		.context-bar {
+			margin-top: 8px;
+		}
+		.context-track {
+			width: 100%;
+			height: 3px;
+			background: var(--vscode-panel-border);
+			border-radius: 2px;
+			overflow: hidden;
+		}
+		.context-fill {
+			height: 100%;
+			border-radius: 2px;
+			transition: width 0.3s ease;
+		}
+		.context-text {
+			font-size: 10px;
+			opacity: 0.5;
+			margin-top: 2px;
+		}
 
-/* ── Milestone Cards ────────────────────────────── */
-.section-label {
-	font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
-	color: var(--sdd-text-dim); padding: 0 2px; margin-bottom: -6px;
-}
-.ms-card {
-	background: var(--sdd-navy-light); border: 1px solid var(--sdd-border);
-	border-radius: 8px; padding: 10px 12px; cursor: default;
-}
-.ms-card.active { border-left: 3px solid var(--sdd-teal); }
-.ms-card.complete { border-left: 3px solid var(--sdd-teal); opacity: 0.55; }
-.ms-card.parked { border-left: 3px solid var(--sdd-yellow); opacity: 0.55; }
-.ms-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.ms-id {
-	font-size: 10px; font-weight: 700; color: var(--sdd-coral);
-	background: rgba(255,107,107,0.12); padding: 1px 5px; border-radius: 3px;
-}
-.ms-status {
-	font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
-	padding: 1px 5px; border-radius: 3px; margin-left: auto;
-}
-.ms-status-active { color: var(--sdd-teal); background: rgba(78,201,176,0.12); }
-.ms-status-complete { color: var(--sdd-teal); background: rgba(78,201,176,0.12); }
-.ms-status-parked { color: var(--sdd-yellow); background: rgba(226,185,61,0.12); }
-.ms-status-pending { color: var(--sdd-text-dim); background: rgba(136,136,168,0.12); }
-.ms-title {
-	font-size: 12px; color: var(--sdd-text); line-height: 1.3;
-	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.ms-progress { margin-top: 6px; }
-.ms-bar-bg {
-	height: 4px; background: var(--sdd-border); border-radius: 2px; overflow: hidden;
-}
-.ms-bar-fill {
-	height: 100%; border-radius: 2px; transition: width 0.3s;
-}
-.ms-bar-fill.green { background: var(--sdd-teal); }
-.ms-bar-fill.coral { background: var(--sdd-coral); }
-.ms-bar-label {
-	font-size: 9px; color: var(--sdd-text-dim); margin-top: 3px;
-	display: flex; justify-content: space-between;
-}
+		/* ---- Collapsible section ---- */
+		.section {
+			margin-bottom: 6px;
+			border: 1px solid var(--vscode-panel-border);
+			border-radius: 6px;
+			overflow: hidden;
+		}
+		.section-header {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding: 6px 10px;
+			cursor: pointer;
+			user-select: none;
+			font-size: 11px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			opacity: 0.7;
+			background: var(--vscode-editor-background);
+		}
+		.section-header:hover { opacity: 1; }
+		.chevron {
+			font-size: 10px;
+			transition: transform 0.15s;
+		}
+		.section.collapsed .section-body { display: none; }
+		.section.collapsed .chevron { transform: rotate(-90deg); }
+		.section-body {
+			padding: 6px 10px 8px;
+		}
 
-/* ── Workflow Actions Grid ──────────────────────── */
-.wf-grid {
-	display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-}
-.wf-btn {
-	display: flex; flex-direction: column; align-items: center;
-	gap: 4px; padding: 10px 6px;
-	background: var(--sdd-navy-light); border: 1px solid var(--sdd-border);
-	border-radius: 8px; cursor: pointer; color: var(--sdd-text);
-	font-size: 11px; text-align: center;
-	transition: border-color 0.15s, background 0.15s, transform 0.1s;
-}
-.wf-btn:hover { border-color: var(--sdd-coral-dim); background: var(--sdd-navy-mid); transform: translateY(-1px); }
-.wf-btn:active { transform: translateY(0); }
-.wf-icon { font-size: 18px; line-height: 1; }
-.wf-label { font-size: 10px; color: var(--sdd-text-dim); line-height: 1.2; }
-.wf-btn.primary {
-	border-color: var(--sdd-coral-dim); background: rgba(255,107,107,0.08);
-}
-.wf-btn.primary:hover { background: rgba(255,107,107,0.15); }
-.wf-btn.wide { grid-column: 1 / -1; flex-direction: row; gap: 8px; padding: 10px 14px; }
-.wf-btn.wide .wf-label { text-align: left; }
+		/* ---- Stats grid ---- */
+		.stats-grid {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			gap: 2px 10px;
+			font-size: 11px;
+		}
+		.stat-label { opacity: 0.6; }
+		.stat-value {
+			text-align: right;
+			font-variant-numeric: tabular-nums;
+		}
 
-/* ── No Project State ───────────────────────────── */
-.no-project {
-	text-align: center; padding: 8px 0;
-	color: var(--sdd-text-dim); font-size: 11px; line-height: 1.5;
-}
+		/* ---- Toggle row ---- */
+		.toggle-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 3px 0;
+			font-size: 11px;
+		}
+		.toggle-label { opacity: 0.7; }
+		.toggle-pill {
+			display: inline-block;
+			padding: 1px 8px;
+			border-radius: 10px;
+			font-size: 10px;
+			cursor: pointer;
+			transition: all 0.15s;
+			border: 1px solid transparent;
+		}
+		.toggle-pill.on {
+			background: color-mix(in srgb, var(--vscode-focusBorder) 30%, transparent);
+			border-color: var(--vscode-focusBorder);
+			color: var(--vscode-foreground);
+		}
+		.toggle-pill.off {
+			background: transparent;
+			border-color: var(--vscode-panel-border);
+			opacity: 0.5;
+		}
+		.toggle-pill:hover { opacity: 1; }
 
-/* ── Chat Bubbles ───────────────────────────────── */
-.msg-wrapper { display: flex; flex-direction: column; }
-.msg-role {
-	font-size: 10px; color: var(--sdd-text-dim); margin-bottom: 3px;
-	text-transform: uppercase; letter-spacing: 0.5px;
-}
-.msg-role-you { text-align: right; }
-.bubble-user {
-	align-self: flex-end; background: var(--sdd-coral); color: #fff;
-	padding: 7px 12px; border-radius: 12px 12px 2px 12px;
-	max-width: 88%; word-wrap: break-word; white-space: pre-wrap; font-size: 12.5px;
-}
-.bubble-assistant {
-	align-self: stretch; background: var(--sdd-navy-light);
-	border: 1px solid var(--sdd-border); color: var(--sdd-text);
-	padding: 10px 14px; border-radius: 6px;
-	width: 100%; box-sizing: border-box; word-wrap: break-word;
-	overflow-wrap: break-word; overflow-x: hidden;
-	line-height: 1.5; font-size: 12.5px;
-}
-.bubble-assistant br + br { display: none; }
-.bubble-assistant .md-h1, .bubble-assistant .md-h2, .bubble-assistant .md-h3 { margin-top: 6px; }
-.bubble-assistant .md-hr { margin: 4px 0; }
-.bubble-assistant .md-li { padding: 1px 0; }
-.bubble-assistant .md-table-row { font-size: 11px; padding: 2px 0; overflow-x: auto; }
-.bubble-assistant .inline-code { word-break: break-all; }
-.bubble-assistant pre { max-width: 100%; overflow-x: auto; }
-.bubble-assistant.streaming { border-color: var(--sdd-coral-dim); }
-.bubble-assistant.streaming::after {
-	content: '\\25CB'; animation: blink 1s step-end infinite; color: var(--sdd-coral);
-}
-@keyframes blink { 50% { opacity: 0; } }
-.err-msg { color: var(--sdd-coral); font-size: 11px; padding: 3px 0; }
+		/* ---- Buttons ---- */
+		.actions {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 4px;
+		}
+		.actions.three-col {
+			grid-template-columns: 1fr 1fr 1fr;
+		}
+		.action-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 4px;
+			padding: 5px 6px;
+			border: 1px solid var(--vscode-panel-border);
+			border-radius: 4px;
+			background: transparent;
+			color: var(--vscode-foreground);
+			font-size: 11px;
+			cursor: pointer;
+			white-space: nowrap;
+			width: auto;
+		}
+		.action-btn:hover {
+			background: var(--vscode-list-hoverBackground);
+			border-color: var(--vscode-focusBorder);
+		}
+		.action-btn.primary {
+			background: var(--vscode-button-background);
+			color: var(--vscode-button-foreground);
+			border-color: var(--vscode-button-background);
+			font-weight: 600;
+		}
+		.action-btn.primary:hover {
+			background: var(--vscode-button-hoverBackground);
+		}
+		.action-btn.danger {
+			border-color: #f44747;
+			color: #f44747;
+		}
+		.action-btn.danger:hover {
+			background: color-mix(in srgb, #f44747 15%, transparent);
+		}
+		.action-btn.full {
+			grid-column: 1 / -1;
+		}
 
-/* ── Input Area ─────────────────────────────────── */
-#input-area {
-	padding: 8px 12px; border-top: 1px solid var(--sdd-border);
-	background: var(--sdd-navy-light); display: flex; gap: 6px;
-	align-items: flex-end; flex-shrink: 0;
-}
-#msg-input {
-	flex: 1; background: var(--sdd-navy); color: var(--sdd-text);
-	border: 1px solid var(--sdd-border); border-radius: 6px;
-	padding: 7px 10px; font-family: var(--vscode-font-family);
-	font-size: var(--vscode-font-size); resize: none;
-	min-height: 34px; max-height: 120px; overflow-y: auto; line-height: 1.4;
-}
-#msg-input::placeholder { color: var(--sdd-text-dim); }
-#msg-input:focus { outline: none; border-color: var(--sdd-coral-dim); }
-#msg-input:disabled { opacity: 0.35; }
-#btn-send {
-	width: 30px; height: 30px; border: none; border-radius: 6px;
-	cursor: pointer; background: var(--sdd-coral); color: #fff;
-	font-size: 16px; display: flex; align-items: center; justify-content: center;
-	flex-shrink: 0; transition: background 0.15s;
-}
-#btn-send:hover { background: var(--sdd-coral-dim); }
-#btn-send:disabled { opacity: 0.25; cursor: default; }
-
-/* ── Footer Controls ────────────────────────────── */
-#footer { border-top: 1px solid var(--sdd-border); flex-shrink: 0; background: var(--sdd-navy); }
-#footer-toggle {
-	width: 100%; padding: 5px 12px; background: none; border: none;
-	cursor: pointer; font-size: 10px; color: var(--sdd-text-dim); text-align: left;
-}
-#footer-toggle:hover { color: var(--sdd-text); }
-#footer-inner { display: none; padding: 8px 12px; flex-direction: column; gap: 5px; }
-#footer-inner.open { display: flex; }
-.btn-row { display: flex; gap: 5px; }
-.btn-row button { flex: 1; }
-.ctrl {
-	padding: 5px 8px; border: 1px solid var(--sdd-border); border-radius: 4px;
-	cursor: pointer; font-size: 11px; color: var(--sdd-text-dim);
-	background: var(--sdd-navy-light); transition: border-color 0.15s, color 0.15s;
-}
-.ctrl:hover { border-color: var(--sdd-coral-dim); color: var(--sdd-text); }
-
-/* ── Tool Progress Indicator ────────────────────── */
-.tool-progress {
-	display: flex; align-items: center; gap: 8px;
-	padding: 6px 10px; margin: 4px 0;
-	background: rgba(255,107,107,0.06); border: 1px solid var(--sdd-border);
-	border-radius: 6px; font-size: 11px; color: var(--sdd-text-dim);
-	animation: fadeIn 0.2s;
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.progress-spinner {
-	display: inline-block; width: 12px; height: 12px;
-	border: 2px solid var(--sdd-border); border-top-color: var(--sdd-coral);
-	border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Markdown Styles ────────────────────────────── */
-.md-h1 { font-size: 15px; font-weight: 700; color: var(--sdd-coral); margin: 10px 0 4px; }
-.md-h2 { font-size: 13px; font-weight: 700; color: var(--sdd-text); margin: 8px 0 3px; }
-.md-h3 { font-size: 12px; font-weight: 600; color: var(--sdd-text); margin: 6px 0 2px; }
-.md-li { padding: 1px 0 1px 4px; }
-.md-hr { border: none; border-top: 1px solid var(--sdd-border); margin: 8px 0; }
-.inline-code {
-	background: var(--sdd-navy-mid); padding: 1px 5px; border-radius: 3px;
-	font-family: monospace; font-size: 11px; color: var(--sdd-coral);
-}
-pre {
-	background: var(--sdd-navy); border: 1px solid var(--sdd-border);
-	border-radius: 6px; padding: 8px 10px; margin: 6px 0;
-	overflow-x: auto; font-size: 11px; line-height: 1.5;
-}
-pre code { font-family: monospace; color: var(--sdd-text); }
-.md-table-row {
-	display: flex; gap: 2px; padding: 3px 0;
-	border-bottom: 1px solid var(--sdd-border); font-size: 11px;
-}
-.md-cell {
-	flex: 1; padding: 2px 6px; overflow: hidden;
-	text-overflow: ellipsis; white-space: nowrap;
-}
-.bubble-assistant strong { color: var(--sdd-coral); }
-
-/* ── Clickable File References ──────────────────── */
-.file-link {
-	color: var(--sdd-teal); cursor: pointer; text-decoration: underline;
-	text-decoration-style: dotted; text-underline-offset: 2px;
-	font-family: monospace; font-size: 11px;
-}
-.file-link:hover { color: #6eddd0; text-decoration-style: solid; }
-
-/* ── Collapsible Thinking Blocks ────────────────── */
-.thinking-block { margin: 4px 0; }
-.thinking-toggle {
-	display: flex; align-items: center; gap: 5px; cursor: pointer;
-	font-size: 10px; color: var(--sdd-text-dim); padding: 3px 0;
-	border: none; background: none; width: 100%; text-align: left;
-}
-.thinking-toggle:hover { color: var(--sdd-text); }
-.thinking-arrow { transition: transform 0.15s; display: inline-block; }
-.thinking-block.open .thinking-arrow { transform: rotate(90deg); }
-.thinking-content {
-	display: none; padding: 6px 10px; margin-top: 3px;
-	background: rgba(136,136,168,0.06); border-left: 2px solid var(--sdd-border);
-	border-radius: 0 4px 4px 0; font-size: 11px; color: var(--sdd-text-dim);
-	line-height: 1.4;
-}
-.thinking-block.open .thinking-content { display: block; }
-
-/* ── Status Bar Nav Buttons ────────────────────── */
-.status-nav-btn {
-	background: none; border: none; cursor: pointer;
-	font-size: 14px; padding: 2px 4px; line-height: 1;
-	color: var(--sdd-text-dim); transition: color 0.15s;
-	flex-shrink: 0; display: none;
-}
-.status-nav-btn:hover { color: var(--sdd-text); }
-.status-nav-btn.visible { display: inline-block; }
-
-/* ── History Panel ─────────────────────────────── */
-#history-panel {
-	display: none; position: absolute; top: 38px; left: 0; right: 0; bottom: 0;
-	background: var(--sdd-navy); z-index: 100; overflow-y: auto;
-	padding: 12px; flex-direction: column; gap: 6px;
-}
-#history-panel.open { display: flex; }
-.history-title {
-	font-size: 12px; font-weight: 700; color: var(--sdd-coral);
-	margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;
-}
-.history-close {
-	background: none; border: none; cursor: pointer;
-	color: var(--sdd-text-dim); font-size: 16px;
-}
-.history-close:hover { color: var(--sdd-text); }
-.history-item {
-	padding: 8px 10px; background: var(--sdd-navy-light);
-	border: 1px solid var(--sdd-border); border-radius: 6px;
-	cursor: pointer; transition: border-color 0.15s;
-}
-.history-item:hover { border-color: var(--sdd-coral-dim); }
-.history-item-time {
-	font-size: 9px; color: var(--sdd-text-dim); margin-bottom: 3px;
-}
-.history-item-text {
-	font-size: 11px; color: var(--sdd-text); white-space: nowrap;
-	overflow: hidden; text-overflow: ellipsis;
-}
-.history-empty {
-	font-size: 11px; color: var(--sdd-text-dim); text-align: center; padding: 20px 0;
-}
-
-/* ── Next-Action Pills ─────────────────────────── */
-.next-actions {
-	display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
-	animation: fadeIn 0.3s;
-}
-.next-action-pill {
-	padding: 4px 10px; font-size: 10px;
-	background: var(--sdd-navy-light); border: 1px solid var(--sdd-border);
-	border-radius: 12px; cursor: pointer; color: var(--sdd-text-dim);
-	transition: border-color 0.15s, color 0.15s, background 0.15s;
-	white-space: nowrap;
-}
-.next-action-pill:hover {
-	border-color: var(--sdd-coral-dim); color: var(--sdd-text);
-	background: var(--sdd-navy-mid);
-}
-</style>
+		/* ---- Disconnected state ---- */
+		.disconnected {
+			text-align: center;
+			padding: 20px 12px;
+		}
+		.disconnected p {
+			opacity: 0.5;
+			font-size: 12px;
+			margin-bottom: 12px;
+		}
+		.start-btn {
+			padding: 8px 24px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: var(--vscode-font-size);
+			font-weight: 600;
+			color: var(--vscode-button-foreground);
+			background: var(--vscode-button-background);
+			width: auto;
+			display: inline-block;
+		}
+		.start-btn:hover {
+			background: var(--vscode-button-hoverBackground);
+		}
+	</style>
 </head>
 <body>
-
-<div id="status-bar">
-	<div class="dot dot-off" id="dot"></div>
-	<span id="model-label">Not connected</span>
-	<button class="status-nav-btn" id="btn-home" title="Home">&#127968;</button>
-	<button class="status-nav-btn" id="btn-new-session" title="New Session">&#10010;</button>
-	<button class="status-nav-btn visible" id="btn-history" title="Session History">&#128337;</button>
-	<button id="btn-toggle">Start</button>
-</div>
-<div id="history-panel"></div>
-
-<div id="messages">
-	<div id="empty"></div>
-</div>
-
-<div id="input-area">
-	<textarea id="msg-input" placeholder="Message SDD... (Enter to send, Shift+Enter for newline)" rows="1" disabled></textarea>
-	<button id="btn-send" disabled title="Send">&uarr;</button>
-</div>
-
-<div id="footer">
-	<button id="footer-toggle">&#9656; Controls</button>
-	<div id="footer-inner">
-		<div class="btn-row">
-			<button class="ctrl" data-command="newSession">New Session</button>
-			<button class="ctrl" data-command="switchModel">Model</button>
-		</div>
-		<div class="btn-row">
-			<button class="ctrl" data-command="cycleThinking">Thinking</button>
-			<button class="ctrl" data-command="toggleAutoCompaction">Auto-Compact</button>
-		</div>
-		<div class="btn-row">
-			<button class="ctrl" data-command="compact">Compact</button>
-			<button class="ctrl" data-command="abort">Abort</button>
+	${info.connected ? this.getConnectedHtml(info, {
+			statusLabel,
+			modelDisplay,
+			sessionDisplay,
+			costDisplay,
+			contextPct,
+			contextColor,
+			hasStats: !!hasStats,
+			statRows,
+			nonce,
+		}) : `
+	<div class="header">
+		<div class="header-top">
+			<div class="status-dot"></div>
+			<span class="status-label">Disconnected</span>
 		</div>
 	</div>
-</div>
+	<div class="disconnected">
+		<p>Agent is not running</p>
+		<button class="start-btn" data-command="start">Start Agent</button>
+	</div>
+	`}
 
-<script nonce="${nonce}">
-const vscode = acquireVsCodeApi();
-const messagesEl = document.getElementById('messages');
-const emptyEl = document.getElementById('empty');
-const inputEl = document.getElementById('msg-input');
-const sendBtn = document.getElementById('btn-send');
-const dot = document.getElementById('dot');
-const modelLabel = document.getElementById('model-label');
-const toggleBtn = document.getElementById('btn-toggle');
-const footerToggle = document.getElementById('footer-toggle');
-const footerInner = document.getElementById('footer-inner');
-const btnHome = document.getElementById('btn-home');
-const btnNewSession = document.getElementById('btn-new-session');
-const btnHistory = document.getElementById('btn-history');
-const historyPanel = document.getElementById('history-panel');
+	<script nonce="${nonce}">
+		const vscode = acquireVsCodeApi();
+		const stored = vscode.getState() || {};
 
-let connected = false;
-let streaming = false;
-let currentBubble = null;
-let lastUserMessage = '';
-let sessionHistory = [];
-let hasMessages = false;
+		// Restore collapsed state
+		document.querySelectorAll('.section').forEach(s => {
+			const id = s.dataset.section;
+			if (id && stored[id] === 'collapsed') s.classList.add('collapsed');
+		});
 
-footerToggle.addEventListener('click', () => {
-	const open = footerInner.classList.toggle('open');
-	footerToggle.innerHTML = (open ? '&#9662;' : '&#9656;') + ' Controls';
-});
-
-function updateNavButtons() {
-	btnHome.className = 'status-nav-btn' + (hasMessages ? ' visible' : '');
-	btnNewSession.className = 'status-nav-btn' + (hasMessages ? ' visible' : '');
-}
-
-btnHistory.addEventListener('click', () => {
-	const isOpen = historyPanel.classList.toggle('open');
-	if (isOpen) vscode.postMessage({ command: 'getHistory' });
-});
-
-btnHome.addEventListener('click', () => {
-	vscode.postMessage({ command: 'home' });
-});
-
-btnNewSession.addEventListener('click', () => {
-	vscode.postMessage({ command: 'newSession' });
-});
-
-function renderHistoryPanel(sessions) {
-	var html = '<div class="history-title"><span>Session History</span><button class="history-close" id="history-close-btn">&times;</button></div>';
-	if (!sessions || sessions.length === 0) {
-		html += '<div class="history-empty">No previous sessions</div>';
-	} else {
-		for (var i = 0; i < sessions.length; i++) {
-			var item = sessions[i];
-			var d = new Date(item.time);
-			var timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-			html += '<div class="history-item" data-history-idx="' + i + '">';
-			html += '<div class="history-item-time">' + esc(timeStr) + '</div>';
-			html += '<div class="history-item-text">' + esc(item.text.substring(0, 80)) + '</div>';
-			html += '</div>';
-		}
-	}
-	historyPanel.innerHTML = html;
-	var closeBtn = document.getElementById('history-close-btn');
-	if (closeBtn) closeBtn.addEventListener('click', () => { historyPanel.classList.remove('open'); });
-}
-
-historyPanel.addEventListener('click', (e) => {
-	var item = e.target.closest('[data-history-idx]');
-	if (item) {
-		historyPanel.classList.remove('open');
-	}
-});
-
-function getNextActions(userMsg) {
-	var lower = (userMsg || '').toLowerCase();
-	var actions = [];
-	if (lower.indexOf('progress') !== -1 || lower.indexOf('check') !== -1) {
-		actions.push({label:'Plan Slice',prompt:'Plan next slice.'});
-		actions.push({label:'Execute Slice',prompt:'Execute current slice.'});
-		actions.push({label:'Resume Work',prompt:'Resume active slice.'});
-	} else if (lower.indexOf('plan') !== -1) {
-		actions.push({label:'Execute Slice',prompt:'Execute current slice.'});
-		actions.push({label:'Verify Work',prompt:'Verify against success criteria.'});
-	} else if (lower.indexOf('execute') !== -1 || lower.indexOf('implement') !== -1) {
-		actions.push({label:'Verify Work',prompt:'Verify against success criteria.'});
-		actions.push({label:'Check Progress',prompt:'Progress: slices done, next, blocked?'});
-	} else if (lower.indexOf('verify') !== -1 || lower.indexOf('test') !== -1) {
-		actions.push({label:'New Milestone',prompt:'Define new milestone with slices.'});
-		actions.push({label:'Check Progress',prompt:'Progress: slices done, next, blocked?'});
-	} else {
-		actions.push({label:'Check Progress',prompt:'Progress: slices done, next, blocked?'});
-		actions.push({label:'New Session',prompt:''});
-		actions.push({label:'Home',prompt:''});
-	}
-	return actions;
-}
-
-function renderNextActions(userMsg) {
-	var actions = getNextActions(userMsg);
-	var row = document.createElement('div');
-	row.className = 'next-actions';
-	for (var i = 0; i < actions.length; i++) {
-		var a = actions[i];
-		var pill = document.createElement('button');
-		pill.className = 'next-action-pill';
-		pill.textContent = a.label;
-		if (a.label === 'New Session') {
-			pill.setAttribute('data-command', 'newSession');
-		} else if (a.label === 'Home') {
-			pill.setAttribute('data-command', 'home');
-		} else {
-			pill.setAttribute('data-prompt', a.prompt);
-			pill.setAttribute('data-label', a.label);
-		}
-		row.appendChild(pill);
-	}
-	messagesEl.appendChild(row);
-	scrollBottom();
-}
-
-document.addEventListener('click', (e) => {
-	const fl = e.target.closest('.file-link');
-	if (fl) { vscode.postMessage({ command: 'openFile', path: fl.dataset.file }); return; }
-	const tb = e.target.closest('.thinking-toggle');
-	if (tb) { tb.closest('.thinking-block').classList.toggle('open'); return; }
-	const cmd = e.target.closest('[data-command]');
-	if (cmd) { vscode.postMessage({ command: cmd.dataset.command }); return; }
-	const wf = e.target.closest('[data-prompt]');
-	if (wf) {
-		const text = wf.dataset.prompt;
-		const label = wf.dataset.label || text;
-		if (!connected) vscode.postMessage({ command: 'start' });
-		setTimeout(() => vscode.postMessage({ command: 'sendMessage', text, label }), connected ? 0 : 1500);
-	}
-});
-
-toggleBtn.addEventListener('click', () => {
-	vscode.postMessage({ command: connected ? 'stop' : 'start' });
-});
-
-function sendMessage() {
-	const text = inputEl.value.trim();
-	if (!text || streaming || !connected) return;
-	inputEl.value = '';
-	autoResize();
-	vscode.postMessage({ command: 'sendMessage', text });
-}
-
-sendBtn.addEventListener('click', sendMessage);
-inputEl.addEventListener('keydown', (e) => {
-	if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-
-function autoResize() {
-	inputEl.style.height = 'auto';
-	inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
-}
-inputEl.addEventListener('input', autoResize);
-
-function renderDashboard(project) {
-	let html = '<div class="dashboard">';
-
-	// Header
-	html += '<div class="dash-header"><div class="dash-logo">SDD</div>';
-	html += '<div class="dash-sub">Spec-Driven Development</div>';
-	html += '<div class="dash-tips">';
-	html += '<strong>Extension</strong> &#8212; progress checks, quick prompts, right-click actions';
-	html += '<br><strong>Terminal</strong> &#8212; run <code class="inline-code">sdd</code> for auto mode, long execution, multi-slice work';
-	html += '</div></div>';
-
-	if (project && project.hasProject && project.milestones.length > 0) {
-		// Active milestone card
-		const active = project.activeMilestone;
-		if (active) {
-			html += '<div class="section-label">ACTIVE MILESTONE</div>';
-			html += renderMilestoneCard(active);
-		}
-
-		// Other milestones summary
-		const others = project.milestones.filter(m => !active || m.id !== active.id);
-		if (others.length > 0) {
-			html += '<div class="section-label">OTHER MILESTONES</div>';
-			for (const m of others.slice(0, 3)) {
-				html += renderMilestoneCard(m);
+		document.addEventListener('click', (e) => {
+			// Section toggle
+			const header = e.target.closest('.section-header');
+			if (header) {
+				const section = header.parentElement;
+				section.classList.toggle('collapsed');
+				const id = section.dataset.section;
+				if (id) {
+					const state = vscode.getState() || {};
+					state[id] = section.classList.contains('collapsed') ? 'collapsed' : 'open';
+					vscode.setState(state);
+				}
+				return;
 			}
-			if (others.length > 3) {
-				html += '<div style="font-size:10px;color:var(--sdd-text-dim);text-align:center;">+' + (others.length - 3) + ' more</div>';
+			// Button/command click
+			const btn = e.target.closest('[data-command]');
+			if (btn) {
+				vscode.postMessage({ command: btn.dataset.command });
 			}
 		}
 
@@ -1245,6 +1165,158 @@ function scrollBottom() {
 </body>
 </html>`;
 	}
+
+	private getConnectedHtml(
+		info: {
+			connected: boolean;
+			modelName: string;
+			modelShort: string;
+			sessionId: string;
+			sessionName: string;
+			messageCount: number;
+			pendingMessageCount: number;
+			thinkingLevel: ThinkingLevel;
+			isStreaming: boolean;
+			isCompacting: boolean;
+			autoCompaction: boolean;
+			autoRetry: boolean;
+			stats: SessionStats | null;
+			contextWindow: number;
+			steeringMode: "all" | "one-at-a-time";
+			followUpMode: "all" | "one-at-a-time";
+		},
+		ui: {
+			statusLabel: string;
+			modelDisplay: string;
+			sessionDisplay: string;
+			costDisplay: string;
+			contextPct: number;
+			contextColor: string;
+			hasStats: boolean;
+			statRows: string;
+			nonce: string;
+		},
+	): string {
+		const pendingBadge = info.pendingMessageCount > 0
+			? ` <span style="opacity:0.5">+${info.pendingMessageCount}</span>`
+			: "";
+
+		return `
+	<!-- Header card -->
+	<div class="header">
+		<div class="header-top">
+			<div class="status-dot"></div>
+			<span class="status-label">${ui.statusLabel}</span>
+			<span class="header-model" data-command="switchModel" title="${escapeHtml(info.modelName)}">${escapeHtml(ui.modelDisplay)}</span>
+			${ui.costDisplay ? `<span class="header-cost">${ui.costDisplay}</span>` : ""}
+		</div>
+		<div class="header-sub">
+			<span class="session-name" data-command="setSessionName" title="${escapeHtml(info.sessionId)}">${escapeHtml(ui.sessionDisplay)}</span>
+			<span class="sep">/</span>
+			<span>${info.messageCount} msg${pendingBadge}</span>
+			<span class="sep">/</span>
+			<span data-command="cycleThinking" style="cursor:pointer" title="Click to cycle thinking level">${info.thinkingLevel === "off" ? "no think" : info.thinkingLevel}</span>
+		</div>
+		${info.contextWindow > 0 ? `
+		<div class="context-bar">
+			<div class="context-track">
+				<div class="context-fill" style="width:${ui.contextPct}%;background:${ui.contextColor}"></div>
+			</div>
+			<div class="context-text">${ui.contextPct}% context (${formatNum((info.stats?.inputTokens ?? 0) + (info.stats?.outputTokens ?? 0))} / ${formatNum(info.contextWindow)})</div>
+		</div>
+		` : ""}
+	</div>
+
+	${info.isStreaming ? `
+	<div class="streaming">
+		<span class="spinner"></span>
+		<span>Agent is working...</span>
+		<button class="streaming-abort" data-command="abort">Stop</button>
+	</div>
+	` : ""}
+
+	<!-- Workflow -->
+	<div class="section" data-section="workflow">
+		<div class="section-header"><span class="chevron">&#9660;</span> Workflow</div>
+		<div class="section-body">
+			<div class="actions">
+				<button class="action-btn primary" data-command="autoMode">Auto</button>
+				<button class="action-btn" data-command="nextUnit">Next</button>
+				<button class="action-btn" data-command="quickTask">Quick</button>
+				<button class="action-btn" data-command="capture">Capture</button>
+			</div>
+		</div>
+	</div>
+
+	${ui.hasStats ? `
+	<!-- Stats -->
+	<div class="section" data-section="stats">
+		<div class="section-header"><span class="chevron">&#9660;</span> Stats</div>
+		<div class="section-body">
+			<div class="stats-grid">${ui.statRows}</div>
+		</div>
+	</div>
+	` : ""}
+
+	<!-- Actions -->
+	<div class="section" data-section="actions">
+		<div class="section-header"><span class="chevron">&#9660;</span> Actions</div>
+		<div class="section-body">
+			<div class="actions three-col">
+				<button class="action-btn" data-command="newSession">New</button>
+				<button class="action-btn" data-command="compact">Compact</button>
+				<button class="action-btn" data-command="copyLastResponse">Copy</button>
+				<button class="action-btn" data-command="status">Status</button>
+				<button class="action-btn" data-command="fixProblemsInFile">Fix Errs</button>
+				<button class="action-btn" data-command="showHistory">History</button>
+			</div>
+			<div style="margin-top:6px">
+				<button class="action-btn danger full" data-command="stop">Stop Agent</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Settings (collapsed by default) -->
+	<div class="section collapsed" data-section="settings">
+		<div class="section-header"><span class="chevron">&#9660;</span> Settings</div>
+		<div class="section-body">
+			<div class="toggle-row">
+				<span class="toggle-label">Auto-compact</span>
+				<span class="toggle-pill ${info.autoCompaction ? "on" : "off"}" data-command="toggleAutoCompaction">${info.autoCompaction ? "on" : "off"}</span>
+			</div>
+			<div class="toggle-row">
+				<span class="toggle-label">Auto-retry</span>
+				<span class="toggle-pill ${info.autoRetry ? "on" : "off"}" data-command="toggleAutoRetry">${info.autoRetry ? "on" : "off"}</span>
+			</div>
+			<div class="toggle-row">
+				<span class="toggle-label">Steering</span>
+				<span class="toggle-pill ${info.steeringMode === "one-at-a-time" ? "on" : "off"}" data-command="toggleSteeringMode">${info.steeringMode === "one-at-a-time" ? "1-at-a-time" : "all"}</span>
+			</div>
+			<div class="toggle-row">
+				<span class="toggle-label">Follow-up</span>
+				<span class="toggle-pill ${info.followUpMode === "one-at-a-time" ? "on" : "off"}" data-command="toggleFollowUpMode">${info.followUpMode === "one-at-a-time" ? "1-at-a-time" : "all"}</span>
+			</div>
+			<div class="toggle-row">
+				<span class="toggle-label">Approval</span>
+				<span class="toggle-pill on" data-command="selectApprovalMode">change</span>
+			</div>
+		</div>
+	</div>`;
+	}
+}
+
+function escapeHtml(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
+}
+
+function formatNum(n: number): string {
+	if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+	if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+	return String(n);
 }
 
 function getNonce(): string {

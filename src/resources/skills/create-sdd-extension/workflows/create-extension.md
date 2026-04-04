@@ -12,8 +12,8 @@
 ## Step 1: Determine Scope and Placement
 
 Ask the user:
-- **Global** (`~/.sdd/agent/extensions/`) — Available in all SDD sessions
-- **Project-local** (`.sdd/extensions/`) — Available only in this project
+- **Global** (`~/.pi/agent/extensions/`) — Available in all GSD sessions
+- **Project-local** (`.gsd/extensions/`) — Available only in this project
 
 ## Step 2: Determine Extension Capabilities
 
@@ -36,12 +36,12 @@ Identify what the extension needs from the user's description:
 
 **Single file** — for small extensions (1-2 tools/commands, simple hooks):
 ```
-~/.sdd/agent/extensions/my-extension.ts
+~/.pi/agent/extensions/my-extension.ts
 ```
 
 **Directory with index.ts** — for multi-file extensions:
 ```
-~/.sdd/agent/extensions/my-extension/
+~/.pi/agent/extensions/my-extension/
 ├── index.ts
 ├── tools.ts
 └── utils.ts
@@ -49,7 +49,7 @@ Identify what the extension needs from the user's description:
 
 **Package with dependencies** — when npm packages are needed:
 ```
-~/.sdd/agent/extensions/my-extension/
+~/.pi/agent/extensions/my-extension/
 ├── package.json
 ├── src/index.ts
 └── node_modules/

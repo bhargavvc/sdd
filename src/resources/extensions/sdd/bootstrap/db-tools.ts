@@ -121,14 +121,6 @@ export function registerDbTools(pi: ExtensionAPI): void {
       };
     }
     try {
-      const db = await import("../sdd-db.js");
-      const existing = db.getRequirementById(params.id);
-      if (!existing) {
-        return {
-          content: [{ type: "text" as const, text: `Error: Requirement ${params.id} not found.` }],
-          details: { operation: "update_requirement", id: params.id, error: "not_found" } as any,
-        };
-      }
       const { updateRequirementInDb } = await import("../db-writer.js");
       const updates: Record<string, string | undefined> = {};
       if (params.status !== undefined) updates.status = params.status;
@@ -196,7 +188,92 @@ export function registerDbTools(pi: ExtensionAPI): void {
   pi.registerTool(requirementUpdateTool);
   registerAlias(pi, requirementUpdateTool, "sdd_update_requirement", "sdd_requirement_update");
 
-  // ─── sdd_summary_save (formerly sdd_save_summary) ──────────────────────
+  // ─── gsd_requirement_save ─────────────────────────────────────────────
+
+  const requirementSaveExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
+    const dbAvailable = await ensureDbOpen();
+    if (!dbAvailable) {
+      return {
+        content: [{ type: "text" as const, text: "Error: GSD database is not available. Cannot save requirement." }],
+        details: { operation: "save_requirement", error: "db_unavailable" } as any,
+      };
+    }
+    try {
+      const { saveRequirementToDb } = await import("../db-writer.js");
+      const result = await saveRequirementToDb(
+        {
+          class: params.class,
+          status: params.status,
+          description: params.description,
+          why: params.why,
+          source: params.source,
+          primary_owner: params.primary_owner,
+          supporting_slices: params.supporting_slices,
+          validation: params.validation,
+          notes: params.notes,
+        },
+        process.cwd(),
+      );
+      return {
+        content: [{ type: "text" as const, text: `Saved requirement ${result.id}` }],
+        details: { operation: "save_requirement", id: result.id } as any,
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      logError("tool", `gsd_requirement_save tool failed: ${msg}`, { tool: "gsd_requirement_save", error: String(err) });
+      return {
+        content: [{ type: "text" as const, text: `Error saving requirement: ${msg}` }],
+        details: { operation: "save_requirement", error: msg } as any,
+      };
+    }
+  };
+
+  const requirementSaveTool = {
+    name: "gsd_requirement_save",
+    label: "Save Requirement",
+    description:
+      "Record a new requirement to the GSD database and regenerate REQUIREMENTS.md. " +
+      "Requirement IDs are auto-assigned — never provide an ID manually.",
+    promptSnippet: "Record a new GSD requirement to the database (auto-assigns ID, regenerates REQUIREMENTS.md)",
+    promptGuidelines: [
+      "Use gsd_requirement_save when recording a new functional, non-functional, or operational requirement.",
+      "Requirement IDs are auto-assigned (R001, R002, ...) — never guess or provide an ID.",
+      "class, description, why, and source are required. All other fields are optional.",
+      "The tool writes to the DB and regenerates .gsd/REQUIREMENTS.md automatically.",
+    ],
+    parameters: Type.Object({
+      class: Type.String({ description: "Requirement class (e.g. 'functional', 'non-functional', 'operational')" }),
+      description: Type.String({ description: "Short description of the requirement" }),
+      why: Type.String({ description: "Why this requirement matters" }),
+      source: Type.String({ description: "Origin of the requirement (e.g. 'user-research', 'design', 'M001')" }),
+      status: Type.Optional(Type.String({ description: "Status (default: 'active')" })),
+      primary_owner: Type.Optional(Type.String({ description: "Primary owning slice" })),
+      supporting_slices: Type.Optional(Type.String({ description: "Supporting slices" })),
+      validation: Type.Optional(Type.String({ description: "Validation criteria" })),
+      notes: Type.Optional(Type.String({ description: "Additional notes" })),
+    }),
+    execute: requirementSaveExecute,
+    renderCall(args: any, theme: any) {
+      let text = theme.fg("toolTitle", theme.bold("requirement_save "));
+      if (args.class) text += theme.fg("accent", `[${args.class}] `);
+      if (args.description) text += theme.fg("muted", args.description);
+      return new Text(text, 0, 0);
+    },
+    renderResult(result: any, _options: any, theme: any) {
+      const d = result.details;
+      if (result.isError || d?.error) {
+        return new Text(theme.fg("error", `Error: ${d?.error ?? "unknown"}`), 0, 0);
+      }
+      let text = theme.fg("success", `Requirement ${d?.id ?? ""} saved`);
+      text += theme.fg("dim", ` → REQUIREMENTS.md`);
+      return new Text(text, 0, 0);
+    },
+  };
+
+  pi.registerTool(requirementSaveTool);
+  registerAlias(pi, requirementSaveTool, "gsd_save_requirement", "gsd_requirement_save");
+
+  // ─── gsd_summary_save (formerly gsd_save_summary) ──────────────────────
 
   const summarySaveExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
@@ -806,7 +883,85 @@ export function registerDbTools(pi: ExtensionAPI): void {
   pi.registerTool(sliceCompleteTool);
   registerAlias(pi, sliceCompleteTool, "sdd_complete_slice", "sdd_slice_complete");
 
-  // ─── sdd_complete_milestone ────────────────────────────────────────────
+  // ─── gsd_skip_slice (#3477 / #3487) ───────────────────────────────────
+
+  const skipSliceExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
+    const dbAvailable = await ensureDbOpen();
+    if (!dbAvailable) {
+      return {
+        content: [{ type: "text" as const, text: "Error: GSD database is not available. Cannot skip slice." }],
+        details: { operation: "skip_slice", error: "db_unavailable" } as any,
+      };
+    }
+    try {
+      const { getSlice, updateSliceStatus } = await import("../gsd-db.js");
+      const { invalidateStateCache } = await import("../state.js");
+
+      const slice = getSlice(params.milestoneId, params.sliceId);
+      if (!slice) {
+        return {
+          content: [{ type: "text" as const, text: `Error: Slice ${params.sliceId} not found in milestone ${params.milestoneId}` }],
+          details: { operation: "skip_slice", error: "slice_not_found" } as any,
+        };
+      }
+
+      if (slice.status === "complete" || slice.status === "done") {
+        return {
+          content: [{ type: "text" as const, text: `Error: Slice ${params.sliceId} is already complete — cannot skip.` }],
+          details: { operation: "skip_slice", error: "already_complete" } as any,
+        };
+      }
+
+      if (slice.status === "skipped") {
+        return {
+          content: [{ type: "text" as const, text: `Slice ${params.sliceId} is already skipped.` }],
+          details: { operation: "skip_slice", sliceId: params.sliceId, milestoneId: params.milestoneId } as any,
+        };
+      }
+
+      updateSliceStatus(params.milestoneId, params.sliceId, "skipped");
+      invalidateStateCache();
+
+      return {
+        content: [{ type: "text" as const, text: `Skipped slice ${params.sliceId} (${params.milestoneId}). Reason: ${params.reason ?? "User-directed skip"}. Auto-mode will advance past this slice.` }],
+        details: {
+          operation: "skip_slice",
+          sliceId: params.sliceId,
+          milestoneId: params.milestoneId,
+          reason: params.reason,
+        } as any,
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      logError("tool", `skip_slice tool failed: ${msg}`, { tool: "gsd_skip_slice", error: String(err) });
+      return {
+        content: [{ type: "text" as const, text: `Error skipping slice: ${msg}` }],
+        details: { operation: "skip_slice", error: msg } as any,
+      };
+    }
+  };
+
+  pi.registerTool({
+    name: "gsd_skip_slice",
+    label: "Skip Slice",
+    description:
+      "Mark a slice as skipped so auto-mode advances past it without executing. " +
+      "The slice data is preserved for reference. The state machine treats skipped slices like completed ones for dependency satisfaction.",
+    promptSnippet: "Skip a GSD slice (mark as skipped, auto-mode will advance past it)",
+    promptGuidelines: [
+      "Use gsd_skip_slice when a slice should be bypassed — descoped, superseded, or no longer relevant.",
+      "Cannot skip a slice that is already complete.",
+      "Skipped slices satisfy downstream dependencies just like completed slices.",
+    ],
+    parameters: Type.Object({
+      sliceId: Type.String({ description: "Slice ID (e.g. S02)" }),
+      milestoneId: Type.String({ description: "Milestone ID (e.g. M003)" }),
+      reason: Type.Optional(Type.String({ description: "Reason for skipping this slice" })),
+    }),
+    execute: skipSliceExecute,
+  });
+
+  // ─── gsd_complete_milestone ────────────────────────────────────────────
 
   const milestoneCompleteExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
@@ -923,9 +1078,9 @@ export function registerDbTools(pi: ExtensionAPI): void {
       "Records verdict (pass/needs-attention/needs-remediation) and rationale.",
     promptSnippet: "Validate a SDD milestone (DB write + VALIDATION.md render)",
     promptGuidelines: [
-      "Use sdd_validate_milestone when all slices are done and the milestone needs validation before completion.",
-      "Parameters: milestoneId, verdict, remediationRound, successCriteriaChecklist, sliceDeliveryAudit, crossSliceIntegration, requirementCoverage, verdictRationale, remediationPlan (optional).",
-      "If verdict is 'needs-remediation', also provide remediationPlan and use sdd_reassess_roadmap to add remediation slices to the roadmap.",
+      "Use gsd_validate_milestone when all slices are done and the milestone needs validation before completion.",
+      "Parameters: milestoneId, verdict, remediationRound, successCriteriaChecklist, sliceDeliveryAudit, crossSliceIntegration, requirementCoverage, verificationClasses (optional), verdictRationale, remediationPlan (optional).",
+      "If verdict is 'needs-remediation', also provide remediationPlan and use gsd_reassess_roadmap to add remediation slices to the roadmap.",
       "On success, returns validationPath where VALIDATION.md was written.",
     ],
     parameters: Type.Object({
@@ -936,6 +1091,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       sliceDeliveryAudit: Type.String({ description: "Markdown table auditing each slice's claimed vs delivered output" }),
       crossSliceIntegration: Type.String({ description: "Markdown describing any cross-slice boundary mismatches" }),
       requirementCoverage: Type.String({ description: "Markdown describing any unaddressed requirements" }),
+      verificationClasses: Type.Optional(Type.String({ description: "Markdown describing verification class compliance and gaps" })),
       verdictRationale: Type.String({ description: "Why this verdict was chosen" }),
       remediationPlan: Type.Optional(Type.String({ description: "Remediation plan (required if verdict is needs-remediation)" })),
     }),
