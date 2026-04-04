@@ -118,14 +118,44 @@ export class SddClient implements vscode.Disposable {
 			return;
 		}
 
-		this.process = spawn(this.binaryPath, ["--mode", "rpc", "--no-session"], {
-			cwd: this.cwd,
-			stdio: ["pipe", "pipe", "pipe"],
-			env: { ...process.env },
-			shell: process.platform === "win32",
-		});
+		// Pre-flight: check if the binary exists before spawning
+		const resolvedPath = await this.resolveBinary();
+		if (!resolvedPath) {
+			const msg = this.binaryPath === "sdd"
+				? `SDD binary not found in PATH. Install it with: npm install -g sdd-pi\n\nOr set "sdd.binaryPath" in VS Code settings to the full path.`
+				: `SDD binary not found at "${this.binaryPath}". Check your "sdd.binaryPath" setting.`;
+			this._onError.fire(msg);
+			throw new Error(msg);
+		}
+
+		try {
+			this.process = spawn(this.binaryPath, ["--mode", "rpc", "--no-session"], {
+				cwd: this.cwd,
+				stdio: ["pipe", "pipe", "pipe"],
+				env: { ...process.env },
+				shell: process.platform === "win32",
+			});
+		} catch (err) {
+			const errMsg = err instanceof Error ? err.message : String(err);
+			const msg = `Failed to spawn SDD process: ${errMsg}\n\nBinary: "${this.binaryPath}"\nWorking dir: "${this.cwd}"`;
+			this._onError.fire(msg);
+			throw new Error(msg);
+		}
 
 		this.buffer = "";
+
+		this.process.on("error", (err) => {
+			this.process = null;
+			const msg = err.message.includes("ENOENT")
+				? `SDD binary "${this.binaryPath}" not found. Install: npm install -g sdd-pi`
+				: err.message.includes("EACCES")
+					? `Permission denied running "${this.binaryPath}". Check file permissions.`
+					: err.message.includes("EINVAL")
+						? `Cannot start SDD — invalid spawn arguments on Windows. Try setting "sdd.binaryPath" to the full path (e.g., "C:\\nvm4w\\nodejs\\sdd.cmd").`
+						: `SDD process error: ${err.message}`;
+			this._onError.fire(msg);
+			this._onConnectionChange.fire(false);
+		});
 
 		this.process.stdout?.on("data", (chunk: Buffer) => {
 			this.buffer += chunk.toString("utf8");
@@ -147,13 +177,26 @@ export class SddClient implements vscode.Disposable {
 			if (code !== 0 && signal !== "SIGTERM") {
 				const now = Date.now();
 				this.restartTimestamps.push(now);
-				// Keep only timestamps within the last 60 seconds
 				this.restartTimestamps = this.restartTimestamps.filter(t => now - t < 60_000);
 
-				if (this.restartTimestamps.length > 3) {
-					// Too many crashes within 60s — stop retrying
+				// Provide specific error messages based on exit code
+				if (code === 1) {
 					this._onError.fire(
-						`SDD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "SDD: Start Agent" to retry manually.`,
+						`SDD agent exited with error (code=1). Check:\n` +
+						`  1. Authentication: Run "sdd" in terminal to re-authenticate\n` +
+						`  2. Node.js version: sdd requires Node 22+ (run "node --version")\n` +
+						`  3. Output panel: View → Output → "SDD Agent" for details`,
+					);
+				}
+
+				if (this.restartTimestamps.length > 3) {
+					this._onError.fire(
+						`SDD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting.\n\n` +
+						`Troubleshooting:\n` +
+						`  1. Open terminal and run: sdd --version\n` +
+						`  2. If that fails: npm install -g sdd-pi\n` +
+						`  3. Check auth: Run "sdd" in terminal and complete setup\n` +
+						`  4. Retry: Run command "SDD: Start Agent"`,
 					);
 				} else if (this.restartCount < 3) {
 					this.restartCount++;
@@ -164,6 +207,25 @@ export class SddClient implements vscode.Disposable {
 
 		this._onConnectionChange.fire(true);
 		this.restartCount = 0;
+	}
+
+	/**
+	 * Check if the binary exists before attempting to spawn.
+	 */
+	private async resolveBinary(): Promise<string | null> {
+		const { execSync } = require("node:child_process");
+		try {
+			const cmd = process.platform === "win32" ? `where "${this.binaryPath}"` : `which "${this.binaryPath}"`;
+			const result = execSync(cmd, { encoding: "utf8", timeout: 5000 }).trim();
+			return result.split(/\r?\n/)[0] || null;
+		} catch {
+			// If binaryPath is an absolute path, check if file exists
+			if (this.binaryPath.includes("/") || this.binaryPath.includes("\\")) {
+				const fs = require("node:fs");
+				return fs.existsSync(this.binaryPath) ? this.binaryPath : null;
+			}
+			return null;
+		}
 	}
 
 	/**
