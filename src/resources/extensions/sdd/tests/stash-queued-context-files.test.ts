@@ -2,12 +2,12 @@
  * stash-queued-context-files.test.ts — Regression test for #2505.
  *
  * When mergeMilestoneToMain runs `git stash push --include-untracked`,
- * untracked `.gsd/milestones/M<queued>/` directories created by `/gsd queue`
+ * untracked `.sdd/milestones/M<queued>/` directories created by `/sdd queue`
  * are swept into the stash. If stash pop fails (conflict on tracked files),
  * the queued milestone CONTEXT files are permanently lost.
  *
  * The fix: drop `--include-untracked` from the stash push, since the stash
- * only needs to handle tracked dirty files. Untracked `.gsd/` files are
+ * only needs to handle tracked dirty files. Untracked `.sdd/` files are
  * already handled separately by clearProjectRootStateFiles.
  */
 
@@ -42,13 +42,13 @@ function createTempRepo(): string {
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
   writeFileSync(join(dir, "README.md"), "# test\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "version: 1\n");
-  // In projects with tracked .gsd/ files (hasGitTrackedGsdFiles=true),
-  // .gsd is NOT added to .gitignore. This means untracked files under
-  // .gsd/ are visible to --include-untracked and get swept into the
+  mkdirSync(join(dir, ".sdd"), { recursive: true });
+  writeFileSync(join(dir, ".sdd", "STATE.md"), "version: 1\n");
+  // In projects with tracked .sdd/ files (hasGitTrackedSddFiles=true),
+  // .sdd is NOT added to .gitignore. This means untracked files under
+  // .sdd/ are visible to --include-untracked and get swept into the
   // stash, destroying queued milestone CONTEXT files (#2505).
-  run("git add -f .gsd/STATE.md", dir);
+  run("git add -f .sdd/STATE.md", dir);
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -78,14 +78,14 @@ test("#2505: git stash --include-untracked sweeps queued CONTEXT files (demonstr
     run("git config user.email test@test.com", dir);
     run("git config user.name Test", dir);
     writeFileSync(join(dir, "README.md"), "# test\n");
-    mkdirSync(join(dir, ".gsd"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "STATE.md"), "version: 1\n");
-    run("git add -f .gsd/STATE.md", dir);
+    mkdirSync(join(dir, ".sdd"), { recursive: true });
+    writeFileSync(join(dir, ".sdd", "STATE.md"), "version: 1\n");
+    run("git add -f .sdd/STATE.md", dir);
     run("git add .", dir);
     run("git commit -m init", dir);
 
     // Create queued milestone CONTEXT files (untracked, not gitignored)
-    const m013Dir = join(dir, ".gsd", "milestones", "M013");
+    const m013Dir = join(dir, ".sdd", "milestones", "M013");
     mkdirSync(m013Dir, { recursive: true });
     writeFileSync(
       join(m013Dir, "M013-CONTEXT.md"),
@@ -97,7 +97,7 @@ test("#2505: git stash --include-untracked sweeps queued CONTEXT files (demonstr
 
     // Verify the CONTEXT file is untracked
     const status = run("git status --porcelain", dir);
-    assert.ok(status.includes("?? .gsd/milestones/"), "precondition: M013 dir is untracked");
+    assert.ok(status.includes("?? .sdd/milestones/"), "precondition: M013 dir is untracked");
 
     // Stash WITH --include-untracked (the bug)
     run('git stash push --include-untracked -m "test stash"', dir);
@@ -146,11 +146,11 @@ test("#2505: mergeMilestoneToMain preserves queued CONTEXT files (not swept into
     run("git checkout milestone/M015", wtPath);
     run(`git merge --no-ff "${sliceBranch}" -m "merge S01"`, wtPath);
 
-    // Simulate `/gsd queue` creating queued milestone CONTEXT files at the
-    // project root. These are untracked, and in repos with tracked .gsd/
+    // Simulate `/sdd queue` creating queued milestone CONTEXT files at the
+    // project root. These are untracked, and in repos with tracked .sdd/
     // files they are NOT gitignored.
-    const m013Dir = join(repo, ".gsd", "milestones", "M013");
-    const m014Dir = join(repo, ".gsd", "milestones", "M014");
+    const m013Dir = join(repo, ".sdd", "milestones", "M013");
+    const m014Dir = join(repo, ".sdd", "milestones", "M014");
     mkdirSync(m013Dir, { recursive: true });
     mkdirSync(m014Dir, { recursive: true });
     writeFileSync(
@@ -168,7 +168,7 @@ test("#2505: mergeMilestoneToMain preserves queued CONTEXT files (not swept into
     // Verify M013 is untracked (precondition)
     const statusBefore = run("git status --porcelain", repo);
     assert.ok(
-      statusBefore.includes("?? .gsd/milestones/"),
+      statusBefore.includes("?? .sdd/milestones/"),
       "M013 directory is untracked before merge (precondition)",
     );
 
@@ -178,7 +178,7 @@ test("#2505: mergeMilestoneToMain preserves queued CONTEXT files (not swept into
 
     const result = mergeMilestoneToMain(repo, "M015", roadmap);
     assert.ok(
-      result.commitMessage.includes("GSD-Milestone: M015"),
+      result.commitMessage.includes("SDD-Milestone: M015"),
       "merge should succeed",
     );
 
@@ -253,7 +253,7 @@ test("#2505: back-to-back merges preserve queued CONTEXT files", () => {
     run(`git merge --no-ff "${slice1}" -m "merge S01"`, wt1);
 
     // Create queued milestone CONTEXT file
-    const m013Dir = join(repo, ".gsd", "milestones", "M013");
+    const m013Dir = join(repo, ".sdd", "milestones", "M013");
     mkdirSync(m013Dir, { recursive: true });
     writeFileSync(
       join(m013Dir, "M013-CONTEXT.md"),

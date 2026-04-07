@@ -9,7 +9,7 @@
 import { describe, it, beforeEach, mock, type Mock } from "node:test";
 import assert from "node:assert/strict";
 import { RetryHandler, type RetryHandlerDeps } from "./retry-handler.js";
-import type { Api, AssistantMessage, Model } from "@gsd/pi-ai";
+import type { Api, AssistantMessage, Model } from "@sdd/pi-ai";
 import type { FallbackResolver } from "./fallback-resolver.js";
 import type { ModelRegistry } from "./model-registry.js";
 import type { SettingsManager } from "./settings-manager.js";

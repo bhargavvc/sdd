@@ -4,7 +4,7 @@ import assert from "node:assert/strict"
 const {
   derivePendingWorkflowCommandLabel,
   executeWorkflowActionInPowerMode,
-  navigateToGSDView,
+  navigateToSDDView,
 } = await import("../../../web/lib/workflow-action-execution.ts")
 
 test("derivePendingWorkflowCommandLabel prefers the latest input line while a command is in flight", () => {

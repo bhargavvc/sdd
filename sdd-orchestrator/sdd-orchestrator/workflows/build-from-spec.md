@@ -4,7 +4,7 @@ End-to-end workflow: take a product idea or specification, produce working softw
 
 ## Prerequisites
 
-- `gsd` CLI installed (`npm install -g gsd-pi`)
+- `sdd` CLI installed (`npm install -g sdd-pi`)
 - A directory for the project (can be empty)
 - Git initialized in the directory
 
@@ -16,7 +16,7 @@ End-to-end workflow: take a product idea or specification, produce working softw
 PROJECT_DIR="/tmp/my-project-name"
 mkdir -p "$PROJECT_DIR"
 cd "$PROJECT_DIR"
-git init 2>/dev/null  # GSD needs a git repo
+git init 2>/dev/null  # SDD needs a git repo
 ```
 
 ### Step 2: Write the spec file
@@ -52,10 +52,10 @@ SPEC
 
 ### Step 3: Launch the build
 
-**Fire-and-forget (simplest — GSD does everything):**
+**Fire-and-forget (simplest — SDD does everything):**
 ```bash
 cd "$PROJECT_DIR"
-RESULT=$(gsd headless --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
+RESULT=$(sdd headless --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
 EXIT=$?
 ```
 
@@ -69,7 +69,7 @@ EXIT=$?
 
 **For CI or ecosystem runs (no user config):**
 ```bash
-RESULT=$(gsd headless --bare --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
+RESULT=$(sdd headless --bare --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
 EXIT=$?
 ```
 
@@ -85,7 +85,7 @@ case $EXIT in
     echo "Build complete: $STATUS, cost: \$$COST, commits: $COMMITS"
 
     # Inspect what was built
-    gsd headless query | jq '.state.progress'
+    sdd headless query | jq '.state.progress'
 
     # Check the actual files
     ls -la "$PROJECT_DIR"
@@ -96,12 +96,12 @@ case $EXIT in
     echo "$RESULT" | jq '{status: .status, phase: .phase}'
 
     # Check state for details
-    gsd headless query | jq '.state'
+    sdd headless query | jq '.state'
     ;;
   10)
     # Blocked — needs intervention
     echo "Build blocked — needs human input"
-    gsd headless query | jq '{phase: .state.phase, blockers: .state.blockers}'
+    sdd headless query | jq '{phase: .state.phase, blockers: .state.blockers}'
 
     # Options: steer, supply answers, or escalate
     # See workflows/monitor-and-poll.md for blocker handling
@@ -120,7 +120,7 @@ After a successful build, verify the output:
 cd "$PROJECT_DIR"
 
 # Check project state
-gsd headless query | jq '{
+sdd headless query | jq '{
   phase: .state.phase,
   progress: .state.progress,
   cost: .cost.total
@@ -168,7 +168,7 @@ Build a REST API for managing todo items using Node.js and Express.
 SPEC
 
 # 3. Launch
-RESULT=$(gsd headless --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
+RESULT=$(sdd headless --output-format json --timeout 0 --context spec.md new-milestone --auto 2>/dev/null)
 EXIT=$?
 
 # 4. Report
@@ -176,7 +176,7 @@ if [ $EXIT -eq 0 ]; then
   COST=$(echo "$RESULT" | jq -r '.cost.total')
   echo "Build complete (\$$COST)"
   echo "Files created:"
-  find . -not -path './.gsd/*' -not -path './.git/*' -type f
+  find . -not -path './.sdd/*' -not -path './.git/*' -type f
 else
   echo "Build failed (exit $EXIT)"
   echo "$RESULT" | jq .

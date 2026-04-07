@@ -1,8 +1,8 @@
 /**
- * GSD Parallel Monitor Overlay
+ * SDD Parallel Monitor Overlay
  *
  * Full-screen TUI overlay showing real-time parallel worker progress.
- * Opened via `/gsd parallel watch` or Ctrl+Alt+P.
+ * Opened via `/sdd parallel watch` or Ctrl+Alt+P.
  * Reads the same data sources as `scripts/parallel-monitor.mjs` but
  * renders as a native pi-tui overlay with theme integration.
  */
@@ -11,8 +11,8 @@ import { existsSync, statSync, readFileSync, openSync, readSync, closeSync, read
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@sdd/pi-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@sdd/pi-tui";
 
 import { formatDuration, STATUS_GLYPH, STATUS_COLOR } from "../shared/mod.js";
 
@@ -96,8 +96,8 @@ function tailRead(filePath: string, maxBytes: number): string {
 }
 
 function discoverWorkers(basePath: string): string[] {
-  const parallelDir = join(basePath, ".gsd", "parallel");
-  const worktreeDir = join(basePath, ".gsd", "worktrees");
+  const parallelDir = join(basePath, ".sdd", "parallel");
+  const worktreeDir = join(basePath, ".sdd", "worktrees");
   const mids = new Set<string>();
 
   if (existsSync(parallelDir)) {
@@ -113,7 +113,7 @@ function discoverWorkers(basePath: string): string[] {
   if (existsSync(worktreeDir)) {
     try {
       for (const d of readdirSync(worktreeDir)) {
-        if (d.startsWith("M") && existsSync(join(worktreeDir, d, ".gsd", "auto.lock"))) {
+        if (d.startsWith("M") && existsSync(join(worktreeDir, d, ".sdd", "auto.lock"))) {
           mids.add(d);
         }
       }
@@ -124,7 +124,7 @@ function discoverWorkers(basePath: string): string[] {
 }
 
 function querySliceProgress(basePath: string, mid: string): SliceProgress[] {
-  const dbPath = join(basePath, ".gsd", "worktrees", mid, ".gsd", "gsd.db");
+  const dbPath = join(basePath, ".sdd", "worktrees", mid, ".sdd", "sdd.db");
   if (!existsSync(dbPath)) return [];
 
   try {
@@ -142,7 +142,7 @@ function querySliceProgress(basePath: string, mid: string): SliceProgress[] {
 }
 
 function extractCostFromNdjson(basePath: string, mid: string): number {
-  const stdoutPath = join(basePath, ".gsd", "parallel", `${mid}.stdout.log`);
+  const stdoutPath = join(basePath, ".sdd", "parallel", `${mid}.stdout.log`);
   if (!existsSync(stdoutPath)) return 0;
   try {
     const content = readFileSync(stdoutPath, "utf-8");
@@ -164,7 +164,7 @@ function extractCostFromNdjson(basePath: string, mid: string): number {
 }
 
 function queryRecentCompletions(basePath: string, mid: string): string[] {
-  const dbPath = join(basePath, ".gsd", "worktrees", mid, ".gsd", "gsd.db");
+  const dbPath = join(basePath, ".sdd", "worktrees", mid, ".sdd", "sdd.db");
   if (!existsSync(dbPath)) return [];
   try {
     const sql = `SELECT id, slice_id, one_liner FROM tasks WHERE milestone_id='${mid}' AND status='complete' AND completed_at IS NOT NULL ORDER BY completed_at DESC LIMIT 5`;
@@ -182,12 +182,12 @@ function queryRecentCompletions(basePath: string, mid: string): string[] {
 
 function collectWorkerData(basePath: string): WorkerView[] {
   const mids = discoverWorkers(basePath);
-  const parallelDir = join(basePath, ".gsd", "parallel");
+  const parallelDir = join(basePath, ".sdd", "parallel");
   const workers: WorkerView[] = [];
 
   for (const mid of mids) {
     const status = readJsonSafe<StatusJson>(join(parallelDir, `${mid}.status.json`));
-    const lock = readJsonSafe<AutoLock>(join(basePath, ".gsd", "worktrees", mid, ".gsd", "auto.lock"));
+    const lock = readJsonSafe<AutoLock>(join(basePath, ".sdd", "worktrees", mid, ".sdd", "auto.lock"));
     const slices = querySliceProgress(basePath, mid);
 
     const pid = lock?.pid || status?.pid || 0;
@@ -382,7 +382,7 @@ export class ParallelMonitorOverlay {
     const aliveCount = this.workers.filter((wk) => wk.alive).length;
     const now = new Date().toLocaleTimeString();
 
-    lines.push(t.bold(t.fg("accent", " GSD Parallel Monitor ")));
+    lines.push(t.bold(t.fg("accent", " SDD Parallel Monitor ")));
     lines.push(
       t.fg("muted", `  ${now}  │  ${aliveCount}/${this.workers.length} alive  │  Total: `) +
       t.bold(`$${totalCost.toFixed(2)}`) +
@@ -393,7 +393,7 @@ export class ParallelMonitorOverlay {
     if (this.workers.length === 0) {
       lines.push("");
       lines.push(t.fg("warning", "  No parallel workers found."));
-      lines.push(t.fg("muted", "  Run /gsd parallel start to begin."));
+      lines.push(t.fg("muted", "  Run /sdd parallel start to begin."));
     } else {
       for (const wk of this.workers) {
         lines.push("");

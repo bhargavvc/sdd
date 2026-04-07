@@ -31,7 +31,7 @@ function createProject(root: string, name: string, markers: string[]): string {
   for (const marker of markers) {
     const markerPath = join(projDir, marker);
     if (marker.startsWith('.') && !marker.includes('.')) {
-      // Likely a directory marker (.git, .gsd)
+      // Likely a directory marker (.git, .sdd)
       mkdirSync(markerPath, { recursive: true });
     } else {
       // File marker (package.json, Cargo.toml, etc.)
@@ -91,7 +91,7 @@ describe('scanForProjects', () => {
     const root = tmpDir();
     cleanupDirs.push(root);
 
-    createProject(root, 'full-stack', ['.git', 'package.json', '.gsd']);
+    createProject(root, 'full-stack', ['.git', 'package.json', '.sdd']);
 
     const results = await scanForProjects([root]);
 
@@ -99,7 +99,7 @@ describe('scanForProjects', () => {
     assert.equal(results[0]!.markers.length, 3);
     assert.ok(results[0]!.markers.includes('git'));
     assert.ok(results[0]!.markers.includes('node'));
-    assert.ok(results[0]!.markers.includes('gsd'));
+    assert.ok(results[0]!.markers.includes('sdd'));
   });
 
   it('returns results sorted alphabetically by name', async () => {
@@ -181,7 +181,7 @@ describe('scanForProjects', () => {
 
     createProject(root, 'git-proj', ['.git']);
     createProject(root, 'node-proj', ['package.json']);
-    createProject(root, 'gsd-proj', ['.gsd']);
+    createProject(root, 'sdd-proj', ['.sdd']);
     createProject(root, 'rust-proj', ['Cargo.toml']);
     createProject(root, 'python-proj', ['pyproject.toml']);
     createProject(root, 'go-proj', ['go.mod']);
@@ -193,7 +193,7 @@ describe('scanForProjects', () => {
     const byName = new Map(results.map(r => [r.name, r]));
     assert.deepEqual(byName.get('git-proj')!.markers, ['git']);
     assert.deepEqual(byName.get('node-proj')!.markers, ['node']);
-    assert.deepEqual(byName.get('gsd-proj')!.markers, ['gsd']);
+    assert.deepEqual(byName.get('sdd-proj')!.markers, ['sdd']);
     assert.deepEqual(byName.get('rust-proj')!.markers, ['rust']);
     assert.deepEqual(byName.get('python-proj')!.markers, ['python']);
     assert.deepEqual(byName.get('go-proj')!.markers, ['go']);

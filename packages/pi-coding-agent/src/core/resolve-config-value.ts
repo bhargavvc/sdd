@@ -33,7 +33,7 @@ let activeCommandPrefixes: string[] = SAFE_COMMAND_PREFIXES;
 /**
  * Replace the active command prefix allowlist.
  * Called during initialization when the user has configured `allowedCommandPrefixes`
- * in global settings.json or via the GSD_ALLOWED_COMMAND_PREFIXES env var.
+ * in global settings.json or via the SDD_ALLOWED_COMMAND_PREFIXES env var.
  */
 export function setAllowedCommandPrefixes(prefixes: string[]): void {
 	if (prefixes.length === 0) {

@@ -5,7 +5,7 @@ import type { SddClient, AgentEvent } from "./sdd-client.js";
 
 /**
  * Send a message through VS Code's Chat panel so the user sees the response.
- * Opens the Chat panel and pre-fills the @gsd participant with the message.
+ * Opens the Chat panel and pre-fills the @sdd participant with the message.
  */
 async function sendViaChat(message: string): Promise<void> {
 	await vscode.commands.executeCommand("workbench.action.chat.open", { query: message });
@@ -17,7 +17,7 @@ async function sendViaChat(message: string): Promise<void> {
  * hidden empty data, and consolidated action buttons.
  */
 export class GsdSidebarProvider implements vscode.WebviewViewProvider {
-	public static readonly viewId = "gsd-sidebar";
+	public static readonly viewId = "sdd-sidebar";
 
 	private view?: vscode.WebviewView;
 	private disposables: vscode.Disposable[] = [];
@@ -113,16 +113,16 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 					}
 					break;
 				case "setSessionName":
-					await vscode.commands.executeCommand("gsd.setSessionName");
+					await vscode.commands.executeCommand("sdd.setSessionName");
 					break;
 				case "copyLastResponse":
-					await vscode.commands.executeCommand("gsd.copyLastResponse");
+					await vscode.commands.executeCommand("sdd.copyLastResponse");
 					break;
 				case "autoMode":
-					await sendViaChat("@gsd /gsd auto");
+					await sendViaChat("@sdd /sdd auto");
 					break;
 				case "nextUnit":
-					await sendViaChat("@gsd /gsd next");
+					await sendViaChat("@sdd /sdd next");
 					break;
 				case "quickTask": {
 					const quickInput = await vscode.window.showInputBox({
@@ -130,7 +130,7 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 						placeHolder: "e.g. fix the typo in README",
 					});
 					if (quickInput) {
-						await sendViaChat(`@gsd /gsd quick ${quickInput}`);
+						await sendViaChat(`@sdd /sdd quick ${quickInput}`);
 					}
 					break;
 				}
@@ -140,24 +140,24 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 						placeHolder: "e.g. we should also handle the edge case for...",
 					});
 					if (thought) {
-						await sendViaChat(`@gsd /gsd capture ${thought}`);
+						await sendViaChat(`@sdd /sdd capture ${thought}`);
 					}
 					break;
 				}
 				case "status":
-					await sendViaChat("@gsd /gsd status");
+					await sendViaChat("@sdd /sdd status");
 					break;
 				case "forkSession":
-					await vscode.commands.executeCommand("gsd.forkSession");
+					await vscode.commands.executeCommand("sdd.forkSession");
 					break;
 				case "toggleSteeringMode":
-					await vscode.commands.executeCommand("gsd.toggleSteeringMode");
+					await vscode.commands.executeCommand("sdd.toggleSteeringMode");
 					break;
 				case "toggleFollowUpMode":
-					await vscode.commands.executeCommand("gsd.toggleFollowUpMode");
+					await vscode.commands.executeCommand("sdd.toggleFollowUpMode");
 					break;
 				case "showHistory":
-					await vscode.commands.executeCommand("gsd.showHistory");
+					await vscode.commands.executeCommand("sdd.showHistory");
 					break;
 			}
 		});

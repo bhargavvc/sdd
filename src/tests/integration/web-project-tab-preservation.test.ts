@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 // Bug #2711: Switching projects always returns to dashboard.
 //
 // Root cause: handleSelectProject in ProjectsPanel dispatched
-//   gsd:navigate-view with { view: "dashboard" } on every switch.
+//   sdd:navigate-view with { view: "dashboard" } on every switch.
 //   Additionally, the viewRestored flag in WorkspaceChrome was never
 //   reset when the project changed, so the per-project sessionStorage
 //   restore could not fire for the new project.
@@ -52,7 +52,7 @@ const KNOWN_VIEWS = new Set([
 ]);
 
 function viewStorageKey(projectCwd: string): string {
-  return `gsd-active-view:${projectCwd}`;
+  return `sdd-active-view:${projectCwd}`;
 }
 
 // ── Simulated WorkspaceChrome view-restore logic ─────────────────────────

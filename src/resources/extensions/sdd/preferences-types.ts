@@ -156,15 +156,15 @@ export interface SDDModelConfig {
  * Extended model config with per-phase fallback support.
  * Each phase can specify a primary model and ordered fallbacks.
  */
-export interface GSDModelConfigV2 {
-  research?: string | GSDPhaseModelConfig;
-  planning?: string | GSDPhaseModelConfig;
-  discuss?: string | GSDPhaseModelConfig;
-  execution?: string | GSDPhaseModelConfig;
-  execution_simple?: string | GSDPhaseModelConfig;
-  completion?: string | GSDPhaseModelConfig;
-  validation?: string | GSDPhaseModelConfig;
-  subagent?: string | GSDPhaseModelConfig;
+export interface SDDModelConfigV2 {
+  research?: string | SDDPhaseModelConfig;
+  planning?: string | SDDPhaseModelConfig;
+  discuss?: string | SDDPhaseModelConfig;
+  execution?: string | SDDPhaseModelConfig;
+  execution_simple?: string | SDDPhaseModelConfig;
+  completion?: string | SDDPhaseModelConfig;
+  validation?: string | SDDPhaseModelConfig;
+  subagent?: string | SDDPhaseModelConfig;
 }
 
 /** Normalized model selection with resolved fallbacks */
@@ -266,7 +266,7 @@ export interface SDDPreferences {
   /**
    * Minutes without a commit before flagging uncommitted changes as stale.
    * When the threshold is exceeded and the working tree is dirty, doctor will
-   * auto-commit a safety snapshot tagged with `[gsd safety]`. Default: 30.
+   * auto-commit a safety snapshot tagged with `[sdd safety]`. Default: 30.
    * Set to 0 to disable.
    */
   stale_commit_threshold_minutes?: number;

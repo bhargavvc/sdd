@@ -7,7 +7,7 @@
  *
  * Single entry point: classifyError(errorMsg, retryAfterMs?)
  *
- * @see https://github.com/gsd-build/gsd/issues/2577
+ * @see https://github.com/bhargavvc/sdd/issues/2577
  */
 
 // ── ErrorClass discriminated union ──────────────────────────────────────────

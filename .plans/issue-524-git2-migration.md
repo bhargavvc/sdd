@@ -193,10 +193,10 @@ Update each TypeScript file to use native bridge functions:
 - `createWorktree()` → use `nativeWorktreeAdd()`, `nativeBranchForceReset()`
 - `listWorktrees()` → use `nativeWorktreeList()`
 - `removeWorktree()` → use `nativeWorktreeRemove()`, `nativeWorktreePrune()`, `nativeBranchDelete()`
-- `diffWorktreeGSD()` → use `nativeDiffNameStatus()`
+- `diffWorktreeSDD()` → use `nativeDiffNameStatus()`
 - `diffWorktreeAll()` → use `nativeDiffNameStatus()`
 - `diffWorktreeNumstat()` → use `nativeDiffNumstat()`
-- `getWorktreeGSDDiff()` → use `nativeDiffContent()`
+- `getWorktreeSDDDiff()` → use `nativeDiffContent()`
 - `getWorktreeCodeDiff()` → use `nativeDiffContent()`
 - `getWorktreeLog()` → use `nativeLogOneline()`
 - `mergeWorktreeToMain()` → use `nativeMergeSquash()` + `nativeCommit()`

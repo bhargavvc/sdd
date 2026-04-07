@@ -110,7 +110,7 @@ const MAX_REWRITE_ATTEMPTS = 3;
 // ─── Disk-persisted rewrite attempt counter ──────────────────────────────────
 // The counter must survive session restarts (crash recovery, pause/resume,
 // step-mode). Storing it on the in-memory session object caused the circuit
-// breaker to never trip — see https://github.com/gsd-build/gsd-2/issues/2203
+// breaker to never trip — see https://github.com/bhargavvc/sdd/issues/2203
 function rewriteCountPath(basePath: string): string {
   return join(sddRoot(basePath), "runtime", "rewrite-count.json");
 }
@@ -137,7 +137,7 @@ export function setRewriteCount(basePath: string, count: number): void {
  * operational verification is needed.  Covers common phrasings the planning
  * agent may use: "None", "None required", "N/A", "Not applicable", etc.
  *
- * @see https://github.com/gsd-build/gsd-2/issues/2931
+ * @see https://github.com/bhargavvc/sdd/issues/2931
  */
 export function isVerificationNotApplicable(value: string): boolean {
   const v = (value ?? "").toLowerCase().trim();
@@ -216,7 +216,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
           uatContent ?? "",
           basePath,
         ),
-        pauseAfterDispatch: !process.env.GSD_HEADLESS && uatType !== "artifact-driven" && uatType !== "browser-executable" && uatType !== "runtime-executable",
+        pauseAfterDispatch: !process.env.SDD_HEADLESS && uatType !== "artifact-driven" && uatType !== "browser-executable" && uatType !== "runtime-executable",
       };
     },
   },

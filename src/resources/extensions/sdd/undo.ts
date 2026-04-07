@@ -133,7 +133,7 @@ export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi
   }
 
   ctx.ui.notify(results.join("\n"), "success");
-  sendDesktopNotification("GSD", `Undone: ${unitType} (${unitId})`, "info", "complete", basename(basePath));
+  sendDesktopNotification("SDD", `Undone: ${unitType} (${unitId})`, "info", "complete", basename(basePath));
 }
 
 // ─── Targeted State Reset ────────────────────────────────────────────────────

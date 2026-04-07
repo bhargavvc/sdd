@@ -585,7 +585,7 @@ async function handleMerge(
     // Gather merge context — full repo diff, not just .sdd/
     const diffSummary = diffWorktreeAll(basePath, name);
     const numstat = diffWorktreeNumstat(basePath, name);
-    const gsdDiff = getWorktreeSDDDiff(basePath, name);
+    const sddDiff = getWorktreeSDDDiff(basePath, name);
     const codeDiff = getWorktreeCodeDiff(basePath, name);
     const commitLog = getWorktreeLog(basePath, name);
 
@@ -609,7 +609,7 @@ async function handleMerge(
     const codeChanges = diffSummary.added.filter(f => !isSDD(f)).length
       + diffSummary.modified.filter(f => !isSDD(f)).length
       + diffSummary.removed.filter(f => !isSDD(f)).length;
-    const gsdChanges = diffSummary.added.filter(isSDD).length
+    const sddChanges = diffSummary.added.filter(isSDD).length
       + diffSummary.modified.filter(isSDD).length
       + diffSummary.removed.filter(isSDD).length;
 
@@ -624,7 +624,7 @@ async function handleMerge(
     const previewLines = [
       `Merge ${CLR.name(name)} → ${CLR.branch(mainBranch)}`,
       "",
-      `  ${totalChanges} file${totalChanges === 1 ? "" : "s"} changed, ${CLR.ok(`+${totalAdded}`)} ${RED}-${totalRemoved}${RESET} lines ${CLR.muted(`(${codeChanges} code, ${gsdChanges} SDD)`)}`,
+      `  ${totalChanges} file${totalChanges === 1 ? "" : "s"} changed, ${CLR.ok(`+${totalAdded}`)} ${RED}-${totalRemoved}${RESET} lines ${CLR.muted(`(${codeChanges} code, ${sddChanges} SDD)`)}`,
     ];
 
     const appendFileList = (label: string, files: string[], prefix: string, limit = 10) => {
@@ -724,7 +724,7 @@ async function handleMerge(
       addedFiles: formatFiles(diffSummary.added),
       modifiedFiles: formatFiles(diffSummary.modified),
       removedFiles: formatFiles(diffSummary.removed),
-      gsdDiff: gsdDiff || "(no SDD artifact changes)",
+      sddDiff: sddDiff || "(no SDD artifact changes)",
       codeDiff: codeDiff || "(no code changes)",
     });
 
@@ -739,7 +739,7 @@ async function handleMerge(
     );
 
     ctx.ui.notify(
-      `${CLR.ok("✓")} Merge helper started for ${CLR.name(name)} ${CLR.muted(`(${codeChanges} code + ${gsdChanges} SDD artifact change${totalChanges === 1 ? "" : "s"})`)}`,
+      `${CLR.ok("✓")} Merge helper started for ${CLR.name(name)} ${CLR.muted(`(${codeChanges} code + ${sddChanges} SDD artifact change${totalChanges === 1 ? "" : "s"})`)}`,
       "info",
     );
   } catch (error) {

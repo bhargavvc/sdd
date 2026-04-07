@@ -1,4 +1,4 @@
-# GSD2 File System Map
+# SDD2 File System Map
 # Maps every source file to its system/subsystem labels
 
 ---
@@ -683,7 +683,7 @@
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
 | web/app/layout.tsx | Web UI | Root Next.js layout with theme provider and font |
-| web/app/page.tsx | Web UI | Entry page loading GSDAppShell |
+| web/app/page.tsx | Web UI | Entry page loading SDDAppShell |
 | web/components/sdd/app-shell.tsx | Web UI | Main app shell — sidebar, panels, terminal, commands |
 | web/components/sdd/sidebar.tsx | Web UI | Multi-panel sidebar with milestone explorer |
 | web/components/sdd/status-bar.tsx | Web UI | Status bar with workspace state and metrics |

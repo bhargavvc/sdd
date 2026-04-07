@@ -5,7 +5,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const sddDir = join(__dirname, "..");
 
 /**
  * Test suite for #2941: Forensics report context lost on follow-up turns.
@@ -24,7 +24,7 @@ describe("forensics context persistence (#2941)", () => {
   // ─── Source-level invariant tests ──────────────────────────────────────────
 
   it("forensics.ts writes active-forensics marker after saving report", () => {
-    const src = readFileSync(join(gsdDir, "forensics.ts"), "utf-8");
+    const src = readFileSync(join(sddDir, "forensics.ts"), "utf-8");
     assert.ok(
       src.includes("active-forensics.json"),
       "forensics.ts must reference active-forensics.json marker file",
@@ -36,19 +36,19 @@ describe("forensics context persistence (#2941)", () => {
   });
 
   it("system-context.ts checks for active forensics marker in buildBeforeAgentStartResult", () => {
-    const src = readFileSync(join(gsdDir, "bootstrap", "system-context.ts"), "utf-8");
+    const src = readFileSync(join(sddDir, "bootstrap", "system-context.ts"), "utf-8");
     assert.ok(
       src.includes("active-forensics.json"),
       "system-context.ts must check for active-forensics.json marker",
     );
     assert.ok(
-      src.includes("gsd-forensics"),
-      "system-context.ts must inject gsd-forensics customType message",
+      src.includes("sdd-forensics"),
+      "system-context.ts must inject sdd-forensics customType message",
     );
   });
 
   it("system-context.ts exports clearForensicsMarker for cleanup", () => {
-    const src = readFileSync(join(gsdDir, "bootstrap", "system-context.ts"), "utf-8");
+    const src = readFileSync(join(sddDir, "bootstrap", "system-context.ts"), "utf-8");
     assert.ok(
       src.includes("clearForensicsMarker"),
       "system-context.ts must export clearForensicsMarker function",
@@ -61,8 +61,8 @@ describe("forensics context persistence (#2941)", () => {
 
   beforeEach(() => {
     rmSync(tmpBase, { recursive: true, force: true });
-    mkdirSync(join(tmpBase, ".gsd", "runtime"), { recursive: true });
-    mkdirSync(join(tmpBase, ".gsd", "forensics"), { recursive: true });
+    mkdirSync(join(tmpBase, ".sdd", "runtime"), { recursive: true });
+    mkdirSync(join(tmpBase, ".sdd", "forensics"), { recursive: true });
   });
 
   afterEach(() => {
@@ -72,12 +72,12 @@ describe("forensics context persistence (#2941)", () => {
   it("writeForensicsMarker creates marker with reportPath and promptContent", async () => {
     const { writeForensicsMarker } = await import("../forensics.ts");
 
-    const reportPath = join(tmpBase, ".gsd", "forensics", "report-2026-01-01.md");
+    const reportPath = join(tmpBase, ".sdd", "forensics", "report-2026-01-01.md");
     writeFileSync(reportPath, "# Test Report", "utf-8");
 
     writeForensicsMarker(tmpBase, reportPath, "Test forensics prompt content");
 
-    const markerPath = join(tmpBase, ".gsd", "runtime", "active-forensics.json");
+    const markerPath = join(tmpBase, ".sdd", "runtime", "active-forensics.json");
     assert.ok(existsSync(markerPath), "marker file must be created");
 
     const marker = JSON.parse(readFileSync(markerPath, "utf-8"));
@@ -96,7 +96,7 @@ describe("forensics context persistence (#2941)", () => {
   it("readForensicsMarker returns marker data when file exists", async () => {
     const { readForensicsMarker } = await import("../forensics.ts");
 
-    const markerPath = join(tmpBase, ".gsd", "runtime", "active-forensics.json");
+    const markerPath = join(tmpBase, ".sdd", "runtime", "active-forensics.json");
     const markerData = {
       reportPath: "/some/report.md",
       promptContent: "forensics prompt",
@@ -113,7 +113,7 @@ describe("forensics context persistence (#2941)", () => {
   it("clearForensicsMarker removes the marker file", async () => {
     const { clearForensicsMarker } = await import("../bootstrap/system-context.ts");
 
-    const markerPath = join(tmpBase, ".gsd", "runtime", "active-forensics.json");
+    const markerPath = join(tmpBase, ".sdd", "runtime", "active-forensics.json");
     writeFileSync(markerPath, JSON.stringify({ reportPath: "/x", promptContent: "y", createdAt: new Date().toISOString() }), "utf-8");
     assert.ok(existsSync(markerPath), "precondition: marker must exist");
 

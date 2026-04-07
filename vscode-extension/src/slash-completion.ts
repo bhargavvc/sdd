@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import type { GsdClient, SlashCommand } from "./gsd-client.js";
+import type { GsdClient, SlashCommand } from "./sdd-client.js";
 
 /**
- * CompletionItemProvider that surfaces GSD slash commands when the user
+ * CompletionItemProvider that surfaces SDD slash commands when the user
  * types `/` at the start of a line (or after only whitespace) in Markdown,
  * plaintext, and TypeScript/JavaScript files.
  *
@@ -78,8 +78,8 @@ export class GsdSlashCompletionProvider
 	private async refreshCache(): Promise<void> {
 		try {
 			const all = await this.client.getCommands();
-			// Only show /gsd commands — filter out unrelated extension/skill commands
-			this.cachedCommands = all.filter((cmd) => cmd.name.startsWith("gsd"));
+			// Only show /sdd commands — filter out unrelated extension/skill commands
+			this.cachedCommands = all.filter((cmd) => cmd.name.startsWith("sdd"));
 		} catch {
 			// Silently ignore — agent may not be ready yet.
 		}

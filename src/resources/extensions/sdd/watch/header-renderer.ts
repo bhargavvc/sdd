@@ -1,20 +1,20 @@
-// GSD Watch — Header renderer: ASCII logo, session info, MCP status, remote questions
+// SDD Watch — Header renderer: ASCII logo, session info, MCP status, remote questions
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { visibleWidth, truncateToWidth } from "@gsd/pi-tui";
-import { loadEffectiveGSDPreferences } from "../preferences.js";
+import { visibleWidth, truncateToWidth } from "@sdd/pi-tui";
+import { loadEffectiveSDDPreferences } from "../preferences.js";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /**
- * GSD ASCII logo — inlined here because the canonical src/logo.ts is outside
+ * SDD ASCII logo — inlined here because the canonical src/logo.ts is outside
  * the resources rootDir and cannot be imported directly.
  */
-const GSD_LOGO: readonly string[] = [
+const SDD_LOGO: readonly string[] = [
   '   ██████╗ ███████╗██████╗ ',
   '  ██╔════╝ ██╔════╝██╔══██╗',
   '  ██║  ███╗███████╗██║  ██║',
@@ -35,13 +35,13 @@ const LABEL_COL_WIDTH = 10;
 // ─── Data Readers ─────────────────────────────────────────────────────────────
 
 /**
- * Read the configured execution model from GSD preferences.
+ * Read the configured execution model from SDD preferences.
  * Falls back through execution -> planning -> research -> first found.
  * Returns "default" if nothing is configured.
  */
 export function readModelFromPreferences(): string {
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveSDDPreferences();
     if (!prefs?.preferences.models) return "default";
     const m = prefs.preferences.models as Record<string, unknown>;
     // Try common phases in priority order
@@ -98,13 +98,13 @@ export function readGitBranch(projectRoot: string): string {
 }
 
 /**
- * Read MCP server names from .mcp.json or .gsd/mcp.json.
+ * Read MCP server names from .mcp.json or .sdd/mcp.json.
  * Returns array of server name strings.
  */
 export function readMcpServerNames(projectRoot: string): string[] {
   const configPaths = [
     join(projectRoot, ".mcp.json"),
-    join(projectRoot, ".gsd", "mcp.json"),
+    join(projectRoot, ".sdd", "mcp.json"),
   ];
   const names: string[] = [];
   const seen = new Set<string>();
@@ -191,14 +191,14 @@ export function formatMcpRow(servers: string[], width: number): string {
 /**
  * Render the full header as an array of terminal-safe strings.
  *
- * Layout: GSD ASCII logo on the left, info panel on the right separated by │.
+ * Layout: SDD ASCII logo on the left, info panel on the right separated by │.
  * Below: MCP server row, remote questions row, separator line.
  */
 export function renderHeaderLines(data: HeaderData, width: number): string[] {
   const lines: string[] = [];
 
   // Logo is 6 lines tall. Info panel has: title + blank + model + provider + directory + branch = 6 lines
-  const logoLines = GSD_LOGO;
+  const logoLines = SDD_LOGO;
   const logoWidth = Math.max(...logoLines.map(l => visibleWidth(l)));
 
   // Calculate available width for the info panel
@@ -213,7 +213,7 @@ export function renderHeaderLines(data: HeaderData, width: number): string[] {
 
   // Build info panel lines (6 lines to match logo height)
   const infoLines: string[] = [
-    `\x1b[1mGet Shit Done\x1b[0m`,
+    `\x1b[1mSpec-Driven Development\x1b[0m`,
     "",
     formatInfoLine("Model", data.model, infoPanelWidth),
     formatInfoLine("Provider", data.provider, infoPanelWidth),
@@ -254,7 +254,7 @@ function renderStackedHeader(data: HeaderData, width: number): string[] {
   const lines: string[] = [];
 
   // Title
-  lines.push(`\x1b[1mGet Shit Done\x1b[0m`);
+  lines.push(`\x1b[1mSpec-Driven Development\x1b[0m`);
   lines.push("");
 
   // Info

@@ -1,7 +1,7 @@
 // agent-loop pauseTurn handling tests
 // Verifies that pause_turn / pauseTurn stop reason causes the inner loop
 // to continue (re-invoke the LLM) instead of exiting.
-// Regression test for https://github.com/gsd-build/gsd-2/issues/2869
+// Regression test for https://github.com/bhargavvc/sdd/issues/2869
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";

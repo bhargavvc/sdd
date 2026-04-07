@@ -75,18 +75,18 @@ export function captureIntegrationBranch(basePath: string, milestoneId: string):
  * paths contain the intermediate `projects/<hash>/` segment that the old
  * single-marker check missed.
  */
-function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWorktrees: number } | null {
+function findWorktreeSegment(normalizedPath: string): { sddIdx: number; afterWorktrees: number } | null {
   // Direct layout: /.sdd/worktrees/<name>
   const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { sddIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   // Symlink-resolved layout: /.sdd/projects/<hash>/worktrees/<name>
   const symlinkRe = /\/\.sdd\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { sddIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -134,19 +134,19 @@ export function resolveProjectRoot(basePath: string): string {
 
   // Candidate root via the string-slice heuristic
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.sdd${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
+  const sddMarker = `${sepChar}.sdd${sepChar}`;
+  const sddIdx = basePath.indexOf(sddMarker);
+  const candidate = sddIdx !== -1
+    ? basePath.slice(0, sddIdx)
+    : basePath.slice(0, seg.sddIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
   // When .sdd is a symlink into ~/.sdd/projects/<hash>, the resolved path
   // contains /.sdd/ at the user-level boundary. Slicing there yields ~ — wrong.
-  const gsdHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
+  const sddHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
   const candidateSddPath = normalizePathForCompare(join(candidate, ".sdd"));
 
-  if (candidateSddPath === gsdHome || candidateSddPath.startsWith(gsdHome + "/")) {
+  if (candidateSddPath === sddHome || candidateSddPath.startsWith(sddHome + "/")) {
     // The candidate is the home directory (or within it in a way that .sdd
     // maps to the user-level SDD dir). Try to recover the real project root
     // from the worktree's .git file.

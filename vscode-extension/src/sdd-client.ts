@@ -611,11 +611,11 @@ export class SddClient implements vscode.Disposable {
 					const message = String(request.message ?? "");
 					const notifyType = String(request.notifyType ?? "info");
 					if (notifyType === "error") {
-						vscode.window.showErrorMessage(`GSD: ${message}`);
+						vscode.window.showErrorMessage(`SDD: ${message}`);
 					} else if (notifyType === "warning") {
-						vscode.window.showWarningMessage(`GSD: ${message}`);
+						vscode.window.showWarningMessage(`SDD: ${message}`);
 					} else {
-						vscode.window.showInformationMessage(`GSD: ${message}`);
+						vscode.window.showInformationMessage(`SDD: ${message}`);
 					}
 					// Notify doesn't need a response
 					break;

@@ -4,9 +4,9 @@
  * and fallback chains.
  */
 
-import type { Api, Model } from "@gsd/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
-import type { GSDPreferences } from "./preferences.js";
+import type { Api, Model } from "@sdd/pi-ai";
+import type { ExtensionAPI, ExtensionContext } from "@sdd/pi-coding-agent";
+import type { SDDPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";
 import { classifyUnitComplexity, tierLabel, extractTaskMetadata } from "./complexity-classifier.js";

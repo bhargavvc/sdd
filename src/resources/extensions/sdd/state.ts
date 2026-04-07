@@ -36,7 +36,7 @@ import {
 
 import { findMilestoneIds } from './milestone-ids.js';
 import { loadQueueOrder, sortByQueueOrder } from './queue-order.js';
-import { nativeBatchParseGsdFiles, type BatchParsedFile } from './native-parser-bridge.js';
+import { nativeBatchParseSddFiles, type BatchParsedFile } from './native-parser-bridge.js';
 
 import { join, resolve } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -84,7 +84,7 @@ export function isGhostMilestone(basePath: string, mid: string): boolean {
   }
 
   // If a worktree exists for this milestone, it was legitimately created.
-  const root = gsdRoot(basePath);
+  const root = sddRoot(basePath);
   const wtPath = join(root, 'worktrees', mid);
   if (existsSync(wtPath)) return false;
 
@@ -299,7 +299,7 @@ function isStatusDone(status: string): boolean {
 }
 
 /**
- * Derive GSD state from the milestones/slices/tasks DB tables.
+ * Derive SDD state from the milestones/slices/tasks DB tables.
  * Flag files (PARKED, VALIDATION, CONTINUE, REPLAN, REPLAN-TRIGGER, CONTEXT-DRAFT)
  * are still checked on the filesystem since they aren't in DB tables.
  * Requirements also stay file-based via parseRequirementCounts().

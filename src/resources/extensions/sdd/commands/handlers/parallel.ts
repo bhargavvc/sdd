@@ -129,7 +129,7 @@ export async function handleParallelCommand(trimmed: string, _ctx: ExtensionComm
     return true;
   }
 
-  emitParallelMessage(pi, `Unknown parallel subcommand "${subcommand}". Usage: /gsd parallel [start|status|stop|pause|resume|merge|watch]`);
+  emitParallelMessage(pi, `Unknown parallel subcommand "${subcommand}". Usage: /sdd parallel [start|status|stop|pause|resume|merge|watch]`);
   return true;
 }
 

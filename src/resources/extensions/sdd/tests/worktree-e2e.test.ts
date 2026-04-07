@@ -21,7 +21,7 @@ import {
 } from "../../auto-worktree.ts";
 import { getSliceBranchName } from "../../worktree.ts";
 import { abortAndReset } from "../../git-self-heal.ts";
-import { runGSDDoctor } from "../../doctor.ts";
+import { runSDDDoctor } from "../../doctor.ts";
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 

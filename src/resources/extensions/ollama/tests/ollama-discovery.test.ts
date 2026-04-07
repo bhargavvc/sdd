@@ -1,4 +1,4 @@
-// GSD2 — Tests for Ollama model discovery and enrichment
+// SDD2 — Tests for Ollama model discovery and enrichment
 import { describe, it, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { getOllamaOpenAIBaseUrl } from "../ollama-discovery.js";

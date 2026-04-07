@@ -10,20 +10,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **extensions**: add Ollama extension for first-class local LLM support (#3371)
-- **doctor**: stale commit safety check with gsd snapshot and auto-cleanup
+- **doctor**: stale commit safety check with sdd snapshot and auto-cleanup
 - **extensions**: wire up topological sort and unified registry filtering (#3152)
 - **widget**: add last commit display and dashboard layout improvements (#3226)
 - **model-routing**: enable dynamic routing by default (#3120)
 - **vscode**: sidebar redesign, SCM provider, checkpoints, diagnostics [3/3]
 - **splash**: add remote channel indicator to welcome screen tools row
 - stream full text and thinking output in headless verbose mode (#2934)
-- **gsd**: add codebase map — structural orientation for fresh agent contexts
+- **sdd**: add codebase map — structural orientation for fresh agent contexts
 
 ### Fixed
 - **worktree**: resolve merge conflict for PR #3322 — adopt comprehensive pre-merge cleanup
 - **merge**: clean stale MERGE_HEAD before squash merge (#2912)
 - **state**: always run disk→DB reconciliation when DB is available (#2631)
-- **git-service**: fix merge-base ancestry check and .gsd/ leakage in snapshot absorption
+- **git-service**: fix merge-base ancestry check and .sdd/ leakage in snapshot absorption
 - **extensions**: update provides.hooks in 7 extension manifests to match actual registrations (#3157)
 - surface nativeCommit errors in reconcileMergeState instead of silently swallowing (#3052)
 - **parallel**: scope commits to milestone boundaries in parallel mode (#3047)
@@ -32,15 +32,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - detect and remove nested .git dirs in worktree cleanup to prevent data loss (#3044)
 - prevent data loss when git isolation default changes (#2625) (#3043)
 - **read-tool**: clamp offset to file bounds instead of throwing (#3007) (#3042)
-- **gsd**: preserve queued milestones with worktrees in ghost detection (#3041)
+- **sdd**: preserve queued milestones with worktrees in ghost detection (#3041)
 - **compaction**: add chunked fallback when messages exceed model context window (#3038)
 - preserve interactive terminal across tab switches and project changes (#3055)
 - call cleanupQuickBranch on turn_end to squash-merge quick branch back (#3054)
 - align run-uat artifact path to ASSESSMENT, preventing false stuck retries (#3053)
 - replace invalid Discord invite links with canonical URL (#3056)
 - add Windows shell guard to remaining spawn sites (#3058)
-- route `gsd auto` to headless runner to prevent hang on piped stdin/stdout (#3057)
-- respect .gitignore for .gsd/ in rethink prompt (#3059)
+- route `sdd auto` to headless runner to prevent hang on piped stdin/stdout (#3057)
+- respect .gitignore for .sdd/ in rethink prompt (#3059)
 - migrate unit ownership from JSON to SQLite to eliminate read-modify-write race (#3061)
 - **roadmap**: handle numbered, bracketed, and indented prose H3 headers in slice parser (#3063)
 - add worktree-merge to resolveModelWithFallbacksForUnit switch and update KNOWN_UNIT_TYPES (#3066)
@@ -54,8 +54,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **auto**: move selectAndApplyModel before updateProgressWidget (#3079)
 - detect project relocation and recover state without data loss (#3080)
 - add free-text input to ask-user-questions when "None of the above" is selected (#3081)
-- block work execution during /gsd queue mode (#2545) (#3082)
-- detect worktree basePath in gsdRoot() to prevent escaping to project root (#3083)
+- block work execution during /sdd queue mode (#2545) (#3082)
+- detect worktree basePath in sddRoot() to prevent escaping to project root (#3083)
 - invalidate stale quick-task captures across milestone boundaries (#3084)
 - defer model validation until after extensions register (#3089)
 - repair YAML bullet lists in malformed tool-call JSON (#3090)
@@ -72,7 +72,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resolve OAuth API key in buildMemoryLLMCall via modelRegistry (#2959) (#3233)
 - **forensics**: read completion status from DB instead of legacy file (#3129) (#3234)
 - use camelCase parameter names in execute-task and complete-slice prompts (#2933) (#3236)
-- check bootstrap completeness in init wizard gate, not just .gsd/ existence (#2942) (#3237)
+- check bootstrap completeness in init wizard gate, not just .sdd/ existence (#2942) (#3237)
 - specify write tool for PROJECT.md in milestone/slice prompts (#3238)
 - widen completing-milestone gate to accept "None required" and similar phrasings (#2931) (#3239)
 - prevent ask_user_questions from poisoning auto-mode dispatch (#2936) (#3240)
@@ -87,11 +87,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - skip staleness rebuild in npm tarball installs (#2877) (#3250)
 - **parallel**: check worktree DB for milestone completion in merge (#2812) (#3256)
 - make claude-code provider stateful with full context and sidechain events (#2859) (#3254)
-- **worktree**: preserve non-empty gsd.db during sync to prevent truncation (#2815) (#3255)
-- align @gsd/native module type with compiled output (#3253)
+- **worktree**: preserve non-empty sdd.db during sync to prevent truncation (#2815) (#3255)
+- align @sdd/native module type with compiled output (#3253)
 - parse hook/* completed-unit keys correctly in forensics + doctor (#2826) (#3252)
 - copy mcp.json into auto-mode worktrees (#2791) (#3251)
-- add gsd_requirement_save and upsert path for requirement updates (#3249)
+- add sdd_requirement_save and upsert path for requirement updates (#3249)
 - handle pause_turn stop reason to prevent 400 errors with native web search (#2869) (#3248)
 - use authoritative milestone status in web roadmap (#2807) (#3258)
 - classify long-context entitlement 429 as quota_exhausted, not rate_limit (#2803) (#3257)
@@ -110,11 +110,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - correct OAuth fallback request shape for google_search (#2963) (#3272)
 - prevent UAT stuck-loop and orphaned worktree after milestone completion (#3065)
 - **mcp**: handle server names with spaces in mcp_discover (#3037)
-- **gsd**: detect markdown body verdicts and guard plan-milestone against completed slices (#2960) (#3035)
+- **sdd**: detect markdown body verdicts and guard plan-milestone against completed slices (#2960) (#3035)
 - **error-classifier**: replace STREAM_RE whack-a-mole with catch-all V8 JSON.parse pattern
 - type _borderColorKey as 'dim' | 'bashMode' to match ThemeColor
 - **tui**: comprehensive TUI review — layout, flow, rendering, and state fixes
-- **gsd**: harden codebase-map — bug fixes, UX polish, and expanded tests
+- **sdd**: harden codebase-map — bug fixes, UX polish, and expanded tests
 
 ### Changed
 - **state**: centralize pipeline logging through workflow logger (#3282)
@@ -131,9 +131,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **auto-dispatch**: widen operational verification gate regex (fixes #2866) (#2898)
 - **parallel**: three bugs preventing reliable parallel worker execution (#2801)
 - **web**: fall back to project totals when dashboard metrics are zero (#2847)
-- **gsd**: parse raw YAML under preference headings (#2794)
-- **gsd**: persist verification classes in milestone validation (#2820)
-- **gsd**: guard reconcileWorktreeDb against same-file ATTACH corruption (#2825)
+- **sdd**: parse raw YAML under preference headings (#2794)
+- **sdd**: persist verification classes in milestone validation (#2820)
+- **sdd**: guard reconcileWorktreeDb against same-file ATTACH corruption (#2825)
 - **web**: skip shutdown in daemon mode so server survives tab close (#2842)
 - **headless**: skip execution_complete for multi-turn commands (auto/next)
 - Fixed 3 bugs (launchd JSON parsing, login race condition, interact…
@@ -154,12 +154,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **headless**: match "completed" status from RPC v2 in exit code mapper
 - show external drives in directory browser on Linux
 - Regenerate package-lock.json after merge
-- **gsd**: resume cold auto bootstrap from db
-- **gsd**: preserve first auto unit model after session reset
+- **sdd**: resume cold auto bootstrap from db
+- **sdd**: preserve first auto unit model after session reset
 - Accept flags after positional command in headless arg parser
-- **gsd**: discover project subagents in .gsd
+- **sdd**: discover project subagents in .sdd
 - **model-routing**: use honest unitTypes for discuss dispatches and map all auto-dispatch phases
-- revert jsonl.ts to inline implementation — @gsd-build/rpc-client not available at source-level test time in CI
+- revert jsonl.ts to inline implementation — @bhargavvc/rpc-client not available at source-level test time in CI
 
 ### Changed
 - auto-commit after complete-milestone
@@ -167,15 +167,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [2.56.0] - 2026-03-27
 
 ### Added
-- **parallel**: /gsd parallel watch — native TUI overlay for worker monitoring (#2806)
+- **parallel**: /sdd parallel watch — native TUI overlay for worker monitoring (#2806)
 
 ### Fixed
 - **ci**: copy web/components to dist-test for xterm-theme test (#2891)
-- **gsd**: prefer PREFERENCES.md in worktrees (#2796)
-- **gsd**: resume auto-mode after transient provider pause (#2822)
+- **sdd**: prefer PREFERENCES.md in worktrees (#2796)
+- **sdd**: resume auto-mode after transient provider pause (#2822)
 - **parallel**: resolve session lock contention and 3 related parallel-mode bugs (#2184) (#2800)
 - **web**: improve light theme terminal contrast (#2819)
-- **gsd**: preserve auto start model through discuss (#2837)
+- **sdd**: preserve auto start model through discuss (#2837)
 
 ### Changed
 - **test**: compile unit tests with esbuild, reclassify integration tests, fix node_modules symlink (#2809)
@@ -187,13 +187,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - headless text mode observability + skip UAT pause (#2867)
 
 ### Fixed
-- **cli**: let gsd update bypass version mismatch gate (#2845)
+- **cli**: let sdd update bypass version mismatch gate (#2845)
 - **contracts**: add isWorkspaceEvent guard + close routeLiveInteractionEvent exhaustiveness gap (#2878)
-- **gsd**: use project root for prior-slice dispatch guard (#2863)
-- **gsd**: include queue context in milestone planning prompts (#2846)
+- **sdd**: use project root for prior-slice dispatch guard (#2863)
+- **sdd**: include queue context in milestone planning prompts (#2846)
 - detect monorepo roots in project discovery to prevent workspace fragmentation (#2849)
 - **bg-shell**: recover from deleted cwd in timers (#2850)
-- **gsd**: enable dynamic routing without models section (#2851)
+- **sdd**: enable dynamic routing without models section (#2851)
 - **interactive**: fully remove providers from /providers (#2852)
 
 ## [2.54.0] - 2026-03-27
@@ -1183,7 +1183,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **sdd**: remove STATE.md update instructions from all prompts (#983)
 - **sdd**: clear all caches after discuss dispatch so picker sees new CONTEXT files (#981)
 - **auto**: dispatch retry after verification gate failure (#998)
-- enforce GSDError usage and activate unused error codes (#997)
+- enforce SDDError usage and activate unused error codes (#997)
 - unify extension discovery logic (#995)
 - deduplicate tierLabel/tierOrdinal exports (#988)
 - deduplicate getMainBranch implementations (#994)
@@ -1323,7 +1323,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Debug logging for silent early-return paths in dispatchNextUnit
 - Untracked .sdd/ state files removed before milestone merge checkout
 - Crash prevention when cancelling OAuth provider login dialog
-- Resource staleness check compares gsdVersion instead of syncedAt
+- Resource staleness check compares sddVersion instead of syncedAt
 - Unique temp paths in saveFile() to prevent parallel write collisions
 - Validation/summary file generation for completed milestones during migration
 - Cache invalidation before initial state derivation in startAuto
@@ -1866,10 +1866,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - Native binary distribution — `.node` binaries were missing from the npm tarball, causing startup crashes on all platforms since v2.10.0
-- Native loader resolution chain: tries `@gsd-build/engine-{platform}` npm package first, then local dev build, with clear error messages listing supported platforms
+- Native loader resolution chain: tries `@bhargavvc/engine-{platform}` npm package first, then local dev build, with clear error messages listing supported platforms
 
 ### Added
-- Per-platform optional dependency packages (`@gsd-build/engine-*`) for macOS (ARM64/x64), Linux (x64/ARM64), and Windows (x64)
+- Per-platform optional dependency packages (`@bhargavvc/engine-*`) for macOS (ARM64/x64), Linux (x64/ARM64), and Windows (x64)
 - Cross-platform native binary CI build and publish workflow
 - Version synchronization script for lock-step platform package releases
 
@@ -2205,7 +2205,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Windows backspace in masked input + custom browser path support (#36, #34)
 
 ### Changed
-- Renamed "Spec-Driven Development" to "Get Shit Done"
+- Renamed "Spec-Driven Development" to "Spec-Driven Development"
 
 ## [0.3.0] - 2026-03-11
 
@@ -2269,105 +2269,105 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - License updated to MIT
 
-[Unreleased]: https://github.com/gsd-build/gsd-2/compare/v2.59.0...HEAD
-[2.59.0]: https://github.com/gsd-build/gsd-2/compare/v2.58.0...v2.59.0
-[2.58.0]: https://github.com/gsd-build/gsd-2/compare/v2.57.0...v2.58.0
-[2.57.0]: https://github.com/gsd-build/gsd-2/compare/v2.56.0...v2.57.0
-[2.56.0]: https://github.com/gsd-build/gsd-2/compare/v2.55.0...v2.56.0
-[2.55.0]: https://github.com/gsd-build/gsd-2/compare/v2.54.0...v2.55.0
-[2.54.0]: https://github.com/gsd-build/gsd-2/compare/v2.53.0...v2.54.0
-[2.53.0]: https://github.com/gsd-build/gsd-2/compare/v2.52.0...v2.53.0
-[2.52.0]: https://github.com/gsd-build/gsd-2/compare/v2.51.0...v2.52.0
-[2.51.0]: https://github.com/gsd-build/gsd-2/compare/v2.50.0...v2.51.0
-[2.50.0]: https://github.com/gsd-build/gsd-2/compare/v2.49.0...v2.50.0
-[2.49.0]: https://github.com/gsd-build/gsd-2/compare/v2.48.0...v2.49.0
-[2.48.0]: https://github.com/gsd-build/gsd-2/compare/v2.47.0...v2.48.0
-[2.47.0]: https://github.com/gsd-build/gsd-2/compare/v2.46.1...v2.47.0
-[2.46.1]: https://github.com/gsd-build/gsd-2/compare/v2.46.0...v2.46.1
-[2.46.0]: https://github.com/gsd-build/gsd-2/compare/v2.45.0...v2.46.0
-[2.45.0]: https://github.com/gsd-build/gsd-2/compare/v2.44.0...v2.45.0
-[2.44.0]: https://github.com/gsd-build/gsd-2/compare/v2.43.0...v2.44.0
-[2.43.0]: https://github.com/gsd-build/gsd-2/compare/v2.42.0...v2.43.0
-[2.42.0]: https://github.com/gsd-build/gsd-2/compare/v2.41.0...v2.42.0
-[2.41.0]: https://github.com/gsd-build/gsd-2/compare/v2.40.0...v2.41.0
-[2.40.0]: https://github.com/gsd-build/gsd-2/compare/v2.39.0...v2.40.0
-[2.39.0]: https://github.com/gsd-build/gsd-2/compare/v2.38.0...v2.39.0
-[2.38.0]: https://github.com/gsd-build/gsd-2/compare/v2.37.1...v2.38.0
-[2.37.1]: https://github.com/gsd-build/gsd-2/compare/v2.37.0...v2.37.1
-[2.37.0]: https://github.com/gsd-build/gsd-2/compare/v2.36.0...v2.37.0
-[2.36.0]: https://github.com/gsd-build/gsd-2/compare/v2.35.0...v2.36.0
-[2.35.0]: https://github.com/gsd-build/gsd-2/compare/v2.34.0...v2.35.0
-[2.34.0]: https://github.com/gsd-build/gsd-2/compare/v2.33.1...v2.34.0
-[2.33.1]: https://github.com/gsd-build/gsd-2/compare/v2.33.0...v2.33.1
-[2.33.0]: https://github.com/gsd-build/gsd-2/compare/v2.32.0...v2.33.0
-[2.32.0]: https://github.com/gsd-build/gsd-2/compare/v2.31.2...v2.32.0
-[2.31.2]: https://github.com/gsd-build/gsd-2/compare/v2.31.1...v2.31.2
-[2.31.1]: https://github.com/gsd-build/gsd-2/compare/v2.31.0...v2.31.1
-[2.31.0]: https://github.com/gsd-build/gsd-2/compare/v2.30.0...v2.31.0
-[2.30.0]: https://github.com/gsd-build/gsd-2/compare/v2.29.0...v2.30.0
-[2.29.0]: https://github.com/gsd-build/gsd-2/compare/v2.28.0...v2.29.0
-[2.28.0]: https://github.com/gsd-build/gsd-2/compare/v2.27.0...v2.28.0
-[2.27.0]: https://github.com/gsd-build/gsd-2/compare/v2.26.0...v2.27.0
-[2.26.0]: https://github.com/gsd-build/gsd-2/compare/v2.25.0...v2.26.0
-[2.25.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.25.0
-[2.24.0]: https://github.com/gsd-build/gsd-2/compare/v2.23.0...v2.24.0
-[2.23.0]: https://github.com/gsd-build/gsd-2/compare/v2.22.0...v2.23.0
-[2.21.0]: https://github.com/gsd-build/gsd-2/compare/v2.20.0...v2.21.0
-[2.19.0]: https://github.com/gsd-build/gsd-2/compare/v2.18.0...v2.19.0
-[2.18.0]: https://github.com/gsd-build/gsd-2/compare/v2.17.0...v2.18.0
-[2.17.0]: https://github.com/gsd-build/gsd-2/compare/v2.16.0...v2.17.0
-[2.16.0]: https://github.com/gsd-build/gsd-2/compare/v2.15.1...v2.16.0
-[2.15.1]: https://github.com/gsd-build/gsd-2/releases/tag/v2.15.1
-[2.15.0]: https://github.com/gsd-build/gsd-2/compare/v2.14.4...v2.15.0
-[2.14.4]: https://github.com/gsd-build/gsd-2/compare/v2.14.3...v2.14.4
-[2.14.3]: https://github.com/gsd-build/gsd-2/compare/v2.14.2...v2.14.3
-[2.14.2]: https://github.com/gsd-build/gsd-2/compare/v2.14.1...v2.14.2
-[2.14.1]: https://github.com/gsd-build/gsd-2/compare/v2.14.0...v2.14.1
-[2.14.0]: https://github.com/gsd-build/gsd-2/compare/v2.13.1...v2.14.0
-[2.13.1]: https://github.com/gsd-build/gsd-2/compare/v2.13.0...v2.13.1
-[2.13.0]: https://github.com/gsd-build/gsd-2/compare/v2.12.0...v2.13.0
-[2.12.0]: https://github.com/gsd-build/gsd-2/compare/v2.11.1...v2.12.0
-[2.11.1]: https://github.com/gsd-build/gsd-2/compare/v2.11.0...v2.11.1
-[2.11.0]: https://github.com/gsd-build/gsd-2/compare/v2.10.12...v2.11.0
-[2.10.12]: https://github.com/gsd-build/gsd-2/compare/v2.10.11...v2.10.12
-[2.10.11]: https://github.com/gsd-build/gsd-2/compare/v2.10.10...v2.10.11
-[2.10.10]: https://github.com/gsd-build/gsd-2/compare/v2.10.9...v2.10.10
-[2.10.9]: https://github.com/gsd-build/gsd-2/compare/v2.10.8...v2.10.9
-[2.10.8]: https://github.com/gsd-build/gsd-2/compare/v2.10.7...v2.10.8
-[2.10.7]: https://github.com/gsd-build/gsd-2/compare/v2.10.6...v2.10.7
-[2.10.6]: https://github.com/gsd-build/gsd-2/compare/v2.10.5...v2.10.6
-[2.10.5]: https://github.com/gsd-build/gsd-2/compare/v2.10.4...v2.10.5
-[2.10.4]: https://github.com/gsd-build/gsd-2/compare/v2.10.2...v2.10.4
-[2.10.2]: https://github.com/gsd-build/gsd-2/compare/v2.10.1...v2.10.2
-[2.10.1]: https://github.com/gsd-build/gsd-2/compare/v2.10.0...v2.10.1
-[2.10.0]: https://github.com/gsd-build/gsd-2/compare/v2.9.0...v2.10.0
-[2.9.0]: https://github.com/gsd-build/gsd-2/compare/v2.8.3...v2.9.0
-[2.8.3]: https://github.com/gsd-build/gsd-2/compare/v2.8.2...v2.8.3
-[2.8.2]: https://github.com/gsd-build/gsd-2/compare/v2.8.1...v2.8.2
-[2.8.1]: https://github.com/gsd-build/gsd-2/compare/v2.8.0...v2.8.1
-[2.8.0]: https://github.com/gsd-build/gsd-2/compare/v2.7.1...v2.8.0
-[2.7.1]: https://github.com/gsd-build/gsd-2/compare/v2.7.0...v2.7.1
-[2.7.0]: https://github.com/gsd-build/gsd-2/compare/v2.6.0...v2.7.0
-[2.6.0]: https://github.com/gsd-build/gsd-2/compare/v2.5.1...v2.6.0
-[2.20.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.20.0
-[2.22.0]: https://github.com/gsd-build/gsd-2/releases/tag/v2.22.0
-[2.5.1]: https://github.com/gsd-build/gsd-2/compare/v2.5.0...v2.5.1
-[2.5.0]: https://github.com/gsd-build/gsd-2/compare/v2.4.0...v2.5.0
-[2.4.0]: https://github.com/gsd-build/gsd-2/compare/v2.3.11...v2.4.0
-[2.3.11]: https://github.com/gsd-build/gsd-2/compare/v2.3.10...v2.3.11
-[2.3.10]: https://github.com/gsd-build/gsd-2/compare/v2.3.9...v2.3.10
-[2.3.9]: https://github.com/gsd-build/gsd-2/compare/v2.3.8...v2.3.9
-[2.3.8]: https://github.com/gsd-build/gsd-2/compare/v2.3.7...v2.3.8
-[2.3.7]: https://github.com/gsd-build/gsd-2/compare/v2.3.6...v2.3.7
-[2.3.6]: https://github.com/gsd-build/gsd-2/compare/v2.3.5...v2.3.6
-[2.3.5]: https://github.com/gsd-build/gsd-2/compare/v2.3.4...v2.3.5
-[2.3.4]: https://github.com/gsd-build/gsd-2/compare/v0.3.3...v2.3.4
-[0.3.3]: https://github.com/gsd-build/gsd-2/compare/v0.3.1...v0.3.3
-[0.3.1]: https://github.com/gsd-build/gsd-2/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/gsd-build/gsd-2/compare/v0.2.9...v0.3.0
-[0.2.9]: https://github.com/gsd-build/gsd-2/compare/v0.2.8...v0.2.9
-[0.2.8]: https://github.com/gsd-build/gsd-2/compare/v0.2.6...v0.2.8
-[0.2.6]: https://github.com/gsd-build/gsd-2/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/gsd-build/gsd-2/compare/v0.2.4...v0.2.5
-[0.2.4]: https://github.com/gsd-build/gsd-2/compare/v0.1.6...v0.2.4
-[0.1.6]: https://github.com/gsd-build/gsd-2/releases/tag/v0.1.6
+[Unreleased]: https://github.com/bhargavvc/sdd/compare/v2.59.0...HEAD
+[2.59.0]: https://github.com/bhargavvc/sdd/compare/v2.58.0...v2.59.0
+[2.58.0]: https://github.com/bhargavvc/sdd/compare/v2.57.0...v2.58.0
+[2.57.0]: https://github.com/bhargavvc/sdd/compare/v2.56.0...v2.57.0
+[2.56.0]: https://github.com/bhargavvc/sdd/compare/v2.55.0...v2.56.0
+[2.55.0]: https://github.com/bhargavvc/sdd/compare/v2.54.0...v2.55.0
+[2.54.0]: https://github.com/bhargavvc/sdd/compare/v2.53.0...v2.54.0
+[2.53.0]: https://github.com/bhargavvc/sdd/compare/v2.52.0...v2.53.0
+[2.52.0]: https://github.com/bhargavvc/sdd/compare/v2.51.0...v2.52.0
+[2.51.0]: https://github.com/bhargavvc/sdd/compare/v2.50.0...v2.51.0
+[2.50.0]: https://github.com/bhargavvc/sdd/compare/v2.49.0...v2.50.0
+[2.49.0]: https://github.com/bhargavvc/sdd/compare/v2.48.0...v2.49.0
+[2.48.0]: https://github.com/bhargavvc/sdd/compare/v2.47.0...v2.48.0
+[2.47.0]: https://github.com/bhargavvc/sdd/compare/v2.46.1...v2.47.0
+[2.46.1]: https://github.com/bhargavvc/sdd/compare/v2.46.0...v2.46.1
+[2.46.0]: https://github.com/bhargavvc/sdd/compare/v2.45.0...v2.46.0
+[2.45.0]: https://github.com/bhargavvc/sdd/compare/v2.44.0...v2.45.0
+[2.44.0]: https://github.com/bhargavvc/sdd/compare/v2.43.0...v2.44.0
+[2.43.0]: https://github.com/bhargavvc/sdd/compare/v2.42.0...v2.43.0
+[2.42.0]: https://github.com/bhargavvc/sdd/compare/v2.41.0...v2.42.0
+[2.41.0]: https://github.com/bhargavvc/sdd/compare/v2.40.0...v2.41.0
+[2.40.0]: https://github.com/bhargavvc/sdd/compare/v2.39.0...v2.40.0
+[2.39.0]: https://github.com/bhargavvc/sdd/compare/v2.38.0...v2.39.0
+[2.38.0]: https://github.com/bhargavvc/sdd/compare/v2.37.1...v2.38.0
+[2.37.1]: https://github.com/bhargavvc/sdd/compare/v2.37.0...v2.37.1
+[2.37.0]: https://github.com/bhargavvc/sdd/compare/v2.36.0...v2.37.0
+[2.36.0]: https://github.com/bhargavvc/sdd/compare/v2.35.0...v2.36.0
+[2.35.0]: https://github.com/bhargavvc/sdd/compare/v2.34.0...v2.35.0
+[2.34.0]: https://github.com/bhargavvc/sdd/compare/v2.33.1...v2.34.0
+[2.33.1]: https://github.com/bhargavvc/sdd/compare/v2.33.0...v2.33.1
+[2.33.0]: https://github.com/bhargavvc/sdd/compare/v2.32.0...v2.33.0
+[2.32.0]: https://github.com/bhargavvc/sdd/compare/v2.31.2...v2.32.0
+[2.31.2]: https://github.com/bhargavvc/sdd/compare/v2.31.1...v2.31.2
+[2.31.1]: https://github.com/bhargavvc/sdd/compare/v2.31.0...v2.31.1
+[2.31.0]: https://github.com/bhargavvc/sdd/compare/v2.30.0...v2.31.0
+[2.30.0]: https://github.com/bhargavvc/sdd/compare/v2.29.0...v2.30.0
+[2.29.0]: https://github.com/bhargavvc/sdd/compare/v2.28.0...v2.29.0
+[2.28.0]: https://github.com/bhargavvc/sdd/compare/v2.27.0...v2.28.0
+[2.27.0]: https://github.com/bhargavvc/sdd/compare/v2.26.0...v2.27.0
+[2.26.0]: https://github.com/bhargavvc/sdd/compare/v2.25.0...v2.26.0
+[2.25.0]: https://github.com/bhargavvc/sdd/releases/tag/v2.25.0
+[2.24.0]: https://github.com/bhargavvc/sdd/compare/v2.23.0...v2.24.0
+[2.23.0]: https://github.com/bhargavvc/sdd/compare/v2.22.0...v2.23.0
+[2.21.0]: https://github.com/bhargavvc/sdd/compare/v2.20.0...v2.21.0
+[2.19.0]: https://github.com/bhargavvc/sdd/compare/v2.18.0...v2.19.0
+[2.18.0]: https://github.com/bhargavvc/sdd/compare/v2.17.0...v2.18.0
+[2.17.0]: https://github.com/bhargavvc/sdd/compare/v2.16.0...v2.17.0
+[2.16.0]: https://github.com/bhargavvc/sdd/compare/v2.15.1...v2.16.0
+[2.15.1]: https://github.com/bhargavvc/sdd/releases/tag/v2.15.1
+[2.15.0]: https://github.com/bhargavvc/sdd/compare/v2.14.4...v2.15.0
+[2.14.4]: https://github.com/bhargavvc/sdd/compare/v2.14.3...v2.14.4
+[2.14.3]: https://github.com/bhargavvc/sdd/compare/v2.14.2...v2.14.3
+[2.14.2]: https://github.com/bhargavvc/sdd/compare/v2.14.1...v2.14.2
+[2.14.1]: https://github.com/bhargavvc/sdd/compare/v2.14.0...v2.14.1
+[2.14.0]: https://github.com/bhargavvc/sdd/compare/v2.13.1...v2.14.0
+[2.13.1]: https://github.com/bhargavvc/sdd/compare/v2.13.0...v2.13.1
+[2.13.0]: https://github.com/bhargavvc/sdd/compare/v2.12.0...v2.13.0
+[2.12.0]: https://github.com/bhargavvc/sdd/compare/v2.11.1...v2.12.0
+[2.11.1]: https://github.com/bhargavvc/sdd/compare/v2.11.0...v2.11.1
+[2.11.0]: https://github.com/bhargavvc/sdd/compare/v2.10.12...v2.11.0
+[2.10.12]: https://github.com/bhargavvc/sdd/compare/v2.10.11...v2.10.12
+[2.10.11]: https://github.com/bhargavvc/sdd/compare/v2.10.10...v2.10.11
+[2.10.10]: https://github.com/bhargavvc/sdd/compare/v2.10.9...v2.10.10
+[2.10.9]: https://github.com/bhargavvc/sdd/compare/v2.10.8...v2.10.9
+[2.10.8]: https://github.com/bhargavvc/sdd/compare/v2.10.7...v2.10.8
+[2.10.7]: https://github.com/bhargavvc/sdd/compare/v2.10.6...v2.10.7
+[2.10.6]: https://github.com/bhargavvc/sdd/compare/v2.10.5...v2.10.6
+[2.10.5]: https://github.com/bhargavvc/sdd/compare/v2.10.4...v2.10.5
+[2.10.4]: https://github.com/bhargavvc/sdd/compare/v2.10.2...v2.10.4
+[2.10.2]: https://github.com/bhargavvc/sdd/compare/v2.10.1...v2.10.2
+[2.10.1]: https://github.com/bhargavvc/sdd/compare/v2.10.0...v2.10.1
+[2.10.0]: https://github.com/bhargavvc/sdd/compare/v2.9.0...v2.10.0
+[2.9.0]: https://github.com/bhargavvc/sdd/compare/v2.8.3...v2.9.0
+[2.8.3]: https://github.com/bhargavvc/sdd/compare/v2.8.2...v2.8.3
+[2.8.2]: https://github.com/bhargavvc/sdd/compare/v2.8.1...v2.8.2
+[2.8.1]: https://github.com/bhargavvc/sdd/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/bhargavvc/sdd/compare/v2.7.1...v2.8.0
+[2.7.1]: https://github.com/bhargavvc/sdd/compare/v2.7.0...v2.7.1
+[2.7.0]: https://github.com/bhargavvc/sdd/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/bhargavvc/sdd/compare/v2.5.1...v2.6.0
+[2.20.0]: https://github.com/bhargavvc/sdd/releases/tag/v2.20.0
+[2.22.0]: https://github.com/bhargavvc/sdd/releases/tag/v2.22.0
+[2.5.1]: https://github.com/bhargavvc/sdd/compare/v2.5.0...v2.5.1
+[2.5.0]: https://github.com/bhargavvc/sdd/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/bhargavvc/sdd/compare/v2.3.11...v2.4.0
+[2.3.11]: https://github.com/bhargavvc/sdd/compare/v2.3.10...v2.3.11
+[2.3.10]: https://github.com/bhargavvc/sdd/compare/v2.3.9...v2.3.10
+[2.3.9]: https://github.com/bhargavvc/sdd/compare/v2.3.8...v2.3.9
+[2.3.8]: https://github.com/bhargavvc/sdd/compare/v2.3.7...v2.3.8
+[2.3.7]: https://github.com/bhargavvc/sdd/compare/v2.3.6...v2.3.7
+[2.3.6]: https://github.com/bhargavvc/sdd/compare/v2.3.5...v2.3.6
+[2.3.5]: https://github.com/bhargavvc/sdd/compare/v2.3.4...v2.3.5
+[2.3.4]: https://github.com/bhargavvc/sdd/compare/v0.3.3...v2.3.4
+[0.3.3]: https://github.com/bhargavvc/sdd/compare/v0.3.1...v0.3.3
+[0.3.1]: https://github.com/bhargavvc/sdd/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/bhargavvc/sdd/compare/v0.2.9...v0.3.0
+[0.2.9]: https://github.com/bhargavvc/sdd/compare/v0.2.8...v0.2.9
+[0.2.8]: https://github.com/bhargavvc/sdd/compare/v0.2.6...v0.2.8
+[0.2.6]: https://github.com/bhargavvc/sdd/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/bhargavvc/sdd/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/bhargavvc/sdd/compare/v0.1.6...v0.2.4
+[0.1.6]: https://github.com/bhargavvc/sdd/releases/tag/v0.1.6

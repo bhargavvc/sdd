@@ -230,52 +230,52 @@ describe('Daemon + DiscordBot wiring', () => {
 // ---------- sanitizeChannelName ----------
 
 describe('sanitizeChannelName', () => {
-  it('converts basic path to gsd-prefixed name', () => {
-    assert.equal(sanitizeChannelName('/home/user/my-project'), 'gsd-my-project');
+  it('converts basic path to sdd-prefixed name', () => {
+    assert.equal(sanitizeChannelName('/home/user/my-project'), 'sdd-my-project');
   });
 
   it('converts path with special characters to hyphens', () => {
-    assert.equal(sanitizeChannelName('/home/user/My_Cool.Project!v2'), 'gsd-my-cool-project-v2');
+    assert.equal(sanitizeChannelName('/home/user/My_Cool.Project!v2'), 'sdd-my-cool-project-v2');
   });
 
   it('truncates very long names to 100 chars', () => {
     const longName = 'a'.repeat(200);
     const result = sanitizeChannelName(`/home/${longName}`);
     assert.ok(result.length <= 100, `Expected <= 100 chars, got ${result.length}`);
-    assert.ok(result.startsWith('gsd-'));
+    assert.ok(result.startsWith('sdd-'));
   });
 
   it('cleans leading/trailing dots and underscores', () => {
-    assert.equal(sanitizeChannelName('/home/...___project___...'), 'gsd-project');
+    assert.equal(sanitizeChannelName('/home/...___project___...'), 'sdd-project');
   });
 
-  it('returns gsd-unnamed for empty basename', () => {
-    assert.equal(sanitizeChannelName(''), 'gsd-unnamed');
-    assert.equal(sanitizeChannelName('/'), 'gsd-unnamed');
+  it('returns sdd-unnamed for empty basename', () => {
+    assert.equal(sanitizeChannelName(''), 'sdd-unnamed');
+    assert.equal(sanitizeChannelName('/'), 'sdd-unnamed');
   });
 
-  it('returns gsd-unnamed for basename with only special chars', () => {
-    assert.equal(sanitizeChannelName('/home/!!!'), 'gsd-unnamed');
+  it('returns sdd-unnamed for basename with only special chars', () => {
+    assert.equal(sanitizeChannelName('/home/!!!'), 'sdd-unnamed');
   });
 
   it('collapses consecutive hyphens', () => {
-    assert.equal(sanitizeChannelName('/home/a---b---c'), 'gsd-a-b-c');
+    assert.equal(sanitizeChannelName('/home/a---b---c'), 'sdd-a-b-c');
   });
 
   it('handles Windows-style backslash paths', () => {
-    assert.equal(sanitizeChannelName('C:\\Users\\lex\\my-project'), 'gsd-my-project');
+    assert.equal(sanitizeChannelName('C:\\Users\\lex\\my-project'), 'sdd-my-project');
   });
 
   it('handles name at exact prefix + 96 chars = 100 char limit', () => {
-    // gsd- is 4 chars, so a 96-char basename should produce exactly 100
+    // sdd- is 4 chars, so a 96-char basename should produce exactly 100
     const name96 = 'a'.repeat(96);
     const result = sanitizeChannelName(`/home/${name96}`);
     assert.equal(result.length, 100);
-    assert.equal(result, `gsd-${'a'.repeat(96)}`);
+    assert.equal(result, `sdd-${'a'.repeat(96)}`);
   });
 
   it('handles whitespace-only basename', () => {
-    assert.equal(sanitizeChannelName('/home/   '), 'gsd-unnamed');
+    assert.equal(sanitizeChannelName('/home/   '), 'sdd-unnamed');
   });
 });
 
@@ -342,7 +342,7 @@ describe('ChannelManager', () => {
     const mgr = new ChannelManager({ guild: guild as any, logger: logger as any });
 
     const cat = await mgr.resolveCategory();
-    assert.equal(cat.name, 'GSD Projects');
+    assert.equal(cat.name, 'SDD Projects');
     assert.equal(cat.type, ChannelType.GuildCategory);
   });
 
@@ -363,7 +363,7 @@ describe('ChannelManager', () => {
     // Pre-populate a matching category
     guild._channels.set('existing-cat', {
       id: 'existing-cat',
-      name: 'GSD Projects',
+      name: 'SDD Projects',
       type: ChannelType.GuildCategory,
       parentId: null,
     });
@@ -383,7 +383,7 @@ describe('ChannelManager', () => {
     const mgr = new ChannelManager({ guild: guild as any, logger: logger as any });
 
     const channel = await mgr.createProjectChannel('/home/user/my-project');
-    assert.equal(channel.name, 'gsd-my-project');
+    assert.equal(channel.name, 'sdd-my-project');
     assert.equal(channel.type, ChannelType.GuildText);
     // Category was created first (chan-1), then channel (chan-2)
     assert.equal(channel.parentId, 'chan-1');
@@ -443,10 +443,10 @@ describe('buildCommands', () => {
     const commands = buildCommands();
     assert.equal(commands.length, 4);
     const names = commands.map((c) => c.name);
-    assert.ok(names.includes('gsd-status'), 'should include gsd-status');
-    assert.ok(names.includes('gsd-start'), 'should include gsd-start');
-    assert.ok(names.includes('gsd-stop'), 'should include gsd-stop');
-    assert.ok(names.includes('gsd-verbose'), 'should include gsd-verbose');
+    assert.ok(names.includes('sdd-status'), 'should include sdd-status');
+    assert.ok(names.includes('sdd-start'), 'should include sdd-start');
+    assert.ok(names.includes('sdd-stop'), 'should include sdd-stop');
+    assert.ok(names.includes('sdd-verbose'), 'should include sdd-verbose');
   });
 
   it('each command has a description', () => {
@@ -551,8 +551,8 @@ describe('command dispatch', () => {
   // The command routing logic is tested indirectly through integration of the
   // pure helpers (buildCommands, formatSessionStatus, isAuthorized).
 
-  it('gsd-status with no sessions produces empty message', () => {
-    // Tests the formatSessionStatus path that /gsd-status calls
+  it('sdd-status with no sessions produces empty message', () => {
+    // Tests the formatSessionStatus path that /sdd-status calls
     const result = formatSessionStatus([]);
     assert.equal(result, 'No active sessions.');
   });
@@ -560,7 +560,7 @@ describe('command dispatch', () => {
   it('unknown command name is not in buildCommands list', () => {
     const commands = buildCommands();
     const names = commands.map((c) => c.name);
-    assert.ok(!names.includes('gsd-unknown'), 'unknown should not be in command list');
+    assert.ok(!names.includes('sdd-unknown'), 'unknown should not be in command list');
   });
 
   it('auth guard rejects non-owner on interaction', () => {
@@ -733,14 +733,14 @@ describe('Daemon orchestrator wiring', () => {
   });
 });
 
-// ---------- /gsd-start and /gsd-stop logic paths ----------
+// ---------- /sdd-start and /sdd-stop logic paths ----------
 
-describe('/gsd-start and /gsd-stop logic', () => {
+describe('/sdd-start and /sdd-stop logic', () => {
   // These test the observable logic paths exercised by the handlers.
   // Since handleGsdStart/handleGsdStop are private, we test the data layer
   // they depend on — project scanning, session listing, and edge cases.
 
-  it('/gsd-start: scanForProjects returning 0 projects', async () => {
+  it('/sdd-start: scanForProjects returning 0 projects', async () => {
     // Simulates the "no projects" path
     const { scanForProjects } = await import('./project-scanner.js');
     // With no scan roots, should return empty
@@ -748,7 +748,7 @@ describe('/gsd-start and /gsd-stop logic', () => {
     assert.equal(projects.length, 0);
   });
 
-  it('/gsd-stop: getAllSessions returns empty when no sessions active', async () => {
+  it('/sdd-stop: getAllSessions returns empty when no sessions active', async () => {
     const { SessionManager } = await import('./session-manager.js');
     const dir = tmpDir();
     cleanupDirs.push(dir);
@@ -760,7 +760,7 @@ describe('/gsd-start and /gsd-stop logic', () => {
     await logger.close();
   });
 
-  it('/gsd-stop: filters to active sessions only', () => {
+  it('/sdd-stop: filters to active sessions only', () => {
     // Simulate the filter logic used in handleGsdStop
     const allSessions: Partial<ManagedSession>[] = [
       { sessionId: 's1', status: 'running', projectName: 'alpha' },
@@ -777,7 +777,7 @@ describe('/gsd-start and /gsd-stop logic', () => {
     assert.deepEqual(active.map((s) => s.projectName), ['alpha', 'gamma', 'epsilon']);
   });
 
-  it('/gsd-start: >25 projects are truncated for select menu', () => {
+  it('/sdd-start: >25 projects are truncated for select menu', () => {
     // Simulate the truncation logic
     const projects = Array.from({ length: 30 }, (_, i) => ({
       name: `project-${i}`,

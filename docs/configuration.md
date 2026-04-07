@@ -155,12 +155,12 @@ Recommended verification order:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GSD_HOME` | `~/.gsd` | Global GSD directory. All paths derive from this unless individually overridden. Affects preferences, skills, sessions, and per-project state. (v2.39) |
-| `GSD_PROJECT_ID` | (auto-hash) | Override the automatic project identity hash. Per-project state goes to `$GSD_HOME/projects/<GSD_PROJECT_ID>/` instead of the computed hash. Useful for CI/CD or sharing state across clones of the same repo. (v2.39) |
-| `GSD_STATE_DIR` | `$GSD_HOME` | Per-project state root. Controls where `projects/<repo-hash>/` directories are created. Takes precedence over `GSD_HOME` for project state. |
-| `GSD_CODING_AGENT_DIR` | `$GSD_HOME/agent` | Agent directory containing managed resources, extensions, and auth. Takes precedence over `GSD_HOME` for agent paths. |
-| `GSD_ALLOWED_COMMAND_PREFIXES` | (built-in list) | Comma-separated command prefixes allowed for `!command` value resolution. Overrides `allowedCommandPrefixes` in settings.json. See [Custom Models — Command Allowlist](custom-models.md#command-allowlist). |
-| `GSD_FETCH_ALLOWED_URLS` | (none) | Comma-separated hostnames exempted from `fetch_page` URL blocking. Overrides `fetchAllowedUrls` in settings.json. See [URL Blocking](#url-blocking-fetch_page). |
+| `SDD_HOME` | `~/.sdd` | Global SDD directory. All paths derive from this unless individually overridden. Affects preferences, skills, sessions, and per-project state. (v2.39) |
+| `SDD_PROJECT_ID` | (auto-hash) | Override the automatic project identity hash. Per-project state goes to `$SDD_HOME/projects/<SDD_PROJECT_ID>/` instead of the computed hash. Useful for CI/CD or sharing state across clones of the same repo. (v2.39) |
+| `SDD_STATE_DIR` | `$SDD_HOME` | Per-project state root. Controls where `projects/<repo-hash>/` directories are created. Takes precedence over `SDD_HOME` for project state. |
+| `SDD_CODING_AGENT_DIR` | `$SDD_HOME/agent` | Agent directory containing managed resources, extensions, and auth. Takes precedence over `SDD_HOME` for agent paths. |
+| `SDD_ALLOWED_COMMAND_PREFIXES` | (built-in list) | Comma-separated command prefixes allowed for `!command` value resolution. Overrides `allowedCommandPrefixes` in settings.json. See [Custom Models — Command Allowlist](custom-models.md#command-allowlist). |
+| `SDD_FETCH_ALLOWED_URLS` | (none) | Comma-separated hostnames exempted from `fetch_page` URL blocking. Overrides `fetchAllowedUrls` in settings.json. See [URL Blocking](#url-blocking-fetch_page). |
 
 ## All Settings
 
@@ -367,7 +367,7 @@ Public URLs (`https://example.com`, `http://8.8.8.8`) are not affected.
 
 **Allowing specific internal hosts:**
 
-If you need the agent to fetch from internal URLs (self-hosted docs, internal APIs behind a VPN), add their hostnames to `fetchAllowedUrls` in global settings (`~/.gsd/agent/settings.json`):
+If you need the agent to fetch from internal URLs (self-hosted docs, internal APIs behind a VPN), add their hostnames to `fetchAllowedUrls` in global settings (`~/.sdd/agent/settings.json`):
 
 ```json
 {
@@ -375,10 +375,10 @@ If you need the agent to fetch from internal URLs (self-hosted docs, internal AP
 }
 ```
 
-Alternatively, set the `GSD_FETCH_ALLOWED_URLS` environment variable (comma-separated). The env var takes precedence over settings.json:
+Alternatively, set the `SDD_FETCH_ALLOWED_URLS` environment variable (comma-separated). The env var takes precedence over settings.json:
 
 ```bash
-export GSD_FETCH_ALLOWED_URLS="internal-docs.company.com,192.168.1.50"
+export SDD_FETCH_ALLOWED_URLS="internal-docs.company.com,192.168.1.50"
 ```
 
 Allowed hostnames bypass the blocklist checks. The protocol restriction (HTTP/HTTPS only) still applies — `file://` and `ftp://` cannot be allowlisted.

@@ -36,9 +36,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   CurrentSliceCardSkeleton,
   ActivityCardSkeleton,
-} from "@/components/gsd/loading-skeletons"
-import { ScopeBadge } from "@/components/gsd/scope-badge"
-import { ProjectWelcome } from "@/components/gsd/project-welcome"
+} from "@/components/sdd/loading-skeletons"
+import { ScopeBadge } from "@/components/sdd/scope-badge"
+import { ProjectWelcome } from "@/components/sdd/project-welcome"
 import { authFetch } from "@/lib/auth"
 import { type ProjectTotals } from "@/lib/visualizer-types"
 

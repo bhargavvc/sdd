@@ -298,8 +298,8 @@ test('E2E: DB-backed path respects queue order (#2556)', async () => {
     // the dispatch guard (which respects queue order) blocked completion.
     const base = createFixtureBase();
     try {
-      const { openDatabase, closeDatabase, insertMilestone, isDbAvailable } = await import('../../gsd-db.ts');
-      const dbPath = join(base, '.gsd', 'gsd.db');
+      const { openDatabase, closeDatabase, insertMilestone, isDbAvailable } = await import('../../sdd-db.ts');
+      const dbPath = join(base, '.sdd', 'sdd.db');
 
       // Create milestone directories (required for findMilestoneIds)
       writeMilestoneDir(base, 'M006');

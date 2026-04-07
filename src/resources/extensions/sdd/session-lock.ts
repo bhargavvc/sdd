@@ -85,29 +85,29 @@ const LOCK_FILE = "auto.lock";
 
 /**
  * Derive the effective lock file name for the current process.
- * In parallel worker mode (GSD_PARALLEL_WORKER + GSD_MILESTONE_LOCK),
+ * In parallel worker mode (SDD_PARALLEL_WORKER + SDD_MILESTONE_LOCK),
  * each worker uses a per-milestone lock file (`auto-<milestoneId>.lock`)
- * to avoid contending on the shared `.gsd/auto.lock` (#2184).
+ * to avoid contending on the shared `.sdd/auto.lock` (#2184).
  */
 export function effectiveLockFile(): string {
-  const mid = process.env.GSD_PARALLEL_WORKER ? process.env.GSD_MILESTONE_LOCK : null;
+  const mid = process.env.SDD_PARALLEL_WORKER ? process.env.SDD_MILESTONE_LOCK : null;
   return mid ? `auto-${mid}.lock` : LOCK_FILE;
 }
 
 /**
  * Derive the OS-level lock target directory for the current process.
- * In parallel worker mode, uses `.gsd/parallel/<milestoneId>/` instead of
- * `.gsd/` so workers don't contend on the same proper-lockfile directory (#2184).
+ * In parallel worker mode, uses `.sdd/parallel/<milestoneId>/` instead of
+ * `.sdd/` so workers don't contend on the same proper-lockfile directory (#2184).
  */
-export function effectiveLockTarget(gsdDir: string): string {
-  const mid = process.env.GSD_PARALLEL_WORKER ? process.env.GSD_MILESTONE_LOCK : null;
-  return mid ? join(gsdDir, "parallel", mid) : gsdDir;
+export function effectiveLockTarget(sddDir: string): string {
+  const mid = process.env.SDD_PARALLEL_WORKER ? process.env.SDD_MILESTONE_LOCK : null;
+  return mid ? join(sddDir, "parallel", mid) : sddDir;
 }
 
 function lockPath(basePath: string): string {
   // If we have a snapshotted path from acquisition, use it for consistency
   if (_snapshotLockPath) return _snapshotLockPath;
-  return join(gsdRoot(basePath), effectiveLockFile());
+  return join(sddRoot(basePath), effectiveLockFile());
 }
 
 // ─── Stray Lock Cleanup ─────────────────────────────────────────────────────
@@ -285,14 +285,14 @@ export function acquireSessionLock(basePath: string): SessionLockResult {
     return acquireFallbackLock(basePath, lp, lockData);
   }
 
-  const gsdDir = gsdRoot(basePath);
-  const lockTarget = effectiveLockTarget(gsdDir);
+  const sddDir = sddRoot(basePath);
+  const lockTarget = effectiveLockTarget(sddDir);
 
   try {
     // Try to acquire an exclusive OS-level lock on the lock target.
     // We lock a directory since proper-lockfile works best on directories,
     // and the lock file itself may not exist yet.
-    // In parallel worker mode, lockTarget is .gsd/parallel/<MID>/ (#2184).
+    // In parallel worker mode, lockTarget is .sdd/parallel/<MID>/ (#2184).
     mkdirSync(lockTarget, { recursive: true });
 
     const release = lockfile.lockSync(lockTarget, {
@@ -507,9 +507,9 @@ export function releaseSessionLock(basePath: string): void {
   }
 
   // Remove the proper-lockfile directory for the current lock target.
-  // In parallel worker mode, this is .gsd/parallel/<MID>.lock/ (#2184).
-  const gsdDir = gsdRoot(basePath);
-  const lockTarget = effectiveLockTarget(gsdDir);
+  // In parallel worker mode, this is .sdd/parallel/<MID>.lock/ (#2184).
+  const sddDir = sddRoot(basePath);
+  const lockTarget = effectiveLockTarget(sddDir);
   try {
     const lockDir = join(lockTarget + ".lock");
     if (existsSync(lockDir)) rmSync(lockDir, { recursive: true, force: true });
@@ -517,7 +517,7 @@ export function releaseSessionLock(basePath: string): void {
     // Non-fatal
   }
   // Also clean the per-milestone parallel directory itself if it exists
-  if (lockTarget !== gsdDir) {
+  if (lockTarget !== sddDir) {
     try {
       if (existsSync(lockTarget)) rmSync(lockTarget, { recursive: true, force: true });
     } catch {

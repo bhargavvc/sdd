@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, readFileSync, existsSync, writeFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices, updateSliceStatus } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices, updateSliceStatus } from '../sdd-db.ts';
 import { handlePlanMilestone } from '../tools/plan-milestone.ts';
 import { parseRoadmap } from '../parsers-legacy.ts';
 
@@ -201,7 +201,7 @@ test('handlePlanMilestone reruns idempotently and updates existing planning stat
 // Regression: #2960 — plan-milestone must refuse to overwrite completed slices
 test('handlePlanMilestone refuses to re-plan a milestone with completed slices (#2960)', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.gsd', 'gsd.db');
+  const dbPath = join(base, '.sdd', 'sdd.db');
   openDatabase(dbPath);
 
   try {

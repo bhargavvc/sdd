@@ -12,7 +12,7 @@ const webMode = await import("../../web-mode.ts");
 // ---------------------------------------------------------------------------
 
 test("launchWebMode passes windowsHide: true in spawn options", async (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-web-winhide-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-web-winhide-"));
   const standaloneRoot = join(tmp, "dist", "web", "standalone");
   const serverPath = join(standaloneRoot, "server.js");
   mkdirSync(standaloneRoot, { recursive: true });
@@ -30,8 +30,8 @@ test("launchWebMode passes windowsHide: true in spawn options", async (t) => {
   const status = await webMode.launchWebMode(
     {
       cwd: "/tmp/winhide-project",
-      projectSessionsDir: "/tmp/.gsd/sessions/winhide",
-      agentDir: "/tmp/.gsd/agent",
+      projectSessionsDir: "/tmp/.sdd/sessions/winhide",
+      agentDir: "/tmp/.sdd/agent",
       packageRoot: tmp,
     },
     {
@@ -66,7 +66,7 @@ test("launchWebMode passes windowsHide: true in spawn options", async (t) => {
 });
 
 test("launchWebMode source-dev host also passes windowsHide: true", async (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-web-winhide-src-"));
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-web-winhide-src-"));
   const webRoot = join(tmp, "web");
   mkdirSync(webRoot, { recursive: true });
   writeFileSync(join(webRoot, "package.json"), '{"name":"web"}\n');
@@ -83,8 +83,8 @@ test("launchWebMode source-dev host also passes windowsHide: true", async (t) =>
   const status = await webMode.launchWebMode(
     {
       cwd: "/tmp/winhide-src-project",
-      projectSessionsDir: "/tmp/.gsd/sessions/winhide-src",
-      agentDir: "/tmp/.gsd/agent",
+      projectSessionsDir: "/tmp/.sdd/sessions/winhide-src",
+      agentDir: "/tmp/.sdd/agent",
       packageRoot: tmp,
     },
     {

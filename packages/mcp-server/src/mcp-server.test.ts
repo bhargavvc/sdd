@@ -1,7 +1,7 @@
 /**
- * @gsd-build/mcp-server — Integration and unit tests.
+ * @bhargavvc/mcp-server — Integration and unit tests.
  *
- * Strategy: We cannot mock @gsd-build/rpc-client at the module level without
+ * Strategy: We cannot mock @bhargavvc/rpc-client at the module level without
  * --experimental-test-module-mocks. Instead we test by:
  *
  * 1. Subclassing SessionManager to inject a mock client factory

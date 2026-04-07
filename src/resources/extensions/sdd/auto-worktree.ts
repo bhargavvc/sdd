@@ -66,7 +66,7 @@ import {
   nativeMergeAbort,
 } from "./native-git-bridge.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 const PROJECT_PREFERENCES_FILE = "PREFERENCES.md";
 const LEGACY_PROJECT_PREFERENCES_FILE = "preferences.md";
 
@@ -88,7 +88,7 @@ const ROOT_STATE_FILES = [
   "metrics.json",
   "mcp.json",
   // NOTE: project preferences are intentionally NOT in ROOT_STATE_FILES.
-  // Forward-sync (main → worktree) is handled explicitly in syncGsdStateToWorktree().
+  // Forward-sync (main → worktree) is handled explicitly in syncSddStateToWorktree().
   // Back-sync (worktree → main) must NEVER overwrite the project root's copy
   // because the project root is authoritative for preferences (#2684).
 ] as const;
@@ -262,10 +262,10 @@ export function syncProjectRootToWorktree(
   const prSdd = join(projectRoot, ".sdd");
   const wtSdd = join(worktreePath_, ".sdd");
 
-  // When .gsd is a symlink to the same external directory in both locations,
+  // When .sdd is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
-  if (isSamePath(prGsd, wtGsd)) return;
+  if (isSamePath(prSdd, wtSdd)) return;
 
   // Copy milestone directory from project root to worktree — additive only.
   // force:false prevents cpSync from overwriting existing worktree files.
@@ -287,8 +287,8 @@ export function syncProjectRootToWorktree(
   // persists, checkNeedsRunUat finds no passing verdict → re-dispatches
   // run-uat indefinitely (stuck-loop ×9).
   forceOverwriteAssessmentsWithVerdict(
-    join(prGsd, "milestones", milestoneId),
-    join(wtGsd, "milestones", milestoneId),
+    join(prSdd, "milestones", milestoneId),
+    join(wtSdd, "milestones", milestoneId),
   );
 
   // Forward-sync completed-units.json from project root to worktree.
@@ -300,9 +300,9 @@ export function syncProjectRootToWorktree(
     { force: true },
   );
 
-  // Delete worktree gsd.db ONLY if it is empty (0 bytes).
+  // Delete worktree sdd.db ONLY if it is empty (0 bytes).
   // An empty DB is stale/corrupt and should be rebuilt (#853).
-  // A non-empty DB was populated by gsd-migrate on respawn and must be
+  // A non-empty DB was populated by sdd-migrate on respawn and must be
   // preserved — deleting it truncates the file to 0 bytes when
   // openDatabase re-creates it, causing "no such table" failures (#2815).
   try {
@@ -335,10 +335,10 @@ export function syncStateToProjectRoot(
   const wtSdd = join(worktreePath_, ".sdd");
   const prSdd = join(projectRoot, ".sdd");
 
-  // When .gsd is a symlink to the same external directory in both locations,
+  // When .sdd is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
-  if (isSamePath(wtGsd, prGsd)) return;
+  if (isSamePath(wtSdd, prSdd)) return;
 
   // 1. STATE.md — the quick-glance status used by initial deriveState()
   safeCopy(join(wtSdd, "STATE.md"), join(prSdd, "STATE.md"), { force: true });
@@ -376,7 +376,7 @@ export function syncStateToProjectRoot(
  */
 export function readResourceVersion(): string | null {
   const agentDir =
-    process.env.SDD_CODING_AGENT_DIR || join(gsdHome, "agent");
+    process.env.SDD_CODING_AGENT_DIR || join(sddHome, "agent");
   const manifestPath = join(agentDir, "managed-resources.json");
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
@@ -439,8 +439,8 @@ export function escapeStaleWorktree(base: string): string {
   // when .sdd is a symlink into ~/.sdd/projects/<hash> and process.cwd()
   // resolved through the symlink. Returning ~ would be catastrophic (#1676).
   const candidateSdd = join(projectRoot, ".sdd").replaceAll("\\", "/");
-  const gsdHomePath = gsdHome.replaceAll("\\", "/");
-  if (candidateSdd === gsdHomePath || candidateSdd.startsWith(gsdHomePath + "/")) {
+  const sddHomePath = sddHome.replaceAll("\\", "/");
+  if (candidateSdd === sddHomePath || candidateSdd.startsWith(sddHomePath + "/")) {
     // Don't chdir to home — return base unchanged.
     // resolveProjectRoot() in worktree.ts has the full git-file-based recovery
     // and will be called by the caller (startAuto → projectRoot()).
@@ -538,12 +538,12 @@ export function syncSddStateToWorktree(
   // Prefer the canonical uppercase file name, but keep the legacy lowercase
   // fallback so older repos still work on case-sensitive filesystems.
   {
-    const worktreeHasPreferences = existsSync(join(wtGsd, PROJECT_PREFERENCES_FILE))
-      || existsSync(join(wtGsd, LEGACY_PROJECT_PREFERENCES_FILE));
+    const worktreeHasPreferences = existsSync(join(wtSdd, PROJECT_PREFERENCES_FILE))
+      || existsSync(join(wtSdd, LEGACY_PROJECT_PREFERENCES_FILE));
     if (!worktreeHasPreferences) {
       for (const file of [PROJECT_PREFERENCES_FILE, LEGACY_PROJECT_PREFERENCES_FILE] as const) {
-        const src = join(mainGsd, file);
-        const dst = join(wtGsd, file);
+        const src = join(mainSdd, file);
+        const dst = join(wtSdd, file);
         if (existsSync(src)) {
           try {
             cpSync(src, dst);
@@ -1093,16 +1093,16 @@ function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
   }
 
   // Seed canonical PREFERENCES.md when available; fall back to legacy lowercase.
-  if (existsSync(join(srcGsd, PROJECT_PREFERENCES_FILE))) {
+  if (existsSync(join(srcSdd, PROJECT_PREFERENCES_FILE))) {
     safeCopy(
-      join(srcGsd, PROJECT_PREFERENCES_FILE),
-      join(dstGsd, PROJECT_PREFERENCES_FILE),
+      join(srcSdd, PROJECT_PREFERENCES_FILE),
+      join(dstSdd, PROJECT_PREFERENCES_FILE),
       { force: true },
     );
-  } else if (existsSync(join(srcGsd, LEGACY_PROJECT_PREFERENCES_FILE))) {
+  } else if (existsSync(join(srcSdd, LEGACY_PROJECT_PREFERENCES_FILE))) {
     safeCopy(
-      join(srcGsd, LEGACY_PROJECT_PREFERENCES_FILE),
-      join(dstGsd, LEGACY_PROJECT_PREFERENCES_FILE),
+      join(srcSdd, LEGACY_PROJECT_PREFERENCES_FILE),
+      join(dstSdd, LEGACY_PROJECT_PREFERENCES_FILE),
       { force: true },
     );
   }
@@ -1354,8 +1354,8 @@ export function mergeMilestoneToMain(
   // database (#2823).
   if (isDbAvailable()) {
     try {
-      const worktreeDbPath = join(worktreeCwd, ".gsd", "gsd.db");
-      const mainDbPath = join(originalBasePath_, ".gsd", "gsd.db");
+      const worktreeDbPath = join(worktreeCwd, ".sdd", "sdd.db");
+      const mainDbPath = join(originalBasePath_, ".sdd", "sdd.db");
       if (!isSamePath(worktreeDbPath, mainDbPath)) {
         reconcileWorktreeDb(mainDbPath, worktreeDbPath);
       }
@@ -1499,7 +1499,7 @@ export function mergeMilestoneToMain(
     }).trim();
     if (status) {
       // Use --include-untracked to stash untracked files that would block
-      // the squash merge, but EXCLUDE .gsd/milestones/ (#2505).
+      // the squash merge, but EXCLUDE .sdd/milestones/ (#2505).
       // --include-untracked without exclusion sweeps queued milestone
       // CONTEXT files into the stash. If stash pop later fails, those files
       // are permanently trapped in the stash entry and lost on the next
@@ -1508,8 +1508,8 @@ export function mergeMilestoneToMain(
         "git",
         [
           "stash", "push", "--include-untracked",
-          "-m", `gsd: pre-merge stash for ${milestoneId}`,
-          "--", ":(exclude).gsd/milestones",
+          "-m", `sdd: pre-merge stash for ${milestoneId}`,
+          "--", ":(exclude).sdd/milestones",
         ],
         { cwd: originalBasePath_, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" },
       );
@@ -1525,8 +1525,8 @@ export function mergeMilestoneToMain(
   // copyPlanningArtifacts), so `git merge --squash` rejects when those same
   // files exist as untracked in the working tree. Temporarily move them to
   // a backup location, then restore after the merge+commit.
-  const milestonesDir = join(gsdRoot(originalBasePath_), "milestones");
-  const shelterDir = join(gsdRoot(originalBasePath_), ".milestone-shelter");
+  const milestonesDir = join(sddRoot(originalBasePath_), "milestones");
+  const shelterDir = join(sddRoot(originalBasePath_), ".milestone-shelter");
   const shelteredDirs: string[] = [];
 
   // Helper: restore sheltered milestone directories (#2505).
@@ -1579,7 +1579,7 @@ export function mergeMilestoneToMain(
     }
   } catch { /* best-effort */ }
 
-  // 8. Squash merge — auto-resolve .gsd/ state file conflicts (#530)
+  // 8. Squash merge — auto-resolve .sdd/ state file conflicts (#530)
   const mergeResult = nativeMergeSquash(originalBasePath_, milestoneBranch);
 
   if (!mergeResult.success) {
@@ -1724,11 +1724,11 @@ export function mergeMilestoneToMain(
       // .sdd/ conflicts during the merge itself: accept HEAD (the just-committed
       // version) and drop the now-applied stash.
       const uu = nativeConflictFiles(originalBasePath_);
-      const gsdUU = uu.filter((f) => f.startsWith(".sdd/"));
+      const sddUU = uu.filter((f) => f.startsWith(".sdd/"));
       const nonSddUU = uu.filter((f) => !f.startsWith(".sdd/"));
 
-      if (gsdUU.length > 0) {
-        for (const f of gsdUU) {
+      if (sddUU.length > 0) {
+        for (const f of sddUU) {
           try {
             // Accept the committed (HEAD) version of the state file
             execFileSync("git", ["checkout", "HEAD", "--", f], {

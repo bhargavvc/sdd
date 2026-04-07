@@ -1,4 +1,4 @@
-// GSD State Machine Regression Tests — Event Replay & Reconciliation (#3161)
+// SDD State Machine Regression Tests — Event Replay & Reconciliation (#3161)
 
 import { describe, test, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -25,7 +25,7 @@ function makeEvent(cmd: string, params: Record<string, unknown>, ts?: string): W
 const tempDirs: string[] = [];
 
 function tempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-recon-test-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "sdd-recon-test-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -141,9 +141,9 @@ describe("reconciliation-edge-cases", () => {
   // appendEvent — filesystem creation
   test("appendEvent creates event log if directory does not exist", () => {
     const base = tempDir();
-    // Remove the .gsd directory if it somehow exists — appendEvent should create it.
-    const gsdDir = path.join(base, ".gsd");
-    if (fs.existsSync(gsdDir)) fs.rmSync(gsdDir, { recursive: true, force: true });
+    // Remove the .sdd directory if it somehow exists — appendEvent should create it.
+    const sddDir = path.join(base, ".sdd");
+    if (fs.existsSync(sddDir)) fs.rmSync(sddDir, { recursive: true, force: true });
 
     appendEvent(base, {
       cmd: "complete_task",
@@ -152,7 +152,7 @@ describe("reconciliation-edge-cases", () => {
       actor: "agent",
     });
 
-    const logPath = path.join(base, ".gsd", "event-log.jsonl");
+    const logPath = path.join(base, ".sdd", "event-log.jsonl");
     assert.ok(fs.existsSync(logPath), "event-log.jsonl should be created by appendEvent");
 
     const events = readEvents(logPath);

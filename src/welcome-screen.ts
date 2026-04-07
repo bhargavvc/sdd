@@ -10,7 +10,7 @@ import { execFileSync } from 'node:child_process'
 import os from 'node:os'
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
-import { GSD_LOGO } from './logo.js'
+import { SDD_LOGO } from './logo.js'
 
 export interface WelcomeScreenOptions {
   version: string

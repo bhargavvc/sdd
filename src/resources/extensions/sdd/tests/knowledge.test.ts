@@ -166,12 +166,12 @@ test('knowledge: appendKnowledge handles lesson type', async () => {
 
 test('loadKnowledgeBlock: returns empty block when neither file exists', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-kb-')));
-  const gsdHome = join(tmp, 'home');
+  const sddHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.sdd'), { recursive: true });
-  mkdirSync(join(gsdHome, 'agent'), { recursive: true });
+  mkdirSync(join(sddHome, 'agent'), { recursive: true });
 
-  const result = loadKnowledgeBlock(gsdHome, cwd);
+  const result = loadKnowledgeBlock(sddHome, cwd);
   assert.strictEqual(result.block, '');
   assert.strictEqual(result.globalSizeKb, 0);
 
@@ -180,13 +180,13 @@ test('loadKnowledgeBlock: returns empty block when neither file exists', () => {
 
 test('loadKnowledgeBlock: uses project knowledge alone when no global file', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-kb-')));
-  const gsdHome = join(tmp, 'home');
+  const sddHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.sdd'), { recursive: true });
-  mkdirSync(join(gsdHome, 'agent'), { recursive: true });
+  mkdirSync(join(sddHome, 'agent'), { recursive: true });
   writeFileSync(join(cwd, '.sdd', 'KNOWLEDGE.md'), 'K001: Use real DB');
 
-  const result = loadKnowledgeBlock(gsdHome, cwd);
+  const result = loadKnowledgeBlock(sddHome, cwd);
   assert.ok(result.block.includes('[KNOWLEDGE — Rules, patterns, and lessons learned]'));
   assert.ok(result.block.includes('## Project Knowledge'));
   assert.ok(result.block.includes('K001: Use real DB'));
@@ -198,13 +198,13 @@ test('loadKnowledgeBlock: uses project knowledge alone when no global file', () 
 
 test('loadKnowledgeBlock: uses global knowledge alone when no project file', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-kb-')));
-  const gsdHome = join(tmp, 'home');
+  const sddHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.sdd'), { recursive: true });
-  mkdirSync(join(gsdHome, 'agent'), { recursive: true });
-  writeFileSync(join(gsdHome, 'agent', 'KNOWLEDGE.md'), 'G001: Respond in English');
+  mkdirSync(join(sddHome, 'agent'), { recursive: true });
+  writeFileSync(join(sddHome, 'agent', 'KNOWLEDGE.md'), 'G001: Respond in English');
 
-  const result = loadKnowledgeBlock(gsdHome, cwd);
+  const result = loadKnowledgeBlock(sddHome, cwd);
   assert.ok(result.block.includes('[KNOWLEDGE — Rules, patterns, and lessons learned]'));
   assert.ok(result.block.includes('## Global Knowledge'));
   assert.ok(result.block.includes('G001: Respond in English'));
@@ -216,14 +216,14 @@ test('loadKnowledgeBlock: uses global knowledge alone when no project file', () 
 
 test('loadKnowledgeBlock: merges global before project when both exist', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-kb-')));
-  const gsdHome = join(tmp, 'home');
+  const sddHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.sdd'), { recursive: true });
-  mkdirSync(join(gsdHome, 'agent'), { recursive: true });
-  writeFileSync(join(gsdHome, 'agent', 'KNOWLEDGE.md'), 'G001: Global rule');
+  mkdirSync(join(sddHome, 'agent'), { recursive: true });
+  writeFileSync(join(sddHome, 'agent', 'KNOWLEDGE.md'), 'G001: Global rule');
   writeFileSync(join(cwd, '.sdd', 'KNOWLEDGE.md'), 'K001: Project rule');
 
-  const result = loadKnowledgeBlock(gsdHome, cwd);
+  const result = loadKnowledgeBlock(sddHome, cwd);
   assert.ok(result.block.includes('## Global Knowledge'));
   assert.ok(result.block.includes('## Project Knowledge'));
   assert.ok(result.block.includes('G001: Global rule'));
@@ -236,14 +236,14 @@ test('loadKnowledgeBlock: merges global before project when both exist', () => {
 
 test('loadKnowledgeBlock: reports globalSizeKb above 4KB threshold', () => {
   const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'sdd-kb-')));
-  const gsdHome = join(tmp, 'home');
+  const sddHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.sdd'), { recursive: true });
-  mkdirSync(join(gsdHome, 'agent'), { recursive: true });
+  mkdirSync(join(sddHome, 'agent'), { recursive: true });
   // Write > 4KB of content
-  writeFileSync(join(gsdHome, 'agent', 'KNOWLEDGE.md'), 'x'.repeat(5000));
+  writeFileSync(join(sddHome, 'agent', 'KNOWLEDGE.md'), 'x'.repeat(5000));
 
-  const result = loadKnowledgeBlock(gsdHome, cwd);
+  const result = loadKnowledgeBlock(sddHome, cwd);
   assert.ok(result.globalSizeKb > 4, `expected > 4KB, got ${result.globalSizeKb}`);
 
   rmSync(tmp, { recursive: true, force: true });

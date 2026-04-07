@@ -17,8 +17,8 @@ import { resolveSearchProviderFromPreferences } from '../sdd/preferences.js'
 // Compute authFilePath locally instead of importing from app-paths.ts,
 // because extensions are copied to ~/.sdd/agent/extensions/ at runtime
 // where the relative import '../../../app-paths.ts' doesn't resolve.
-const gsdHome = process.env.SDD_HOME || join(homedir(), '.sdd')
-const authFilePath = join(gsdHome, 'agent', 'auth.json')
+const sddHome = process.env.SDD_HOME || join(homedir(), '.sdd')
+const authFilePath = join(sddHome, 'agent', 'auth.json')
 
 export type SearchProvider = 'tavily' | 'brave' | 'ollama'
 export type SearchProviderPreference = SearchProvider | 'auto'

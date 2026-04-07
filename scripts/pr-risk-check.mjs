@@ -238,7 +238,7 @@ function renderConsole(report) {
   const { changedFiles, systemsPerFile, unmatchedFiles, systemRisks, risk } = report;
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(' GSD2 PR Risk Report');
+  console.log(' SDD2 PR Risk Report');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   console.log(`Overall Risk: ${TIER_EMOJI[risk]} ${risk.toUpperCase()}`);

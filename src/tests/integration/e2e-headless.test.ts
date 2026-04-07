@@ -44,7 +44,7 @@ type RunResult = {
 /**
  * Spawn `node dist/loader.js ...args` and collect output.
  */
-function runGsd(
+function runSdd(
   args: string[],
   timeoutMs = 30_000,
   env: NodeJS.ProcessEnv = {},
@@ -82,7 +82,7 @@ function runGsd(
  * Spawn a child process with the ability to send signals mid-flight.
  * Returns both the child and a promise that resolves with the result.
  */
-function spawnGsd(
+function spawnSdd(
   args: string[],
   timeoutMs = 30_000,
   env: NodeJS.ProcessEnv = {},
@@ -125,7 +125,7 @@ function stripAnsi(s: string): string {
 }
 
 /** Bootstrap a temp directory with .sdd/ structure (milestones + runtime). */
-function createTempWithGsd(prefix: string): string {
+function createTempWithSdd(prefix: string): string {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   mkdirSync(join(dir, ".sdd", "milestones"), { recursive: true });
   mkdirSync(join(dir, ".sdd", "runtime"), { recursive: true });
@@ -158,13 +158,13 @@ function assertNoCrashMarkers(output: string): void {
 // ===========================================================================
 
 test("headless --output-format json emits a single HeadlessJsonResult on stdout", async (t) => {
-  const tmpDir = createTempWithGsd("sdd-e2e-json-batch-");
+  const tmpDir = createTempWithSdd("sdd-e2e-json-batch-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // --max-restarts 0 prevents retry loops which would emit multiple JSON results.
   // --timeout 2000 ensures the process completes quickly.
   // Will timeout/error (no API key) but JSON batch mode should emit one HeadlessJsonResult.
-  const result = await runGsd(
+  const result = await runSdd(
     ["headless", "--output-format", "json", "--timeout", "2000", "--max-restarts", "0", "auto"],
     45_000,  // generous harness timeout — process needs ~4-6s (2s timeout + startup + cleanup)
     {},
@@ -210,12 +210,12 @@ test("headless --output-format json emits a single HeadlessJsonResult on stdout"
 // ===========================================================================
 
 test("headless exits with code 11 after SIGINT", async (t) => {
-  const tmpDir = createTempWithGsd("sdd-e2e-sigint-");
+  const tmpDir = createTempWithSdd("sdd-e2e-sigint-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // Spawn with long timeout and max-restarts 0 so the process stays alive
   // waiting for completion while we send SIGINT.
-  const { child, result: resultPromise } = spawnGsd(
+  const { child, result: resultPromise } = spawnSdd(
     ["headless", "--timeout", "60000", "--max-restarts", "0", "--context-text", "Test context for SIGINT", "new-milestone"],
     30_000,
     {},
@@ -275,11 +275,11 @@ test("headless exits with code 11 after SIGINT", async (t) => {
 // ===========================================================================
 
 test("headless --output-format stream-json emits NDJSON on stdout", async (t) => {
-  const tmpDir = createTempWithGsd("sdd-e2e-stream-json-");
+  const tmpDir = createTempWithSdd("sdd-e2e-stream-json-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // --max-restarts 0 to prevent retry loops that extend runtime.
-  const result = await runGsd(
+  const result = await runSdd(
     ["headless", "--output-format", "stream-json", "--timeout", "2000", "--max-restarts", "0", "auto"],
     45_000,  // generous harness timeout
     {},
@@ -323,10 +323,10 @@ test("headless --output-format stream-json emits NDJSON on stdout", async (t) =>
 // ===========================================================================
 
 test("headless --resume with nonexistent ID exits 1 with descriptive error", async (t) => {
-  const tmpDir = createTempWithGsd("sdd-e2e-resume-bad-");
+  const tmpDir = createTempWithSdd("sdd-e2e-resume-bad-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runSdd(
     ["headless", "--resume", "nonexistent-id-xyz", "--max-restarts", "0", "auto"],
     30_000,
     {},
@@ -353,10 +353,10 @@ test("headless --resume with nonexistent ID exits 1 with descriptive error", asy
 // ===========================================================================
 
 test("headless --output-format with invalid value exits 1", async (t) => {
-  const tmpDir = createTempWithGsd("sdd-e2e-bad-format-");
+  const tmpDir = createTempWithSdd("sdd-e2e-bad-format-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runSdd(
     ["headless", "--output-format", "invalid-format", "auto"],
     15_000,
     {},

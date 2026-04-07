@@ -187,7 +187,7 @@ test("loader MIN_NODE_MAJOR matches package.json engines field", () => {
     `loader MIN_NODE_MAJOR (${loaderMin}) must match package.json engines.node (>=${engineMin}.0.0)`);
 });
 
-test("cli.ts lets gsd update bypass the managed-resource mismatch gate", () => {
+test("cli.ts lets sdd update bypass the managed-resource mismatch gate", () => {
   const cliSrc = readFileSync(join(projectRoot, "src", "cli.ts"), "utf-8");
   const updateBranchIndex = cliSrc.indexOf("if (cliFlags.messages[0] === 'update')")
   const mismatchGateIndex = cliSrc.indexOf("exitIfManagedResourcesAreNewer(agentDir)")
@@ -196,7 +196,7 @@ test("cli.ts lets gsd update bypass the managed-resource mismatch gate", () => {
   assert.ok(mismatchGateIndex !== -1, "cli.ts contains the managed-resource mismatch gate")
   assert.ok(
     updateBranchIndex < mismatchGateIndex,
-    "gsd update must run before the managed-resource mismatch gate",
+    "sdd update must run before the managed-resource mismatch gate",
   )
 });
 

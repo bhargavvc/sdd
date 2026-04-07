@@ -3,8 +3,8 @@
  *
  * Bug #2936: When the LLM calls ask_user_questions during auto-mode units
  * (plan-slice, execute-task, complete-slice), the interactive tool queues a
- * user response which causes the subsequent gsd_plan_slice / gsd_complete_task
- * call to fail with "Skipped due to queued user message." The canonical GSD
+ * user response which causes the subsequent sdd_plan_slice / sdd_complete_task
+ * call to fail with "Skipped due to queued user message." The canonical SDD
  * tool call is never recorded, verifyExpectedArtifact finds no artifact, and
  * the dispatch loop re-dispatches the same unit 2-4x.
  *

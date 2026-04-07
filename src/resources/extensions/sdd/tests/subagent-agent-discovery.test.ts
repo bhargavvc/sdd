@@ -7,12 +7,12 @@ import test from "node:test";
 import { discoverAgents } from "../../subagent/agents.ts";
 
 function makeProjectRoot(t: test.TestContext): string {
-	const root = mkdtempSync(join(tmpdir(), "gsd-subagent-agents-"));
+	const root = mkdtempSync(join(tmpdir(), "sdd-subagent-agents-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
 	return root;
 }
 
-function writeAgent(root: string, configDirName: ".gsd" | ".pi", name = "ping"): string {
+function writeAgent(root: string, configDirName: ".sdd" | ".pi", name = "ping"): string {
 	const agentsDir = join(root, configDirName, "agents");
 	mkdirSync(agentsDir, { recursive: true });
 	writeFileSync(
@@ -22,9 +22,9 @@ function writeAgent(root: string, configDirName: ".gsd" | ".pi", name = "ping"):
 	return agentsDir;
 }
 
-test("discoverAgents finds project agents in .gsd/agents", (t) => {
+test("discoverAgents finds project agents in .sdd/agents", (t) => {
 	const root = makeProjectRoot(t);
-	const agentsDir = writeAgent(root, ".gsd");
+	const agentsDir = writeAgent(root, ".sdd");
 
 	const discovery = discoverAgents(root, "project");
 

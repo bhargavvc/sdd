@@ -34,10 +34,10 @@ export type MergeOrder = "sequential" | "by-completion";
 /**
  * Check whether a milestone is complete by querying its worktree SQLite DB.
  * Uses a subprocess to avoid disrupting the global DB singleton.
- * Returns true when milestones.status = 'complete' in the worktree's gsd.db.
+ * Returns true when milestones.status = 'complete' in the worktree's sdd.db.
  */
 export function isMilestoneCompleteInWorktreeDb(basePath: string, mid: string): boolean {
-  const dbPath = join(basePath, ".gsd", "worktrees", mid, ".gsd", "gsd.db");
+  const dbPath = join(basePath, ".sdd", "worktrees", mid, ".sdd", "sdd.db");
   if (!existsSync(dbPath)) return false;
 
   try {
@@ -54,11 +54,11 @@ export function isMilestoneCompleteInWorktreeDb(basePath: string, mid: string): 
 
 /**
  * Discover milestone IDs with status='complete' in their worktree DB,
- * scanning .gsd/worktrees/<MID>/.gsd/gsd.db for each worktree directory.
+ * scanning .sdd/worktrees/<MID>/.sdd/sdd.db for each worktree directory.
  */
 function discoverDbCompletedMilestones(basePath: string): Set<string> {
   const completed = new Set<string>();
-  const worktreeDir = join(basePath, ".gsd", "worktrees");
+  const worktreeDir = join(basePath, ".sdd", "worktrees");
   try {
     for (const entry of readdirSync(worktreeDir)) {
       if (entry.startsWith("M") && isMilestoneCompleteInWorktreeDb(basePath, entry)) {
@@ -79,7 +79,7 @@ function discoverDbCompletedMilestones(basePath: string): Set<string> {
  * When basePath is provided, also checks worktree SQLite DBs as the
  * source of truth — workers with stale orchestrator state (e.g. "error")
  * are included if their worktree DB shows status='complete'.
- * See: https://github.com/gsd-build/gsd-2/issues/2812
+ * See: https://github.com/bhargavvc/sdd/issues/2812
  */
 export function determineMergeOrder(
   workers: WorkerInfo[],
@@ -113,7 +113,7 @@ export function determineMergeOrder(
         title: mid,
         pid: 0,
         process: null,
-        worktreePath: basePath ? join(basePath, ".gsd", "worktrees", mid) : "",
+        worktreePath: basePath ? join(basePath, ".sdd", "worktrees", mid) : "",
         startedAt: 0,
         state: "stopped",
         cost: 0,

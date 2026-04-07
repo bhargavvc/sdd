@@ -18,12 +18,12 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { sddIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   const symlinkRe = /\/\.sdd\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { sddIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -81,17 +81,17 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
 
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.sdd${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
+  const sddMarker = `${sepChar}.sdd${sepChar}`;
+  const sddIdx = basePath.indexOf(sddMarker);
+  const candidate = sddIdx !== -1
+    ? basePath.slice(0, sddIdx)
+    : basePath.slice(0, seg.sddIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  const gsdHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
+  const sddHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
   const candidateGsdPath = normalizePathForCompare(join(candidate, ".sdd"));
 
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  if (candidateGsdPath === sddHome || candidateGsdPath.startsWith(sddHome + "/")) {
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
     return basePath;
@@ -104,15 +104,15 @@ function resolveProjectRoot(basePath) {
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "sdd-verify-fix-"));
-const USER_GSD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
+const USER_SDD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
 const USER_HOME = homedir();
-const PROJECT_SDD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_SDD_STORAGE = `${USER_SDD}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
 const PROJECT_SDD_LINK = `${PROJECT_DIR}/.sdd`;
 const PROJECT_REAL = normalizePathForCompare(PROJECT_DIR);
-const EXPECTED_BUGGY_ROOT = normalizePathForCompare(resolve(USER_GSD, ".."));
+const EXPECTED_BUGGY_ROOT = normalizePathForCompare(resolve(USER_SDD, ".."));
 
-process.env.SDD_HOME = USER_GSD;
+process.env.SDD_HOME = USER_SDD;
 
 console.log("=== Setting up filesystem layout ===\n");
 
@@ -232,10 +232,10 @@ function oldResolveProjectRoot(basePath) {
   const seg = findWorktreeSegment(normalizedPath);
   if (!seg) return basePath;
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.sdd${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
-  return basePath.slice(0, seg.gsdIdx);
+  const sddMarker = `${sepChar}.sdd${sepChar}`;
+  const sddIdx = basePath.indexOf(sddMarker);
+  if (sddIdx !== -1) return basePath.slice(0, sddIdx);
+  return basePath.slice(0, seg.sddIdx);
 }
 
 const oldResult = oldResolveProjectRoot(workerCwd);

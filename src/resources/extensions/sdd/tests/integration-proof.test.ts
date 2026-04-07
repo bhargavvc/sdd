@@ -50,7 +50,7 @@ import {
   transaction,
   isDbAvailable,
   _getAdapter,
-} from "../../gsd-db.ts";
+} from "../../sdd-db.ts";
 
 // ── Tool handlers ─────────────────────────────────────────────────────────
 import { handleCompleteTask } from "../../tools/complete-task.ts";
@@ -82,7 +82,7 @@ import {
 import { detectRogueFileWrites } from "../../auto-post-unit.ts";
 
 // ── Doctor ────────────────────────────────────────────────────────────────
-import { runGSDDoctor } from "../../doctor.ts";
+import { runSDDDoctor } from "../../doctor.ts";
 
 // ── Undo/reset ────────────────────────────────────────────────────────────
 import { handleUndoTask, handleResetSlice } from "../../undo.ts";
@@ -457,7 +457,7 @@ test("recovery: DB loss → migrateFromMarkdown restores state, stale render det
 
     assert.equal(existsSync(dbPath), false, "DB file should be deleted");
 
-    // Clear path caches so gsdRoot re-probes after DB deletion
+    // Clear path caches so sddRoot re-probes after DB deletion
     const { clearPathCache: clearPaths } = await import("../../paths.ts");
     clearPaths();
     invalidateAllCaches();

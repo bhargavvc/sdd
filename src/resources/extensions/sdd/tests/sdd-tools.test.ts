@@ -258,10 +258,10 @@ describe('sdd-tools', () => {
     assert.deepStrictEqual(fallbackId, 'D001', 'nextDecisionId should return D001 when DB unavailable');
   });
 
-  test('gsd_requirement_save creates new requirement', async () => {
+  test('sdd_requirement_save creates new requirement', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
       openDatabase(dbPath);
 
       // (a) saveRequirementToDb creates a new requirement with auto-assigned ID
@@ -286,7 +286,7 @@ describe('sdd-tools', () => {
       assert.deepStrictEqual(row!.status, 'active', 'Status should match');
 
       // Verify REQUIREMENTS.md was generated
-      const mdPath = path.join(tmpDir, '.gsd', 'REQUIREMENTS.md');
+      const mdPath = path.join(tmpDir, '.sdd', 'REQUIREMENTS.md');
       assert.ok(fs.existsSync(mdPath), 'REQUIREMENTS.md should be created');
       const mdContent = fs.readFileSync(mdPath, 'utf-8');
       assert.ok(mdContent.includes('R001'), 'REQUIREMENTS.md should contain R001');
@@ -314,7 +314,7 @@ describe('sdd-tools', () => {
   test('nextRequirementId computes correct next ID', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
       openDatabase(dbPath);
 
       // No requirements yet
@@ -346,10 +346,10 @@ describe('sdd-tools', () => {
     }
   });
 
-  test('gsd_requirement_update upserts when requirement not in DB', async () => {
+  test('sdd_requirement_update upserts when requirement not in DB', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.sdd', 'sdd.db');
       openDatabase(dbPath);
 
       // Requirement R025 does NOT exist in DB — simulates the bug scenario
@@ -367,7 +367,7 @@ describe('sdd-tools', () => {
       assert.deepStrictEqual(created!.validation, 'Integration tests pass', 'Validation should be set');
 
       // Verify REQUIREMENTS.md was generated
-      const mdPath = path.join(tmpDir, '.gsd', 'REQUIREMENTS.md');
+      const mdPath = path.join(tmpDir, '.sdd', 'REQUIREMENTS.md');
       assert.ok(fs.existsSync(mdPath), 'REQUIREMENTS.md should be created');
 
       closeDatabase();

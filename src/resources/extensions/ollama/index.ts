@@ -1,4 +1,4 @@
-// GSD2 — Ollama Extension: First-class local LLM support
+// SDD2 — Ollama Extension: First-class local LLM support
 /**
  * Ollama Extension
  *
@@ -16,8 +16,8 @@
  * Respects OLLAMA_HOST env var for non-default endpoints.
  */
 
-import { importExtensionModule, type ExtensionAPI } from "@gsd/pi-coding-agent";
-import type { OpenAICompletionsCompat } from "@gsd/pi-ai";
+import { importExtensionModule, type ExtensionAPI } from "@sdd/pi-coding-agent";
+import type { OpenAICompletionsCompat } from "@sdd/pi-ai";
 import * as client from "./ollama-client.js";
 import { discoverModels, getOllamaOpenAIBaseUrl } from "./ollama-discovery.js";
 import { registerOllamaCommands } from "./ollama-commands.js";

@@ -22,15 +22,15 @@ import {
   getMilestoneSlices,
   getSliceTasks,
   getGateResults,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { renderRoadmapContent } from "../workflow-projections.ts";
-import type { MilestoneRow, SliceRow } from "../gsd-db.ts";
+import type { MilestoneRow, SliceRow } from "../sdd-db.ts";
 import type { AutoSession } from "../auto/session.ts";
 
 // ─── Fixture helpers ────────────────────────────────────────────────────────
 
 function tempDbPath(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-2945-"));
+  const dir = mkdtempSync(join(tmpdir(), "sdd-2945-"));
   return join(dir, "test.db");
 }
 
@@ -45,8 +45,8 @@ function cleanupDb(dbPath: string): void {
 }
 
 function createTempProject(): { basePath: string } {
-  const basePath = mkdtempSync(join(tmpdir(), "gsd-2945-project-"));
-  mkdirSync(join(basePath, ".gsd", "milestones", "M001"), { recursive: true });
+  const basePath = mkdtempSync(join(tmpdir(), "sdd-2945-project-"));
+  mkdirSync(join(basePath, ".sdd", "milestones", "M001"), { recursive: true });
   return { basePath };
 }
 
@@ -288,11 +288,11 @@ describe("#2945 Bug 3: mergeAndExit must teardown worktree after successful merg
       getAutoWorktreePath: () => null,
       autoCommitCurrentBranch: () => {},
       getCurrentBranch: () => "main",
-      autoWorktreeBranch: () => "gsd/M001",
+      autoWorktreeBranch: () => "sdd/M001",
       resolveMilestoneFile: () => "/mock/roadmap.md",
       readFileSync: () => "# Roadmap content",
       GitServiceImpl: class {} as unknown as new (p: string, c: unknown) => unknown,
-      loadEffectiveGSDPreferences: () => undefined,
+      loadEffectiveSDDPreferences: () => undefined,
       invalidateAllCaches: () => {},
       captureIntegrationBranch: () => {},
     };
@@ -359,7 +359,7 @@ describe("#2945 Bug 4: validate-milestone must persist quality_gates records", (
 
     // Quality gate records should exist in DB for this milestone
     // Use a wildcard slice_id since milestone-level gates use a sentinel
-    const adapter = (await import("../gsd-db.ts"))._getAdapter()!;
+    const adapter = (await import("../sdd-db.ts"))._getAdapter()!;
     const gates = adapter.prepare(
       "SELECT * FROM quality_gates WHERE milestone_id = 'M001'"
     ).all();
@@ -388,7 +388,7 @@ describe("#2945 Bug 4: validate-milestone must persist quality_gates records", (
       remediationPlan: "Fix S01",
     }, basePath);
 
-    const adapter = (await import("../gsd-db.ts"))._getAdapter()!;
+    const adapter = (await import("../sdd-db.ts"))._getAdapter()!;
     const gates = adapter.prepare(
       "SELECT * FROM quality_gates WHERE milestone_id = 'M001'"
     ).all();

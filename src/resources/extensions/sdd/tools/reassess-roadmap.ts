@@ -243,7 +243,7 @@ export async function handleReassessRoadmap(
 
     if (hasStructuralChanges) {
       const validationFile = join(
-        basePath, ".gsd", "milestones", params.milestoneId,
+        basePath, ".sdd", "milestones", params.milestoneId,
         `${params.milestoneId}-VALIDATION.md`,
       );
       try {

@@ -10,7 +10,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'nod
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase } from '../../gsd-db.ts';
+import { openDatabase, closeDatabase } from '../../sdd-db.ts';
 import { migrateFromMarkdown } from '../../md-importer.ts';
 import {
   queryDecisions,

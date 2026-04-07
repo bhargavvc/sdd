@@ -1,5 +1,5 @@
 /**
- * Orchestrator — LLM-powered agent for the #gsd-control Discord channel.
+ * Orchestrator — LLM-powered agent for the #sdd-control Discord channel.
  *
  * Receives Discord messages, maintains conversation history, calls the
  * Anthropic messages API with 5 tool definitions (list_projects, start_session,
@@ -30,7 +30,7 @@ import type { ProjectInfo, ManagedSession } from './types.js';
 import type { Logger } from './logger.js';
 
 // ---------------------------------------------------------------------------
-// OAuth token resolution — reads GSD's auth.json, refreshes if expired
+// OAuth token resolution — reads SDD's auth.json, refreshes if expired
 // ---------------------------------------------------------------------------
 
 interface OAuthCredentials {
@@ -44,7 +44,7 @@ const TOKEN_URL = 'https://platform.claude.com/v1/oauth/token';
 const CLIENT_ID = atob('OWQxYzI1MGEtZTYxYi00NGQ5LTg4ZWQtNTk0NGQxOTYyZjVl');
 
 /**
- * Read the Anthropic OAuth access token from GSD's auth.json.
+ * Read the Anthropic OAuth access token from SDD's auth.json.
  * If expired, refresh it and write the new credentials back.
  * Falls back to ANTHROPIC_API_KEY env var if no OAuth credential exists.
  */
@@ -54,20 +54,20 @@ async function resolveAnthropicApiKey(logger?: Logger): Promise<string> {
     return process.env.ANTHROPIC_API_KEY;
   }
 
-  const authPath = join(homedir(), '.gsd', 'agent', 'auth.json');
+  const authPath = join(homedir(), '.sdd', 'agent', 'auth.json');
   let authData: Record<string, unknown>;
   try {
     authData = JSON.parse(readFileSync(authPath, 'utf-8'));
   } catch {
     throw new Error(
-      'No Anthropic auth found. Run `gsd login` to authenticate, or set ANTHROPIC_API_KEY.',
+      'No Anthropic auth found. Run `sdd login` to authenticate, or set ANTHROPIC_API_KEY.',
     );
   }
 
   const cred = authData.anthropic as OAuthCredentials | undefined;
   if (!cred || cred.type !== 'oauth' || !cred.access) {
     throw new Error(
-      'No Anthropic OAuth credential in auth.json. Run `gsd login` to authenticate.',
+      'No Anthropic OAuth credential in auth.json. Run `sdd login` to authenticate.',
     );
   }
 
@@ -139,7 +139,7 @@ export interface OrchestratorDeps {
 // System Prompt
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are GSD Control — a concise, capable orchestrator for managing GSD (Get Shit Done) coding agent sessions via Discord.
+const SYSTEM_PROMPT = `You are SDD Control — a concise, capable orchestrator for managing SDD (Spec-Driven Development) coding agent sessions via Discord.
 
 You have tools to list projects, start sessions, get status, stop sessions, and inspect session details. Use them to fulfill the user's requests.
 
@@ -159,7 +159,7 @@ Response guidelines:
 const TOOLS: Tool[] = [
   {
     name: 'list_projects',
-    description: 'List all detected projects across configured scan roots. Returns project names, paths, and detected markers (git, node, gsd, etc.).',
+    description: 'List all detected projects across configured scan roots. Returns project names, paths, and detected markers (git, node, sdd, etc.).',
     input_schema: {
       type: 'object' as const,
       properties: {},
@@ -168,19 +168,19 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'start_session',
-    description: 'Start a new GSD auto-mode session for a project. Provide the absolute project path. Optionally provide a command to run instead of the default "/gsd auto".',
+    description: 'Start a new SDD auto-mode session for a project. Provide the absolute project path. Optionally provide a command to run instead of the default "/sdd auto".',
     input_schema: {
       type: 'object' as const,
       properties: {
         projectPath: { type: 'string', description: 'Absolute path to the project directory' },
-        command: { type: 'string', description: 'Optional command to send instead of "/gsd auto"' },
+        command: { type: 'string', description: 'Optional command to send instead of "/sdd auto"' },
       },
       required: ['projectPath'],
     },
   },
   {
     name: 'get_status',
-    description: 'Get the current status of all active GSD sessions. Shows project name, status, duration, and cost for each.',
+    description: 'Get the current status of all active SDD sessions. Shows project name, status, duration, and cost for each.',
     input_schema: {
       type: 'object' as const,
       properties: {},
@@ -189,7 +189,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'stop_session',
-    description: 'Stop a running GSD session. Provide a session ID or project name — fuzzy matching is used to find the session.',
+    description: 'Stop a running SDD session. Provide a session ID or project name — fuzzy matching is used to find the session.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -254,7 +254,7 @@ export class Orchestrator {
 
   /**
    * Lazily initialise the Anthropic client. Dynamic import handles K007 module resolution.
-   * Resolves auth from GSD's OAuth credentials (auth.json), refreshing if needed.
+   * Resolves auth from SDD's OAuth credentials (auth.json), refreshing if needed.
    */
   private async getClient(): Promise<Anthropic> {
     if (this.client) return this.client;

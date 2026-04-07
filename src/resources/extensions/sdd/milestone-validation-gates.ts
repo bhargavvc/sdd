@@ -15,7 +15,7 @@
  * These use the existing quality_gates table with scope "milestone".
  */
 
-import { _getAdapter } from "./gsd-db.js";
+import { _getAdapter } from "./sdd-db.js";
 
 /** Milestone validation gate IDs. */
 const MILESTONE_GATE_IDS = ["MV01", "MV02", "MV03", "MV04"] as const;

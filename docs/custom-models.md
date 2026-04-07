@@ -143,7 +143,7 @@ Shell operators (`;`, `|`, `&`, `` ` ``, `$`, `>`, `<`) are also blocked in comm
 
 **Customizing the allowlist:**
 
-If you use a credential tool not on the default list, override it in global settings (`~/.gsd/agent/settings.json`):
+If you use a credential tool not on the default list, override it in global settings (`~/.sdd/agent/settings.json`):
 
 ```json
 {
@@ -153,13 +153,13 @@ If you use a credential tool not on the default list, override it in global sett
 
 This replaces the default list entirely — include any defaults you still want.
 
-Alternatively, set the `GSD_ALLOWED_COMMAND_PREFIXES` environment variable (comma-separated). The env var takes precedence over settings.json:
+Alternatively, set the `SDD_ALLOWED_COMMAND_PREFIXES` environment variable (comma-separated). The env var takes precedence over settings.json:
 
 ```bash
-export GSD_ALLOWED_COMMAND_PREFIXES="pass,op,sops,doppler"
+export SDD_ALLOWED_COMMAND_PREFIXES="pass,op,sops,doppler"
 ```
 
-> **Note:** This setting is global-only. Project-level settings.json (`<project>/.gsd/settings.json`) cannot override the command allowlist — this prevents a cloned repo from escalating command execution privileges.
+> **Note:** This setting is global-only. Project-level settings.json (`<project>/.sdd/settings.json`) cannot override the command allowlist — this prevents a cloned repo from escalating command execution privileges.
 
 ### Custom Headers
 

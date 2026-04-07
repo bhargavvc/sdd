@@ -1,4 +1,4 @@
-import { parseStreamingJson as nativeParseStreamingJson } from "@gsd/native";
+import { parseStreamingJson as nativeParseStreamingJson } from "@sdd/native";
 import { hasYamlBulletLists, repairToolJson } from "./repair-tool-json.js";
 
 /**

@@ -12,7 +12,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, appendFile
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, isDbAvailable, _getAdapter } from '../../gsd-db.ts';
+import { openDatabase, closeDatabase, isDbAvailable, _getAdapter } from '../../sdd-db.ts';
 import { migrateFromMarkdown, parseDecisionsTable } from '../../md-importer.ts';
 import {
   queryDecisions,

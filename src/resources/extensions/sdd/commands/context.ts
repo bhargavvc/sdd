@@ -6,7 +6,7 @@ import { resolveProjectRoot } from "../worktree.js";
 import { showNextAction } from "../../shared/tui.js";
 import { handleStatus } from "./handlers/core.js";
 
-export interface GsdDispatchContext {
+export interface SddDispatchContext {
   ctx: ExtensionCommandContext;
   pi: ExtensionAPI;
   trimmed: string;

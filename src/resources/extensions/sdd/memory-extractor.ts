@@ -90,11 +90,11 @@ export function buildMemoryLLMCall(ctx: ExtensionContext): LLMCallFn | null {
     // Resolve API key via modelRegistry so OAuth tokens (auth.json) are used.
     // Without this, streamSimpleAnthropic only checks env vars via getEnvApiKey,
     // which returns undefined for OAuth users (Claude Max / Claude Pro).
-    // See: https://github.com/gsd-build/gsd-2/issues/2959
+    // See: https://github.com/bhargavvc/sdd/issues/2959
     const resolvedKeyPromise = ctx.modelRegistry.getApiKey(selectedModel).catch(() => undefined);
 
     return async (system: string, user: string): Promise<string> => {
-      const { completeSimple } = await import('@gsd/pi-ai');
+      const { completeSimple } = await import('@sdd/pi-ai');
       const resolvedApiKey = await resolvedKeyPromise;
       const result: AssistantMessage = await completeSimple(selectedModel, {
         systemPrompt: system,

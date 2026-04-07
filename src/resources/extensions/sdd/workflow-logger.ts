@@ -32,7 +32,7 @@ export type LogComponent =
   | "tool"          // Tool handler errors
   | "compaction"    // Event compaction
   | "reconcile"     // Worktree reconciliation
-  | "db"            // Database operations (gsd-db)
+  | "db"            // Database operations (sdd-db)
   | "dispatch";     // Auto-dispatch rule evaluation
 
 export interface LogEntry {

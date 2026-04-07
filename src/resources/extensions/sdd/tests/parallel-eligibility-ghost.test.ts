@@ -20,13 +20,13 @@ import {
   insertSlice,
   insertTask,
   updateMilestoneStatus,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-parallel-elig-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-parallel-elig-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   return base;
 }
 
@@ -36,13 +36,13 @@ function writeMilestoneFile(
   filename: string,
   content: string,
 ): void {
-  const filePath = join(base, ".gsd", "milestones", milestoneId, filename);
+  const filePath = join(base, ".sdd", "milestones", milestoneId, filename);
   mkdirSync(join(filePath, ".."), { recursive: true });
   writeFileSync(filePath, content);
 }
 
 function makeMilestoneDir(base: string, milestoneId: string): void {
-  mkdirSync(join(base, ".gsd", "milestones", milestoneId), { recursive: true });
+  mkdirSync(join(base, ".sdd", "milestones", milestoneId), { recursive: true });
 }
 
 function cleanup(base: string): void {
@@ -76,7 +76,7 @@ describe("parallel-eligibility: ghost milestone ineligibility (#2501)", () => {
 
     // Create ghost milestone M017 — directory with only slices/, no CONTEXT/ROADMAP/SUMMARY
     makeMilestoneDir(base, "M017");
-    mkdirSync(join(base, ".gsd", "milestones", "M017", "slices"), { recursive: true });
+    mkdirSync(join(base, ".sdd", "milestones", "M017", "slices"), { recursive: true });
 
     invalidateStateCache();
     const result = await analyzeParallelEligibility(base);

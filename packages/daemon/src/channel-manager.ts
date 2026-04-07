@@ -1,6 +1,6 @@
 /**
  * ChannelManager — manages per-project Discord text channels under a
- * 'GSD Projects' category, with archive support.
+ * 'SDD Projects' category, with archive support.
  *
  * Pure helper `sanitizeChannelName` exported separately for testability.
  */
@@ -19,9 +19,9 @@ import type { Logger } from './logger.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CATEGORY_NAME = 'GSD Projects';
-const ARCHIVE_CATEGORY_NAME = 'GSD Archive';
-const CHANNEL_PREFIX = 'gsd-';
+const DEFAULT_CATEGORY_NAME = 'SDD Projects';
+const ARCHIVE_CATEGORY_NAME = 'SDD Archive';
+const CHANNEL_PREFIX = 'sdd-';
 const MAX_CHANNEL_NAME_LENGTH = 100; // Discord's limit
 
 // ---------------------------------------------------------------------------
@@ -36,10 +36,10 @@ const MAX_CHANNEL_NAME_LENGTH = 100; // Discord's limit
  * - Replaces non-alphanumeric (except hyphens) with hyphens
  * - Collapses consecutive hyphens
  * - Trims leading/trailing hyphens
- * - Prefixes with 'gsd-'
+ * - Prefixes with 'sdd-'
  * - Caps total length at 100 chars (Discord limit)
  *
- * Returns 'gsd-unnamed' for empty/whitespace-only inputs.
+ * Returns 'sdd-unnamed' for empty/whitespace-only inputs.
  */
 export function sanitizeChannelName(projectDir: string): string {
   // Extract basename — handle both forward and back slashes
@@ -51,7 +51,7 @@ export function sanitizeChannelName(projectDir: string): string {
 
   // Fallback for empty basename
   if (!basename) {
-    return 'gsd-unnamed';
+    return 'sdd-unnamed';
   }
 
   // Lowercase
@@ -68,7 +68,7 @@ export function sanitizeChannelName(projectDir: string): string {
 
   // Fallback if nothing remains after sanitization
   if (!name) {
-    return 'gsd-unnamed';
+    return 'sdd-unnamed';
   }
 
   // Prefix
@@ -135,7 +135,7 @@ export class ChannelManager {
   }
 
   /**
-   * Create a text channel for a project under the GSD Projects category.
+   * Create a text channel for a project under the SDD Projects category.
    * Channel name is derived from the project directory path.
    */
   async createProjectChannel(projectDir: string): Promise<TextChannel> {
@@ -159,7 +159,7 @@ export class ChannelManager {
   }
 
   /**
-   * Archive a channel by moving it to the 'GSD Archive' category and
+   * Archive a channel by moving it to the 'SDD Archive' category and
    * setting permission overwrite to deny ViewChannel for @everyone.
    */
   async archiveChannel(channelId: string): Promise<void> {

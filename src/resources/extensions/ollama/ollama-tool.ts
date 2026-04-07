@@ -1,11 +1,11 @@
-// GSD2 — LLM-callable Ollama management tool
+// SDD2 — LLM-callable Ollama management tool
 /**
  * Registers an ollama_manage tool that the LLM can call to interact
  * with the local Ollama instance — list models, pull new ones, check status.
  */
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { Text } from "@gsd/pi-tui";
+import type { ExtensionAPI } from "@sdd/pi-coding-agent";
+import { Text } from "@sdd/pi-tui";
 import { Type } from "@sinclair/typebox";
 import * as client from "./ollama-client.js";
 import { discoverModels, formatModelForDisplay } from "./ollama-discovery.js";

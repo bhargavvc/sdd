@@ -491,15 +491,15 @@ export function reconcileMergeState(
     }
   } else {
     // Still conflicted — try auto-resolving .sdd/ state file conflicts (#530)
-    const gsdConflicts = conflictedFiles.filter((f) => f.startsWith(".sdd/"));
+    const sddConflicts = conflictedFiles.filter((f) => f.startsWith(".sdd/"));
     const codeConflicts = conflictedFiles.filter((f) => !f.startsWith(".sdd/"));
 
-    if (gsdConflicts.length > 0 && codeConflicts.length === 0) {
+    if (sddConflicts.length > 0 && codeConflicts.length === 0) {
       // All conflicts are in .sdd/ state files — auto-resolve by accepting theirs
       let resolved = true;
       try {
-        nativeCheckoutTheirs(basePath, gsdConflicts);
-        nativeAddPaths(basePath, gsdConflicts);
+        nativeCheckoutTheirs(basePath, sddConflicts);
+        nativeAddPaths(basePath, sddConflicts);
       } catch {
         resolved = false;
       }
@@ -510,7 +510,7 @@ export function reconcileMergeState(
             "chore: auto-resolve .sdd/ state file conflicts",
           );
           ctx.ui.notify(
-            `Auto-resolved ${gsdConflicts.length} .sdd/ state file conflict(s) from prior merge.`,
+            `Auto-resolved ${sddConflicts.length} .sdd/ state file conflict(s) from prior merge.`,
             "info",
           );
         } catch {

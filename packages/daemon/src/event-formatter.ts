@@ -11,8 +11,8 @@
  */
 
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import type { SdkAgentEvent } from '@gsd-build/rpc-client';
-import type { RpcExtensionUIRequest } from '@gsd-build/rpc-client';
+import type { SdkAgentEvent } from '@bhargavvc/rpc-client';
+import type { RpcExtensionUIRequest } from '@bhargavvc/rpc-client';
 import type { FormattedEvent, PendingBlocker } from './types.js';
 
 // ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 > **Status**: Research only — not planned for implementation.
 > Scope: `packages/pi-coding-agent` and `packages/pi-agent-core` infrastructure.
-> These changes would benefit every consumer of the pi engine, not just GSD.
+> These changes would benefit every consumer of the pi engine, not just SDD.
 
 ---
 
@@ -21,7 +21,7 @@
 
 **Cache hierarchy**: Tools → system → messages. Changing a tool definition invalidates system and message caches. Tool definitions should be sorted deterministically (alphabetically) to prevent spurious cache misses.
 
-**Expected savings**: 80–90% reduction in input token cost for multi-turn sessions (the dominant cost pattern in GSD auto-mode).
+**Expected savings**: 80–90% reduction in input token cost for multi-turn sessions (the dominant cost pattern in SDD auto-mode).
 
 ---
 
@@ -95,7 +95,7 @@ COMPACTION_RESERVE_TOKENS = contextWindow * (1 - COMPACTION_THRESHOLD_PERCENT)
 ## 5. Context File Deduplication and Trim
 
 **Current state** (`packages/pi-coding-agent/src/core/resource-loader.ts`, lines 84–109):
-- Searches from `~/.gsd/agent/` → ancestor dirs → cwd
+- Searches from `~/.sdd/agent/` → ancestor dirs → cwd
 - Deduplicates by *file path* but not by *content*
 - Entire file content concatenated verbatim into system prompt — no trimming, no summarization
 
@@ -165,7 +165,7 @@ Speakeasy measured 91–97% token reduction with 100% task success rate. Trade-o
 
 ## 10. Cost Attribution and Per-Phase Reporting
 
-**Current state**: `SessionManager.getUsageTotals()` accumulates cost across the entire session. No per-phase or per-agent breakdown is stored. Cost visibility is limited to the footer total and `GSD_SHOW_TOKEN_COST=1` per-turn display.
+**Current state**: `SessionManager.getUsageTotals()` accumulates cost across the entire session. No per-phase or per-agent breakdown is stored. Cost visibility is limited to the footer total and `SDD_SHOW_TOKEN_COST=1` per-turn display.
 
 **Opportunity**: Emit structured cost events that extensions can subscribe to:
 ```typescript
@@ -178,7 +178,7 @@ interface CostCheckpointEvent {
 }
 ```
 
-GSD extension could consume these events to surface per-milestone cost in `/gsd stats` and flag milestones that are disproportionately expensive — enabling budget-aware planning.
+SDD extension could consume these events to surface per-milestone cost in `/sdd stats` and flag milestones that are disproportionately expensive — enabling budget-aware planning.
 
 ---
 

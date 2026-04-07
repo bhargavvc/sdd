@@ -9,7 +9,7 @@ import {
   closeDatabase,
   isDbAvailable,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../sdd-db.ts';
 
 const _require = createRequire(import.meta.url);
 
@@ -18,7 +18,7 @@ const _require = createRequire(import.meta.url);
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDbPath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-vacuum-test-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdd-vacuum-test-'));
   return path.join(dir, 'test.db');
 }
 

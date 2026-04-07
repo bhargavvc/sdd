@@ -331,9 +331,9 @@ export function MilestoneExplorer({ isConnecting = false, width, onCollapse }: {
 
   const openTaskFile = (absolutePath: string | undefined) => {
     if (!absolutePath || !projectCwd) return
-    const gsdPrefix = `${projectCwd}/.sdd/`
-    if (!absolutePath.startsWith(gsdPrefix)) return
-    const relativePath = absolutePath.slice(gsdPrefix.length)
+    const sddPrefix = `${projectCwd}/.sdd/`
+    if (!absolutePath.startsWith(sddPrefix)) return
+    const relativePath = absolutePath.slice(sddPrefix.length)
     window.dispatchEvent(new CustomEvent("sdd:open-file", { detail: { root: "sdd", path: relativePath } }))
   }
 

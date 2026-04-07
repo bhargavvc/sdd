@@ -10,8 +10,8 @@ import {
   getMilestoneSlices,
   getSliceTasks,
   getVerificationEvidence,
-} from "./gsd-db.js";
-import type { MilestoneRow, SliceRow, TaskRow, VerificationEvidenceRow } from "./gsd-db.js";
+} from "./sdd-db.js";
+import type { MilestoneRow, SliceRow, TaskRow, VerificationEvidenceRow } from "./sdd-db.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { join } from "node:path";
 import { mkdirSync, existsSync } from "node:fs";
@@ -248,7 +248,7 @@ export function renderSummaryProjection(basePath: string, milestoneId: string, s
 
   const evidenceRows = getVerificationEvidence(milestoneId, sliceId, taskId);
   const content = renderSummaryContent(taskRow, sliceId, milestoneId, evidenceRows);
-  const dir = join(basePath, ".gsd", "milestones", milestoneId, "slices", sliceId, "tasks");
+  const dir = join(basePath, ".sdd", "milestones", milestoneId, "slices", sliceId, "tasks");
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, `${taskId}-SUMMARY.md`), content);
 }

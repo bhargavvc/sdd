@@ -1061,10 +1061,10 @@ describe('derive-state-db', async () => {
       // M002: queued milestone — directory + slices dir exists, but no content files.
       // This is what happens when ensureMilestoneDbRow creates M002 but the DB row
       // is lost during worktree teardown.
-      mkdirSync(join(base, '.gsd', 'milestones', 'M002', 'slices'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'milestones', 'M002', 'slices'), { recursive: true });
 
       // A worktree exists for M002, proving it's a legitimate milestone
-      mkdirSync(join(base, '.gsd', 'worktrees', 'M002'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'worktrees', 'M002'), { recursive: true });
 
       // isGhostMilestone should NOT treat M002 as ghost when worktree exists
       assert.ok(!isGhostMilestone(base, 'M002'), 'ghost-wt: M002 with worktree is NOT a ghost');
@@ -1099,7 +1099,7 @@ describe('derive-state-db', async () => {
       writeFile(base, 'milestones/M001/M001-SUMMARY.md', '# M001 Summary\n\nDone.');
 
       // M002: queued milestone — directory exists, no content files, but has DB row
-      mkdirSync(join(base, '.gsd', 'milestones', 'M002', 'slices'), { recursive: true });
+      mkdirSync(join(base, '.sdd', 'milestones', 'M002', 'slices'), { recursive: true });
 
       // DB has both M001 complete and M002 queued
       openDatabase(':memory:');

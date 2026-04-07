@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 ##############################################################################
-# rebrand-gsd-to-sdd.sh
+# rebrand-sdd-to-sdd.sh
 #
 # Converts all G.S.D references to S.D.D after an upstream sync.
 # IDEMPOTENT — safe to re-run. Excludes itself from modification.
 #
-# USAGE:  bash scripts/rebrand-gsd-to-sdd.sh
+# USAGE:  bash scripts/rebrand-sdd-to-sdd.sh
 # RUN AFTER:  git merge upstream-sync  (into main)
 # MANIFEST:  scripts/REBRAND-MANIFEST.md — lists all patterns, exceptions, trouble spots
 ##############################################################################
 
-set -euo pipefail
+set -eu
+# Note: pipefail removed intentionally — grep returns 1 for "no matches"
+# which is normal/expected when patterns are already replaced.
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -79,7 +81,7 @@ while IFS= read -r file; do
 
   # Targeted replacements first (compound terms)
   sed -i \
-    -e "s/Get Stuff Done/Spec-Driven Development/g" \
+    -e "s/Spec-Driven Development/Spec-Driven Development/g" \
     -e "s/get stuff done/spec-driven development/g" \
     -e "s/${OLD_LC}-pi/${NEW_LC}-pi/g" \
     -e "s/${OLD_LC}-cli/${NEW_LC}-cli/g" \
@@ -124,7 +126,7 @@ while IFS= read -r file; do
     -e "s/\/${OLD_LC}/\/${NEW_LC}/g" \
     "$file"
 
-  # Restore @gsd-build (upstream npm scope — must stay)
+  # Restore @bhargavvc (upstream npm scope — must stay)
   if grep -q "${NEW_LC}-build" "$file" 2>/dev/null; then
     sed -i \
       -e "s/@${NEW_LC}-build/@${OLD_LC}-build/g" \
@@ -141,11 +143,11 @@ echo "  Done."
 echo ""
 echo "[2b/4] Fixing camelCase variables and branding..."
 
-# Fix camelCase: gsdDir→sddDir, gsdRoot→sddRoot, etc.
+# Fix camelCase: sddDir→sddDir, sddRoot→sddRoot, etc.
 # See REBRAND-MANIFEST.md for full pattern list
 OLD_CC=$(printf '\x47\x73\x64')   # G-s-d (PascalCase mid-word)
 NEW_CC="Sdd"
-grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" src/ --include="*.ts" 2>/dev/null | grep -v node_modules | while read -r f; do
+{ grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" src/ --include="*.ts" 2>/dev/null || true; } | grep -v node_modules | while read -r f; do
   sed -i \
     -e "s/${OLD_LC}Dir/${NEW_LC}Dir/g" \
     -e "s/${OLD_LC}Root/${NEW_LC}Root/g" \
@@ -169,23 +171,23 @@ grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" src/ --include="*.ts" 2>/dev/null | grep -v
     -e "s/${OLD_UC}Preferences/${NEW_UC}Preferences/g" \
     -e "s/${OLD_UC}State/${NEW_UC}State/g" \
     "$f"
-  # Restore @gsd-build in case mid-word replacement broke it
+  # Restore @bhargavvc in case mid-word replacement broke it
   if grep -q "${NEW_LC}-build" "$f" 2>/dev/null; then
     sed -i -e "s/@${NEW_LC}-build/@${OLD_LC}-build/g" "$f"
   fi
 done
 
 # Fix branding text (src/ AND web/)
-grep -rl 'Get Shit Done\|Get Stuff Done' src/ web/ --include="*.ts" --include="*.tsx" 2>/dev/null | while read -r f; do
+{ grep -rl 'Spec-Driven Development\|Spec-Driven Development' src/ web/ --include="*.ts" --include="*.tsx" 2>/dev/null || true; } | while read -r f; do
   sed -i \
-    -e 's/Get Shit Done/Spec-Driven Development/g' \
-    -e 's/Get Stuff Done/Spec-Driven Development/g' \
+    -e 's/Spec-Driven Development/Spec-Driven Development/g' \
+    -e 's/Spec-Driven Development/Spec-Driven Development/g' \
     "$f"
 done
 
 # Fix web/ components — PascalCase and camelCase (Lesson: web/ has its own patterns)
 echo "  Fixing web/ components..."
-grep -rl "${OLD_UC}\|${OLD_CC}\|${OLD_LC}[A-Z]" web/ --include="*.ts" --include="*.tsx" 2>/dev/null \
+{ grep -rl "${OLD_UC}\|${OLD_CC}\|${OLD_LC}[A-Z]" web/ --include="*.ts" --include="*.tsx" 2>/dev/null || true; } \
   | grep -v node_modules | while read -r f; do
   sed -i \
     -e "s/${OLD_UC}WorkspaceStore/${NEW_UC}WorkspaceStore/g" \
@@ -204,7 +206,7 @@ grep -rl "${OLD_UC}\|${OLD_CC}\|${OLD_LC}[A-Z]" web/ --include="*.ts" --include=
     -e "s/${OLD_CC}/${NEW_CC}/g" \
     -e "s/\b${OLD_LC}\b/${NEW_LC}/g" \
     "$f"
-  # Restore @gsd-build
+  # Restore @bhargavvc
   if grep -q "${NEW_LC}-build" "$f" 2>/dev/null; then
     sed -i -e "s/@${NEW_LC}-build/@${OLD_LC}-build/g" "$f"
   fi
@@ -213,7 +215,7 @@ done
 # Fix header filter title pattern
 HEADER_FILTER="web/lib/initial-${NEW_LC}-header-filter.ts"
 if [ -f "$HEADER_FILTER" ]; then
-  sed -i "s/Get Shit Done v/Spec-Driven Development v/g" "$HEADER_FILTER"
+  sed -i "s/Spec-Driven Development v/Spec-Driven Development v/g" "$HEADER_FILTER"
 fi
 
 # Fix Dockerfiles (Lesson: not in standard extension list)
@@ -228,8 +230,8 @@ find . -name "Dockerfile*" -not -path './.git/*' 2>/dev/null | while read -r f; 
   fi
 done
 
-# Fix packages/ camelCase (Lesson: packages/ also has gsdDir, gsdBin)
-grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" packages/ --include="*.ts" 2>/dev/null \
+# Fix packages/ camelCase (Lesson: packages/ also has sddDir, sddBin)
+{ grep -rl "${OLD_LC}[A-Z]\|${OLD_CC}" packages/ --include="*.ts" 2>/dev/null || true; } \
   | grep -v node_modules | while read -r f; do
   sed -i \
     -e "s/${OLD_LC}Dir/${NEW_LC}Dir/g" \
@@ -277,8 +279,8 @@ sed -i "s/\"name\": \"${OLD_LC}-pi\"/\"name\": \"${NEW_LC}-pi\"/g" package.json 
 echo "  Package names:"
 grep '"name"' package.json packages/*/package.json 2>/dev/null | head -10
 
-# Also fix gsd variable names in source (gsdDir, gsdBin, etc.)
-grep -rl --include="*.ts" --include="*.js" "${OLD_LC}Dir\|${OLD_LC}Bin\|${OLD_LC}Path" . 2>/dev/null \
+# Also fix sdd variable names in source (sddDir, sddBin, etc.)
+{ grep -rl --include="*.ts" --include="*.js" "${OLD_LC}Dir\|${OLD_LC}Bin\|${OLD_LC}Path" . 2>/dev/null || true; } \
   | grep -v '\.git/' | grep -v 'node_modules/' \
   | while read -r f; do
     sed -i \

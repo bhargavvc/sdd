@@ -11,7 +11,7 @@
       "sdd_decision_save", "sdd_summary_save",
       "sdd_requirement_update", "sdd_milestone_generate_id"
     ],
-    "commands": ["gsd", "kill", "worktree", "exit"],
+    "commands": ["sdd", "kill", "worktree", "exit"],
     "hooks": [
       "session_start",
       "session_switch",

@@ -66,7 +66,7 @@ function Invoke-GitOrDryRun {
 }
 
 # Check whether a path is a symlink OR a junction (Windows uses junctions for
-# the .gsd external-state migration via symlinkSync(..., "junction"))
+# the .sdd external-state migration via symlinkSync(..., "junction"))
 function Test-ReparsePoint {
     param([string]$Path)
     if (-not (Test-Path $Path)) { return $false }
@@ -103,15 +103,15 @@ if ($DryRun) {
 
 Write-Section "── Step 1: Detect .sdd/ directory ─────────────────────────────────"
 
-$gsdDir = Join-Path $repoRoot '.sdd'
+$sddDir = Join-Path $repoRoot '.sdd'
 $GsdIsSymlink = $false
 
-if (-not (Test-Path $gsdDir)) {
+if (-not (Test-Path $sddDir)) {
     Write-Ok ".sdd/ does not exist in this repo — not affected."
     exit 0
 }
 
-if (Test-ReparsePoint $gsdDir) {
+if (Test-ReparsePoint $sddDir) {
     # Scenario C: migration succeeded (symlink/junction in place) but git index was never
     # cleaned — tracked .sdd/* files still appear as deleted through the reparse point.
     $GsdIsSymlink = $true
@@ -120,9 +120,9 @@ if (Test-ReparsePoint $gsdDir) {
     Write-Info ".sdd/ is a real directory (Scenario A/B)."
 }
 
-# ── Step 2: Check .gitignore for .gsd entry ──────────────────────────────────
+# ── Step 2: Check .gitignore for .sdd entry ──────────────────────────────────
 
-Write-Section "── Step 2: Check .gitignore for .gsd entry ─────────────────────────"
+Write-Section "── Step 2: Check .gitignore for .sdd entry ─────────────────────────"
 
 $gitignorePath = Join-Path $repoRoot '.gitignore'
 
@@ -132,25 +132,25 @@ if (-not (Test-Path $gitignorePath) -and -not $GsdIsSymlink) {
 }
 
 $gitignoreLines = @()
-$gsdIgnoreLine  = $null
+$sddIgnoreLine  = $null
 if (Test-Path $gitignorePath) {
     $gitignoreLines = Get-Content $gitignorePath -Encoding UTF8
-    $gsdIgnoreLine  = $gitignoreLines | Where-Object {
+    $sddIgnoreLine  = $gitignoreLines | Where-Object {
         $trimmed = $_.Trim()
         $trimmed -eq '.sdd' -and -not $trimmed.StartsWith('#')
     } | Select-Object -First 1
 }
 
 if ($GsdIsSymlink) {
-    # Symlink layout: .gsd SHOULD be ignored (it's external state).
-    if (-not $gsdIgnoreLine) {
+    # Symlink layout: .sdd SHOULD be ignored (it's external state).
+    if (-not $sddIgnoreLine) {
         Write-Warn '".sdd" missing from .gitignore — will add (migration complete, .sdd/ is external).'
     } else {
         Write-Ok '".sdd" already in .gitignore — correct for external-state layout.'
     }
 } else {
-    # Real-directory layout: .gsd should NOT be ignored.
-    if (-not $gsdIgnoreLine) {
+    # Real-directory layout: .sdd should NOT be ignored.
+    if (-not $sddIgnoreLine) {
         Write-Ok '".sdd" not found in .gitignore — .gitignore not affected.'
     } else {
         Write-Warn '".sdd" found in .gitignore — this is the bad pattern from #1364.'
@@ -175,8 +175,8 @@ if ($GsdIsSymlink) {
     # Only index entries can be stale — no need to scan commit history.
     if ($trackedInHead.Count -eq 0 -and $deletedFiles.Count -eq 0) {
         Write-Ok "No stale index entries found — symlink/junction layout is healthy."
-        if (-not $gsdIgnoreLine) {
-            Write-Info "Add .gsd to .gitignore manually to complete the migration."
+        if (-not $sddIgnoreLine) {
+            Write-Info "Add .sdd to .gitignore manually to complete the migration."
         }
         exit 0
     }
@@ -193,7 +193,7 @@ if ($GsdIsSymlink) {
     # Nothing was ever tracked in any scenario
     if ($trackedInHead.Count -eq 0 -and $deletedFiles.Count -eq 0 -and $deletedFromHistory.Count -eq 0) {
         Write-Ok "No .sdd/ files tracked in this repo — not affected by #1364."
-        if ($gsdIgnoreLine) {
+        if ($sddIgnoreLine) {
             Write-Warn '".sdd" is still in .gitignore but there is nothing to restore.'
         }
         exit 0
@@ -220,7 +220,7 @@ if ($GsdIsSymlink) {
 
     # HEAD has files and working tree is clean — only .gitignore needs fixing
     if ($trackedInHead.Count -gt 0 -and $deletedFiles.Count -eq 0) {
-        if (-not $gsdIgnoreLine) {
+        if (-not $sddIgnoreLine) {
             Write-Ok "No action needed — .sdd/ is tracked in HEAD and .gitignore is clean."
             exit 0
         }
@@ -239,7 +239,7 @@ $restorableFiles = @()
 if ($GsdIsSymlink) {
     Write-Info "Scenario C: symlink/junction layout — skipping commit history scan (no file restore needed)."
 } else {
-    Write-Info "Scanning git log to find when .gsd was added to .gitignore..."
+    Write-Info "Scanning git log to find when .sdd was added to .gitignore..."
 
     # Strategy 1: find first commit that added ".sdd" to .gitignore
     $gitignoreCommits = Invoke-Git @('log', '--format=%H', '--', '.gitignore') -AllowFailure
@@ -331,8 +331,8 @@ if ($GsdIsSymlink) {
 Write-Section "── Step 6: Fix .gitignore ──────────────────────────────────────────"
 
 if ($GsdIsSymlink) {
-    # Scenario C: .gsd IS external — it should be in .gitignore.  Add if missing.
-    if (-not $gsdIgnoreLine) {
+    # Scenario C: .sdd IS external — it should be in .gitignore.  Add if missing.
+    if (-not $sddIgnoreLine) {
         Write-Info 'Adding ".sdd" to .gitignore (migration complete — .sdd/ is external state)...'
         if ($DryRun) {
             Write-Host "  (dry-run) Would append: .sdd" -ForegroundColor Yellow
@@ -345,8 +345,8 @@ if ($GsdIsSymlink) {
         Write-Ok '".sdd" already in .gitignore — correct for external-state layout.'
     }
 } else {
-    # Scenario A/B: .gsd is a real tracked directory — remove the bad ignore line.
-    if (-not $gsdIgnoreLine) {
+    # Scenario A/B: .sdd is a real tracked directory — remove the bad ignore line.
+    if (-not $sddIgnoreLine) {
         Write-Ok '".sdd" not in .gitignore — nothing to fix.'
     } else {
         Write-Info 'Removing bare ".sdd" line from .gitignore...'

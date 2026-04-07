@@ -8,7 +8,7 @@
  *
  * Uses temp-dir fixtures — no real marketplace repos required.
  *
- * Fixes: https://github.com/gsd-build/gsd-2/issues/2717
+ * Fixes: https://github.com/bhargavvc/sdd/issues/2717
  */
 
 import { describe, it, beforeEach, afterEach } from "node:test";

@@ -12,7 +12,7 @@ import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import type { SDDState } from "./types.js";
 import { runProviderChecks, summariseProviderIssues } from "./doctor-providers.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveSDDPreferences } from "./preferences.js";
 import { nativeIsRepo, nativeLastCommitEpoch, nativeGetCurrentBranch, nativeCommitSubject } from "./native-git-bridge.js";
 import { loadLedgerFromDisk, getProjectTotals } from "./metrics.js";
 import { describeNextUnit, estimateTimeRemaining, updateSliceProgressCache } from "./auto-dashboard.js";

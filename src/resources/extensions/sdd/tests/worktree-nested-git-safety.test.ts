@@ -81,7 +81,7 @@ assertTrue(
 );
 
 // ── Test 5: The findNestedGitDirs helper correctly identifies nested repos ──
-// Verify the helper scans subdirectories but skips .gsd/, node_modules/, .git/
+// Verify the helper scans subdirectories but skips .sdd/, node_modules/, .git/
 
 const helperBody = src.includes("findNestedGitDirs")
   ? src.slice(src.indexOf("findNestedGitDirs"))
@@ -89,7 +89,7 @@ const helperBody = src.includes("findNestedGitDirs")
 
 const skipsExcludedDirs =
   helperBody.includes("node_modules") ||
-  helperBody.includes(".gsd") ||
+  helperBody.includes(".sdd") ||
   helperBody.includes("skip") ||
   helperBody.includes("exclude");
 

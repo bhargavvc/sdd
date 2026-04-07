@@ -22,20 +22,20 @@ function makeMockPi() {
 // ─── Rename map ───────────────────────────────────────────────────────────────
 
 const RENAME_MAP: Array<{ canonical: string; alias: string }> = [
-  { canonical: "gsd_decision_save", alias: "gsd_save_decision" },
-  { canonical: "gsd_requirement_update", alias: "gsd_update_requirement" },
-  { canonical: "gsd_requirement_save", alias: "gsd_save_requirement" },
-  { canonical: "gsd_summary_save", alias: "gsd_save_summary" },
-  { canonical: "gsd_milestone_generate_id", alias: "gsd_generate_milestone_id" },
-  { canonical: "gsd_task_complete", alias: "gsd_complete_task" },
-  { canonical: "gsd_slice_complete", alias: "gsd_complete_slice" },
-  { canonical: "gsd_plan_milestone", alias: "gsd_milestone_plan" },
-  { canonical: "gsd_plan_slice", alias: "gsd_slice_plan" },
-  { canonical: "gsd_plan_task", alias: "gsd_task_plan" },
-  { canonical: "gsd_replan_slice", alias: "gsd_slice_replan" },
-  { canonical: "gsd_reassess_roadmap", alias: "gsd_roadmap_reassess" },
-  { canonical: "gsd_complete_milestone", alias: "gsd_milestone_complete" },
-  { canonical: "gsd_validate_milestone", alias: "gsd_milestone_validate" },
+  { canonical: "sdd_decision_save", alias: "sdd_save_decision" },
+  { canonical: "sdd_requirement_update", alias: "sdd_update_requirement" },
+  { canonical: "sdd_requirement_save", alias: "sdd_save_requirement" },
+  { canonical: "sdd_summary_save", alias: "sdd_save_summary" },
+  { canonical: "sdd_milestone_generate_id", alias: "sdd_generate_milestone_id" },
+  { canonical: "sdd_task_complete", alias: "sdd_complete_task" },
+  { canonical: "sdd_slice_complete", alias: "sdd_complete_slice" },
+  { canonical: "sdd_plan_milestone", alias: "sdd_milestone_plan" },
+  { canonical: "sdd_plan_slice", alias: "sdd_slice_plan" },
+  { canonical: "sdd_plan_task", alias: "sdd_task_plan" },
+  { canonical: "sdd_replan_slice", alias: "sdd_slice_replan" },
+  { canonical: "sdd_reassess_roadmap", alias: "sdd_roadmap_reassess" },
+  { canonical: "sdd_complete_milestone", alias: "sdd_milestone_complete" },
+  { canonical: "sdd_validate_milestone", alias: "sdd_milestone_validate" },
 ];
 
 // ─── Registration count ──────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ console.log('\n── Tool naming: registration count ──');
 const pi = makeMockPi();
 registerDbTools(pi);
 
-assert.deepStrictEqual(pi.tools.length, 30, 'Should register exactly 30 tools (14 canonical + 14 aliases + 1 gate tool + 1 gsd_skip_slice)');
+assert.deepStrictEqual(pi.tools.length, 30, 'Should register exactly 30 tools (14 canonical + 14 aliases + 1 gate tool + 1 sdd_skip_slice)');
 
 // ─── Both names exist for each pair ──────────────────────────────────────────
 

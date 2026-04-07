@@ -1,11 +1,11 @@
 /**
- * GSD Command — /gsd codebase
+ * SDD Command — /sdd codebase
  *
- * Generate and manage the codebase map (.gsd/CODEBASE.md).
+ * Generate and manage the codebase map (.sdd/CODEBASE.md).
  * Subcommands: generate, update, stats, help
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@sdd/pi-coding-agent";
 
 import {
   generateCodebaseMap,
@@ -16,7 +16,7 @@ import {
 } from "./codebase-generator.js";
 
 const USAGE =
-  "Usage: /gsd codebase [generate|update|stats]\n\n" +
+  "Usage: /sdd codebase [generate|update|stats]\n\n" +
   "  generate [--max-files N]  — Generate or regenerate CODEBASE.md\n" +
   "  update                    — Incremental update (preserves descriptions)\n" +
   "  stats                     — Show file count, coverage, and generation time\n" +
@@ -67,7 +67,7 @@ export async function handleCodebase(
       const existing = readCodebaseMap(basePath);
       if (!existing) {
         ctx.ui.notify(
-          "No codebase map found. Run /gsd codebase generate to create one.",
+          "No codebase map found. Run /sdd codebase generate to create one.",
           "warning",
         );
         return;
@@ -119,7 +119,7 @@ export async function handleCodebase(
 function showStats(basePath: string, ctx: ExtensionCommandContext): void {
   const stats = getCodebaseMapStats(basePath);
   if (!stats.exists) {
-    ctx.ui.notify("No codebase map found. Run /gsd codebase generate to create one.", "info");
+    ctx.ui.notify("No codebase map found. Run /sdd codebase generate to create one.", "info");
     return;
   }
 
@@ -134,7 +134,7 @@ function showStats(basePath: string, ctx: ExtensionCommandContext): void {
     `  Undescribed: ${stats.undescribedCount}\n` +
     `  Generated: ${stats.generatedAt ?? "unknown"}\n\n` +
     (stats.undescribedCount > 0
-      ? `Tip: Run /gsd codebase update to refresh after file changes.`
+      ? `Tip: Run /sdd codebase update to refresh after file changes.`
       : `Coverage is complete.`),
     "info",
   );

@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { sddRoot } from "./paths.js";
 
-const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
@@ -285,7 +285,7 @@ const MAX_RECURSIVE_SCAN_DEPTH = 6;
  */
 export function detectProjectState(basePath: string): ProjectDetection {
   const v1 = detectV1Planning(basePath);
-  const v2 = detectV2Gsd(basePath);
+  const v2 = detectV2Sdd(basePath);
   const projectSignals = detectProjectSignals(basePath);
   const globalSetup = hasGlobalSetup();
   const firstEver = isFirstEverLaunch();
@@ -353,7 +353,7 @@ export function detectV1Planning(basePath: string): V1Detection | null {
 
 // ─── V2 SDD Detection ──────────────────────────────────────────────────────────
 
-function detectV2Gsd(basePath: string): V2Detection | null {
+function detectV2Sdd(basePath: string): V2Detection | null {
   const sddPath = sddRoot(basePath);
 
   if (!existsSync(sddPath)) return null;
@@ -714,8 +714,8 @@ function detectVerificationCommands(
  */
 export function hasGlobalSetup(): boolean {
   return (
-    existsSync(join(gsdHome, "PREFERENCES.md")) ||
-    existsSync(join(gsdHome, "preferences.md"))
+    existsSync(join(sddHome, "PREFERENCES.md")) ||
+    existsSync(join(sddHome, "preferences.md"))
   );
 }
 
@@ -724,18 +724,18 @@ export function hasGlobalSetup(): boolean {
  * Returns true if ~/.sdd/ doesn't exist or has no preferences or auth.
  */
 export function isFirstEverLaunch(): boolean {
-  if (!existsSync(gsdHome)) return true;
+  if (!existsSync(sddHome)) return true;
 
   // If we have preferences, not first launch
   if (
-    existsSync(join(gsdHome, "PREFERENCES.md")) ||
-    existsSync(join(gsdHome, "preferences.md"))
+    existsSync(join(sddHome, "PREFERENCES.md")) ||
+    existsSync(join(sddHome, "preferences.md"))
   ) {
     return false;
   }
 
   // If we have auth.json, not first launch (onboarding.ts already ran)
-  if (existsSync(join(gsdHome, "agent", "auth.json"))) return false;
+  if (existsSync(join(sddHome, "agent", "auth.json"))) return false;
 
   // Check legacy path too
   const legacyPath = join(homedir(), ".pi", "agent", "sdd-preferences.md");

@@ -16,15 +16,15 @@ const { resolve, join } = require('path')
 
 const root = resolve(__dirname, '..')
 const piPkgPath = join(root, 'packages', 'pi-coding-agent', 'package.json')
-const gsdPkgPath = join(root, 'pkg', 'package.json')
+const sddPkgPath = join(root, 'pkg', 'package.json')
 
 const piPkg = JSON.parse(readFileSync(piPkgPath, 'utf-8'))
-const gsdPkg = JSON.parse(readFileSync(gsdPkgPath, 'utf-8'))
+const sddPkg = JSON.parse(readFileSync(sddPkgPath, 'utf-8'))
 
-if (gsdPkg.version !== piPkg.version) {
-  console.log(`[sync-pkg-version] Updating pkg/package.json version: ${gsdPkg.version} → ${piPkg.version}`)
-  gsdPkg.version = piPkg.version
-  writeFileSync(gsdPkgPath, JSON.stringify(gsdPkg, null, 2) + '\n')
+if (sddPkg.version !== piPkg.version) {
+  console.log(`[sync-pkg-version] Updating pkg/package.json version: ${sddPkg.version} → ${piPkg.version}`)
+  sddPkg.version = piPkg.version
+  writeFileSync(sddPkgPath, JSON.stringify(sddPkg, null, 2) + '\n')
 } else {
   console.log(`[sync-pkg-version] pkg/package.json version already matches: ${piPkg.version}`)
 }

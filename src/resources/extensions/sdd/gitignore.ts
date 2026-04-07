@@ -39,9 +39,9 @@ const SDD_RUNTIME_PATTERNS = [
 ] as const;
 
 const BASELINE_PATTERNS = [
-  // ── GSD state directory (symlink to external storage) ──
-  ".gsd",
-  ".gsd-id",
+  // ── SDD state directory (symlink to external storage) ──
+  ".sdd",
+  ".sdd-id",
 
   // ── OS junk ──
   ".DS_Store",
@@ -86,22 +86,22 @@ const BASELINE_PATTERNS = [
 ];
 
 /**
- * Check whether `.gsd` is covered by the project's `.gitignore`.
+ * Check whether `.sdd` is covered by the project's `.gitignore`.
  *
  * Uses `git check-ignore` for accurate evaluation — this respects nested
  * .gitignore files, global gitignore, and negation patterns. Returns true
- * only when git would actually ignore `.gsd/`.
+ * only when git would actually ignore `.sdd/`.
  *
  * Returns false (not ignored) if:
  *   - No `.gitignore` exists
- *   - `.gsd` is not listed in any active ignore rule
+ *   - `.sdd` is not listed in any active ignore rule
  *   - Not a git repo or git is unavailable
  */
-export function isGsdGitignored(basePath: string): boolean {
-  // Check both `.gsd` and `.gsd/` because `.gsd/` in .gitignore (trailing
+export function isSddGitignored(basePath: string): boolean {
+  // Check both `.sdd` and `.sdd/` because `.sdd/` in .gitignore (trailing
   // slash = directory-only pattern) only matches the directory form. Using
   // both paths covers all gitignore pattern variants.
-  for (const path of [".gsd", ".gsd/"]) {
+  for (const path of [".sdd", ".sdd/"]) {
     try {
       // git check-ignore exits 0 when the path IS ignored, 1 when it is NOT.
       execFileSync("git", ["check-ignore", "-q", path], {
@@ -109,7 +109,7 @@ export function isGsdGitignored(basePath: string): boolean {
         stdio: "pipe",
         env: GIT_NO_PROMPT_ENV,
       });
-      return true; // exit 0 → .gsd is ignored
+      return true; // exit 0 → .sdd is ignored
     } catch {
       // exit 1 → this form is NOT ignored, try the other
     }
@@ -118,9 +118,9 @@ export function isGsdGitignored(basePath: string): boolean {
 }
 
 /**
- * Check whether `.gsd/` contains files tracked by git.
- * If so, the project intentionally keeps `.gsd/` in version control
- * and we must NOT add `.gsd` to `.gitignore` or attempt migration.
+ * Check whether `.sdd/` contains files tracked by git.
+ * If so, the project intentionally keeps `.sdd/` in version control
+ * and we must NOT add `.sdd` to `.gitignore` or attempt migration.
  *
  * Returns true if git tracks at least one file under `.sdd/`.
  * Returns false (safe to ignore) if:
@@ -196,8 +196,8 @@ export function ensureGitignore(
 
   // Determine which patterns to apply. If .sdd/ has tracked files,
   // exclude the ".sdd" pattern to prevent deleting tracked state.
-  const gsdIsTracked = hasGitTrackedSddFiles(basePath);
-  const patternsToApply = gsdIsTracked
+  const sddIsTracked = hasGitTrackedSddFiles(basePath);
+  const patternsToApply = sddIsTracked
     ? BASELINE_PATTERNS.filter((p) => p !== ".sdd")
     : BASELINE_PATTERNS;
 

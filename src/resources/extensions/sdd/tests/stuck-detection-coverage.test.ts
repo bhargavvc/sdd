@@ -1,4 +1,4 @@
-// GSD State Machine Regression Tests — Stuck Detection Coverage (#3161)
+// SDD State Machine Regression Tests — Stuck Detection Coverage (#3161)
 
 import test from "node:test";
 import assert from "node:assert/strict";

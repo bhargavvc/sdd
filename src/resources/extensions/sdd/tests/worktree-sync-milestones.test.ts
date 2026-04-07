@@ -100,8 +100,8 @@ describe('worktree-sync-milestones', async () => {
     }
   }
 
-  // ─── 3. empty gsd.db deleted in worktree after sync ────────────────────
-  console.log('\n=== 3. empty gsd.db deleted in worktree after sync ===');
+  // ─── 3. empty sdd.db deleted in worktree after sync ────────────────────
+  console.log('\n=== 3. empty sdd.db deleted in worktree after sync ===');
   {
     const mainBase = createBase('main');
     const wtBase = createBase('wt');
@@ -111,37 +111,37 @@ describe('worktree-sync-milestones', async () => {
       mkdirSync(m001Dir, { recursive: true });
       writeFileSync(join(m001Dir, 'M001-ROADMAP.md'), '# Roadmap');
 
-      // Worktree has an empty (0-byte) gsd.db — stale/corrupt
-      writeFileSync(join(wtBase, '.gsd', 'gsd.db'), '');
-      assert.ok(existsSync(join(wtBase, '.gsd', 'gsd.db')), 'gsd.db exists before sync');
+      // Worktree has an empty (0-byte) sdd.db — stale/corrupt
+      writeFileSync(join(wtBase, '.sdd', 'sdd.db'), '');
+      assert.ok(existsSync(join(wtBase, '.sdd', 'sdd.db')), 'sdd.db exists before sync');
 
       syncProjectRootToWorktree(mainBase, wtBase, 'M001');
 
-      assert.ok(!existsSync(join(wtBase, '.gsd', 'gsd.db')), '#853: empty gsd.db deleted after sync');
+      assert.ok(!existsSync(join(wtBase, '.sdd', 'sdd.db')), '#853: empty sdd.db deleted after sync');
     } finally {
       cleanup(mainBase);
       cleanup(wtBase);
     }
   }
 
-  // ─── 3b. non-empty gsd.db preserved in worktree after sync (#2815) ───
-  console.log('\n=== 3b. non-empty gsd.db preserved in worktree after sync (#2815) ===');
+  // ─── 3b. non-empty sdd.db preserved in worktree after sync (#2815) ───
+  console.log('\n=== 3b. non-empty sdd.db preserved in worktree after sync (#2815) ===');
   {
     const mainBase = createBase('main');
     const wtBase = createBase('wt');
 
     try {
-      const m001Dir = join(mainBase, '.gsd', 'milestones', 'M001');
+      const m001Dir = join(mainBase, '.sdd', 'milestones', 'M001');
       mkdirSync(m001Dir, { recursive: true });
       writeFileSync(join(m001Dir, 'M001-ROADMAP.md'), '# Roadmap');
 
-      // Worktree has a populated gsd.db (e.g. from gsd-migrate on respawn)
-      writeFileSync(join(wtBase, '.gsd', 'gsd.db'), 'migrated-db-content');
-      assert.ok(existsSync(join(wtBase, '.gsd', 'gsd.db')), 'gsd.db exists before sync');
+      // Worktree has a populated sdd.db (e.g. from sdd-migrate on respawn)
+      writeFileSync(join(wtBase, '.sdd', 'sdd.db'), 'migrated-db-content');
+      assert.ok(existsSync(join(wtBase, '.sdd', 'sdd.db')), 'sdd.db exists before sync');
 
       syncProjectRootToWorktree(mainBase, wtBase, 'M001');
 
-      assert.ok(existsSync(join(wtBase, '.gsd', 'gsd.db')), '#2815: non-empty gsd.db preserved after sync');
+      assert.ok(existsSync(join(wtBase, '.sdd', 'sdd.db')), '#2815: non-empty sdd.db preserved after sync');
     } finally {
       cleanup(mainBase);
       cleanup(wtBase);

@@ -310,23 +310,23 @@ export function sddRoot(basePath: string): string {
 }
 
 /**
- * Detect if a path is inside a .gsd/worktrees/<name>/ structure.
+ * Detect if a path is inside a .sdd/worktrees/<name>/ structure.
  *
- * GSD auto-worktrees live at <project>/.gsd/worktrees/<milestoneId>/.
- * When gsdRoot() is called with such a path, we must NOT walk up to the
- * project root's .gsd — each worktree manages its own .gsd state (#2594).
+ * SDD auto-worktrees live at <project>/.sdd/worktrees/<milestoneId>/.
+ * When sddRoot() is called with such a path, we must NOT walk up to the
+ * project root's .sdd — each worktree manages its own .sdd state (#2594).
  *
  * Matches both forward-slash and platform-native separators to handle
  * Windows paths (path.sep = '\\') and normalized Unix paths.
  */
-function isInsideGsdWorktree(p: string): boolean {
-  // Match /.gsd/worktrees/<name> where <name> is the final segment or
+function isInsideSddWorktree(p: string): boolean {
+  // Match /.sdd/worktrees/<name> where <name> is the final segment or
   // followed by a separator. The <name> segment must be non-empty.
   const sepFwd = "/";
   const sepNative = "\\";
   const markers = [
-    `${sepFwd}.gsd${sepFwd}worktrees${sepFwd}`,
-    `${sepNative}.gsd${sepNative}worktrees${sepNative}`,
+    `${sepFwd}.sdd${sepFwd}worktrees${sepFwd}`,
+    `${sepNative}.sdd${sepNative}worktrees${sepNative}`,
   ];
   for (const marker of markers) {
     const idx = p.indexOf(marker);
@@ -341,17 +341,17 @@ function isInsideGsdWorktree(p: string): boolean {
   return false;
 }
 
-function probeGsdRoot(rawBasePath: string): string {
+function probeSddRoot(rawBasePath: string): string {
   // 1. Fast path — check the input path directly
   const local = join(rawBasePath, ".sdd");
   if (existsSync(local)) return local;
 
-  // 1b. Worktree guard (#2594) — if basePath is inside a .gsd/worktrees/<name>/
-  //     structure, return the worktree-local .gsd path immediately. Without this,
+  // 1b. Worktree guard (#2594) — if basePath is inside a .sdd/worktrees/<name>/
+  //     structure, return the worktree-local .sdd path immediately. Without this,
   //     the git-root probe (step 2) or walk-up (step 3) escapes to the project
-  //     root's .gsd, causing ensurePreconditions() and deriveState() to read/write
+  //     root's .sdd, causing ensurePreconditions() and deriveState() to read/write
   //     state in the wrong location.
-  if (isInsideGsdWorktree(rawBasePath)) return local;
+  if (isInsideSddWorktree(rawBasePath)) return local;
 
   // Resolve symlinks so path comparisons work correctly across platforms
   // (e.g. macOS /var → /private/var). Use rawBasePath as fallback if not resolvable.
@@ -359,7 +359,7 @@ function probeGsdRoot(rawBasePath: string): string {
   try { basePath = realpathSync.native(rawBasePath); } catch { basePath = rawBasePath; }
 
   // Also check the resolved path for the worktree pattern (macOS /tmp → /private/tmp)
-  if (basePath !== rawBasePath && isInsideGsdWorktree(basePath)) return local;
+  if (basePath !== rawBasePath && isInsideSddWorktree(basePath)) return local;
 
   // 2. Git root anchor — used as both probe target and walk-up boundary
   //    Only walk if we're inside a git project — prevents escaping into

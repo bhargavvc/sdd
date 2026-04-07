@@ -41,7 +41,7 @@ export interface CompleteTaskResult {
   summaryPath: string;
 }
 
-import type { TaskRow } from "../gsd-db.js";
+import type { TaskRow } from "../sdd-db.js";
 
 /**
  * Build a TaskRow-shaped object from CompleteTaskParams so the unified

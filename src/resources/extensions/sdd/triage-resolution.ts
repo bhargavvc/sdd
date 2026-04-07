@@ -135,7 +135,7 @@ export function executeReplan(
  * Execute a backtrack directive — user wants to abandon current milestone
  * and return to a previous one (milestone regression).
  *
- * Writes a BACKTRACK-TRIGGER.md marker at `.gsd/BACKTRACK-TRIGGER.md` with
+ * Writes a BACKTRACK-TRIGGER.md marker at `.sdd/BACKTRACK-TRIGGER.md` with
  * the target milestone, reason, and timestamp. The state machine (deriveState)
  * detects this and transitions the project to the target milestone, resetting
  * its slices to allow re-planning.
@@ -154,7 +154,7 @@ export function executeBacktrack(
     const targetMilestoneId = targetMatch?.[1] ?? null;
 
     const ts = new Date().toISOString();
-    const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+    const triggerPath = join(sddRoot(basePath), "BACKTRACK-TRIGGER.md");
     const content = [
       `# Backtrack Trigger`,
       ``,
@@ -220,7 +220,7 @@ export function readBacktrackTrigger(basePath: string): {
   capture: string;
   triggeredAt: string;
 } | null {
-  const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+  const triggerPath = join(sddRoot(basePath), "BACKTRACK-TRIGGER.md");
   if (!existsSync(triggerPath)) return null;
 
   try {
@@ -244,7 +244,7 @@ export function readBacktrackTrigger(basePath: string): {
  * Remove the backtrack trigger after it has been processed.
  */
 export function clearBacktrackTrigger(basePath: string): void {
-  const triggerPath = join(gsdRoot(basePath), "BACKTRACK-TRIGGER.md");
+  const triggerPath = join(sddRoot(basePath), "BACKTRACK-TRIGGER.md");
   try {
     if (existsSync(triggerPath)) {
       unlinkSync(triggerPath);
@@ -400,7 +400,7 @@ export function buildQuickTaskPrompt(capture: CaptureEntry): string {
     `   the current codebase. If the issue has already been fixed (e.g., by planned`,
     `   milestone work), report "Already resolved — no changes needed." and stop.`,
     `2. Execute this task as a small, self-contained change.`,
-    `3. Do NOT modify any \`.gsd/\` plan files — this is a one-off, not a planned task.`,
+    `3. Do NOT modify any \`.sdd/\` plan files — this is a one-off, not a planned task.`,
     `4. Commit your changes with a descriptive message.`,
     `5. Keep changes minimal and focused on the capture text.`,
     `6. When done, say: "Quick task complete."`,

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'SDD',
-  description: 'The evolution of Get Shit Done — now a real coding agent. One command. Walk away. Come back to a built project.',
+  description: 'The evolution of Spec-Driven Development — now a real coding agent. One command. Walk away. Come back to a built project.',
   applicationName: 'SDD',
   icons: {
     icon: [

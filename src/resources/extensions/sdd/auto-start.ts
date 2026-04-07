@@ -105,13 +105,13 @@ export interface BootstrapDeps {
  * DB first ensures deriveState sees the full picture on its very first run.
  */
 async function openProjectDbIfPresent(basePath: string): Promise<void> {
-  const gsdDbPath = resolveProjectRootDbPath(basePath);
-  if (!existsSync(gsdDbPath)) return;
+  const sddDbPath = resolveProjectRootDbPath(basePath);
+  if (!existsSync(sddDbPath)) return;
   if (isDbAvailable()) return;
 
   try {
-    const { openDatabase } = await import("./gsd-db.js");
-    openDatabase(gsdDbPath);
+    const { openDatabase } = await import("./sdd-db.js");
+    openDatabase(sddDbPath);
   } catch {
     /* non-fatal — DB lifecycle block below will retry */
   }
@@ -204,10 +204,10 @@ export async function bootstrapAutoSession(
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
     // Bootstrap milestones/ if it doesn't exist.
-    // Check milestones/ directly — ensureGsdSymlink above already created .gsd/,
-    // so checking .gsd/ existence would be dead code (#2942).
-    const gsdDir = join(base, ".gsd");
-    const milestonesPath = join(gsdDir, "milestones");
+    // Check milestones/ directly — ensureSddSymlink above already created .sdd/,
+    // so checking .sdd/ existence would be dead code (#2942).
+    const sddDir = join(base, ".sdd");
+    const milestonesPath = join(sddDir, "milestones");
     if (!existsSync(milestonesPath)) {
       mkdirSync(milestonesPath, { recursive: true });
       try {
@@ -561,15 +561,15 @@ export async function bootstrapAutoSession(
     }
 
     // ── DB lifecycle ──
-    const gsdDbPath = join(s.basePath, ".sdd", "sdd.db");
+    const sddDbPath = join(s.basePath, ".sdd", "sdd.db");
     const sddDirPath = join(s.basePath, ".sdd");
-    if (existsSync(sddDirPath) && !existsSync(gsdDbPath)) {
+    if (existsSync(sddDirPath) && !existsSync(sddDbPath)) {
       const hasDecisions = existsSync(join(sddDirPath, "DECISIONS.md"));
       const hasRequirements = existsSync(join(sddDirPath, "REQUIREMENTS.md"));
       const hasMilestones = existsSync(join(sddDirPath, "milestones"));
       try {
         const { openDatabase: openDb } = await import("./sdd-db.js");
-        openDb(gsdDbPath);
+        openDb(sddDbPath);
         if (hasDecisions || hasRequirements || hasMilestones) {
           const { migrateFromMarkdown } = await import("./md-importer.js");
           migrateFromMarkdown(s.basePath);
@@ -580,10 +580,10 @@ export async function bootstrapAutoSession(
         );
       }
     }
-    if (existsSync(gsdDbPath) && !isDbAvailable()) {
+    if (existsSync(sddDbPath) && !isDbAvailable()) {
       try {
         const { openDatabase: openDb } = await import("./sdd-db.js");
-        openDb(gsdDbPath);
+        openDb(sddDbPath);
       } catch (err) {
         process.stderr.write(
           `sdd-db: failed to open existing database: ${(err as Error).message}\n`,
@@ -596,7 +596,7 @@ export async function bootstrapAutoSession(
     // auto-mode starts but every sdd_task_complete / sdd_slice_complete
     // call returns "db_unavailable", triggering artifact-retry which
     // re-dispatches the same task — producing an infinite loop (#2419).
-    if (existsSync(gsdDbPath) && !isDbAvailable()) {
+    if (existsSync(sddDbPath) && !isDbAvailable()) {
       ctx.ui.notify(
         "SQLite database exists but failed to open. Auto-mode cannot proceed without a working database provider. " +
           "Check for corrupt sdd.db or missing native SQLite bindings.",

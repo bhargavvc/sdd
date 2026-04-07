@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient, AgentEvent } from "./gsd-client.js";
+import type { GsdClient, AgentEvent } from "./sdd-client.js";
 
 interface PlanStep {
 	id: number;
@@ -16,7 +16,7 @@ interface PlanStep {
  * what it has completed — a live execution plan.
  */
 export class GsdPlanViewerProvider implements vscode.TreeDataProvider<PlanStep>, vscode.Disposable {
-	public static readonly viewId = "gsd-plan";
+	public static readonly viewId = "sdd-plan";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;

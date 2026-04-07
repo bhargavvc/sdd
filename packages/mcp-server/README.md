@@ -1,4 +1,4 @@
-# @gsd-build/mcp-server
+# @bhargavvc/mcp-server
 
 MCP server exposing SDD orchestration tools for Claude Code, Cursor, and other MCP-compatible clients.
 
@@ -7,7 +7,7 @@ Start SDD auto-mode sessions, poll progress, resolve blockers, and retrieve resu
 ## Installation
 
 ```bash
-npm install @gsd-build/mcp-server
+npm install @bhargavvc/mcp-server
 ```
 
 Or with the monorepo workspace:
@@ -180,12 +180,12 @@ Resolve a pending blocker in a session by sending a response to the blocked UI r
 
 ```
 ┌─────────────────┐     stdio      ┌──────────────────┐
-│  MCP Client     │ ◄────────────► │  @gsd-build/mcp-server │
+│  MCP Client     │ ◄────────────► │  @bhargavvc/mcp-server │
 │  (Claude Code,  │    JSON-RPC    │                  │
 │   Cursor, etc.) │                │  SessionManager  │
 └─────────────────┘                │       │          │
                                    │       ▼          │
-                                   │  @gsd-build/rpc-client │
+                                   │  @bhargavvc/rpc-client │
                                    │       │          │
                                    │       ▼          │
                                    │  SDD CLI (child  │
@@ -193,9 +193,9 @@ Resolve a pending blocker in a session by sending a response to the blocked UI r
                                    └──────────────────┘
 ```
 
-- **@gsd-build/mcp-server** — MCP protocol adapter. Translates MCP tool calls into SessionManager operations.
+- **@bhargavvc/mcp-server** — MCP protocol adapter. Translates MCP tool calls into SessionManager operations.
 - **SessionManager** — Manages RpcClient lifecycle. One session per project directory. Tracks events in a ring buffer (last 50), detects blockers, accumulates cost.
-- **@gsd-build/rpc-client** — Low-level RPC client that spawns and communicates with the SDD CLI process via JSON-RPC over stdio.
+- **@bhargavvc/rpc-client** — Low-level RPC client that spawns and communicates with the SDD CLI process via JSON-RPC over stdio.
 
 ## License
 

@@ -27,8 +27,8 @@ import { verifyExpectedArtifact } from "./auto-recovery.js";
 import { deriveState } from "./state.js";
 import { isAutoActive } from "./auto.js";
 import { loadPrompt } from "./prompt-loader.js";
-import { gsdRoot } from "./paths.js";
-import { isDbAvailable, getAllMilestones, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { sddRoot } from "./paths.js";
+import { isDbAvailable, getAllMilestones, getMilestoneSlices, getSliceTasks } from "./sdd-db.js";
 import { isClosedStatus } from "./status-guards.js";
 import { formatDuration } from "../shared/format-utils.js";
 import { getAutoWorktreePath } from "./auto-worktree.js";
@@ -120,7 +120,7 @@ interface ForensicReport {
 const DEDUP_PROMPT_SECTION = `
 ## Pre-Investigation: Duplicate Check (REQUIRED)
 
-Before reading GSD source code or performing deep analysis, you MUST search for existing issues and PRs that may already address this bug. This avoids wasting tokens on already-fixed bugs.
+Before reading SDD source code or performing deep analysis, you MUST search for existing issues and PRs that may already address this bug. This avoids wasting tokens on already-fixed bugs.
 
 ### Search Steps
 
@@ -128,17 +128,17 @@ Use keywords from the user's problem description and the anomaly summaries in th
 
 1. **Search closed issues** for similar keywords:
    \`\`\`
-   gh issue list --repo gsd-build/gsd-2 --state closed --search "<keywords from root cause>" --limit 20
+   gh issue list --repo bhargavvc/sdd --state closed --search "<keywords from root cause>" --limit 20
    \`\`\`
 
 2. **Search open PRs** that might contain the fix:
    \`\`\`
-   gh pr list --repo gsd-build/gsd-2 --state open --search "<keywords>" --limit 10
+   gh pr list --repo bhargavvc/sdd --state open --search "<keywords>" --limit 10
    \`\`\`
 
 3. **Search merged PRs** that may have already fixed this:
    \`\`\`
-   gh pr list --repo gsd-build/gsd-2 --state merged --search "<keywords>" --limit 10
+   gh pr list --repo bhargavvc/sdd --state merged --search "<keywords>" --limit 10
    \`\`\`
 
 ### Analysis
@@ -239,18 +239,18 @@ export async function handleForensics(
 
   // Derive SDD source dir for prompt — fall back to ~/.sdd/agent/extensions/sdd/
   // when import.meta.url resolves to the npm-global install path (Windows).
-  let gsdSourceDir = dirname(fileURLToPath(import.meta.url));
-  if (!existsSync(join(gsdSourceDir, "prompts"))) {
-    const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
-    const fallback = join(gsdHome, "agent", "extensions", "sdd");
-    if (existsSync(join(fallback, "prompts"))) gsdSourceDir = fallback;
+  let sddSourceDir = dirname(fileURLToPath(import.meta.url));
+  if (!existsSync(join(sddSourceDir, "prompts"))) {
+    const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+    const fallback = join(sddHome, "agent", "extensions", "sdd");
+    if (existsSync(join(fallback, "prompts"))) sddSourceDir = fallback;
   }
 
   const forensicData = formatReportForPrompt(report);
   const content = loadPrompt("forensics", {
     problemDescription,
     forensicData,
-    gsdSourceDir,
+    sddSourceDir,
     dedupSection,
   });
 
@@ -989,7 +989,7 @@ export interface ForensicsMarker {
  * the forensics prompt on follow-up turns.  (#2941)
  */
 export function writeForensicsMarker(basePath: string, reportPath: string, promptContent: string): void {
-  const dir = join(gsdRoot(basePath), "runtime");
+  const dir = join(sddRoot(basePath), "runtime");
   mkdirSync(dir, { recursive: true });
   const marker: ForensicsMarker = {
     reportPath,
@@ -1003,7 +1003,7 @@ export function writeForensicsMarker(basePath: string, reportPath: string, promp
  * Read the active forensics marker, or null if none exists.
  */
 export function readForensicsMarker(basePath: string): ForensicsMarker | null {
-  const markerPath = join(gsdRoot(basePath), "runtime", "active-forensics.json");
+  const markerPath = join(sddRoot(basePath), "runtime", "active-forensics.json");
   if (!existsSync(markerPath)) return null;
   try {
     return JSON.parse(readFileSync(markerPath, "utf-8")) as ForensicsMarker;
@@ -1134,7 +1134,7 @@ function formatReportForPrompt(report: ForensicReport): string {
   } else {
     sections.push(`### Completed Keys: ${report.completedKeys.length}`);
   }
-  sections.push(`### GSD Version: ${report.gsdVersion}`);
+  sections.push(`### SDD Version: ${report.sddVersion}`);
   sections.push(`### Active Milestone: ${report.activeMilestone ?? "none"}`);
   sections.push(`### Active Slice: ${report.activeSlice ?? "none"}`);
   if (report.activeWorktree) {

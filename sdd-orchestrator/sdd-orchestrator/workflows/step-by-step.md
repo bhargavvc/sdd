@@ -1,6 +1,6 @@
 # Step-by-Step Execution
 
-Run GSD one unit at a time with decision points between steps. Use this when you need
+Run SDD one unit at a time with decision points between steps. Use this when you need
 control over execution — budget enforcement, progress reporting, conditional logic,
 or the ability to steer mid-build.
 
@@ -20,7 +20,7 @@ TOTAL_COST=0
 
 while true; do
   # Run one unit
-  RESULT=$(gsd headless --output-format json next 2>/dev/null)
+  RESULT=$(sdd headless --output-format json next 2>/dev/null)
   EXIT=$?
 
   # Parse result
@@ -38,7 +38,7 @@ while true; do
       ;;
     10)
       echo "Blocked — needs intervention"
-      gsd headless query | jq '.state'
+      sdd headless query | jq '.state'
       break
       ;;
     11)
@@ -48,24 +48,24 @@ while true; do
   esac
 
   # Check if milestone complete
-  CURRENT_PHASE=$(gsd headless query | jq -r '.state.phase')
+  CURRENT_PHASE=$(sdd headless query | jq -r '.state.phase')
   if [ "$CURRENT_PHASE" = "complete" ]; then
-    TOTAL_COST=$(gsd headless query | jq -r '.cost.total')
+    TOTAL_COST=$(sdd headless query | jq -r '.cost.total')
     echo "Milestone complete. Total cost: \$$TOTAL_COST"
     break
   fi
 
   # Budget check
-  TOTAL_COST=$(gsd headless query | jq -r '.cost.total')
+  TOTAL_COST=$(sdd headless query | jq -r '.cost.total')
   OVER=$(echo "$TOTAL_COST > $MAX_BUDGET" | bc -l)
   if [ "$OVER" = "1" ]; then
     echo "Budget limit (\$$MAX_BUDGET) exceeded at \$$TOTAL_COST"
-    gsd headless stop
+    sdd headless stop
     break
   fi
 
   # Progress report
-  PROGRESS=$(gsd headless query | jq -r '"\(.state.progress.tasks.done)/\(.state.progress.tasks.total) tasks"')
+  PROGRESS=$(sdd headless query | jq -r '"\(.state.progress.tasks.done)/\(.state.progress.tasks.total) tasks"')
   echo "Step done ($STATUS). Phase: $CURRENT_PHASE, Progress: $PROGRESS, Cost: \$$TOTAL_COST"
 done
 ```
@@ -85,7 +85,7 @@ cat > spec.md << 'SPEC'
 SPEC
 
 # 3. Create the milestone (planning only, no execution)
-RESULT=$(gsd headless --output-format json --context spec.md new-milestone 2>/dev/null)
+RESULT=$(sdd headless --output-format json --context spec.md new-milestone 2>/dev/null)
 EXIT=$?
 
 if [ $EXIT -ne 0 ]; then
@@ -100,13 +100,13 @@ echo "Milestone created. Starting execution..."
 STEP=0
 while true; do
   STEP=$((STEP + 1))
-  RESULT=$(gsd headless --output-format json next 2>/dev/null)
+  RESULT=$(sdd headless --output-format json next 2>/dev/null)
   EXIT=$?
 
   [ $EXIT -ne 0 ] && break
 
-  PHASE=$(gsd headless query | jq -r '.state.phase')
-  COST=$(gsd headless query | jq -r '.cost.total')
+  PHASE=$(sdd headless query | jq -r '.state.phase')
+  COST=$(sdd headless query | jq -r '.cost.total')
 
   echo "Step $STEP complete. Phase: $PHASE, Cost: \$$COST"
 
@@ -124,33 +124,33 @@ If you detect the build going in the wrong direction:
 
 ```bash
 # Check what's happening
-gsd headless query | jq '{phase: .state.phase, task: .state.activeTask}'
+sdd headless query | jq '{phase: .state.phase, task: .state.activeTask}'
 
 # Redirect
-gsd headless steer "Use SQLite instead of PostgreSQL for storage"
+sdd headless steer "Use SQLite instead of PostgreSQL for storage"
 
 # Continue
-gsd headless --output-format json next 2>/dev/null
+sdd headless --output-format json next 2>/dev/null
 ```
 
 ### Skip a stuck unit
 
 ```bash
-gsd headless skip
-gsd headless --output-format json next 2>/dev/null
+sdd headless skip
+sdd headless --output-format json next 2>/dev/null
 ```
 
 ### Undo last completed unit
 
 ```bash
-gsd headless undo --force
-gsd headless --output-format json next 2>/dev/null
+sdd headless undo --force
+sdd headless --output-format json next 2>/dev/null
 ```
 
 ### Force a specific phase
 
 ```bash
-gsd headless dispatch replan   # Re-plan the current slice
-gsd headless dispatch execute  # Skip to execution
-gsd headless dispatch uat      # Jump to user acceptance testing
+sdd headless dispatch replan   # Re-plan the current slice
+sdd headless dispatch execute  # Skip to execution
+sdd headless dispatch uat      # Jump to user acceptance testing
 ```

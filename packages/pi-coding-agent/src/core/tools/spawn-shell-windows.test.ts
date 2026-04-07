@@ -10,7 +10,7 @@
  *
  * This test structurally scans all spawn sites and verifies the guard is present.
  *
- * Fixes: gsd-build/gsd-2#2854
+ * Fixes: bhargavvc/sdd#2854
  */
 
 import test from "node:test";
@@ -30,8 +30,8 @@ const coreDir = join(__dirname, "..");
  * it does not need the guard and should NOT appear here.
  */
 const SPAWN_FILES_NEEDING_SHELL_GUARD = [
-	// Extension's GSD client — spawns the `gsd` binary which is a .cmd on Windows
-	join(coreDir, "..", "..", "..", "vscode-extension", "src", "gsd-client.ts"),
+	// Extension's SDD client — spawns the `sdd` binary which is a .cmd on Windows
+	join(coreDir, "..", "..", "..", "vscode-extension", "src", "sdd-client.ts"),
 	// exec.ts — used by extensions to run arbitrary commands
 	join(coreDir, "exec.ts"),
 	// LSP index — spawns project-type commands (tsc, cargo, etc.)
@@ -86,7 +86,7 @@ test("all spawn sites that invoke user-facing binaries include shell: process.pl
 		[],
 		`The following spawn sites are missing 'shell: process.platform === "win32"':\n` +
 		failures.map(f => `  - ${f}`).join("\n") +
-		`\nOn Windows, .cmd wrapper scripts (npm, npx, tsc, gsd) require shell ` +
+		`\nOn Windows, .cmd wrapper scripts (npm, npx, tsc, sdd) require shell ` +
 		`resolution. Without this guard, spawn fails with ENOENT or EINVAL.`,
 	);
 });

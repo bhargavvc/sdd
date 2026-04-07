@@ -1,4 +1,4 @@
-// GSD State Machine Regression Tests — Completion Hierarchy & State Derivation (#3161)
+// SDD State Machine Regression Tests — Completion Hierarchy & State Derivation (#3161)
 
 import { describe, test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -15,7 +15,7 @@ import {
   getSliceTasks,
   updateTaskStatus,
   updateSliceStatus,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { isClosedStatus } from "../status-guards.ts";
 
 // ─── Setup / Teardown ──────────────────────────────────────────────────────

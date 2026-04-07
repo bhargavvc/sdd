@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { existsSync, copyFileSync, mkdirSync, realpathSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Decision, Requirement, GateRow, GateId, GateScope, GateStatus, GateVerdict } from "./types.js";
-import { GSDError, GSD_STALE_STATE } from "./errors.js";
+import { SDDError, SDD_STALE_STATE } from "./errors.js";
 import { logError } from "./workflow-logger.js";
 
 const _require = createRequire(import.meta.url);
@@ -785,7 +785,7 @@ export function openDatabase(path: string): boolean {
       try {
         adapter.exec("VACUUM");
         initSchema(adapter, fileBacked);
-        process.stderr.write("gsd-db: recovered corrupt database via VACUUM\n");
+        process.stderr.write("sdd-db: recovered corrupt database via VACUUM\n");
       } catch (retryErr) {
         try { adapter.close(); } catch { /* swallow */ }
         throw retryErr;
@@ -1139,7 +1139,7 @@ export function insertMilestone(m: {
 }
 
 export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord>, title?: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new SDDError(SDD_STALE_STATE, "sdd-db: No database open");
   currentDb.prepare(
     `UPDATE milestones SET
       title = COALESCE(:title, title),
@@ -1635,7 +1635,7 @@ export function getMilestone(id: string): MilestoneRow | null {
 /**
  * Update a milestone's status in the database.
  * Used by park/unpark to keep the DB in sync with the filesystem marker.
- * See: https://github.com/gsd-build/gsd-2/issues/2694
+ * See: https://github.com/bhargavvc/sdd/issues/2694
  */
 export function updateMilestoneStatus(milestoneId: string, status: string, completedAt?: string | null): void {
   if (!currentDb) throw new SDDError(SDD_STALE_STATE, "sdd-db: No database open");

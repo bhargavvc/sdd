@@ -477,7 +477,7 @@ function deriveProjectScopedSessionId(
   sessionPrefix?: string,
   command?: string,
 ): string {
-  const base = sessionPrefix ?? (command ? "gsd-default" : "default")
+  const base = sessionPrefix ?? (command ? "sdd-default" : "default")
   if (!projectCwd) return base
   return `${base}:${projectCwd}`
 }

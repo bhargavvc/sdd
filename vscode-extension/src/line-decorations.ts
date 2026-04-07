@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import type { GsdChangeTracker } from "./change-tracker.js";
 
 /**
- * Provides line-level editor decorations for files modified by the GSD agent.
+ * Provides line-level editor decorations for files modified by the SDD agent.
  * Shows subtle background highlights on changed lines and gutter icons.
  */
 export class GsdLineDecorationManager implements vscode.Disposable {
@@ -78,12 +78,12 @@ export class GsdLineDecorationManager implements vscode.Disposable {
 
 		const addedRanges = added.map((line) => {
 			const range = new vscode.Range(line, 0, line, currentLines[line]?.length ?? 0);
-			return { range, hoverMessage: new vscode.MarkdownString("$(hubot) *Added by GSD Agent*") };
+			return { range, hoverMessage: new vscode.MarkdownString("$(hubot) *Added by SDD Agent*") };
 		});
 
 		const modifiedRanges = modified.map((line) => {
 			const range = new vscode.Range(line, 0, line, currentLines[line]?.length ?? 0);
-			return { range, hoverMessage: new vscode.MarkdownString("$(hubot) *Modified by GSD Agent*") };
+			return { range, hoverMessage: new vscode.MarkdownString("$(hubot) *Modified by SDD Agent*") };
 		});
 
 		const gutterRanges = [...added, ...modified].map((line) => ({

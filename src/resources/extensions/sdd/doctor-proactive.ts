@@ -23,7 +23,7 @@ import { rebuildState } from "./doctor.js";
 import { deriveState } from "./state.js";
 import { resolveMilestoneIntegrationBranch } from "./git-service.js";
 import { nativeIsRepo, nativeHasChanges, nativeLastCommitEpoch, nativeGetCurrentBranch, nativeAddTracked, nativeCommit } from "./native-git-bridge.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveSDDPreferences } from "./preferences.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
 
 // ── Health Score Tracking ──────────────────────────────────────────────────
@@ -300,7 +300,7 @@ export async function preDispatchHealthGate(basePath: string): Promise<PreDispat
   // create a safety snapshot so work isn't lost if the next unit crashes.
   try {
     if (nativeIsRepo(basePath)) {
-      const prefs = loadEffectiveGSDPreferences()?.preferences ?? {};
+      const prefs = loadEffectiveSDDPreferences()?.preferences ?? {};
       const thresholdMinutes = prefs.stale_commit_threshold_minutes ?? 30;
 
       if (thresholdMinutes > 0 && nativeHasChanges(basePath)) {
@@ -313,14 +313,14 @@ export async function preDispatchHealthGate(basePath: string): Promise<PreDispat
           const mins = Math.floor(minutesSinceCommit);
           try {
             nativeAddTracked(basePath);
-            const commitMsg = `gsd snapshot: pre-dispatch, uncommitted changes after ${mins}m inactivity`;
+            const commitMsg = `sdd snapshot: pre-dispatch, uncommitted changes after ${mins}m inactivity`;
             const result = nativeCommit(basePath, commitMsg);
             if (result) {
-              fixesApplied.push(`pre-dispatch: created gsd snapshot after ${mins}m of uncommitted changes`);
+              fixesApplied.push(`pre-dispatch: created sdd snapshot after ${mins}m of uncommitted changes`);
             }
           } catch {
             // Non-blocking — snapshot failed but dispatch can continue
-            fixesApplied.push("pre-dispatch: gsd snapshot failed");
+            fixesApplied.push("pre-dispatch: sdd snapshot failed");
           }
         }
       }

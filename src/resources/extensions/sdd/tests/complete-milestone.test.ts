@@ -242,15 +242,15 @@ describe("complete-milestone", () => {
       workingDirectory: "/tmp/test-project",
       milestoneId: "M001",
       milestoneTitle: "Tool Guidance Test",
-      roadmapPath: ".gsd/milestones/M001/M001-ROADMAP.md",
+      roadmapPath: ".sdd/milestones/M001/M001-ROADMAP.md",
       inlinedContext: "context",
-      milestoneSummaryPath: ".gsd/milestones/M001/M001-SUMMARY.md",
+      milestoneSummaryPath: ".sdd/milestones/M001/M001-SUMMARY.md",
       skillActivation: "",
     });
 
     // Step 11 must explicitly name the `write` tool so the LLM doesn't
     // confuse it with `edit` (which requires path + oldText + newText).
-    // See: https://github.com/gsd-build/gsd-2/issues/2946
+    // See: https://github.com/bhargavvc/sdd/issues/2946
     assert.ok(
       /PROJECT\.md.*\bwrite\b/i.test(prompt) || /\bwrite\b.*PROJECT\.md/i.test(prompt),
       "step 11 must name the `write` tool when updating PROJECT.md",
@@ -259,7 +259,7 @@ describe("complete-milestone", () => {
     // The prompt must NOT leave tool choice ambiguous for PROJECT.md
     // Verify it mentions the required parameter (`content` or `path`)
     assert.ok(
-      prompt.includes("`.gsd/PROJECT.md`") || prompt.includes('".gsd/PROJECT.md"'),
+      prompt.includes("`.sdd/PROJECT.md`") || prompt.includes('".sdd/PROJECT.md"'),
       "step 11 must reference the PROJECT.md path explicitly",
     );
   });

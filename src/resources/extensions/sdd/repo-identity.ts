@@ -12,7 +12,7 @@ import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, re
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 
-const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 // ─── Repo Metadata ───────────────────────────────────────────────────────────
 
@@ -165,7 +165,7 @@ function isProjectSdd(sddPath: string): boolean {
     if (stat.isSymbolicLink()) return true;
 
     // For real directories, check that this isn't the global SDD home.
-    // Recompute gsdHome dynamically so env overrides (SDD_HOME) are
+    // Recompute sddHome dynamically so env overrides (SDD_HOME) are
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
       const currentSddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
@@ -280,7 +280,7 @@ export function validateProjectId(id: string): boolean {
  * this makes the identity stable across directory moves/renames (#2750).
  *
  * For local-only repos (no remote), includes the git root in the hash.
- * Local repos use a `.gsd-id` marker file for recovery after moves.
+ * Local repos use a `.sdd-id` marker file for recovery after moves.
  *
  * Deterministic: same repo always produces the same hash regardless of
  * which worktree the caller is inside.
@@ -311,7 +311,7 @@ export function repoIdentity(basePath: string): string {
  * otherwise `~/.sdd/projects/<hash>`.
  */
 export function externalSddRoot(basePath: string): string {
-  const base = process.env.SDD_STATE_DIR || gsdHome;
+  const base = process.env.SDD_STATE_DIR || sddHome;
   return join(base, "projects", repoIdentity(basePath));
 }
 
@@ -320,7 +320,7 @@ export function externalSddRoot(basePath: string): string {
  * Honors SDD_STATE_DIR override before falling back to SDD_HOME.
  */
 export function externalProjectsRoot(): string {
-  const base = process.env.SDD_STATE_DIR || gsdHome;
+  const base = process.env.SDD_STATE_DIR || sddHome;
   return join(base, "projects");
 }
 
@@ -362,10 +362,10 @@ export function cleanNumberedSddVariants(projectPath: string): string[] {
   return removed;
 }
 
-// ─── .gsd-id Marker ─────────────────────────────────────────────────────────
+// ─── .sdd-id Marker ─────────────────────────────────────────────────────────
 
 /**
- * Write a `.gsd-id` marker file in the project root.
+ * Write a `.sdd-id` marker file in the project root.
  *
  * This file records the identity hash used for the external state directory.
  * For local-only repos (no remote), this marker survives directory moves and
@@ -374,9 +374,9 @@ export function cleanNumberedSddVariants(projectPath: string): string[] {
  * The marker is gitignored by ensureGitignore(). Non-fatal: failure to write
  * the marker must never block project setup.
  */
-function writeGsdIdMarker(projectPath: string, identity: string): void {
+function writeSddIdMarker(projectPath: string, identity: string): void {
   try {
-    const markerPath = join(projectPath, ".gsd-id");
+    const markerPath = join(projectPath, ".sdd-id");
     // Only write if content differs to avoid unnecessary disk writes.
     if (existsSync(markerPath)) {
       try {
@@ -390,12 +390,12 @@ function writeGsdIdMarker(projectPath: string, identity: string): void {
 }
 
 /**
- * Read the `.gsd-id` marker from the project root.
+ * Read the `.sdd-id` marker from the project root.
  * Returns the identity hash, or null if the marker doesn't exist or is unreadable.
  */
-function readGsdIdMarker(projectPath: string): string | null {
+function readSddIdMarker(projectPath: string): string | null {
   try {
-    const markerPath = join(projectPath, ".gsd-id");
+    const markerPath = join(projectPath, ".sdd-id");
     if (!existsSync(markerPath)) return null;
     const content = readFileSync(markerPath, "utf-8").trim();
     return /^[a-zA-Z0-9_-]+$/.test(content) ? content : null;
@@ -423,13 +423,13 @@ function hasProjectState(externalPath: string): boolean {
  * Resolve the external state directory, with recovery for relocated projects.
  *
  * For local-only repos where the computed identity produces an empty state dir,
- * checks the `.gsd-id` marker for the original identity hash and recovers
+ * checks the `.sdd-id` marker for the original identity hash and recovers
  * the old state directory if it still exists and contains data (#2750).
  *
  * Returns the resolved external path (may differ from the computed identity).
  */
 function resolveExternalPathWithRecovery(projectPath: string): string {
-  const computedPath = externalGsdRoot(projectPath);
+  const computedPath = externalSddRoot(projectPath);
   const computedId = repoIdentity(projectPath);
 
   // Check if computed path already has state — fast path, no recovery needed.
@@ -437,11 +437,11 @@ function resolveExternalPathWithRecovery(projectPath: string): string {
     return computedPath;
   }
 
-  // Check for .gsd-id marker from a previous location.
-  const markerId = readGsdIdMarker(projectPath);
+  // Check for .sdd-id marker from a previous location.
+  const markerId = readSddIdMarker(projectPath);
   if (markerId && markerId !== computedId) {
     // The marker points to a different identity — the repo was likely moved.
-    const base = process.env.GSD_STATE_DIR || gsdHome;
+    const base = process.env.SDD_STATE_DIR || sddHome;
     const markerPath = join(base, "projects", markerId);
     if (hasProjectState(markerPath)) {
       // Recover: use the old state directory and update the marker to the new identity.
@@ -479,40 +479,40 @@ function resolveExternalPathWithRecovery(projectPath: string): string {
 /**
  * Ensure the `<project>/.sdd` symlink points to the external state directory.
  *
- * 1. Clean up any macOS numbered collision variants (`.gsd 2`, `.gsd 3`, etc.)
- * 2. Resolve external dir (with relocation recovery via `.gsd-id` marker)
+ * 1. Clean up any macOS numbered collision variants (`.sdd 2`, `.sdd 3`, etc.)
+ * 2. Resolve external dir (with relocation recovery via `.sdd-id` marker)
  * 3. mkdir -p the external dir
- * 4. If `<project>/.gsd` doesn't exist → create symlink
- * 5. If `<project>/.gsd` is already the correct symlink → no-op
- * 6. If `<project>/.gsd` is a real directory → return as-is (migration handles later)
- * 7. Write `.gsd-id` marker for future relocation recovery
+ * 4. If `<project>/.sdd` doesn't exist → create symlink
+ * 5. If `<project>/.sdd` is already the correct symlink → no-op
+ * 6. If `<project>/.sdd` is a real directory → return as-is (migration handles later)
+ * 7. Write `.sdd-id` marker for future relocation recovery
  *
  * Returns the resolved external path.
  */
-export function ensureGsdSymlink(projectPath: string): string {
-  const result = ensureGsdSymlinkCore(projectPath);
+export function ensureSddSymlink(projectPath: string): string {
+  const result = ensureSddSymlinkCore(projectPath);
 
-  // Write .gsd-id marker so future relocations can recover this state (#2750).
+  // Write .sdd-id marker so future relocations can recover this state (#2750).
   // Only write for the project root (not subdirectories or worktrees that
-  // delegate to a parent .gsd).
+  // delegate to a parent .sdd).
   if (!isInsideWorktree(projectPath)) {
-    writeGsdIdMarker(projectPath, repoIdentity(projectPath));
+    writeSddIdMarker(projectPath, repoIdentity(projectPath));
   }
 
   return result;
 }
 
-function ensureGsdSymlinkCore(projectPath: string): string {
+function ensureSddSymlinkCore(projectPath: string): string {
   const externalPath = resolveExternalPathWithRecovery(projectPath);
-  const localGsd = join(projectPath, ".gsd");
+  const localSdd = join(projectPath, ".sdd");
   const inWorktree = isInsideWorktree(projectPath);
 
   // Guard: Never create a symlink at ~/.sdd — that's the user-level SDD home,
   // not a project .sdd. This can happen if resolveProjectRoot() or
   // escapeStaleWorktree() returned ~ as the project root (#1676).
   const localSddNormalized = localSdd.replaceAll("\\", "/");
-  const gsdHomePath = gsdHome.replaceAll("\\", "/");
-  if (localSddNormalized === gsdHomePath) {
+  const sddHomePath = sddHome.replaceAll("\\", "/");
+  if (localSddNormalized === sddHomePath) {
     return localSdd;
   }
 
@@ -555,19 +555,19 @@ function ensureGsdSymlinkCore(projectPath: string): string {
   writeRepoMeta(externalPath, getRemoteUrl(projectPath), resolveGitRoot(projectPath));
 
   const replaceWithSymlink = (): string => {
-    rmSync(localGsd, { recursive: true, force: true });
+    rmSync(localSdd, { recursive: true, force: true });
     // Defensive: remove any residual entry (e.g. dangling symlink) before creating.
-    try { unlinkSync(localGsd); } catch { /* already gone */ }
-    symlinkSync(externalPath, localGsd, "junction");
+    try { unlinkSync(localSdd); } catch { /* already gone */ }
+    symlinkSync(externalPath, localSdd, "junction");
     return externalPath;
   };
 
   // Check for dangling symlinks (e.g. after relocation recovery removed the old
   // state dir). existsSync follows symlinks, so it returns false for dangling ones.
   // lstatSync does NOT follow, so we can detect the dangling symlink and replace it.
-  if (!existsSync(localGsd)) {
+  if (!existsSync(localSdd)) {
     try {
-      const stat = lstatSync(localGsd);
+      const stat = lstatSync(localSdd);
       if (stat.isSymbolicLink()) {
         // Dangling symlink — replace with correct one (#2750).
         return replaceWithSymlink();
@@ -577,8 +577,8 @@ function ensureGsdSymlinkCore(projectPath: string): string {
     }
     // Nothing exists yet — create symlink.
     // Defensive: remove any residual entry to avoid EEXIST race (#2750).
-    try { unlinkSync(localGsd); } catch { /* nothing to remove */ }
-    symlinkSync(externalPath, localGsd, "junction");
+    try { unlinkSync(localSdd); } catch { /* nothing to remove */ }
+    symlinkSync(externalPath, localSdd, "junction");
     return externalPath;
   }
 

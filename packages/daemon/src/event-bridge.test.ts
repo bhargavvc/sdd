@@ -12,7 +12,7 @@ import { EventEmitter } from 'node:events';
 import { EventBridge } from './event-bridge.js';
 import type { EventBridgeOptions, BridgeClient } from './event-bridge.js';
 import type { PendingBlocker, ManagedSession, DaemonConfig, SessionStatus } from './types.js';
-import type { SdkAgentEvent, RpcClient, RpcExtensionUIRequest } from '@gsd-build/rpc-client';
+import type { SdkAgentEvent, RpcClient, RpcExtensionUIRequest } from '@bhargavvc/rpc-client';
 
 // ---------------------------------------------------------------------------
 // Mock factories

@@ -8,8 +8,8 @@ import { writePhaseAnchor, readPhaseAnchor, formatAnchorForPrompt } from "../pha
 import type { PhaseAnchor } from "../phase-anchor.js";
 
 function makeTempBase(): string {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-anchor-test-"));
-  mkdirSync(join(tmp, ".gsd", "milestones", "M001", "anchors"), { recursive: true });
+  const tmp = mkdtempSync(join(tmpdir(), "sdd-anchor-test-"));
+  mkdirSync(join(tmp, ".sdd", "milestones", "M001", "anchors"), { recursive: true });
   return tmp;
 }
 
@@ -26,7 +26,7 @@ test("writePhaseAnchor creates anchor file in correct location", () => {
       nextSteps: ["Plan the implementation slices"],
     };
     writePhaseAnchor(base, "M001", anchor);
-    assert.ok(existsSync(join(base, ".gsd", "milestones", "M001", "anchors", "discuss.json")));
+    assert.ok(existsSync(join(base, ".sdd", "milestones", "M001", "anchors", "discuss.json")));
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

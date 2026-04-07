@@ -5,7 +5,7 @@ import {
 	buildPromptFromContext,
 	buildSdkOptions,
 } from "../stream-adapter.ts";
-import type { Context, Message } from "@gsd/pi-ai";
+import type { Context, Message } from "@sdd/pi-ai";
 
 // ---------------------------------------------------------------------------
 // Existing tests — exhausted stream fallback (#2575)

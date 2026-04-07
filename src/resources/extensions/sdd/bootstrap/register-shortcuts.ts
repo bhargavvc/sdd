@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type { ExtensionAPI } from "@sdd/pi-coding-agent";
 import { Key } from "@sdd/pi-tui";
 
-import { GSDDashboardOverlay } from "../dashboard-overlay.js";
+import { SDDDashboardOverlay } from "../dashboard-overlay.js";
 import { ParallelMonitorOverlay } from "../parallel-monitor-overlay.js";
 import { shortcutDesc } from "../../shared/mod.js";
 
@@ -32,11 +32,11 @@ export function registerShortcuts(pi: ExtensionAPI): void {
   });
 
   pi.registerShortcut(Key.ctrlAlt("p"), {
-    description: shortcutDesc("Open parallel worker monitor", "/gsd parallel watch"),
+    description: shortcutDesc("Open parallel worker monitor", "/sdd parallel watch"),
     handler: async (ctx) => {
-      const parallelDir = join(process.cwd(), ".gsd", "parallel");
+      const parallelDir = join(process.cwd(), ".sdd", "parallel");
       if (!existsSync(parallelDir)) {
-        ctx.ui.notify("No parallel workers found. Run /gsd parallel start first.", "info");
+        ctx.ui.notify("No parallel workers found. Run /sdd parallel start first.", "info");
         return;
       }
       await ctx.ui.custom<void>(

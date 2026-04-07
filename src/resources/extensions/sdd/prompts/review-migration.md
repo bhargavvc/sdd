@@ -4,7 +4,7 @@ A `/sdd migrate` command just wrote a `.sdd/` directory from an old `.planning` 
 
 ### Source
 - Old `.planning` directory: `{{sourcePath}}`
-- Written `.sdd` directory: `{{gsdPath}}`
+- Written `.sdd` directory: `{{sddPath}}`
 
 ### Migration Stats
 {{previewStats}}

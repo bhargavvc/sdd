@@ -31,8 +31,8 @@ afterEach(() => {
 function basePlistOpts(overrides?: Partial<PlistOptions>): PlistOptions {
   return {
     nodePath: '/usr/local/bin/node',
-    scriptPath: '/usr/local/lib/gsd-daemon/dist/cli.js',
-    configPath: join(homedir(), '.gsd', 'daemon.yaml'),
+    scriptPath: '/usr/local/lib/sdd-daemon/dist/cli.js',
+    configPath: join(homedir(), '.sdd', 'daemon.yaml'),
     ...overrides,
   };
 }
@@ -69,9 +69,9 @@ describe('generatePlist', () => {
     assert.ok(xml.includes('</plist>'));
   });
 
-  it('includes label com.gsd.daemon', () => {
+  it('includes label com.sdd.daemon', () => {
     const xml = generatePlist(basePlistOpts());
-    assert.ok(xml.includes('<string>com.gsd.daemon</string>'));
+    assert.ok(xml.includes('<string>com.sdd.daemon</string>'));
   });
 
   it('uses the absolute node path from opts', () => {
@@ -149,8 +149,8 @@ describe('generatePlist', () => {
 // ---------- getPlistPath ----------
 
 describe('getPlistPath', () => {
-  it('returns ~/Library/LaunchAgents/com.gsd.daemon.plist', () => {
-    const expected = join(homedir(), 'Library', 'LaunchAgents', 'com.gsd.daemon.plist');
+  it('returns ~/Library/LaunchAgents/com.sdd.daemon.plist', () => {
+    const expected = join(homedir(), 'Library', 'LaunchAgents', 'com.sdd.daemon.plist');
     assert.equal(getPlistPath(), expected);
   });
 });
@@ -193,7 +193,7 @@ describe('install', () => {
     // (install is a thin wrapper around generatePlist + writeFile + launchctl)
     const xml = generatePlist(basePlistOpts());
     assert.ok(xml.includes('<key>Label</key>'));
-    assert.ok(xml.includes('<string>com.gsd.daemon</string>'));
+    assert.ok(xml.includes('<string>com.sdd.daemon</string>'));
   });
 
   it('handles idempotent install (unloads first if plist exists)', () => {
@@ -266,7 +266,7 @@ describe('uninstall', () => {
 describe('status', () => {
   it('parses running daemon output (PID present)', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
-      return '{\n\t"PID" = 1234;\n\t"Label" = "com.gsd.daemon";\n}\nPID\tStatus\tLabel\n1234\t0\tcom.gsd.daemon\n';
+      return '{\n\t"PID" = 1234;\n\t"Label" = "com.sdd.daemon";\n}\nPID\tStatus\tLabel\n1234\t0\tcom.sdd.daemon\n';
     };
 
     const result = status(mockRun);
@@ -277,7 +277,7 @@ describe('status', () => {
 
   it('parses stopped daemon output (no PID)', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
-      return 'PID\tStatus\tLabel\n-\t78\tcom.gsd.daemon\n';
+      return 'PID\tStatus\tLabel\n-\t78\tcom.sdd.daemon\n';
     };
 
     const result = status(mockRun);
@@ -288,7 +288,7 @@ describe('status', () => {
 
   it('returns not-registered when launchctl list fails', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
-      throw new Error('Could not find service "com.gsd.daemon" in domain for port');
+      throw new Error('Could not find service "com.sdd.daemon" in domain for port');
     };
 
     const result = status(mockRun);
@@ -299,7 +299,7 @@ describe('status', () => {
 
   it('returns structured result with all fields', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
-      return 'PID\tStatus\tLabel\n5678\t0\tcom.gsd.daemon\n';
+      return 'PID\tStatus\tLabel\n5678\t0\tcom.sdd.daemon\n';
     };
 
     const result = status(mockRun);
@@ -311,10 +311,10 @@ describe('status', () => {
   it('parses JSON-style dict output (newer macOS)', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
       return `{
-\t"StandardOutPath" = "/Users/me/.gsd/daemon-stdout.log";
+\t"StandardOutPath" = "/Users/me/.sdd/daemon-stdout.log";
 \t"LimitLoadToSessionType" = "Aqua";
-\t"StandardErrorPath" = "/Users/me/.gsd/daemon-stderr.log";
-\t"Label" = "com.gsd.daemon";
+\t"StandardErrorPath" = "/Users/me/.sdd/daemon-stderr.log";
+\t"Label" = "com.sdd.daemon";
 \t"OnDemand" = true;
 \t"LastExitStatus" = 0;
 \t"PID" = 23802;
@@ -331,7 +331,7 @@ describe('status', () => {
   it('parses JSON-style dict output when daemon stopped (no PID key)', () => {
     const mockRun: RunCommandFn = (_cmd: string) => {
       return `{
-\t"Label" = "com.gsd.daemon";
+\t"Label" = "com.sdd.daemon";
 \t"LastExitStatus" = 1;
 \t"OnDemand" = true;
 };`;

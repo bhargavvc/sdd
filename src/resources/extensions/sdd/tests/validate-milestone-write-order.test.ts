@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
 import { handleValidateMilestone } from "../tools/validate-milestone.js";
-import { openDatabase, closeDatabase, _getAdapter, insertMilestone, insertSlice } from "../gsd-db.js";
+import { openDatabase, closeDatabase, _getAdapter, insertMilestone, insertSlice } from "../sdd-db.js";
 import { clearPathCache } from "../paths.js";
 import { clearParseCache } from "../files.js";
 
@@ -69,7 +69,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
 
   it("omits verification class section when no verification classes are supplied", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".gsd", "gsd.db");
+    const dbPath = join(base, ".sdd", "sdd.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
     insertSlice({ id: "S01", milestoneId: "M001" });
@@ -80,7 +80,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
     );
     assert.ok(!("error" in result), `unexpected error: ${"error" in result ? result.error : ""}`);
 
-    const filePath = join(base, ".gsd", "milestones", "M001", "M001-VALIDATION.md");
+    const filePath = join(base, ".sdd", "milestones", "M001", "M001-VALIDATION.md");
     const validationMd = readFileSync(filePath, "utf-8");
     assert.doesNotMatch(validationMd, /## Verification Class Compliance/);
   });

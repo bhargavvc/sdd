@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient } from "./gsd-client.js";
+import type { GsdClient } from "./sdd-client.js";
 
 /**
  * Integrates with VS Code's diagnostic system:
@@ -11,7 +11,7 @@ export class GsdDiagnosticBridge implements vscode.Disposable {
 	private disposables: vscode.Disposable[] = [];
 
 	constructor(private readonly client: GsdClient) {
-		this.collection = vscode.languages.createDiagnosticCollection("gsd");
+		this.collection = vscode.languages.createDiagnosticCollection("sdd");
 		this.disposables.push(this.collection);
 	}
 
@@ -92,7 +92,7 @@ export class GsdDiagnosticBridge implements vscode.Disposable {
 	}
 
 	/**
-	 * Add a GSD diagnostic (agent finding) to a file.
+	 * Add a SDD diagnostic (agent finding) to a file.
 	 * Can be used to surface agent review findings in the Problems panel.
 	 */
 	addFinding(
@@ -103,11 +103,11 @@ export class GsdDiagnosticBridge implements vscode.Disposable {
 	): void {
 		const existing = this.collection.get(uri) ?? [];
 		const diagnostic = new vscode.Diagnostic(range, message, severity);
-		diagnostic.source = "GSD Agent";
+		diagnostic.source = "SDD Agent";
 		this.collection.set(uri, [...existing, diagnostic]);
 	}
 
-	/** Clear all GSD diagnostics */
+	/** Clear all SDD diagnostics */
 	clearFindings(): void {
 		this.collection.clear();
 	}

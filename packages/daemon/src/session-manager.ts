@@ -1,5 +1,5 @@
 /**
- * SessionManager — manages RpcClient lifecycle for daemon-driven GSD execution.
+ * SessionManager — manages RpcClient lifecycle for daemon-driven SDD execution.
  *
  * Extends EventEmitter to emit typed session lifecycle events.
  * One active session per projectDir. Tracks events in a ring buffer,
@@ -16,8 +16,8 @@
 import { execSync } from 'node:child_process';
 import { basename, resolve } from 'node:path';
 import { EventEmitter } from 'node:events';
-import { RpcClient } from '@gsd-build/rpc-client';
-import type { SdkAgentEvent, RpcInitResult, RpcCostUpdateEvent, RpcExtensionUIRequest } from '@gsd-build/rpc-client';
+import { RpcClient } from '@bhargavvc/rpc-client';
+import type { SdkAgentEvent, RpcInitResult, RpcCostUpdateEvent, RpcExtensionUIRequest } from '@bhargavvc/rpc-client';
 import type {
   ManagedSession,
   StartSessionOptions,
@@ -67,11 +67,11 @@ export class SessionManager extends EventEmitter {
   }
 
   /**
-   * Start a new GSD auto-mode session for the given project directory.
+   * Start a new SDD auto-mode session for the given project directory.
    *
    * Rejects if a session already exists for this projectDir.
    * Creates an RpcClient, starts the process, performs the v2 init handshake,
-   * wires event tracking, and sends '/gsd auto' to begin execution.
+   * wires event tracking, and sends '/sdd auto' to begin execution.
    */
   async startSession(options: StartSessionOptions): Promise<string> {
     const { projectDir } = options;
@@ -140,7 +140,7 @@ export class SessionManager extends EventEmitter {
       });
 
       // Kick off auto-mode
-      const command = options.command ?? '/gsd auto';
+      const command = options.command ?? '/sdd auto';
       await client.prompt(command);
 
       this.logger.info('session started', { sessionId: session.sessionId, projectDir: resolvedDir });
@@ -275,24 +275,24 @@ export class SessionManager extends EventEmitter {
   }
 
   /**
-   * Resolve the GSD CLI path.
+   * Resolve the SDD CLI path.
    *
-   * 1. GSD_CLI_PATH env var (highest priority)
-   * 2. `which gsd` → resolve to the actual dist/cli.js
+   * 1. SDD_CLI_PATH env var (highest priority)
+   * 2. `which sdd` → resolve to the actual dist/cli.js
    */
   static resolveCLIPath(): string {
-    const envPath = process.env['GSD_CLI_PATH'];
+    const envPath = process.env['SDD_CLI_PATH'];
     if (envPath) return resolve(envPath);
 
     try {
-      const gsdBin = execSync('which gsd', { encoding: 'utf-8' }).trim();
-      if (gsdBin) return resolve(gsdBin);
+      const sddBin = execSync('which sdd', { encoding: 'utf-8' }).trim();
+      if (sddBin) return resolve(sddBin);
     } catch {
       // which failed
     }
 
     throw new Error(
-      'Cannot find GSD CLI. Set GSD_CLI_PATH environment variable or ensure `gsd` is in PATH.'
+      'Cannot find SDD CLI. Set SDD_CLI_PATH environment variable or ensure `sdd` is in PATH.'
     );
   }
 

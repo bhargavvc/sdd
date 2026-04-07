@@ -1,12 +1,12 @@
 /**
  * Project Relocation Recovery Tests (#2750)
  *
- * Verifies that moving/renaming a GSD project directory does not cause
+ * Verifies that moving/renaming a SDD project directory does not cause
  * silent data loss. When a repo has a remote URL, the identity hash
  * should be based solely on the remote — making moves transparent.
  *
- * For local-only repos (no remote), ensureGsdSymlink should detect
- * orphaned state directories with a matching .gsd-id marker and
+ * For local-only repos (no remote), ensureSddSymlink should detect
+ * orphaned state directories with a matching .sdd-id marker and
  * recover them automatically.
  */
 
@@ -29,8 +29,8 @@ import { execFileSync } from "node:child_process";
 
 import {
   repoIdentity,
-  externalGsdRoot,
-  ensureGsdSymlink,
+  externalSddRoot,
+  ensureSddSymlink,
   readRepoMeta,
   externalProjectsRoot,
 } from "../repo-identity.ts";
@@ -66,16 +66,16 @@ describe("project-relocation-recovery (#2750)", () => {
   let savedStateDir: string | undefined;
 
   before(() => {
-    savedStateDir = process.env.GSD_STATE_DIR;
-    stateDir = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-state-")));
-    process.env.GSD_STATE_DIR = stateDir;
+    savedStateDir = process.env.SDD_STATE_DIR;
+    stateDir = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-state-")));
+    process.env.SDD_STATE_DIR = stateDir;
   });
 
   after(() => {
     if (savedStateDir !== undefined) {
-      process.env.GSD_STATE_DIR = savedStateDir;
+      process.env.SDD_STATE_DIR = savedStateDir;
     } else {
-      delete process.env.GSD_STATE_DIR;
+      delete process.env.SDD_STATE_DIR;
     }
     rmSync(stateDir, { recursive: true, force: true });
   });
@@ -83,7 +83,7 @@ describe("project-relocation-recovery (#2750)", () => {
   // ── Remote repos: identity should be path-independent ─────────────────
 
   test("repoIdentity is stable across moves for repos with a remote URL", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-a-")));
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-a-")));
     initRepo(repoA, "https://github.com/example/myrepo.git");
 
     const identityBefore = repoIdentity(repoA);
@@ -91,7 +91,7 @@ describe("project-relocation-recovery (#2750)", () => {
     // Move the repo to a new location
     const repoB = join(
       tmpdir(),
-      `gsd-reloc-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `sdd-reloc-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     renameSync(repoA, repoB);
 
@@ -106,12 +106,12 @@ describe("project-relocation-recovery (#2750)", () => {
     rmSync(repoB, { recursive: true, force: true });
   });
 
-  test("ensureGsdSymlink reuses the same external dir after repo move (remote repo)", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-reuse-a-")));
+  test("ensureSddSymlink reuses the same external dir after repo move (remote repo)", () => {
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-reuse-a-")));
     initRepo(repoA, "https://github.com/example/reloc-reuse.git");
 
-    // Initialize GSD state with some planning data
-    const externalA = ensureGsdSymlink(repoA);
+    // Initialize SDD state with some planning data
+    const externalA = ensureSddSymlink(repoA);
     const milestonesPath = join(externalA, "milestones");
     mkdirSync(milestonesPath, { recursive: true });
     writeFileSync(
@@ -123,12 +123,12 @@ describe("project-relocation-recovery (#2750)", () => {
     // Move the repo
     const repoB = join(
       tmpdir(),
-      `gsd-reloc-reuse-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `sdd-reloc-reuse-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     renameSync(repoA, repoB);
 
-    // ensureGsdSymlink at the new location should find the same external dir
-    const externalB = ensureGsdSymlink(repoB);
+    // ensureSddSymlink at the new location should find the same external dir
+    const externalB = ensureSddSymlink(repoB);
 
     assert.strictEqual(
       normalizePath(externalB),
@@ -155,21 +155,21 @@ describe("project-relocation-recovery (#2750)", () => {
   });
 
   test("repo-meta.json gitRoot is updated after move (remote repo)", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-meta-a-")));
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-meta-a-")));
     initRepo(repoA, "https://github.com/example/reloc-meta.git");
 
-    const externalA = ensureGsdSymlink(repoA);
+    const externalA = ensureSddSymlink(repoA);
     const metaBefore = readRepoMeta(externalA);
     assert.ok(metaBefore !== null, "metadata should exist before move");
 
     // Move the repo
     const repoB = join(
       tmpdir(),
-      `gsd-reloc-meta-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `sdd-reloc-meta-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     renameSync(repoA, repoB);
 
-    const externalB = ensureGsdSymlink(repoB);
+    const externalB = ensureSddSymlink(repoB);
     const metaAfter = readRepoMeta(externalB);
     assert.ok(metaAfter !== null, "metadata should exist after move");
     assert.strictEqual(
@@ -186,31 +186,31 @@ describe("project-relocation-recovery (#2750)", () => {
     rmSync(repoB, { recursive: true, force: true });
   });
 
-  // ── Local-only repos: .gsd-id marker provides recovery ────────────────
+  // ── Local-only repos: .sdd-id marker provides recovery ────────────────
 
-  test("ensureGsdSymlink writes a .gsd-id marker in the project root", () => {
-    const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-marker-")));
+  test("ensureSddSymlink writes a .sdd-id marker in the project root", () => {
+    const repo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-marker-")));
     initRepo(repo);
 
-    ensureGsdSymlink(repo);
+    ensureSddSymlink(repo);
 
-    const markerPath = join(repo, ".gsd-id");
-    assert.ok(existsSync(markerPath), ".gsd-id marker must be written by ensureGsdSymlink");
+    const markerPath = join(repo, ".sdd-id");
+    assert.ok(existsSync(markerPath), ".sdd-id marker must be written by ensureSddSymlink");
 
     const markerId = readFileSync(markerPath, "utf-8").trim();
     const computedId = repoIdentity(repo);
-    assert.strictEqual(markerId, computedId, ".gsd-id must contain the repo identity hash");
+    assert.strictEqual(markerId, computedId, ".sdd-id must contain the repo identity hash");
 
     rmSync(repo, { recursive: true, force: true });
   });
 
-  test("local-only repo recovers state via .gsd-id marker after move", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-local-a-")));
+  test("local-only repo recovers state via .sdd-id marker after move", () => {
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-local-a-")));
     initRepo(repoA);
     // No remote — identity includes gitRoot
 
-    // Initialize GSD state
-    const externalA = ensureGsdSymlink(repoA);
+    // Initialize SDD state
+    const externalA = ensureSddSymlink(repoA);
     mkdirSync(join(externalA, "milestones"), { recursive: true });
     writeFileSync(
       join(externalA, "milestones", "M001.md"),
@@ -223,7 +223,7 @@ describe("project-relocation-recovery (#2750)", () => {
     // Move the repo
     const repoB = join(
       tmpdir(),
-      `gsd-reloc-local-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `sdd-reloc-local-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     renameSync(repoA, repoB);
 
@@ -235,11 +235,11 @@ describe("project-relocation-recovery (#2750)", () => {
       "local-only repo identity changes with move (expected)",
     );
 
-    // But ensureGsdSymlink should detect .gsd-id marker and recover
-    const externalB = ensureGsdSymlink(repoB);
+    // But ensureSddSymlink should detect .sdd-id marker and recover
+    const externalB = ensureSddSymlink(repoB);
     assert.ok(
       existsSync(join(externalB, "milestones", "M001.md")),
-      "local-only repo must recover state via .gsd-id marker after move",
+      "local-only repo must recover state via .sdd-id marker after move",
     );
 
     rmSync(repoB, { recursive: true, force: true });
@@ -248,10 +248,10 @@ describe("project-relocation-recovery (#2750)", () => {
   // ── Edge cases ────────────────────────────────────────────────────────
 
   test("identity remains different for repos with different remotes", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-diff-a-")));
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-diff-a-")));
     initRepo(repoA, "https://github.com/example/repo-alpha.git");
 
-    const repoB = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-diff-b-")));
+    const repoB = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-diff-b-")));
     initRepo(repoB, "https://github.com/example/repo-beta.git");
 
     assert.notStrictEqual(
@@ -265,10 +265,10 @@ describe("project-relocation-recovery (#2750)", () => {
   });
 
   test("no orphaned state dir created when remote repo is moved", () => {
-    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "gsd-reloc-orphan-a-")));
+    const repoA = realpathSync(mkdtempSync(join(tmpdir(), "sdd-reloc-orphan-a-")));
     initRepo(repoA, "https://github.com/example/no-orphan.git");
 
-    ensureGsdSymlink(repoA);
+    ensureSddSymlink(repoA);
 
     // Count project dirs before move
     const projectsDir = externalProjectsRoot();
@@ -279,11 +279,11 @@ describe("project-relocation-recovery (#2750)", () => {
     // Move the repo
     const repoB = join(
       tmpdir(),
-      `gsd-reloc-orphan-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      `sdd-reloc-orphan-b-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     );
     renameSync(repoA, repoB);
 
-    ensureGsdSymlink(repoB);
+    ensureSddSymlink(repoB);
 
     const countAfter = readdirSync(projectsDir).length;
     assert.strictEqual(

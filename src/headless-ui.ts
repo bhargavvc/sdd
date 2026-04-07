@@ -145,9 +145,9 @@ export function summarizeToolArgs(toolName: unknown, toolInput: unknown): string
     case 'browser_navigate':
       return String(input.url ?? '')
     default: {
-      // GSD tools: show milestone/slice/task IDs when present
-      if (name.startsWith('gsd_')) {
-        return summarizeGsdTool(name, input)
+      // SDD tools: show milestone/slice/task IDs when present
+      if (name.startsWith('sdd_')) {
+        return summarizeSddTool(name, input)
       }
       // Fallback: show first string-valued key up to 60 chars
       for (const v of Object.values(input)) {
@@ -160,8 +160,8 @@ export function summarizeToolArgs(toolName: unknown, toolInput: unknown): string
   }
 }
 
-/** Summarize GSD extension tool args into a compact identifier string. */
-function summarizeGsdTool(name: string, input: Record<string, unknown>): string {
+/** Summarize SDD extension tool args into a compact identifier string. */
+function summarizeSddTool(name: string, input: Record<string, unknown>): string {
   const parts: string[] = []
   if (input.milestoneId) parts.push(String(input.milestoneId))
   if (input.sliceId) parts.push(String(input.sliceId))
@@ -175,7 +175,7 @@ function summarizeGsdTool(name: string, input: Record<string, unknown>): string 
     }
     return id
   }
-  // Fallback for GSD tools without IDs (e.g. gsd_decision_save)
+  // Fallback for SDD tools without IDs (e.g. sdd_decision_save)
   if (input.decision) {
     const d = String(input.decision)
     return d.length > 60 ? d.slice(0, 57) + '...' : d
@@ -303,8 +303,8 @@ export function formatProgress(event: Record<string, unknown>, ctx: ProgressCont
         // Bold important notifications
         const isImportant = /^(committed:|verification gate:|milestone|blocked:)/i.test(msg)
         return isImportant
-          ? `${c.bold}[gsd]     ${msg}${c.reset}`
-          : `[gsd]     ${msg}`
+          ? `${c.bold}[sdd]     ${msg}${c.reset}`
+          : `[sdd]     ${msg}`
       }
 
       if (method === 'setStatus') {

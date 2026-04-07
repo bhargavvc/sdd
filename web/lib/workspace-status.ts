@@ -10,7 +10,7 @@ export function getMilestoneStatus(
   milestone: WorkspaceMilestoneTarget,
   active: { milestoneId?: string },
 ): ItemStatus {
-  // Prefer authoritative milestone status from GSD state registry (#2807)
+  // Prefer authoritative milestone status from SDD state registry (#2807)
   if (milestone.status) {
     switch (milestone.status) {
       case "complete":

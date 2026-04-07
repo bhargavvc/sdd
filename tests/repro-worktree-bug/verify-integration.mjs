@@ -7,7 +7,7 @@
  *
  * Covers:
  * 1. resolveProjectRoot() returns the real project, not ~
- * 2. gsdRoot() from the resolved project root finds project .sdd, not ~/.sdd
+ * 2. sddRoot() from the resolved project root finds project .sdd, not ~/.sdd
  * 3. The parallel/ directory would be created under project .sdd
  * 4. session-status writes target the correct location
  * 5. orchestrator.json would be written to project .sdd
@@ -28,12 +28,12 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { sddIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   const symlinkRe = /\/\.sdd\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { sddIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -91,14 +91,14 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
 
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.sdd${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
-  const gsdHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
+  const sddMarker = `${sepChar}.sdd${sepChar}`;
+  const sddIdx = basePath.indexOf(sddMarker);
+  const candidate = sddIdx !== -1
+    ? basePath.slice(0, sddIdx)
+    : basePath.slice(0, seg.sddIdx);
+  const sddHome = normalizePathForCompare(process.env.SDD_HOME || join(homedir(), ".sdd"));
   const candidateGsdPath = normalizePathForCompare(join(candidate, ".sdd"));
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  if (candidateGsdPath === sddHome || candidateGsdPath.startsWith(sddHome + "/")) {
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
     return basePath;
@@ -106,8 +106,8 @@ function resolveProjectRoot(basePath) {
   return candidate;
 }
 
-// Simplified gsdRoot — matches paths.ts probeGsdRoot logic
-function gsdRoot(basePath) {
+// Simplified sddRoot — matches paths.ts probeGsdRoot logic
+function sddRoot(basePath) {
   const local = join(basePath, ".sdd");
   if (existsSync(local)) return local;
   return local; // fallback
@@ -133,15 +133,15 @@ function validateDirectory(dirPath) {
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "sdd-verify-integration-"));
-const USER_GSD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
+const USER_SDD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
 const USER_HOME = homedir();
-const PROJECT_SDD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_SDD_STORAGE = `${USER_SDD}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
 const PROJECT_SDD_LINK = `${PROJECT_DIR}/.sdd`;
 const PROJECT_REAL = normalizePathForCompare(PROJECT_DIR);
 let PROJECT_STORAGE_REAL = "";
 
-process.env.SDD_HOME = USER_GSD;
+process.env.SDD_HOME = USER_SDD;
 
 console.log("=== Setup ===\n");
 
@@ -179,26 +179,26 @@ console.log(`  Resolved project root: ${projectRoot}`);
 test("resolveProjectRoot returns real project root", projectRoot, PROJECT_REAL);
 test("resolveProjectRoot does NOT return home dir", projectRoot !== USER_HOME, true);
 
-console.log("\n=== Test 2: gsdRoot finds project .sdd ===\n");
+console.log("\n=== Test 2: sddRoot finds project .sdd ===\n");
 
-const sdd = gsdRoot(projectRoot);
-console.log(`  gsdRoot result: ${sdd}`);
-test("gsdRoot points to project .sdd", sdd, `${PROJECT_REAL}/.sdd`);
+const sdd = sddRoot(projectRoot);
+console.log(`  sddRoot result: ${sdd}`);
+test("sddRoot points to project .sdd", sdd, `${PROJECT_REAL}/.sdd`);
 
 // Verify it's a symlink to the right place
-const gsdReal = realpathSync(sdd);
-console.log(`  gsdRoot resolves to: ${gsdReal}`);
-test("gsdRoot resolves to project storage", gsdReal, PROJECT_STORAGE_REAL);
-test("gsdRoot does NOT resolve to user-level ~/.sdd", gsdReal !== USER_GSD, true);
+const sddReal = realpathSync(sdd);
+console.log(`  sddRoot resolves to: ${sddReal}`);
+test("sddRoot resolves to project storage", sddReal, PROJECT_STORAGE_REAL);
+test("sddRoot does NOT resolve to user-level ~/.sdd", sddReal !== USER_SDD, true);
 
 console.log("\n=== Test 3: parallel/ directory targets project .sdd ===\n");
 
 const parallelDir = join(sdd, "parallel");
 console.log(`  Parallel dir would be: ${parallelDir}`);
-const parallelReal = join(gsdReal, "parallel");
+const parallelReal = join(sddReal, "parallel");
 console.log(`  Resolves physically to: ${parallelReal}`);
 test("parallel dir is under project .sdd", parallelDir.startsWith(PROJECT_REAL), true);
-test("parallel dir is NOT under ~/.sdd root", !parallelDir.startsWith(USER_GSD) || parallelDir.startsWith(`${USER_GSD}/projects/`), true);
+test("parallel dir is NOT under ~/.sdd root", !parallelDir.startsWith(USER_SDD) || parallelDir.startsWith(`${USER_SDD}/projects/`), true);
 
 // Actually create it and verify
 mkdirSync(parallelDir, { recursive: true });
@@ -218,8 +218,8 @@ writeFileSync(orchestratorPath, JSON.stringify({ active: true }));
 test("orchestrator.json written to project .sdd", existsSync(orchestratorPath), true);
 
 // Verify nothing leaked to user-level ~/.sdd root
-const userParallelDir = join(USER_GSD, "parallel");
-const userOrchestratorPath = join(USER_GSD, "orchestrator.json");
+const userParallelDir = join(USER_SDD, "parallel");
+const userOrchestratorPath = join(USER_SDD, "orchestrator.json");
 test("NO parallel/ dir at user-level ~/.sdd root", !existsSync(userParallelDir), true);
 test("NO orchestrator.json at user-level ~/.sdd root", !existsSync(userOrchestratorPath), true);
 
@@ -254,7 +254,7 @@ if (failed > 0) {
 } else {
   console.log("\n✅ ALL INTEGRATION TESTS PASSED");
   console.log("  - resolveProjectRoot returns real project, not ~");
-  console.log("  - gsdRoot finds project .sdd through symlink");
+  console.log("  - sddRoot finds project .sdd through symlink");
   console.log("  - parallel/ dir created in project .sdd, not ~/.sdd");
   console.log("  - session status writes land in correct location");
   console.log("  - orchestrator.json lands in correct location");

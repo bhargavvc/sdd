@@ -4,7 +4,7 @@
 
 ### Added
 
-- **SCM provider** — "GSD Agent" appears in Source Control panel with accept/discard per-file diffs
+- **SCM provider** — "SDD Agent" appears in Source Control panel with accept/discard per-file diffs
 - **Change tracker** — captures original file content before agent modifications for diff and rollback
 - **Checkpoints** — automatic snapshots on each agent turn with restore capability
 - **Diagnostic bridge** — "Fix Problems in File" and "Fix All Problems" commands read VS Code diagnostics and send to agent
@@ -20,12 +20,12 @@
 
 - **Sidebar redesign** — compact card-based layout with collapsible sections, pill toggles, hidden empty data
 - **Workflow buttons** now route through Chat panel so responses are visible
-- **Slash completion** filtered to `/gsd` commands only
+- **Slash completion** filtered to `/sdd` commands only
 - **Checkpoint labels** show timestamp + first action (e.g., "10:32 — Edit sidebar.ts")
-- **Session tree** supports ISO timestamp filenames (GSD's actual format)
+- **Session tree** supports ISO timestamp filenames (SDD's actual format)
 - **Session persistence** enabled (removed `--no-session` flag)
 - **Progress notifications** disabled by default (Chat panel provides inline progress)
-- **Sidebar reduced** from 6 panels to 3 (GSD Agent, Sessions, Activity)
+- **Sidebar reduced** from 6 panels to 3 (SDD Agent, Sessions, Activity)
 - **Settings section** starts collapsed by default
 
 ## [0.2.0]
@@ -38,7 +38,7 @@
 - **Session forking** — fork from any message via QuickPick
 - **Queue mode controls** — toggle steering and follow-up modes from the sidebar
 - **Enhanced conversation history** — tool call rendering, collapsible thinking blocks, search/filter, fork-from-here
-- **Enhanced code lens** — Refactor, Find Bugs, and Generate Tests alongside Ask GSD
+- **Enhanced code lens** — Refactor, Find Bugs, and Generate Tests alongside Ask SDD
 - **8 new commands** (33 total)
 
 ## [0.1.0]
@@ -52,7 +52,7 @@ Initial release — forked from SDD-2 VS Code extension.
 - Bash terminal — pseudoterminal routing agent Bash tool output
 - Session tree — browse and switch between session files
 - Conversation history — webview panel with full chat log
-- Slash command completion — auto-complete for `/gsd` commands
-- Code lens — "Ask GSD" above functions and classes in TS/JS/Python/Go/Rust
+- Slash command completion — auto-complete for `/sdd` commands
+- Code lens — "Ask SDD" above functions and classes in TS/JS/Python/Go/Rust
 - 25 commands with 6 keyboard shortcuts
 - Auto-start, auto-compaction, and code lens configuration

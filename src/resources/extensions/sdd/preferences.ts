@@ -83,12 +83,12 @@ export {
 
 // ─── Path Constants & Getters ───────────────────────────────────────────────
 
-function gsdHome(): string {
+function sddHome(): string {
   return process.env.SDD_HOME || join(homedir(), ".sdd");
 }
 
 function globalPreferencesPath(): string {
-  return join(gsdHome(), "preferences.md");
+  return join(sddHome(), "preferences.md");
 }
 
 function legacyGlobalPreferencesPath(): string {
@@ -96,15 +96,15 @@ function legacyGlobalPreferencesPath(): string {
 }
 
 function projectPreferencesPath(): string {
-  return join(gsdRoot(process.cwd()), "preferences.md");
+  return join(sddRoot(process.cwd()), "preferences.md");
 }
 // Bootstrap in gitignore.ts historically created PREFERENCES.md (uppercase) by mistake.
 // Check uppercase as a fallback so those files aren't silently ignored.
 function globalPreferencesPathUppercase(): string {
-  return join(gsdHome(), "PREFERENCES.md");
+  return join(sddHome(), "PREFERENCES.md");
 }
 function projectPreferencesPathUppercase(): string {
-  return join(gsdRoot(process.cwd()), "PREFERENCES.md");
+  return join(sddRoot(process.cwd()), "PREFERENCES.md");
 }
 
 export function getGlobalSDDPreferencesPath(): string {
@@ -251,7 +251,7 @@ function parseFrontmatterBlock(frontmatter: string): SDDPreferences {
  *   ## Models
  *   - planner: sonnet
  */
-function parseHeadingListFormat(content: string): GSDPreferences {
+function parseHeadingListFormat(content: string): SDDPreferences {
   const result: Record<string, string[]> = {};
   let currentSection: string | null = null;
 
@@ -517,7 +517,7 @@ export function resolvePreDispatchHooks(): PreDispatchHookConfig[] {
  * Resolve the effective git isolation mode from preferences.
  * Returns "none" (default), "worktree", or "branch".
  *
- * Default is "none" so GSD works out of the box without preferences.md.
+ * Default is "none" so SDD works out of the box without preferences.md.
  * Worktree isolation requires explicit opt-in because it depends on git
  * branch infrastructure that must be set up before use.
  */

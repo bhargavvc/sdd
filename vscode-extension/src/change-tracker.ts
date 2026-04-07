@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "node:fs";
-import type { GsdClient, AgentEvent } from "./gsd-client.js";
+import type { GsdClient, AgentEvent } from "./sdd-client.js";
 
 export interface FileSnapshot {
 	uri: vscode.Uri;
@@ -17,7 +17,7 @@ export interface Checkpoint {
 }
 
 /**
- * Tracks file changes made by the GSD agent. Stores original file content
+ * Tracks file changes made by the SDD agent. Stores original file content
  * before the agent modifies it, enabling diff views, SCM integration,
  * and checkpoint/rollback functionality.
  */

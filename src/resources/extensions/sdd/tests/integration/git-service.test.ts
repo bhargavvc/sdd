@@ -1114,7 +1114,7 @@ describe('git-service', async () => {
 
   test('untrackRuntimeFiles', async () => {
     const { untrackRuntimeFiles } = await import("../../gitignore.ts");
-    const repo = mkdtempSync(join(tmpdir(), "gsd-untrack-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-untrack-"));
     runGit(repo, ["init", "-b", "main"]);
     runGit(repo, ["config", "user.email", "test@test.com"]);
     runGit(repo, ["config", "user.name", "Test"]);
@@ -1221,9 +1221,9 @@ describe('git-service', async () => {
 
   // ─── ensureGitignore: always adds .sdd to gitignore ──────────────────
 
-  test('ensureGitignore: adds .gsd entry', async () => {
+  test('ensureGitignore: adds .sdd entry', async () => {
     const { ensureGitignore } = await import("../../gitignore.ts");
-    const repo = mkdtempSync(join(tmpdir(), "gsd-gitignore-external-state-"));
+    const repo = mkdtempSync(join(tmpdir(), "sdd-gitignore-external-state-"));
 
     // Should add .sdd to gitignore (external state dir is a symlink)
     const modified = ensureGitignore(repo);
@@ -1250,13 +1250,13 @@ describe('git-service', async () => {
     const repo = initTempRepo();
 
     // Create the real .sdd directory outside the repo, then symlink it
-    const externalGsd = mkdtempSync(join(tmpdir(), "sdd-external-"));
-    mkdirSync(join(externalGsd, "activity"), { recursive: true });
-    writeFileSync(join(externalGsd, "activity", "log.jsonl"), "log data");
-    writeFileSync(join(externalGsd, "STATE.md"), "# State");
+    const externalSdd = mkdtempSync(join(tmpdir(), "sdd-external-"));
+    mkdirSync(join(externalSdd, "activity"), { recursive: true });
+    writeFileSync(join(externalSdd, "activity", "log.jsonl"), "log data");
+    writeFileSync(join(externalSdd, "STATE.md"), "# State");
 
     // Symlink .sdd -> external directory
-    symlinkSync(externalGsd, join(repo, ".sdd"));
+    symlinkSync(externalSdd, join(repo, ".sdd"));
 
     // Add .gitignore so git add -A fallback skips .sdd/
     writeFileSync(join(repo, ".gitignore"), ".sdd\n");
@@ -1280,7 +1280,7 @@ describe('git-service', async () => {
     assert.ok(!staged.includes(".sdd"), ".sdd content not staged");
 
     rmSync(repo, { recursive: true, force: true });
-    rmSync(externalGsd, { recursive: true, force: true });
+    rmSync(externalSdd, { recursive: true, force: true });
   });
 
   // ─── nativeAddAllWithExclusions: non-symlinked .sdd still works ───────
@@ -1423,12 +1423,12 @@ describe('git-service', async () => {
     const repo = initTempRepo();
 
     // Create an external .sdd directory and symlink it into the repo
-    const externalGsd = mkdtempSync(join(tmpdir(), "sdd-external-symlink-"));
-    mkdirSync(join(externalGsd, "milestones", "M009"), { recursive: true });
-    mkdirSync(join(externalGsd, "activity"), { recursive: true });
-    mkdirSync(join(externalGsd, "runtime"), { recursive: true });
+    const externalSdd = mkdtempSync(join(tmpdir(), "sdd-external-symlink-"));
+    mkdirSync(join(externalSdd, "milestones", "M009"), { recursive: true });
+    mkdirSync(join(externalSdd, "activity"), { recursive: true });
+    mkdirSync(join(externalSdd, "runtime"), { recursive: true });
 
-    symlinkSync(externalGsd, join(repo, ".sdd"));
+    symlinkSync(externalSdd, join(repo, ".sdd"));
 
     // .gitignore blocks .sdd (as ensureGitignore would do for symlink projects)
     writeFileSync(join(repo, ".gitignore"), ".sdd\n");
@@ -1436,9 +1436,9 @@ describe('git-service', async () => {
     run('git commit -m "add gitignore"', repo);
 
     // Simulate new milestone artifacts created during execution
-    writeFileSync(join(externalGsd, "milestones", "M009", "M009-SUMMARY.md"), "# M009 Summary");
-    writeFileSync(join(externalGsd, "milestones", "M009", "S01-SUMMARY.md"), "# S01 Summary");
-    writeFileSync(join(externalGsd, "milestones", "M009", "T01-VERIFY.json"), '{"passed":true}');
+    writeFileSync(join(externalSdd, "milestones", "M009", "M009-SUMMARY.md"), "# M009 Summary");
+    writeFileSync(join(externalSdd, "milestones", "M009", "S01-SUMMARY.md"), "# S01 Summary");
+    writeFileSync(join(externalSdd, "milestones", "M009", "T01-VERIFY.json"), '{"passed":true}');
 
     // Also create a normal source file change
     createFile(repo, "src/feature.ts", "export const feature = true;");
@@ -1453,22 +1453,22 @@ describe('git-service', async () => {
       "symlink autoCommit: .sdd/milestones/ files are NOT staged (external state stays external)");
 
     try { rmSync(repo, { recursive: true, force: true }); } catch {}
-    try { rmSync(externalGsd, { recursive: true, force: true }); } catch {}
+    try { rmSync(externalSdd, { recursive: true, force: true }); } catch {}
   });
 
-  // ─── autoCommit: absorbs preceding gsd snapshot commits ─────────────────
+  // ─── autoCommit: absorbs preceding sdd snapshot commits ─────────────────
 
-  test('autoCommit: absorbs preceding gsd snapshot commits', () => {
+  test('autoCommit: absorbs preceding sdd snapshot commits', () => {
     const repo = initTempRepo();
 
-    // Simulate 2 gsd snapshot commits
+    // Simulate 2 sdd snapshot commits
     createFile(repo, "file1.ts", "v1");
     run("git add -A", repo);
-    run('git commit -m "gsd snapshot: uncommitted changes after 35m inactivity"', repo);
+    run('git commit -m "sdd snapshot: uncommitted changes after 35m inactivity"', repo);
 
     createFile(repo, "file2.ts", "v2");
     run("git add -A", repo);
-    run('git commit -m "gsd snapshot: pre-dispatch, uncommitted changes after 40m inactivity"', repo);
+    run('git commit -m "sdd snapshot: pre-dispatch, uncommitted changes after 40m inactivity"', repo);
 
     // Verify we have 3 commits (init + 2 snapshots)
     const countBefore = run("git rev-list --count HEAD", repo);
@@ -1491,9 +1491,9 @@ describe('git-service', async () => {
     assert.ok(files.includes("file2.ts"), "file2.ts from snapshot 2 preserved");
     assert.ok(files.includes("feature.ts"), "feature.ts from real commit preserved");
 
-    // No gsd snapshot commits in log
+    // No sdd snapshot commits in log
     const log = run("git log --oneline", repo);
-    assert.ok(!log.includes("gsd snapshot"), "no gsd snapshot commits remain in history");
+    assert.ok(!log.includes("sdd snapshot"), "no sdd snapshot commits remain in history");
 
     rmSync(repo, { recursive: true, force: true });
   });

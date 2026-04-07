@@ -188,13 +188,13 @@ export function registerDbTools(pi: ExtensionAPI): void {
   pi.registerTool(requirementUpdateTool);
   registerAlias(pi, requirementUpdateTool, "sdd_update_requirement", "sdd_requirement_update");
 
-  // ─── gsd_requirement_save ─────────────────────────────────────────────
+  // ─── sdd_requirement_save ─────────────────────────────────────────────
 
   const requirementSaveExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
     if (!dbAvailable) {
       return {
-        content: [{ type: "text" as const, text: "Error: GSD database is not available. Cannot save requirement." }],
+        content: [{ type: "text" as const, text: "Error: SDD database is not available. Cannot save requirement." }],
         details: { operation: "save_requirement", error: "db_unavailable" } as any,
       };
     }
@@ -220,7 +220,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      logError("tool", `gsd_requirement_save tool failed: ${msg}`, { tool: "gsd_requirement_save", error: String(err) });
+      logError("tool", `sdd_requirement_save tool failed: ${msg}`, { tool: "sdd_requirement_save", error: String(err) });
       return {
         content: [{ type: "text" as const, text: `Error saving requirement: ${msg}` }],
         details: { operation: "save_requirement", error: msg } as any,
@@ -229,17 +229,17 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   const requirementSaveTool = {
-    name: "gsd_requirement_save",
+    name: "sdd_requirement_save",
     label: "Save Requirement",
     description:
-      "Record a new requirement to the GSD database and regenerate REQUIREMENTS.md. " +
+      "Record a new requirement to the SDD database and regenerate REQUIREMENTS.md. " +
       "Requirement IDs are auto-assigned — never provide an ID manually.",
-    promptSnippet: "Record a new GSD requirement to the database (auto-assigns ID, regenerates REQUIREMENTS.md)",
+    promptSnippet: "Record a new SDD requirement to the database (auto-assigns ID, regenerates REQUIREMENTS.md)",
     promptGuidelines: [
-      "Use gsd_requirement_save when recording a new functional, non-functional, or operational requirement.",
+      "Use sdd_requirement_save when recording a new functional, non-functional, or operational requirement.",
       "Requirement IDs are auto-assigned (R001, R002, ...) — never guess or provide an ID.",
       "class, description, why, and source are required. All other fields are optional.",
-      "The tool writes to the DB and regenerates .gsd/REQUIREMENTS.md automatically.",
+      "The tool writes to the DB and regenerates .sdd/REQUIREMENTS.md automatically.",
     ],
     parameters: Type.Object({
       class: Type.String({ description: "Requirement class (e.g. 'functional', 'non-functional', 'operational')" }),
@@ -271,9 +271,9 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(requirementSaveTool);
-  registerAlias(pi, requirementSaveTool, "gsd_save_requirement", "gsd_requirement_save");
+  registerAlias(pi, requirementSaveTool, "sdd_save_requirement", "sdd_requirement_save");
 
-  // ─── gsd_summary_save (formerly gsd_save_summary) ──────────────────────
+  // ─── sdd_summary_save (formerly sdd_save_summary) ──────────────────────
 
   const summarySaveExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
@@ -883,18 +883,18 @@ export function registerDbTools(pi: ExtensionAPI): void {
   pi.registerTool(sliceCompleteTool);
   registerAlias(pi, sliceCompleteTool, "sdd_complete_slice", "sdd_slice_complete");
 
-  // ─── gsd_skip_slice (#3477 / #3487) ───────────────────────────────────
+  // ─── sdd_skip_slice (#3477 / #3487) ───────────────────────────────────
 
   const skipSliceExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
     if (!dbAvailable) {
       return {
-        content: [{ type: "text" as const, text: "Error: GSD database is not available. Cannot skip slice." }],
+        content: [{ type: "text" as const, text: "Error: SDD database is not available. Cannot skip slice." }],
         details: { operation: "skip_slice", error: "db_unavailable" } as any,
       };
     }
     try {
-      const { getSlice, updateSliceStatus } = await import("../gsd-db.js");
+      const { getSlice, updateSliceStatus } = await import("../sdd-db.js");
       const { invalidateStateCache } = await import("../state.js");
 
       const slice = getSlice(params.milestoneId, params.sliceId);
@@ -933,7 +933,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      logError("tool", `skip_slice tool failed: ${msg}`, { tool: "gsd_skip_slice", error: String(err) });
+      logError("tool", `skip_slice tool failed: ${msg}`, { tool: "sdd_skip_slice", error: String(err) });
       return {
         content: [{ type: "text" as const, text: `Error skipping slice: ${msg}` }],
         details: { operation: "skip_slice", error: msg } as any,
@@ -942,14 +942,14 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool({
-    name: "gsd_skip_slice",
+    name: "sdd_skip_slice",
     label: "Skip Slice",
     description:
       "Mark a slice as skipped so auto-mode advances past it without executing. " +
       "The slice data is preserved for reference. The state machine treats skipped slices like completed ones for dependency satisfaction.",
-    promptSnippet: "Skip a GSD slice (mark as skipped, auto-mode will advance past it)",
+    promptSnippet: "Skip a SDD slice (mark as skipped, auto-mode will advance past it)",
     promptGuidelines: [
-      "Use gsd_skip_slice when a slice should be bypassed — descoped, superseded, or no longer relevant.",
+      "Use sdd_skip_slice when a slice should be bypassed — descoped, superseded, or no longer relevant.",
       "Cannot skip a slice that is already complete.",
       "Skipped slices satisfy downstream dependencies just like completed slices.",
     ],
@@ -961,7 +961,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
     execute: skipSliceExecute,
   });
 
-  // ─── gsd_complete_milestone ────────────────────────────────────────────
+  // ─── sdd_complete_milestone ────────────────────────────────────────────
 
   const milestoneCompleteExecute = async (_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: unknown, _ctx: unknown) => {
     const dbAvailable = await ensureDbOpen();
@@ -1078,9 +1078,9 @@ export function registerDbTools(pi: ExtensionAPI): void {
       "Records verdict (pass/needs-attention/needs-remediation) and rationale.",
     promptSnippet: "Validate a SDD milestone (DB write + VALIDATION.md render)",
     promptGuidelines: [
-      "Use gsd_validate_milestone when all slices are done and the milestone needs validation before completion.",
+      "Use sdd_validate_milestone when all slices are done and the milestone needs validation before completion.",
       "Parameters: milestoneId, verdict, remediationRound, successCriteriaChecklist, sliceDeliveryAudit, crossSliceIntegration, requirementCoverage, verificationClasses (optional), verdictRationale, remediationPlan (optional).",
-      "If verdict is 'needs-remediation', also provide remediationPlan and use gsd_reassess_roadmap to add remediation slices to the roadmap.",
+      "If verdict is 'needs-remediation', also provide remediationPlan and use sdd_reassess_roadmap to add remediation slices to the roadmap.",
       "On success, returns validationPath where VALIDATION.md was written.",
     ],
     parameters: Type.Object({

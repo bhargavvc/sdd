@@ -14,7 +14,7 @@
  *
  * This module detects and repairs such patterns before JSON.parse is called.
  *
- * @see https://github.com/gsd-build/gsd-2/issues/2660
+ * @see https://github.com/bhargavvc/sdd/issues/2660
  */
 
 /**

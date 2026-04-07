@@ -10,7 +10,7 @@ You are debugging SDD itself. The user is donating their tokens to help find bug
 
 ## SDD Source Location
 
-SDD extension source code is at: `{{gsdSourceDir}}`
+SDD extension source code is at: `{{sddSourceDir}}`
 
 ### Source Map by Domain
 
@@ -114,7 +114,7 @@ A unit dispatched more than once (`type/id` appears multiple times) indicates a 
 
 4. **Form hypotheses** about which module and code path is responsible. Use the source map to identify candidate files.
 
-5. **Read the actual SDD source code** at `{{gsdSourceDir}}` to confirm or deny each hypothesis. Do not guess what code does — read it.
+5. **Read the actual SDD source code** at `{{sddSourceDir}}` to confirm or deny each hypothesis. Do not guess what code does — read it.
 
 6. **Trace the code path** from the entry point (usually `auto-loop.ts` dispatch or `auto-dispatch.ts`) through to the failure point. Follow function calls across files.
 
@@ -135,7 +135,7 @@ Explain your findings:
 - **Code snippet** — the problematic code and what it should do instead
 - **Recovery** — what the user can do right now to get unstuck
 
-Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on gsd-build/gsd-2?"
+Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on bhargavvc/sdd?"
 
 **CRITICAL: The `github_issues` tool ONLY targets the current user's repository — it has no `repo` parameter. You MUST use `gh issue create --repo sdd-build/sdd-2` via the `bash` tool to file on the correct repo. Do NOT use the `github_issues` tool for this.**
 

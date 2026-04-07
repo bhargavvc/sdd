@@ -1,4 +1,4 @@
-// GSD-2 — Extension Sort Tests
+// SDD-2 — Extension Sort Tests
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import { describe, it } from "node:test";

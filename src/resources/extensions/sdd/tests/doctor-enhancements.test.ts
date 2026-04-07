@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync } from "node:
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { runGSDDoctor } from "../../doctor.js";
+import { runSDDDoctor } from "../../doctor.js";
 import { formatDoctorReportJson } from "../../doctor-format.js";
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

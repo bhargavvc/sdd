@@ -299,7 +299,7 @@ test('writeBlockerPlaceholder: updates DB task status for execute-task (#2531)',
   const base = createFixtureBase();
   try {
     const { openDatabase, closeDatabase, insertMilestone, insertSlice, insertTask, getTask, isDbAvailable } =
-      await import("../../gsd-db.ts");
+      await import("../../sdd-db.ts");
 
     const dbPath = join(base, ".sdd", "sdd.db");
     // Create the tasks directory (required for artifact path resolution)
@@ -334,7 +334,7 @@ test('writeBlockerPlaceholder: does NOT update DB for non-execute-task types', a
   const base = createFixtureBase();
   try {
     const { openDatabase, closeDatabase, insertMilestone, insertSlice, getSlice, isDbAvailable } =
-      await import("../../gsd-db.ts");
+      await import("../../sdd-db.ts");
 
     const dbPath = join(base, ".sdd", "sdd.db");
     mkdirSync(join(base, ".sdd", "milestones", "M001", "slices", "S01"), { recursive: true });

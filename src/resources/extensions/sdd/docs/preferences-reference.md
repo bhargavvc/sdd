@@ -195,7 +195,7 @@ Setting `prefer_skills: []` does **not** disable skill discovery — it just mea
   - `observation_masking`: boolean — mask old tool results to reduce context bloat. Default: `true`.
   - `observation_mask_turns`: number — keep this many recent turns verbatim (1-50). Default: `8`.
   - `compaction_threshold_percent`: number — trigger compaction at this % of context window (0.5-0.95). Lower values fire compaction earlier, reducing drift. Default: `0.70`.
-  - `tool_result_max_chars`: number — max chars per tool result in GSD sessions (200-10000). Default: `800`.
+  - `tool_result_max_chars`: number — max chars per tool result in SDD sessions (200-10000). Default: `800`.
 
 - `auto_visualize`: boolean — show a visualizer hint after each milestone completion in auto-mode. Default: `false`.
 

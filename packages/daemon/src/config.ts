@@ -20,7 +20,7 @@ function defaults(): DaemonConfig {
     discord: undefined,
     projects: { scan_roots: [] },
     log: {
-      file: resolve(homedir(), '.gsd', 'daemon.log'),
+      file: resolve(homedir(), '.sdd', 'daemon.log'),
       level: 'info',
       max_size_mb: 50,
     },
@@ -29,13 +29,13 @@ function defaults(): DaemonConfig {
 
 /**
  * Resolve the config file path.
- * Priority: explicit CLI arg → GSD_DAEMON_CONFIG env → ~/.gsd/daemon.yaml
+ * Priority: explicit CLI arg → SDD_DAEMON_CONFIG env → ~/.sdd/daemon.yaml
  */
 export function resolveConfigPath(cliPath?: string): string {
   if (cliPath) return expandTilde(cliPath);
-  const envPath = process.env['GSD_DAEMON_CONFIG'];
+  const envPath = process.env['SDD_DAEMON_CONFIG'];
   if (envPath) return expandTilde(envPath);
-  return resolve(homedir(), '.gsd', 'daemon.yaml');
+  return resolve(homedir(), '.sdd', 'daemon.yaml');
 }
 
 /**

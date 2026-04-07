@@ -47,7 +47,7 @@ export function registerHooks(pi: ExtensionAPI): void {
         if (sddBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
-            join(dirname(gsdBinPath), "welcome-screen.js")
+            join(dirname(sddBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string; remoteChannel?: string }) => void };
 
           let remoteChannel: string | undefined;
@@ -57,7 +57,7 @@ export function registerHooks(pi: ExtensionAPI): void {
             if (rc) remoteChannel = rc.channel;
           } catch { /* non-fatal */ }
 
-          printWelcomeScreen({ version: process.env.GSD_VERSION || "0.0.0", remoteChannel });
+          printWelcomeScreen({ version: process.env.SDD_VERSION || "0.0.0", remoteChannel });
         }
       } catch { /* non-fatal */ }
     }
@@ -151,8 +151,8 @@ export function registerHooks(pi: ExtensionAPI): void {
     }
 
     // ── Queue-mode execution guard (#2545): block source-code mutations ──
-    // When /gsd queue is active, the agent should only create milestones,
-    // not execute work. Block write/edit to non-.gsd/ paths and bash commands
+    // When /sdd queue is active, the agent should only create milestones,
+    // not execute work. Block write/edit to non-.sdd/ paths and bash commands
     // that would modify files.
     if (isQueuePhaseActive()) {
       let queueInput = "";
@@ -271,8 +271,8 @@ export function registerHooks(pi: ExtensionAPI): void {
     // Only active during auto-mode when context_management.observation_masking is enabled.
     if (isAutoActive()) {
       try {
-        const { loadEffectiveGSDPreferences } = await import("../preferences.js");
-        const prefs = loadEffectiveGSDPreferences();
+        const { loadEffectiveSDDPreferences } = await import("../preferences.js");
+        const prefs = loadEffectiveSDDPreferences();
         const cmConfig = prefs?.preferences.context_management;
 
         // Observation masking: replace old tool results with placeholders

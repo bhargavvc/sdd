@@ -35,10 +35,10 @@ sdd -e ./path/to/extension.ts
 Community extensions must be in auto-discovery paths:
 - `~/.pi/agent/extensions/*.ts`
 - `~/.pi/agent/extensions/*/index.ts`
-- `.gsd/extensions/*.ts`
-- `.gsd/extensions/*/index.ts`
+- `.sdd/extensions/*.ts`
+- `.sdd/extensions/*/index.ts`
 
-Note: `~/.gsd/agent/extensions/` is reserved for bundled extensions synced from the gsd-pi package.
+Note: `~/.sdd/agent/extensions/` is reserved for bundled extensions synced from the sdd-pi package.
 
 The file must `export default function(pi: ExtensionAPI) { ... }`.
 

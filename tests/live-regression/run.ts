@@ -98,8 +98,8 @@ function buildTaskSummary(id: string): string {
 run("headless query returns valid JSON on initialized project", () => {
   const dir = createTempProject("query");
   try {
-    const gsdDir = join(dir, ".sdd");
-    mkdirSync(join(gsdDir, "milestones"), { recursive: true });
+    const sddDir = join(dir, ".sdd");
+    mkdirSync(join(sddDir, "milestones"), { recursive: true });
     
     const result = sdd(["headless", "query"], dir);
     assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.stderr}`);
@@ -209,10 +209,10 @@ run("headless query: milestone with summary reports complete", () => {
 run("stale auto.lock with dead PID does not block --version", () => {
   const dir = createTempProject("stale-lock");
   try {
-    const gsdDir = join(dir, ".sdd");
-    mkdirSync(gsdDir, { recursive: true });
+    const sddDir = join(dir, ".sdd");
+    mkdirSync(sddDir, { recursive: true });
     // Write a lock with a PID that doesn't exist
-    writeFileSync(join(gsdDir, "auto.lock"), JSON.stringify({
+    writeFileSync(join(sddDir, "auto.lock"), JSON.stringify({
       pid: 99999999,
       startedAt: new Date().toISOString(),
       unitType: "starting",
@@ -234,9 +234,9 @@ run("stale auto.lock with dead PID does not block --version", () => {
 run("crash recovery shows actionable guidance", () => {
   const dir = createTempProject("crash-recovery");
   try {
-    const gsdDir = join(dir, ".sdd");
-    mkdirSync(join(gsdDir, "milestones"), { recursive: true });
-    writeFileSync(join(gsdDir, "auto.lock"), JSON.stringify({
+    const sddDir = join(dir, ".sdd");
+    mkdirSync(join(sddDir, "milestones"), { recursive: true });
+    writeFileSync(join(sddDir, "auto.lock"), JSON.stringify({
       pid: 99999999,
       startedAt: new Date().toISOString(),
       unitType: "execute-task",
@@ -282,14 +282,14 @@ run("version skew is detected before TTY check", () => {
     const agentDir = join(dir, ".sdd-test-agent");
     mkdirSync(agentDir, { recursive: true });
     writeFileSync(join(agentDir, "managed-resources.json"), JSON.stringify({
-      gsdVersion: "999.0.0",
+      sddVersion: "999.0.0",
     }));
     
     // Set HOME to the temp dir so SDD reads the fake agent dir
     const fakeHome = dir;
     mkdirSync(join(fakeHome, ".sdd", "agent"), { recursive: true });
     writeFileSync(join(fakeHome, ".sdd", "agent", "managed-resources.json"), JSON.stringify({
-      gsdVersion: "999.0.0",
+      sddVersion: "999.0.0",
     }));
     
     const result = sdd([], dir, { HOME: fakeHome });

@@ -39,15 +39,15 @@ function makeTempDir(prefix: string): string {
   return dir;
 }
 
-function setupGsdDir(tmp: string): void {
-  mkdirSync(join(tmp, ".gsd"), { recursive: true });
+function setupSddDir(tmp: string): void {
+  mkdirSync(join(tmp, ".sdd"), { recursive: true });
 }
 
 // ─── Classification Types ─────────────────────────────────────────────────────
 
 test("stop is a valid classification", () => {
   const tmp = makeTempDir("stop-class");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const id = appendCapture(tmp, "stop running immediately");
   markCaptureResolved(tmp, id, "stop", "Halt auto-mode", "User said stop", "M005");
   const all = loadAllCaptures(tmp);
@@ -58,7 +58,7 @@ test("stop is a valid classification", () => {
 
 test("backtrack is a valid classification", () => {
   const tmp = makeTempDir("bt-class");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const id = appendCapture(tmp, "restart from M003");
   markCaptureResolved(tmp, id, "backtrack", "Backtrack to M003", "User wants to restart", "M005");
   const all = loadAllCaptures(tmp);
@@ -71,7 +71,7 @@ test("backtrack is a valid classification", () => {
 
 test("loadStopCaptures returns unexecuted stop and backtrack captures", () => {
   const tmp = makeTempDir("load-stop");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const stopId = appendCapture(tmp, "halt execution");
   const btId = appendCapture(tmp, "go back to M003");
   const noteId = appendCapture(tmp, "just a note");
@@ -88,7 +88,7 @@ test("loadStopCaptures returns unexecuted stop and backtrack captures", () => {
 
 test("loadBacktrackCaptures returns only backtrack captures", () => {
   const tmp = makeTempDir("load-bt");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const stopId = appendCapture(tmp, "halt execution");
   const btId = appendCapture(tmp, "go back to M003");
   markCaptureResolved(tmp, stopId, "stop", "Halt", "User stop", "M005");
@@ -104,11 +104,11 @@ test("loadBacktrackCaptures returns only backtrack captures", () => {
 
 test("revertExecutorResolvedCaptures reverts captures resolved without classification", () => {
   const tmp = makeTempDir("revert-exec");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const id = appendCapture(tmp, "stop everything");
 
   // Simulate an executor writing Status: resolved directly (no classification)
-  const capPath = join(tmp, ".gsd", "CAPTURES.md");
+  const capPath = join(tmp, ".sdd", "CAPTURES.md");
   let content = readFileSync(capPath, "utf-8");
   content = content.replace("**Status:** pending", "**Status:** resolved");
   writeFileSync(capPath, content, "utf-8");
@@ -127,7 +127,7 @@ test("revertExecutorResolvedCaptures reverts captures resolved without classific
 
 test("revertExecutorResolvedCaptures does NOT revert properly triaged captures", () => {
   const tmp = makeTempDir("revert-skip");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const id = appendCapture(tmp, "restart from M003");
   markCaptureResolved(tmp, id, "backtrack", "Backtrack to M003", "User wants restart", "M005");
 
@@ -141,10 +141,10 @@ test("revertExecutorResolvedCaptures does NOT revert properly triaged captures",
 
 test("executeBacktrack writes trigger and regression markers", () => {
   const tmp = makeTempDir("exec-bt");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
 
   // Create target milestone directory
-  mkdirSync(join(tmp, ".gsd", "milestones", "M003"), { recursive: true });
+  mkdirSync(join(tmp, ".sdd", "milestones", "M003"), { recursive: true });
 
   const targetMid = executeBacktrack(tmp, "M005", {
     id: "CAP-test123",
@@ -159,14 +159,14 @@ test("executeBacktrack writes trigger and regression markers", () => {
   assert.equal(targetMid, "M003");
 
   // Check trigger file exists
-  const triggerPath = join(tmp, ".gsd", "BACKTRACK-TRIGGER.md");
+  const triggerPath = join(tmp, ".sdd", "BACKTRACK-TRIGGER.md");
   assert.ok(existsSync(triggerPath));
   const triggerContent = readFileSync(triggerPath, "utf-8");
   assert.ok(triggerContent.includes("M005"));
   assert.ok(triggerContent.includes("M003"));
 
   // Check regression marker exists on target milestone
-  const regressionPath = join(tmp, ".gsd", "milestones", "M003", "M003-REGRESSION.md");
+  const regressionPath = join(tmp, ".sdd", "milestones", "M003", "M003-REGRESSION.md");
   assert.ok(existsSync(regressionPath));
   const regressionContent = readFileSync(regressionPath, "utf-8");
   assert.ok(regressionContent.includes("M005"));
@@ -177,8 +177,8 @@ test("executeBacktrack writes trigger and regression markers", () => {
 
 test("readBacktrackTrigger parses trigger file", () => {
   const tmp = makeTempDir("read-bt");
-  setupGsdDir(tmp);
-  mkdirSync(join(tmp, ".gsd", "milestones", "M003"), { recursive: true });
+  setupSddDir(tmp);
+  mkdirSync(join(tmp, ".sdd", "milestones", "M003"), { recursive: true });
 
   executeBacktrack(tmp, "M005", {
     id: "CAP-abc",
@@ -199,7 +199,7 @@ test("readBacktrackTrigger parses trigger file", () => {
 
 test("readBacktrackTrigger returns null when no trigger exists", () => {
   const tmp = makeTempDir("no-bt");
-  setupGsdDir(tmp);
+  setupSddDir(tmp);
   const trigger = readBacktrackTrigger(tmp);
   assert.equal(trigger, null);
   rmSync(tmp, { recursive: true, force: true });

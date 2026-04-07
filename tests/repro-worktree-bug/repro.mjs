@@ -28,13 +28,13 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.sdd/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { sddIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   // Symlink-resolved layout: /.sdd/projects/<hash>/worktrees/<name>
   const symlinkRe = /\/\.sdd\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { sddIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -45,19 +45,19 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
   // Return the original path up to the /.sdd/ boundary
   const sep = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sep}.sdd${sep}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
-  return basePath.slice(0, seg.gsdIdx);
+  const sddMarker = `${sep}.sdd${sep}`;
+  const sddIdx = basePath.indexOf(sddMarker);
+  if (sddIdx !== -1) return basePath.slice(0, sddIdx);
+  return basePath.slice(0, seg.sddIdx);
 }
 
 // ── Set up the filesystem layout ────────────────────────────────────────
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "sdd-repro-"));
-const USER_GSD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
+const USER_SDD = process.env.SDD_HOME || join(TEST_ROOT, ".sdd");
 const USER_HOME = homedir();
-const PROJECT_SDD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_SDD_STORAGE = `${USER_SDD}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
 const PROJECT_SDD_LINK = `${PROJECT_DIR}/.sdd`;
 
@@ -145,10 +145,10 @@ console.log(`\n=== Root Cause Detail ===\n`);
 const seg = findWorktreeSegment(resolvedPath);
 if (seg) {
   console.log(`findWorktreeSegment() matched:`);
-  console.log(`  gsdIdx:         ${seg.gsdIdx}`);
+  console.log(`  sddIdx:         ${seg.sddIdx}`);
   console.log(`  afterWorktrees: ${seg.afterWorktrees}`);
-  console.log(`  Path before /.sdd/: "${resolvedPath.slice(0, seg.gsdIdx)}"`);
-  console.log(`  This is: ${resolvedPath.slice(0, seg.gsdIdx) === USER_HOME ? "THE HOME DIRECTORY (bug!)" : "some other directory"}`);
+  console.log(`  Path before /.sdd/: "${resolvedPath.slice(0, seg.sddIdx)}"`);
+  console.log(`  This is: ${resolvedPath.slice(0, seg.sddIdx) === USER_HOME ? "THE HOME DIRECTORY (bug!)" : "some other directory"}`);
   
   // Show which regex matched
   const directMarker = "/.sdd/worktrees/";

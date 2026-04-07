@@ -11,7 +11,7 @@ const { newestSrcMtime, detectStalePackages } = require("../../scripts/ensure-wo
 describe("newestSrcMtime", () => {
   let tmp: string;
 
-  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "gsd-mtime-test-")); });
+  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "sdd-mtime-test-")); });
   afterEach(() => { rmSync(tmp, { recursive: true, force: true }); });
 
   it("returns 0 for a non-existent directory", () => {
@@ -66,7 +66,7 @@ describe("newestSrcMtime", () => {
 describe("detectStalePackages", () => {
   let tmp: string;
 
-  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "gsd-stale-test-")); });
+  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "sdd-stale-test-")); });
   afterEach(() => { rmSync(tmp, { recursive: true, force: true }); });
 
   /**

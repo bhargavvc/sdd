@@ -1,5 +1,5 @@
 /**
- * Tests for Orchestrator — LLM agent for #gsd-control channel.
+ * Tests for Orchestrator — LLM agent for #sdd-control channel.
  *
  * Uses a MockAnthropicClient that simulates messages.create() responses,
  * allowing tool execution and conversation flow testing without real API calls.
@@ -226,7 +226,7 @@ function makeOrchestrator(opts?: {
   if (opts?.sessions) sessionManager.sessions = opts.sessions;
 
   const projects: ProjectInfo[] = opts?.projects ?? [
-    { name: 'alpha', path: '/home/user/alpha', markers: ['git', 'node', 'gsd'], lastModified: Date.now() },
+    { name: 'alpha', path: '/home/user/alpha', markers: ['git', 'node', 'sdd'], lastModified: Date.now() },
     { name: 'bravo', path: '/home/user/bravo', markers: ['git', 'rust'], lastModified: Date.now() },
   ];
 
@@ -568,7 +568,7 @@ describe('Orchestrator', () => {
       const mockClient = new MockAnthropicClient(
         MockAnthropicClient.toolThenTextHandler(
           'start_session',
-          { projectPath: '/p', command: '/gsd quick fix tests' },
+          { projectPath: '/p', command: '/sdd quick fix tests' },
           'Started',
         ),
       );
@@ -577,7 +577,7 @@ describe('Orchestrator', () => {
       await orchestrator.handleMessage(msg);
 
       assert.equal(sessionManager.startSessionCalls.length, 1);
-      assert.equal(sessionManager.startSessionCalls[0]!.command, '/gsd quick fix tests');
+      assert.equal(sessionManager.startSessionCalls[0]!.command, '/sdd quick fix tests');
     });
   });
 

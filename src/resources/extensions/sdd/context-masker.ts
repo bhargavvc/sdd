@@ -1,5 +1,5 @@
 /**
- * Observation masking for GSD auto-mode sessions.
+ * Observation masking for SDD auto-mode sessions.
  *
  * Replaces tool result content older than N turns with a placeholder.
  * Reduces context bloat between compactions with zero LLM overhead.

@@ -6,7 +6,7 @@ import type { GsdChangeTracker, Checkpoint } from "./change-tracker.js";
  * Each checkpoint can be restored to revert all file changes since that point.
  */
 export class GsdCheckpointProvider implements vscode.TreeDataProvider<Checkpoint>, vscode.Disposable {
-	public static readonly viewId = "gsd-checkpoints";
+	public static readonly viewId = "sdd-checkpoints";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -34,7 +34,7 @@ export class GsdCheckpointProvider implements vscode.TreeDataProvider<Checkpoint
 		item.tooltip = `Checkpoint: ${checkpoint.label}\nTime: ${time.toLocaleString()}\nFiles tracked: ${fileCount}\n\nClick to restore to this point`;
 		item.contextValue = "checkpoint";
 		item.command = {
-			command: "gsd.restoreCheckpoint",
+			command: "sdd.restoreCheckpoint",
 			title: "Restore Checkpoint",
 			arguments: [checkpoint.id],
 		};

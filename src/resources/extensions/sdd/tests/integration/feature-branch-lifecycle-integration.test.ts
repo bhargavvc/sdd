@@ -339,8 +339,8 @@ describe('feature-branch-lifecycle-integration', async () => {
 
       // With external state, worktree .sdd is a symlink to shared state.
       // Verify symlink was created (planning files are shared, not copied).
-      const wtGsd = join(wtPath, ".sdd");
-      assert.ok(existsSync(wtGsd), "worktree .sdd exists (symlink or dir)");
+      const wtSdd = join(wtPath, ".sdd");
+      assert.ok(existsSync(wtSdd), "worktree .sdd exists (symlink or dir)");
 
       // Clean up: chdir back before teardown
       process.chdir(savedCwd);

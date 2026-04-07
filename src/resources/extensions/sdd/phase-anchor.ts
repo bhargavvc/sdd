@@ -1,12 +1,12 @@
 /**
  * Phase handoff anchors — compact structured summaries written between
- * GSD auto-mode phases so downstream agents inherit decisions, blockers,
+ * SDD auto-mode phases so downstream agents inherit decisions, blockers,
  * and intent without re-inferring from scratch.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 
 export interface PhaseAnchor {
   phase: string;
@@ -19,7 +19,7 @@ export interface PhaseAnchor {
 }
 
 function anchorsDir(basePath: string, milestoneId: string): string {
-  return join(gsdRoot(basePath), "milestones", milestoneId, "anchors");
+  return join(sddRoot(basePath), "milestones", milestoneId, "anchors");
 }
 
 function anchorPath(basePath: string, milestoneId: string, phase: string): string {

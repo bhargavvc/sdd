@@ -488,10 +488,10 @@ test("runProviderChecks uses object provider field for anthropic-vertex models",
 // ─── Cross-provider routing: Codex & Gemini CLI (#2922) ────────────────────
 
 test("runProviderChecks reports ok for Google via google-gemini-cli auth.json (#2922)", () => {
-  const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-gemini-cli-repo-")));
-  mkdirSync(join(repo, ".gsd"), { recursive: true });
+  const repo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-providers-gemini-cli-repo-")));
+  mkdirSync(join(repo, ".sdd"), { recursive: true });
   writeFileSync(
-    join(repo, ".gsd", "PREFERENCES.md"),
+    join(repo, ".sdd", "PREFERENCES.md"),
     [
       "---",
       "models:",
@@ -501,8 +501,8 @@ test("runProviderChecks reports ok for Google via google-gemini-cli auth.json (#
     ].join("\n"),
   );
 
-  const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-gemini-cli-home-")));
-  const agentDir = join(tmpHome, ".gsd", "agent");
+  const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "sdd-providers-gemini-cli-home-")));
+  const agentDir = join(tmpHome, ".sdd", "agent");
   mkdirSync(agentDir, { recursive: true });
 
   // google-gemini-cli OAuth in auth.json (no google API key)
@@ -530,10 +530,10 @@ test("runProviderChecks reports ok for Google via google-gemini-cli auth.json (#
 });
 
 test("runProviderChecks reports ok for OpenAI via openai-codex auth.json (#2922)", () => {
-  const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-codex-repo-")));
-  mkdirSync(join(repo, ".gsd"), { recursive: true });
+  const repo = realpathSync(mkdtempSync(join(tmpdir(), "sdd-providers-codex-repo-")));
+  mkdirSync(join(repo, ".sdd"), { recursive: true });
   writeFileSync(
-    join(repo, ".gsd", "PREFERENCES.md"),
+    join(repo, ".sdd", "PREFERENCES.md"),
     [
       "---",
       "models:",
@@ -543,8 +543,8 @@ test("runProviderChecks reports ok for OpenAI via openai-codex auth.json (#2922)
     ].join("\n"),
   );
 
-  const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-codex-home-")));
-  const agentDir = join(tmpHome, ".gsd", "agent");
+  const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "sdd-providers-codex-home-")));
+  const agentDir = join(tmpHome, ".sdd", "agent");
   mkdirSync(agentDir, { recursive: true });
 
   // openai-codex OAuth in auth.json (no openai API key)

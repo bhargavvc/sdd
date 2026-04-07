@@ -25,12 +25,12 @@ export function sendDesktopNotification(
   kind: NotificationKind = "complete",
   projectName?: string,
 ): void {
-  // When a projectName is provided and the title is the default "GSD",
+  // When a projectName is provided and the title is the default "SDD",
   // replace it with a project-qualified title for multi-project clarity.
-  if (projectName && title === "GSD") {
+  if (projectName && title === "SDD") {
     title = formatNotificationTitle(projectName);
   }
-  const loaded = loadEffectiveGSDPreferences()?.preferences;
+  const loaded = loadEffectiveSDDPreferences()?.preferences;
   if (!shouldSendDesktopNotification(kind, loaded?.notifications)) return;
 
   const cmux = resolveCmuxConfig(loaded);
@@ -72,12 +72,12 @@ export function shouldSendDesktopNotification(
 
 /**
  * Format a notification title that includes the project name for context.
- * Returns "GSD — projectName" when a project name is available, otherwise "GSD".
+ * Returns "SDD — projectName" when a project name is available, otherwise "SDD".
  */
 export function formatNotificationTitle(projectName?: string): string {
   const trimmed = projectName?.trim();
-  if (trimmed) return `GSD — ${trimmed}`;
-  return "GSD";
+  if (trimmed) return `SDD — ${trimmed}`;
+  return "SDD";
 }
 
 export function buildDesktopNotificationCommand(
@@ -94,7 +94,7 @@ export function buildDesktopNotificationCommand(
     // so it gets a proper permission entry in System Settings → Notifications.
     // osascript notifications are silently swallowed when the calling terminal
     // (Ghostty, iTerm2, etc.) lacks notification permissions — exits 0, no error.
-    // See: https://github.com/gsd-build/gsd-2/issues/2632
+    // See: https://github.com/bhargavvc/sdd/issues/2632
     const tnPath = findExecutable("terminal-notifier");
     if (tnPath) {
       const sound = level === "error" ? "Basso" : "Glass";

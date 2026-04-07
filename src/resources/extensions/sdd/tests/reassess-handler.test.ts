@@ -329,7 +329,7 @@ test('handleReassessRoadmap returns structured error payloads with actionable me
 
 test('handleReassessRoadmap invalidates stale milestone-validation when roadmap changes (#2957)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     // Seed: M001 with S01-S04 all complete, plus a stale VALIDATION with needs-remediation
@@ -340,7 +340,7 @@ test('handleReassessRoadmap invalidates stale milestone-validation when roadmap 
     insertSlice({ id: 'S04', milestoneId: 'M001', title: 'Slice Four', status: 'complete', demo: 'Demo' });
 
     // Insert milestone-validation assessment with needs-remediation verdict (stale)
-    const validationPath = join('.gsd', 'milestones', 'M001', 'M001-VALIDATION.md');
+    const validationPath = join('.sdd', 'milestones', 'M001', 'M001-VALIDATION.md');
     insertAssessment({
       path: validationPath,
       milestoneId: 'M001',
@@ -395,7 +395,7 @@ test('handleReassessRoadmap invalidates stale milestone-validation when roadmap 
 
 test('handleReassessRoadmap does NOT invalidate validation when no roadmap structural changes (#2957)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.gsd', 'gsd.db'));
+  openDatabase(join(base, '.sdd', 'sdd.db'));
 
   try {
     // Seed: M001 with slices, plus a validation with pass verdict
@@ -404,7 +404,7 @@ test('handleReassessRoadmap does NOT invalidate validation when no roadmap struc
     insertSlice({ id: 'S02', milestoneId: 'M001', title: 'Slice Two', status: 'pending', demo: 'Demo' });
 
     // Insert milestone-validation assessment with pass verdict
-    const validationPath = join('.gsd', 'milestones', 'M001', 'M001-VALIDATION.md');
+    const validationPath = join('.sdd', 'milestones', 'M001', 'M001-VALIDATION.md');
     insertAssessment({
       path: validationPath,
       milestoneId: 'M001',

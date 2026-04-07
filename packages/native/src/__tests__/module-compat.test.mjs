@@ -1,5 +1,5 @@
 /**
- * Tests that the @gsd/native package.json is correctly configured
+ * Tests that the @sdd/native package.json is correctly configured
  * for Node.js module resolution (ESM/CJS compatibility).
  *
  * Regression test for #2861: "type": "module" + "import"-only export
@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkgPath = path.resolve(__dirname, "..", "..", "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
-describe("@gsd/native module compatibility (#2861)", () => {
+describe("@sdd/native module compatibility (#2861)", () => {
   test("package.json must not declare type: module (compiled output is CJS-compatible)", () => {
     // The compiled output uses createRequire() to load .node addons.
     // Declaring "type": "module" forces Node.js to treat .js files as ESM,
@@ -33,7 +33,7 @@ describe("@gsd/native module compatibility (#2861)", () => {
 
   test("package.json should explicitly declare type: commonjs", () => {
     // When installed as a dependency under a parent with "type": "module"
-    // (e.g. gsd-pi), an absent "type" field would inherit the parent's
+    // (e.g. sdd-pi), an absent "type" field would inherit the parent's
     // ESM setting. Explicit "commonjs" overrides this.
     assert.equal(
       pkg.type,

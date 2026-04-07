@@ -20,10 +20,10 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const sddDir = join(__dirname, "..");
 
 function readSrc(file: string): string {
-  return readFileSync(join(gsdDir, file), "utf-8");
+  return readFileSync(join(sddDir, file), "utf-8");
 }
 
 const preferencesSrc = readSrc("preferences-models.ts");
@@ -56,27 +56,27 @@ const ALL_KNOWN_UNIT_TYPES = [
 // #2865: discuss dispatches must NOT alias to plan unitTypes
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("#2865: no dispatchWorkflow with gsd-discuss customType uses plan-milestone", () => {
-  // Match dispatchWorkflow calls where "gsd-discuss" appears before "plan-milestone"
+test("#2865: no dispatchWorkflow with sdd-discuss customType uses plan-milestone", () => {
+  // Match dispatchWorkflow calls where "sdd-discuss" appears before "plan-milestone"
   // in the same call (the 5 args are on consecutive lines).
   const blocks = guidedFlowSrc.split(/dispatchWorkflow\(/);
   for (const block of blocks) {
     const callEnd = block.indexOf(");");
     if (callEnd === -1) continue;
     const call = block.slice(0, callEnd);
-    if (call.includes('"gsd-discuss"') && call.includes('"plan-milestone"')) {
+    if (call.includes('"sdd-discuss"') && call.includes('"plan-milestone"')) {
       assert.fail(`Discuss dispatch should not use plan-milestone: ...dispatchWorkflow(${call.slice(0, 120).trim()}...`);
     }
   }
 });
 
-test("#2865: no dispatchWorkflow with gsd-discuss customType uses plan-slice", () => {
+test("#2865: no dispatchWorkflow with sdd-discuss customType uses plan-slice", () => {
   const blocks = guidedFlowSrc.split(/dispatchWorkflow\(/);
   for (const block of blocks) {
     const callEnd = block.indexOf(");");
     if (callEnd === -1) continue;
     const call = block.slice(0, callEnd);
-    if (call.includes('"gsd-discuss"') && call.includes('"plan-slice"')) {
+    if (call.includes('"sdd-discuss"') && call.includes('"plan-slice"')) {
       assert.fail(`Discuss slice dispatch should not use plan-slice: ...dispatchWorkflow(${call.slice(0, 120).trim()}...`);
     }
   }

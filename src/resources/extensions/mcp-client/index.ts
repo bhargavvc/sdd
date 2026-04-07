@@ -143,7 +143,7 @@ async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client>
 	const existing = connections.get(config.name);
 	if (existing) return existing.client;
 
-	const client = new Client({ name: "gsd", version: "1.0.0" });
+	const client = new Client({ name: "sdd", version: "1.0.0" });
 	let transport: StdioClientTransport | StreamableHTTPClientTransport;
 
 	if (config.transport === "stdio" && config.command) {

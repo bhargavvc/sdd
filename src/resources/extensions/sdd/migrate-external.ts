@@ -9,7 +9,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync, cpSync, rmSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import { externalGsdRoot, isInsideWorktree } from "./repo-identity.js";
+import { externalSddRoot, isInsideWorktree } from "./repo-identity.js";
 import { getErrorMessage } from "./error-utils.js";
 import { hasGitTrackedSddFiles } from "./gitignore.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
@@ -34,15 +34,15 @@ export interface MigrationResult {
  * 3. On failure: rename `.sdd.migrating` back to `.sdd` (rollback)
  */
 export function migrateToExternalState(basePath: string): MigrationResult {
-  // Worktrees get their .gsd via syncGsdStateToWorktree(), not migration.
+  // Worktrees get their .sdd via syncSddStateToWorktree(), not migration.
   // Migration inside a worktree would compute the same external hash as the
-  // main repo (externalGsdRoot hashes remoteUrl + gitRoot), creating a broken
-  // junction and orphaning .gsd.migrating (#2970).
+  // main repo (externalSddRoot hashes remoteUrl + gitRoot), creating a broken
+  // junction and orphaning .sdd.migrating (#2970).
   if (isInsideWorktree(basePath)) {
     return { migrated: false };
   }
 
-  const localGsd = join(basePath, ".gsd");
+  const localSdd = join(basePath, ".sdd");
 
   // Skip if doesn't exist
   if (!existsSync(localSdd)) {

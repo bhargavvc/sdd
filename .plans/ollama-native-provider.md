@@ -4,7 +4,7 @@
 
 ## Problem
 
-Ollama support in GSD2 currently requires manual `models.json` configuration. Users must:
+Ollama support in SDD2 currently requires manual `models.json` configuration. Users must:
 1. Know the OpenAI-compatibility endpoint (`localhost:11434/v1`)
 2. Manually list every model they want to use
 3. Set compat flags (`supportsDeveloperRole: false`, etc.)
@@ -14,7 +14,7 @@ There's an `ollama-cloud` provider for hosted Ollama, and a discovery adapter th
 
 ## Goal
 
-Make Ollama the easiest way to use GSD2 — zero config when Ollama is running locally. All Ollama functionality lives in a single extension: `src/resources/extensions/ollama/`.
+Make Ollama the easiest way to use SDD2 — zero config when Ollama is running locally. All Ollama functionality lives in a single extension: `src/resources/extensions/ollama/`.
 
 ## Architecture
 
@@ -109,7 +109,7 @@ Each discovered model registers as:
 ```
 
 **Behavior:**
-- `gsd --list-models` shows all locally-pulled Ollama models automatically
+- `sdd --list-models` shows all locally-pulled Ollama models automatically
 - `/model ollama/llama3.1:8b` works without any config file
 - If Ollama isn't running, extension is silent — no errors, no models listed
 - `models.json` overrides still work (user config wins over auto-discovery)
@@ -122,8 +122,8 @@ Each discovered model registers as:
 - `ollama/ollama-provider.ts` — Native `/api/chat` streaming:
   - Registers `"ollama-chat"` API with `registerApiProvider()`
   - Implements `stream()` and `streamSimple()`:
-    - Maps GSD `Context` → Ollama messages format
-    - Maps GSD `Tool[]` → Ollama tool format
+    - Maps SDD `Context` → Ollama messages format
+    - Maps SDD `Tool[]` → Ollama tool format
     - Streams NDJSON responses, maps back to `AssistantMessage` events
     - Extracts `<think>` blocks for reasoning models (deepseek-r1, qwq)
   - Ollama-specific options:
@@ -177,7 +177,7 @@ Each discovered model registers as:
 
 **UX Flow:**
 ```
-$ gsd
+$ sdd
 > /ollama
 Ollama v0.5.7 — running (localhost:11434)
 Loaded:

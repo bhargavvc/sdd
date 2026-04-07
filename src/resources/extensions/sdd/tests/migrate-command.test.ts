@@ -12,7 +12,7 @@ import {
   parsePlanningDirectory,
   transformToSDD,
   generatePreview,
-  writeGSDDirectory,
+  writeSDDDirectory,
 } from '../../migrate/index.ts';
 import { deriveState } from '../../state.ts';
 import { describe, test, beforeEach, afterEach } from 'node:test';

@@ -1,5 +1,5 @@
 /**
- * Tests for `gsd auto` routing — verifies that `auto` is recognized as a
+ * Tests for `sdd auto` routing — verifies that `auto` is recognized as a
  * subcommand alias for `headless auto` so it doesn't fall through to the
  * interactive TUI, which hangs when stdin/stdout are piped.
  *
@@ -45,14 +45,14 @@ function cliSourceHandlesAutoBeforeTUI(): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Core regression test: `gsd auto` must be handled before TUI (#2732)
+// Core regression test: `sdd auto` must be handled before TUI (#2732)
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('cli.ts handles `auto` subcommand before interactive TUI (#2732)', () => {
   assert.ok(
     cliSourceHandlesAutoBeforeTUI(),
     'cli.ts must route messages[0] === "auto" to a handler BEFORE ' +
-    'reaching `new InteractiveMode()`. Without this, `gsd auto` with ' +
+    'reaching `new InteractiveMode()`. Without this, `sdd auto` with ' +
     'piped stdin/stdout falls through to the TUI and hangs.',
   )
 })
@@ -77,18 +77,18 @@ test('cli.ts routes `auto` to headless runner', () => {
 // Verify piped-mode hint in error message when auto mode is not available
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('TTY error message mentions `gsd auto` as a non-interactive alternative', () => {
+test('TTY error message mentions `sdd auto` as a non-interactive alternative', () => {
   const cliSource = readFileSync(join(projectRoot, 'src', 'cli.ts'), 'utf-8')
 
   // The TTY error message should mention auto as an alternative
   assert.ok(
-    cliSource.includes('gsd auto') || cliSource.includes('gsd headless'),
+    cliSource.includes('sdd auto') || cliSource.includes('sdd headless'),
     'TTY error hints should mention headless/auto mode as alternatives',
   )
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-// `gsd headless` still works (no regression)
+// `sdd headless` still works (no regression)
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('cli.ts handles `headless` subcommand before interactive TUI', () => {

@@ -42,12 +42,12 @@ assertTrue(
 );
 
 const gateMatch = afterDbLifecycle.match(
-  /if\s*\(existsSync\(gsdDbPath\)\s*&&\s*!isDbAvailable\(\)\)\s*\{[\s\S]*?releaseLockAndReturn\(\);[\s\S]*?\}/,
+  /if\s*\(existsSync\(sddDbPath\)\s*&&\s*!isDbAvailable\(\)\)\s*\{[\s\S]*?releaseLockAndReturn\(\);[\s\S]*?\}/,
 );
 
 assertTrue(
   !!gateMatch,
-  "auto-start.ts has a hard abort gate when gsd.db exists but SQLite is still unavailable (#2419)",
+  "auto-start.ts has a hard abort gate when sdd.db exists but SQLite is still unavailable (#2419)",
 );
 
 if (gateMatch) {

@@ -23,7 +23,7 @@ const PRIVATE_IP_PATTERNS = [
 
 /**
  * Hostnames exempted from SSRF blocking. Set via setFetchAllowedUrls()
- * from global settings.json or GSD_FETCH_ALLOWED_URLS env var.
+ * from global settings.json or SDD_FETCH_ALLOWED_URLS env var.
  */
 let fetchAllowedHostnames: Set<string> = new Set();
 

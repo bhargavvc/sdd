@@ -26,7 +26,7 @@ import {
 const repoRoot = join(import.meta.dirname, "..", "..", "..");
 
 function makeTempFixture(): { projectCwd: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-auto-lock-test-"));
+  const root = mkdtempSync(join(tmpdir(), "sdd-auto-lock-test-"));
   const projectCwd = join(root, "project");
   mkdirSync(projectCwd, { recursive: true });
   return {
@@ -47,13 +47,13 @@ function writeAutoModule(dir: string, payload: Record<string, unknown>): string 
 }
 
 function writeSessionLock(projectCwd: string, data: Record<string, unknown>): void {
-  const gsdDir = join(projectCwd, ".gsd");
-  mkdirSync(gsdDir, { recursive: true });
-  writeFileSync(join(gsdDir, "auto.lock"), JSON.stringify(data));
+  const sddDir = join(projectCwd, ".sdd");
+  mkdirSync(sddDir, { recursive: true });
+  writeFileSync(join(sddDir, "auto.lock"), JSON.stringify(data));
 }
 
 function writePausedSession(projectCwd: string, data: Record<string, unknown>): void {
-  const runtimeDir = join(projectCwd, ".gsd", "runtime");
+  const runtimeDir = join(projectCwd, ".sdd", "runtime");
   mkdirSync(runtimeDir, { recursive: true });
   writeFileSync(join(runtimeDir, "paused-session.json"), JSON.stringify(data));
 }
@@ -91,8 +91,8 @@ test("#2705 regression: subprocess reports active=false but session lock exists 
   const result = await collectAuthoritativeAutoDashboardData(repoRoot, {
     env: {
       ...process.env,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
     },
   });
 
@@ -110,8 +110,8 @@ test("#2705: subprocess reports active=false and no session lock → remains ina
   const result = await collectAuthoritativeAutoDashboardData(repoRoot, {
     env: {
       ...process.env,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
     },
   });
 
@@ -134,8 +134,8 @@ test("#2705: subprocess reports active=false but paused-session.json exists → 
   const result = await collectAuthoritativeAutoDashboardData(repoRoot, {
     env: {
       ...process.env,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
     },
   });
 
@@ -164,8 +164,8 @@ test("#2705: subprocess reports active=true → no reconciliation needed", async
   const result = await collectAuthoritativeAutoDashboardData(repoRoot, {
     env: {
       ...process.env,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
     },
   });
 
@@ -190,8 +190,8 @@ test("#2705: session lock exists but PID is dead → remains inactive (stale loc
   const result = await collectAuthoritativeAutoDashboardData(repoRoot, {
     env: {
       ...process.env,
-      GSD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
+      SDD_WEB_TEST_AUTO_DASHBOARD_MODULE: modulePath,
+      SDD_WEB_PROJECT_CWD: fixture.projectCwd,
     },
   });
 

@@ -1,5 +1,5 @@
 {
-  "name": "@gsd-build/rpc-client",
+  "name": "@bhargavvc/rpc-client",
   "version": "2.52.0",
   "description": "Standalone RPC client SDK for SDD — zero internal dependencies",
   "license": "MIT",

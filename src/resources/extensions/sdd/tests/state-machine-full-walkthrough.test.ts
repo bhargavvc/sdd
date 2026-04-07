@@ -1,4 +1,4 @@
-// GSD State Machine — Comprehensive Phase-by-Phase Walkthrough Tests
+// SDD State Machine — Comprehensive Phase-by-Phase Walkthrough Tests
 // Verifies all 16 phases, reconciliation, edge cases, and cross-validation.
 
 import { describe, test, afterEach } from "node:test";
@@ -24,7 +24,7 @@ import {
   getAllMilestones,
   insertGateRow,
   getPendingSliceGateCount,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 import { isClosedStatus } from "../status-guards.ts";
 import { clearPathCache } from "../paths.ts";
 
@@ -33,8 +33,8 @@ import { clearPathCache } from "../paths.ts";
 const tempDirs: string[] = [];
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-walkthrough-"));
-  mkdirSync(join(base, ".gsd", "milestones"), { recursive: true });
+  const base = mkdtempSync(join(tmpdir(), "sdd-walkthrough-"));
+  mkdirSync(join(base, ".sdd", "milestones"), { recursive: true });
   tempDirs.push(base);
   return base;
 }
@@ -49,25 +49,25 @@ afterEach(() => {
 });
 
 function writeContext(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT.md`), content);
 }
 
 function writeContextDraft(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-CONTEXT-DRAFT.md`), content);
 }
 
 function writeRoadmap(base: string, mid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-ROADMAP.md`), content);
 }
 
 function writePlan(base: string, mid: string, sid: string, content: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   const tasksDir = join(dir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(dir, `${sid}-PLAN.md`), content);
@@ -80,7 +80,7 @@ function writePlan(base: string, mid: string, sid: string, content: string): voi
 }
 
 function writeTaskSummary(base: string, mid: string, sid: string, tid: string): void {
-  const tasksDir = join(base, ".gsd", "milestones", mid, "slices", sid, "tasks");
+  const tasksDir = join(base, ".sdd", "milestones", mid, "slices", sid, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(tasksDir, `${tid}-SUMMARY.md`), [
     `# ${tid} Summary`,
@@ -90,7 +90,7 @@ function writeTaskSummary(base: string, mid: string, sid: string, tid: string): 
 }
 
 function writeTaskSummaryWithBlocker(base: string, mid: string, sid: string, tid: string): void {
-  const tasksDir = join(base, ".gsd", "milestones", mid, "slices", sid, "tasks");
+  const tasksDir = join(base, ".sdd", "milestones", mid, "slices", sid, "tasks");
   mkdirSync(tasksDir, { recursive: true });
   writeFileSync(join(tasksDir, `${tid}-SUMMARY.md`), [
     "---",
@@ -104,19 +104,19 @@ function writeTaskSummaryWithBlocker(base: string, mid: string, sid: string, tid
 }
 
 function writeSliceSummary(base: string, mid: string, sid: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-SUMMARY.md`), `# ${sid} Summary\n\nSlice done.\n`);
 }
 
 function writeMilestoneSummary(base: string, mid: string): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-SUMMARY.md`), `# ${mid} Summary\n\nMilestone complete.\n`);
 }
 
 function writeMilestoneValidation(base: string, mid: string, verdict: string = "pass"): void {
-  const dir = join(base, ".gsd", "milestones", mid);
+  const dir = join(base, ".sdd", "milestones", mid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${mid}-VALIDATION.md`), [
     "---",
@@ -130,19 +130,19 @@ function writeMilestoneValidation(base: string, mid: string, verdict: string = "
 }
 
 function writeReplanTrigger(base: string, mid: string, sid: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-REPLAN-TRIGGER.md`), "Triage replan triggered.\n");
 }
 
 function writeReplan(base: string, mid: string, sid: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-REPLAN.md`), "# Replan\n\nReplan completed.\n");
 }
 
 function writeContinue(base: string, mid: string, sid: string): void {
-  const dir = join(base, ".gsd", "milestones", mid, "slices", sid);
+  const dir = join(base, ".sdd", "milestones", mid, "slices", sid);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${sid}-CONTINUE.md`), [
     "---",
@@ -367,7 +367,7 @@ describe("state-machine-full-walkthrough", () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", standardRoadmap());
       // Plan file with no task entries
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), [
         "# S01: First Slice",
@@ -389,7 +389,7 @@ describe("state-machine-full-walkthrough", () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", standardRoadmap());
       // Write plan file WITH tasks but WITHOUT stub T##-PLAN.md files
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       mkdirSync(join(dir, "tasks"), { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), standardPlan());
       // Intentionally do NOT create T01-PLAN.md or T02-PLAN.md
@@ -419,7 +419,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Phase 6: evaluating-gates", () => {
     test("DB path: pending quality gates → evaluating-gates", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       // Set up milestone + slice + task in DB
@@ -445,7 +445,7 @@ describe("state-machine-full-walkthrough", () => {
 
     test("DB path: no pending gates → NOT evaluating-gates", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -566,7 +566,7 @@ describe("state-machine-full-walkthrough", () => {
         "### T02: Second Task",
         "Second task.",
       ].join("\n");
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       const tasksDir = join(dir, "tasks");
       mkdirSync(tasksDir, { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), planContent);
@@ -620,7 +620,7 @@ describe("state-machine-full-walkthrough", () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", doneSliceRoadmap());
       // Write a validation file with no parseable verdict
-      const dir = join(base, ".gsd", "milestones", "M001");
+      const dir = join(base, ".sdd", "milestones", "M001");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "M001-VALIDATION.md"), "Just some text with no frontmatter verdict.");
       invalidateStateCache();
@@ -842,7 +842,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Reconciliation", () => {
     test("DB: task with SUMMARY on disk but DB says pending → reconciliation fixes status (#2514)", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -887,7 +887,7 @@ describe("state-machine-full-walkthrough", () => {
     test("ghost milestone (empty dir) → NOT in registry", async () => {
       const base = createFixtureBase();
       // Create empty milestone dir (ghost — no CONTEXT, ROADMAP, SUMMARY)
-      mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+      mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
       // Create a real milestone too
       writeContext(base, "M002", "# M002: Real\n\nContext.");
       invalidateStateCache();
@@ -904,7 +904,7 @@ describe("state-machine-full-walkthrough", () => {
     test("ghost milestone detection helper", () => {
       const base = createFixtureBase();
       // Ghost: empty dir
-      mkdirSync(join(base, ".gsd", "milestones", "M001"), { recursive: true });
+      mkdirSync(join(base, ".sdd", "milestones", "M001"), { recursive: true });
       clearPathCache();
       assert.equal(isGhostMilestone(base, "M001"), true, "empty dir is ghost");
 
@@ -922,7 +922,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Cross-validation: DB vs filesystem", () => {
     test("executing scenario produces same phase on both paths", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -948,7 +948,7 @@ describe("state-machine-full-walkthrough", () => {
 
     test("summarizing scenario produces same phase on both paths", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1043,7 +1043,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure: DB has slice but no task rows (partial migration)", () => {
     test("DB tasks empty but PLAN on disk has tasks → wrong phase (planning)", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1067,7 +1067,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure: partial SUMMARY reconciliation", () => {
     test("only one task has SUMMARY, other still pending → executing next task", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1095,7 +1095,7 @@ describe("state-machine-full-walkthrough", () => {
       writeRoadmap(base, "M001", standardRoadmap());
       writePlan(base, "M001", "S01", standardPlan());
       // Write 0-byte SUMMARY — existsSync returns true for empty files
-      const tasksDir = join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks");
+      const tasksDir = join(base, ".sdd", "milestones", "M001", "slices", "S01", "tasks");
       mkdirSync(tasksDir, { recursive: true });
       writeFileSync(join(tasksDir, "T01-SUMMARY.md"), "");
 
@@ -1114,7 +1114,7 @@ describe("state-machine-full-walkthrough", () => {
     test("0-byte VALIDATION file → stays in validating-milestone", async () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", doneSliceRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001");
+      const dir = join(base, ".sdd", "milestones", "M001");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "M001-VALIDATION.md"), "");
 
@@ -1128,7 +1128,7 @@ describe("state-machine-full-walkthrough", () => {
     test("0-byte PLAN file → planning phase", async () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", standardRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), "");
 
@@ -1142,7 +1142,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure: DB/filesystem divergence", () => {
     test("DB says slice complete, no milestone VALIDATION → validating-milestone", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1159,7 +1159,7 @@ describe("state-machine-full-walkthrough", () => {
 
     test("DB says task complete but SUMMARY missing → no crash, advances to next", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1179,7 +1179,7 @@ describe("state-machine-full-walkthrough", () => {
 
     test("milestone in DB but directory missing from disk → no crash", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1195,7 +1195,7 @@ describe("state-machine-full-walkthrough", () => {
     test("VALIDATION with broken frontmatter → stays in validating", async () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", doneSliceRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001");
+      const dir = join(base, ".sdd", "milestones", "M001");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "M001-VALIDATION.md"), [
         "---",
@@ -1236,7 +1236,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure: missing task plan files in DB path", () => {
     test("DB has tasks but no T##-PLAN.md files → planning phase", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1244,7 +1244,7 @@ describe("state-machine-full-walkthrough", () => {
       insertTask({ id: "T01", sliceId: "S01", milestoneId: "M001", title: "T01: Task", status: "pending" });
 
       writeRoadmap(base, "M001", standardRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       mkdirSync(join(dir, "tasks"), { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), standardPlan());
       // NO T01-PLAN.md
@@ -1319,7 +1319,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure at needs-discussion: CONTEXT-DRAFT is empty", () => {
     test("0-byte CONTEXT-DRAFT → should still trigger needs-discussion", async () => {
       const base = createFixtureBase();
-      const dir = join(base, ".gsd", "milestones", "M001");
+      const dir = join(base, ".sdd", "milestones", "M001");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "M001-CONTEXT-DRAFT.md"), "");
       invalidateStateCache();
@@ -1371,7 +1371,7 @@ describe("state-machine-full-walkthrough", () => {
     test("PLAN exists but tasks section is garbage → zero tasks → planning", async () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", standardRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), [
         "# S01: Slice",
@@ -1394,7 +1394,7 @@ describe("state-machine-full-walkthrough", () => {
     test("T01-PLAN.md exists but is 0-byte → still enters executing", async () => {
       const base = createFixtureBase();
       writeRoadmap(base, "M001", standardRoadmap());
-      const dir = join(base, ".gsd", "milestones", "M001", "slices", "S01");
+      const dir = join(base, ".sdd", "milestones", "M001", "slices", "S01");
       const tasksDir = join(dir, "tasks");
       mkdirSync(tasksDir, { recursive: true });
       writeFileSync(join(dir, "S01-PLAN.md"), standardPlan());
@@ -1415,7 +1415,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure at executing: DB has task but wrong status string", () => {
     test("task with unexpected status string → not treated as closed", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });
@@ -1572,7 +1572,7 @@ describe("state-machine-full-walkthrough", () => {
   describe("Failure: multiple reconciliation in single derivation", () => {
     test("DB has 3 stale tasks, all with SUMMARY on disk → all reconciled in one pass", async () => {
       const base = createFixtureBase();
-      const dbPath = join(base, ".gsd", "gsd.db");
+      const dbPath = join(base, ".sdd", "sdd.db");
       openDatabase(dbPath);
 
       insertMilestone({ id: "M001", title: "M001: Test", status: "active" });

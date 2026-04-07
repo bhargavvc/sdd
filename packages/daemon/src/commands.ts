@@ -24,19 +24,19 @@ import type { Logger } from './logger.js';
 export function buildCommands(): RESTPostAPIChatInputApplicationCommandsJSONBody[] {
   return [
     new SlashCommandBuilder()
-      .setName('gsd-status')
-      .setDescription('Show status of all active GSD sessions')
+      .setName('sdd-status')
+      .setDescription('Show status of all active SDD sessions')
       .toJSON(),
     new SlashCommandBuilder()
-      .setName('gsd-start')
-      .setDescription('Start a new GSD session')
+      .setName('sdd-start')
+      .setDescription('Start a new SDD session')
       .toJSON(),
     new SlashCommandBuilder()
-      .setName('gsd-stop')
-      .setDescription('Stop a running GSD session')
+      .setName('sdd-stop')
+      .setDescription('Stop a running SDD session')
       .toJSON(),
     new SlashCommandBuilder()
-      .setName('gsd-verbose')
+      .setName('sdd-verbose')
       .setDescription('Set event verbosity level for this channel')
       .addStringOption((option) =>
         option
@@ -90,7 +90,7 @@ export async function registerGuildCommands(
 // ---------------------------------------------------------------------------
 
 /**
- * Format session list for /gsd-status reply.
+ * Format session list for /sdd-status reply.
  * Shows projectName, status, duration, and cost for each session.
  * Returns 'No active sessions.' if the array is empty.
  */

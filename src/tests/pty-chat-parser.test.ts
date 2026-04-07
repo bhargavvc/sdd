@@ -29,7 +29,7 @@ test("user input echoed on the same prompt line is classified as role=user", () 
     latest = parser.getMessages();
   });
 
-  // GSD prints assistant response, then prompt with user input on same line
+  // SDD prints assistant response, then prompt with user input on same line
   parser.feed("Here is your task summary.\n");
   parser.feed("❯ show status\n");
 
@@ -45,7 +45,7 @@ test("user input on a separate line after bare prompt is classified as role=user
     latest = parser.getMessages();
   });
 
-  // GSD prints assistant text, then bare prompt on its own line
+  // SDD prints assistant text, then bare prompt on its own line
   parser.feed("Done processing.\n");
   parser.feed("❯ \n");
   // User input appears on the next line (PTY echo without prompt prefix)
@@ -73,7 +73,7 @@ test("multiple user turns: each user input after prompt is role=user", () => {
   });
 
   // Turn 1: assistant response, prompt, user input
-  parser.feed("Welcome to GSD.\n");
+  parser.feed("Welcome to SDD.\n");
   parser.feed("❯ \n");
   parser.feed("discuss\n");
 

@@ -477,7 +477,7 @@ export function FilesView() {
 
   const [activeRoot, setActiveRoot] = useState<RootMode>("sdd")
   const [leftPanel, setLeftPanel] = useState<LeftPanel>("tree")
-  const [gsdTree, setSddTree] = useState<FileNode[] | null>(null)
+  const [sddTree, setSddTree] = useState<FileNode[] | null>(null)
   const [projectTree, setProjectTree] = useState<FileNode[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -522,7 +522,7 @@ export function FilesView() {
   )
 
   // Expanded paths per root, restored from sessionStorage
-  const [gsdExpanded, setSddExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "sdd"))
+  const [sddExpanded, setSddExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "sdd"))
   const [projectExpanded, setProjectExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "project"))
 
   // Re-hydrate from storage once projectCwd is available (boot may arrive after first render)
@@ -534,7 +534,7 @@ export function FilesView() {
     setProjectExpanded(loadExpanded(projectCwd, "project"))
   }, [projectCwd])
 
-  const expandedPaths = activeRoot === "sdd" ? gsdExpanded : projectExpanded
+  const expandedPaths = activeRoot === "sdd" ? sddExpanded : projectExpanded
   const setExpandedPaths = activeRoot === "sdd" ? setSddExpanded : setProjectExpanded
 
   // ── Multi-tab state ──
@@ -553,8 +553,8 @@ export function FilesView() {
   // The selected path in the tree corresponds to the active tab
   const selectedPath = activeTab?.path ?? null
 
-  const tree = activeRoot === "sdd" ? gsdTree : projectTree
-  const treeLoaded = activeRoot === "sdd" ? gsdTree !== null : projectTree !== null
+  const tree = activeRoot === "sdd" ? sddTree : projectTree
+  const treeLoaded = activeRoot === "sdd" ? sddTree !== null : projectTree !== null
 
   const fetchTree = useCallback(async (root: RootMode) => {
     try {
@@ -676,14 +676,14 @@ export function FilesView() {
   // Process a file open request (used both on mount and on event)
   const processFileOpen = useCallback(async (root: RootMode, path: string) => {
     // Ensure tree is loaded for this root
-    if (root === "sdd" && !gsdTree) {
+    if (root === "sdd" && !sddTree) {
       fetchTree("sdd")
     } else if (root === "project" && !projectTree) {
       fetchTree("project")
     }
 
     await openFileTab(root, path)
-  }, [gsdTree, projectTree, fetchTree, openFileTab])
+  }, [sddTree, projectTree, fetchTree, openFileTab])
 
   // On mount: consume any pending file request that arrived before this component mounted
   const consumedPendingRef = useRef(false)
@@ -1029,13 +1029,13 @@ export function FilesView() {
   const autoSelectedRef = useRef(false)
   useEffect(() => {
     if (autoSelectedRef.current) return
-    if (!gsdTree || openTabs.length > 0 || consumedPendingRef.current) return
-    const hasStateMd = gsdTree.some((n) => n.name === "STATE.md" && n.type === "file")
+    if (!sddTree || openTabs.length > 0 || consumedPendingRef.current) return
+    const hasStateMd = sddTree.some((n) => n.name === "STATE.md" && n.type === "file")
     if (hasStateMd) {
       autoSelectedRef.current = true
       void openFileTab("sdd", "STATE.md")
     }
-  }, [gsdTree, openTabs.length, openFileTab])
+  }, [sddTree, openTabs.length, openFileTab])
 
   // ── Agent file-edit auto-open: watch tool executions for edit/write tools ──
   const lastSeenToolCountRef = useRef(0)
@@ -1054,7 +1054,7 @@ export function FilesView() {
       if (!filePath) continue
 
       // Determine root and relative path
-      const gsdPrefix = ".sdd/"
+      const sddPrefix = ".sdd/"
       let root: RootMode = "project"
       let relativePath = filePath
 
@@ -1064,9 +1064,9 @@ export function FilesView() {
         if (relativePath.startsWith("/")) relativePath = relativePath.slice(1)
       }
 
-      if (relativePath.startsWith(gsdPrefix)) {
+      if (relativePath.startsWith(sddPrefix)) {
         root = "sdd"
-        relativePath = relativePath.slice(gsdPrefix.length)
+        relativePath = relativePath.slice(sddPrefix.length)
       }
 
       const key = tabKey(root, relativePath)

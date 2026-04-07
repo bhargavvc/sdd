@@ -17,7 +17,7 @@ import {
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { writeExportFile } from "./export.js";
-import { gsdRoot } from "./paths.js";
+import { sddRoot } from "./paths.js";
 import { stripAnsi } from "../shared/mod.js";
 
 const TAB_COUNT = 10;
@@ -353,7 +353,7 @@ export class SDDVisualizerOverlay {
       // Capture current active tab's rendered lines as snapshot
       const snapshotLines = this.renderTabContent(this.activeTab, 80);
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      const exportDir = gsdRoot(this.basePath);
+      const exportDir = sddRoot(this.basePath);
       mkdirSync(exportDir, { recursive: true });
       const outPath = join(exportDir, `snapshot-${timestamp}.txt`);
       writeFileSync(outPath, snapshotLines.join("\n") + "\n", "utf-8");

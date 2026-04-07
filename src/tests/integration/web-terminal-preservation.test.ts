@@ -227,7 +227,7 @@ function deriveSessionId(
   sessionPrefix?: string,
   command?: string,
 ): string {
-  const base = sessionPrefix ?? (command ? "gsd-default" : "default");
+  const base = sessionPrefix ?? (command ? "sdd-default" : "default");
   if (!projectCwd) return base;
   // Stable hash-like key from the project path — keeps IDs short but unique
   return `${base}:${projectCwd}`;
@@ -252,10 +252,10 @@ test("session ID derivation: explicit sessionPrefix is preserved with project sc
 });
 
 test("session ID derivation: command sessions are also project-scoped", () => {
-  const idA = deriveSessionId("/projects/alpha", undefined, "gsd");
-  const idB = deriveSessionId("/projects/beta", undefined, "gsd");
+  const idA = deriveSessionId("/projects/alpha", undefined, "sdd");
+  const idB = deriveSessionId("/projects/beta", undefined, "sdd");
   assert.notEqual(idA, idB);
-  assert.ok(idA.includes("gsd-default"), "Uses gsd-default base for command sessions");
+  assert.ok(idA.includes("sdd-default"), "Uses sdd-default base for command sessions");
 });
 
 test("session ID derivation: no projectCwd falls back to plain base ID", () => {

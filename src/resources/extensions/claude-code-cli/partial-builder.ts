@@ -15,8 +15,8 @@ import type {
 	ToolCall,
 	Usage,
 	WebSearchResultContent,
-} from "@gsd/pi-ai";
-import { repairToolJson } from "@gsd/pi-ai";
+} from "@sdd/pi-ai";
+import { repairToolJson } from "@sdd/pi-ai";
 import type { BetaContentBlock, BetaRawMessageStreamEvent, NonNullableUsage } from "./sdk-types.js";
 
 // ---------------------------------------------------------------------------

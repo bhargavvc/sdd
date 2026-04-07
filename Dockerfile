@@ -1,6 +1,6 @@
 # ──────────────────────────────────────────────
 # Runtime
-# Image: ghcr.io/gsd-build/gsd-pi
+# Image: ghcr.io/gsd-build/sdd-pi
 # Used by: end users via docker run
 # ──────────────────────────────────────────────
 FROM node:24-slim AS runtime
@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install GSD globally — version is controlled by the build arg
-ARG GSD_VERSION=latest
-RUN npm install -g gsd-pi@${GSD_VERSION}
+ARG SDD_VERSION=latest
+RUN npm install -g sdd-pi@${SDD_VERSION}
 
 # Default working directory for user projects
 WORKDIR /workspace

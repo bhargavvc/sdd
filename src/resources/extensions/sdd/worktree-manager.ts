@@ -286,14 +286,14 @@ export function listWorktrees(basePath: string): WorktreeInfo[] {
 
 /** Directories to skip when scanning for nested .git dirs. */
 const NESTED_GIT_SKIP_DIRS = new Set([
-  ".git", ".gsd", "node_modules", ".next", ".nuxt", "dist", "build",
+  ".git", ".sdd", "node_modules", ".next", ".nuxt", "dist", "build",
   "__pycache__", ".tox", ".venv", "venv", "target", "vendor",
 ]);
 
 /**
  * Recursively find nested .git directories inside a worktree root.
  * Returns paths to directories that contain their own .git (directory, not file).
- * Skips node_modules, .gsd, and other non-project directories for performance.
+ * Skips node_modules, .sdd, and other non-project directories for performance.
  *
  * A nested .git *directory* (not a .git file — which is a legitimate worktree
  * pointer) indicates a scaffolded repo that will become an orphaned gitlink.
@@ -466,7 +466,7 @@ export function removeWorktree(
   // worktree remove), force-remove the git internal worktree metadata first,
   // then remove the filesystem directory. Without this, the .git/worktrees/<name>
   // lock prevents rmSync from cleaning up, and the orphaned worktree directory
-  // causes every subsequent `/gsd auto` to re-enter the stale worktree.
+  // causes every subsequent `/sdd auto` to re-enter the stale worktree.
   if (existsSync(resolvedWtPath)) {
     try {
       const wtInternalDir = join(basePath, ".git", "worktrees", name);

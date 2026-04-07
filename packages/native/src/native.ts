@@ -37,7 +37,7 @@ function loadNative(): Record<string, unknown> {
   const packageSuffix = platformPackageMap[platformTag];
   if (packageSuffix) {
     try {
-      _loadedSuccessfully = true; return _require(`@gsd-build/engine-${packageSuffix}`) as Record<string, unknown>;
+      _loadedSuccessfully = true; return _require(`@bhargavvc/engine-${packageSuffix}`) as Record<string, unknown>;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       errors.push(`@bhargavvc/engine-${packageSuffix}: ${message}`);

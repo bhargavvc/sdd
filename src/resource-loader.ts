@@ -1,4 +1,4 @@
-import { DefaultResourceLoader, sortExtensionPaths } from '@gsd/pi-coding-agent'
+import { DefaultResourceLoader, sortExtensionPaths } from '@sdd/pi-coding-agent'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, openSync, closeSync, readFileSync, readlinkSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -604,7 +604,7 @@ export function buildResourceLoader(agentDir: string): DefaultResourceLoader {
     additionalExtensionPaths: piExtensionPaths,
     bundledExtensionNames: bundledKeys,
     extensionPathsTransform: (paths: string[]) => {
-      // 1. Filter community extensions through the GSD registry
+      // 1. Filter community extensions through the SDD registry
       const filteredPaths = paths.filter((entryPath) => {
         const manifest = readManifestFromEntryPath(entryPath)
         if (!manifest) return true // no manifest = always load

@@ -175,8 +175,8 @@ async function main() {
   const { existsSync } = await import('node:fs');
   const testDirsToClean = [
     [join(ROOT, 'dist-test', 'src', 'tests'), join(ROOT, 'src', 'tests')],
-    [join(ROOT, 'dist-test', 'src', 'resources', 'extensions', 'gsd', 'tests'),
-     join(ROOT, 'src', 'resources', 'extensions', 'gsd', 'tests')],
+    [join(ROOT, 'dist-test', 'src', 'resources', 'extensions', 'sdd', 'tests'),
+     join(ROOT, 'src', 'resources', 'extensions', 'sdd', 'tests')],
   ];
   let staleCleaned = 0;
   for (const [distDir, srcDir] of testDirsToClean) {
@@ -200,7 +200,7 @@ async function main() {
   }
 
   // Ensure dist-test/node_modules exists so resource-loader.ts (which computes
-  // packageRoot from import.meta.url) resolves gsdNodeModules to a real path.
+  // packageRoot from import.meta.url) resolves sddNodeModules to a real path.
   // Without this, initResources creates dangling symlinks in test environments.
   const distNodeModules = join(ROOT, 'dist-test', 'node_modules');
   if (!existsSync(distNodeModules)) {

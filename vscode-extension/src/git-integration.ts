@@ -86,12 +86,12 @@ export class GsdGitIntegration implements vscode.Disposable {
 			if (!diff.trim()) {
 				// Files may be untracked — show status instead
 				const status = await this.git("status --short");
-				const channel = vscode.window.createOutputChannel("GSD Git Diff");
+				const channel = vscode.window.createOutputChannel("SDD Git Diff");
 				channel.appendLine("# Agent-modified files (unstaged):");
 				channel.appendLine(status);
 				channel.show();
 			} else {
-				const channel = vscode.window.createOutputChannel("GSD Git Diff");
+				const channel = vscode.window.createOutputChannel("SDD Git Diff");
 				channel.clear();
 				channel.appendLine(diff);
 				channel.show();

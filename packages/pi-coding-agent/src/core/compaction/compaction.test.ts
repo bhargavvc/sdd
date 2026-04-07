@@ -6,8 +6,8 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 
-import type { AgentMessage } from "@gsd/pi-agent-core";
-import type { Model, AssistantMessage } from "@gsd/pi-ai";
+import type { AgentMessage } from "@sdd/pi-agent-core";
+import type { Model, AssistantMessage } from "@sdd/pi-ai";
 
 import { generateSummary, estimateTokens, chunkMessages } from "./compaction.js";
 

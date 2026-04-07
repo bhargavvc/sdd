@@ -86,7 +86,7 @@ function extractMessageText(msg: { role: string; content: unknown }): string {
 }
 
 /**
- * Build a full conversational prompt from GSD's context messages.
+ * Build a full conversational prompt from SDD's context messages.
  *
  * Previous behaviour sent only the last user message, making every SDK
  * call effectively stateless. This version serialises the complete

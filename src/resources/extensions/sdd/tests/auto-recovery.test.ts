@@ -22,7 +22,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from "../../gsd-db.ts";
+} from "../../sdd-db.ts";
 import { renderPlanFromDb } from "../../markdown-renderer.ts";
 
 function makeTmpBase(): string {
@@ -117,7 +117,7 @@ test("resolveExpectedArtifactPath returns correct path for all slice-level types
 // ─── run-uat artifact path contract (#2873) ──────────────────────────────
 
 test("resolveExpectedArtifactPath for run-uat returns ASSESSMENT path, not UAT (#2873)", (t) => {
-  // The run-uat prompt instructs the agent to call gsd_summary_save with
+  // The run-uat prompt instructs the agent to call sdd_summary_save with
   // artifact_type: "ASSESSMENT", which writes S##-ASSESSMENT.md. The artifact
   // verification path must match — otherwise verification fails and auto-mode
   // retries the unit in an infinite loop.
@@ -145,13 +145,13 @@ test("diagnoseExpectedArtifact for run-uat references ASSESSMENT (#2873)", (t) =
 });
 
 test("verifyExpectedArtifact passes for run-uat when ASSESSMENT file exists (#2873)", (t) => {
-  // Regression test: run-uat writes S##-ASSESSMENT.md via gsd_summary_save,
+  // Regression test: run-uat writes S##-ASSESSMENT.md via sdd_summary_save,
   // but verification looked for S##-UAT.md, causing false stuck retries.
   const base = makeTmpBase();
   t.after(() => cleanup(base));
 
-  // Write the ASSESSMENT file (what gsd_summary_save actually produces)
-  const assessPath = join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-ASSESSMENT.md");
+  // Write the ASSESSMENT file (what sdd_summary_save actually produces)
+  const assessPath = join(base, ".sdd", "milestones", "M001", "slices", "S01", "S01-ASSESSMENT.md");
   writeFileSync(assessPath, "---\nverdict: PASS\n---\n# UAT Assessment\n");
 
   const verified = verifyExpectedArtifact("run-uat", "M001/S01", base);

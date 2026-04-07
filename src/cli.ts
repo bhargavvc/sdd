@@ -157,7 +157,7 @@ async function ensureRtkBootstrap(): Promise<void> {
   }
 }
 
-// `gsd update` — update to the latest version via npm
+// `sdd update` — update to the latest version via npm
 if (cliFlags.messages[0] === 'update') {
   const { runUpdate } = await import('./update-cmd.js')
   await runUpdate()
@@ -170,17 +170,17 @@ exitIfManagedResourcesAreNewer(agentDir)
 // handles that prevent process.exit() from completing promptly.
 const hasSubcommand = cliFlags.messages.length > 0
 if (!process.stdin.isTTY && !isPrintMode && !hasSubcommand && !cliFlags.listModels && !cliFlags.web) {
-  process.stderr.write('[gsd] Error: Interactive mode requires a terminal (TTY).\n')
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd auto                       Auto-mode (pipeable, no TUI)\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
+  process.stderr.write('[sdd] Error: Interactive mode requires a terminal (TTY).\n')
+  process.stderr.write('[sdd] Non-interactive alternatives:\n')
+  process.stderr.write('[sdd]   sdd auto                       Auto-mode (pipeable, no TUI)\n')
+  process.stderr.write('[sdd]   sdd --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[sdd]   sdd --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode text "message"      Text output mode\n')
   process.exit(1)
 }
 
-// `gsd <subcommand> --help` — show subcommand-specific help
+// `sdd <subcommand> --help` — show subcommand-specific help
 const subcommand = cliFlags.messages[0]
 if (subcommand && process.argv.includes('--help')) {
   if (printSubcommandHelp(subcommand, process.env.SDD_VERSION || '0.0.0')) {
@@ -209,7 +209,7 @@ if (cliFlags.messages[0] === 'config') {
   process.exit(0)
 }
 
-// `gsd web stop [path|all]` — stop web server before anything else
+// `sdd web stop [path|all]` — stop web server before anything else
 if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   const webFlags = parseWebCliArgs(process.argv)
   const webBranch = await runWebCliBranch(webFlags, {
@@ -303,13 +303,13 @@ if (cliFlags.messages[0] === 'headless') {
   process.exit(0)
 }
 
-// `gsd auto [args...]` — shorthand for `gsd headless auto [args...]` (#2732)
-// Without this, `gsd auto` falls through to the interactive TUI which hangs
+// `sdd auto [args...]` — shorthand for `sdd headless auto [args...]` (#2732)
+// Without this, `sdd auto` falls through to the interactive TUI which hangs
 // when stdin/stdout are piped (non-TTY environments).
 if (cliFlags.messages[0] === 'auto') {
   await ensureRtkBootstrap()
   const { runHeadless, parseHeadlessArgs } = await import('./headless.js')
-  // Rewrite argv so parseHeadlessArgs sees: [node, gsd, headless, auto, ...rest]
+  // Rewrite argv so parseHeadlessArgs sees: [node, sdd, headless, auto, ...rest]
   const rewrittenArgv = [
     process.argv[0],
     process.argv[1],
@@ -412,7 +412,7 @@ if (cliFlags.listModels !== undefined) {
   process.exit(0)
 }
 
-// GSD always uses quiet startup — the gsd extension renders its own branded header
+// SDD always uses quiet startup — the sdd extension renders its own branded header
 if (!settingsManager.getQuietStartup()) {
   settingsManager.setQuietStartup(true)
 }
@@ -556,16 +556,16 @@ if (!cliFlags.worktree && !isPrintMode) {
 }
 
 // ---------------------------------------------------------------------------
-// Auto-redirect: `gsd auto` with piped stdout → headless mode (#2732)
-// When stdout is not a TTY (e.g. `gsd auto | cat`, `gsd auto > file`),
+// Auto-redirect: `sdd auto` with piped stdout → headless mode (#2732)
+// When stdout is not a TTY (e.g. `sdd auto | cat`, `sdd auto > file`),
 // the TUI cannot render and the process hangs. Redirect to headless mode
 // which handles non-interactive output gracefully.
 // ---------------------------------------------------------------------------
 if (cliFlags.messages[0] === 'auto' && !process.stdout.isTTY) {
   await ensureRtkBootstrap()
   const { runHeadless, parseHeadlessArgs } = await import('./headless.js')
-  process.stderr.write('[gsd] stdout is not a terminal — running auto-mode in headless mode.\n')
-  await runHeadless(parseHeadlessArgs(['node', 'gsd', 'headless', ...cliFlags.messages.slice(1)]))
+  process.stderr.write('[sdd] stdout is not a terminal — running auto-mode in headless mode.\n')
+  await runHeadless(parseHeadlessArgs(['node', 'sdd', 'headless', ...cliFlags.messages.slice(1)]))
   process.exit(0)
 }
 
@@ -677,15 +677,15 @@ if (!process.stdin.isTTY || !process.stdout.isTTY) {
     : !process.stdin.isTTY
       ? 'stdin is'
       : 'stdout is'
-  process.stderr.write(`[gsd] Error: Interactive mode requires a terminal (TTY) but ${missing} not a TTY.\n`)
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd auto                       Auto-mode (pipeable, no TUI)\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --web [path]               Browser-only web mode\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
-  process.stderr.write('[gsd]   gsd headless                   Auto-mode without TUI\n')
+  process.stderr.write(`[sdd] Error: Interactive mode requires a terminal (TTY) but ${missing} not a TTY.\n`)
+  process.stderr.write('[sdd] Non-interactive alternatives:\n')
+  process.stderr.write('[sdd]   sdd auto                       Auto-mode (pipeable, no TUI)\n')
+  process.stderr.write('[sdd]   sdd --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[sdd]   sdd --web [path]               Browser-only web mode\n')
+  process.stderr.write('[sdd]   sdd --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[sdd]   sdd --mode text "message"      Text output mode\n')
+  process.stderr.write('[sdd]   sdd headless                   Auto-mode without TUI\n')
   process.exit(1)
 }
 

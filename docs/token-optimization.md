@@ -309,7 +309,7 @@ Individual tool results that exceed `tool_result_max_chars` (default: 800) are t
 
 *Introduced in v2.59.0*
 
-When auto-mode transitions between phases (research → planning → execution), structured JSON anchors are written to `.gsd/milestones/<mid>/anchors/<phase>.json`. Downstream prompt builders inject these anchors so the next phase inherits intent, decisions, blockers, and next steps without re-inferring from artifact files.
+When auto-mode transitions between phases (research → planning → execution), structured JSON anchors are written to `.sdd/milestones/<mid>/anchors/<phase>.json`. Downstream prompt builders inject these anchors so the next phase inherits intent, decisions, blockers, and next steps without re-inferring from artifact files.
 
 This reduces context drift — the 65% of enterprise agent failures caused by agents losing track of prior decisions across phase boundaries.
 

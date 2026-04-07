@@ -1,12 +1,12 @@
 # SDD — VS Code Extension
 
-Control the [GSD-2 coding agent](https://github.com/gsd-build/gsd-2) directly from VS Code. Run autonomous coding sessions, chat with `@gsd`, monitor agent activity in real-time, review and accept/reject changes, and manage your workflow — all without leaving the editor.
+Control the [SDD-2 coding agent](https://github.com/bhargavvc/sdd) directly from VS Code. Run autonomous coding sessions, chat with `@sdd`, monitor agent activity in real-time, review and accept/reject changes, and manage your workflow — all without leaving the editor.
 
-![GSD Extension Overview](docs/images/overview.png)
+![SDD Extension Overview](docs/images/overview.png)
 
 ## Requirements
 
-- **GSD-2** installed globally: `npm install -g gsd-pi`
+- **SDD-2** installed globally: `npm install -g sdd-pi`
 - **Node.js** >= 22.0.0
 - **Git** installed and on PATH
 - **VS Code** >= 1.95.0
@@ -16,9 +16,9 @@ Control the [GSD-2 coding agent](https://github.com/gsd-build/gsd-2) directly fr
 1. Install SDD: `npm install -g sdd-pi`
 2. Install this extension
 3. Open a project folder in VS Code
-4. Click the **GSD icon** in the Activity Bar (left sidebar)
-5. Click **Start Agent** or run `Ctrl+Shift+P` > **GSD: Start Agent**
-6. Start chatting with `@gsd` in Chat or click **Auto** in the sidebar
+4. Click the **SDD icon** in the Activity Bar (left sidebar)
+5. Click **Start Agent** or run `Ctrl+Shift+P` > **SDD: Start Agent**
+6. Start chatting with `@sdd` in Chat or click **Auto** in the sidebar
 
 ---
 
@@ -26,11 +26,11 @@ Control the [GSD-2 coding agent](https://github.com/gsd-build/gsd-2) directly fr
 
 ### Sidebar Dashboard
 
-Click the **GSD icon** in the Activity Bar. The compact header shows connection status, model, session, message count, thinking level, context usage bar, and cost — all in two lines. Sections (Workflow, Stats, Actions, Settings) are collapsible and remember their state.
+Click the **SDD icon** in the Activity Bar. The compact header shows connection status, model, session, message count, thinking level, context usage bar, and cost — all in two lines. Sections (Workflow, Stats, Actions, Settings) are collapsible and remember their state.
 
 ### Workflow Controls
 
-One-click buttons for GSD's core commands. All route through the Chat panel so you see the full response:
+One-click buttons for SDD's core commands. All route through the Chat panel so you see the full response:
 
 | Button | What it does |
 |--------|-------------|
@@ -39,14 +39,14 @@ One-click buttons for GSD's core commands. All route through the Chat panel so y
 | **Quick** | Quick task without planning (opens input) |
 | **Capture** | Capture a thought for later triage |
 
-### Chat Integration (`@gsd`)
+### Chat Integration (`@sdd`)
 
-Use `@gsd` in VS Code Chat (`Cmd+Shift+I`) to talk to the agent:
+Use `@sdd` in VS Code Chat (`Cmd+Shift+I`) to talk to the agent:
 
 ```
-@gsd refactor the auth module to use JWT
-@gsd /gsd auto
-@gsd fix the errors in this file
+@sdd refactor the auth module to use JWT
+@sdd /sdd auto
+@sdd fix the errors in this file
 ```
 
 - **Auto-starts** the agent if not running
@@ -57,7 +57,7 @@ Use `@gsd` in VS Code Chat (`Cmd+Shift+I`) to talk to the agent:
 
 ### Source Control Integration
 
-Agent-modified files appear in a dedicated **"GSD Agent"** section of the Source Control panel:
+Agent-modified files appear in a dedicated **"SDD Agent"** section of the Source Control panel:
 
 - **Click any file** to see a before/after diff in VS Code's native diff editor
 - **Accept** or **Discard** changes per-file via inline buttons
@@ -70,7 +70,7 @@ When the agent modifies a file, you'll see:
 - **Green background** on newly added lines
 - **Yellow background** on modified lines
 - **Left border gutter indicator** on all agent-touched lines
-- **Hover** any decorated line to see "Modified by GSD Agent"
+- **Hover** any decorated line to see "Modified by SDD Agent"
 
 ### Checkpoints & Rollback
 
@@ -87,7 +87,7 @@ The **Sessions** panel lists all past sessions for the current workspace. Click 
 ### Diagnostic Integration
 
 - **Fix Errors** button in the sidebar reads the active file's diagnostics from the Problems panel and sends them to the agent
-- **Fix All Problems** (`Cmd+Shift+P` > GSD: Fix All Problems) collects errors/warnings across the workspace
+- **Fix All Problems** (`Cmd+Shift+P` > SDD: Fix All Problems) collects errors/warnings across the workspace
 - Works automatically in chat — mention "fix" or "error" and diagnostics are included
 
 ### Code Lens
@@ -96,7 +96,7 @@ Four inline actions above every function and class (TS/JS/Python/Go/Rust):
 
 | Action | What it does |
 |--------|-------------|
-| **Ask GSD** | Explain the function/class |
+| **Ask SDD** | Explain the function/class |
 | **Refactor** | Improve clarity, performance, or structure |
 | **Find Bugs** | Review for bugs and edge cases |
 | **Tests** | Generate test coverage |
@@ -117,7 +117,7 @@ Control how much autonomy the agent has:
 | **Ask** | Prompts before file writes and commands |
 | **Plan-only** | Read-only — agent can analyze but not modify |
 
-Change via Settings section or `Cmd+Shift+P` > **GSD: Select Approval Mode**.
+Change via Settings section or `Cmd+Shift+P` > **SDD: Select Approval Mode**.
 
 ### Agent UI Requests
 
@@ -126,7 +126,7 @@ When the agent needs input (questions, confirmations, selections), VS Code dialo
 ### Additional Features
 
 - **Conversation History** — full message viewer with tool calls, thinking blocks, search, and fork-from-here
-- **Slash Command Completion** — type `/` for auto-complete of `/gsd` commands
+- **Slash Command Completion** — type `/` for auto-complete of `/sdd` commands
 - **File Decorations** — "G" badge on agent-modified files in the Explorer
 - **Bash Terminal** — dedicated terminal for agent shell output
 - **Context Window Warning** — notification when context exceeds threshold
@@ -138,36 +138,36 @@ When the agent needs input (questions, confirmations, selections), VS Code dialo
 
 | Command | Shortcut | Description |
 |---------|----------|-------------|
-| **GSD: Start Agent** | | Connect to the GSD agent |
-| **GSD: Stop Agent** | | Disconnect the agent |
-| **GSD: New Session** | `Cmd+Shift+G` `Cmd+Shift+N` | Start a fresh conversation |
-| **GSD: Send Message** | `Cmd+Shift+G` `Cmd+Shift+P` | Send a message to the agent |
-| **GSD: Abort** | `Cmd+Shift+G` `Cmd+Shift+A` | Interrupt the current operation |
-| **GSD: Steer Agent** | `Cmd+Shift+G` `Cmd+Shift+I` | Steering message mid-operation |
-| **GSD: Switch Model** | | Pick a model from QuickPick |
-| **GSD: Cycle Model** | `Cmd+Shift+G` `Cmd+Shift+M` | Rotate to the next model |
-| **GSD: Set Thinking Level** | | Choose off / low / medium / high |
-| **GSD: Cycle Thinking** | `Cmd+Shift+G` `Cmd+Shift+T` | Rotate through thinking levels |
-| **GSD: Compact Context** | | Trigger context compaction |
-| **GSD: Export HTML** | | Save session as HTML |
-| **GSD: Session Stats** | | Display token usage and cost |
-| **GSD: Run Bash** | | Execute a shell command |
-| **GSD: List Commands** | | Browse slash commands |
-| **GSD: Set Session Name** | | Rename current session |
-| **GSD: Copy Last Response** | | Copy to clipboard |
-| **GSD: Switch Session** | | Load a different session |
-| **GSD: Show History** | | Open conversation viewer |
-| **GSD: Fork Session** | | Fork from a previous message |
-| **GSD: Fix Problems in File** | | Send file diagnostics to agent |
-| **GSD: Fix All Problems** | | Send workspace errors to agent |
-| **GSD: Commit Agent Changes** | | Git commit modified files |
-| **GSD: Create Branch** | | Create branch for agent work |
-| **GSD: Show Agent Diff** | | View git diff |
-| **GSD: Accept All Changes** | | Accept all SCM changes |
-| **GSD: Discard All Changes** | | Revert all agent modifications |
-| **GSD: Select Approval Mode** | | Choose auto-approve/ask/plan-only |
-| **GSD: Cycle Approval Mode** | | Rotate through approval modes |
-| **GSD: Code Lens** actions | | Ask, Refactor, Find Bugs, Tests |
+| **SDD: Start Agent** | | Connect to the SDD agent |
+| **SDD: Stop Agent** | | Disconnect the agent |
+| **SDD: New Session** | `Cmd+Shift+G` `Cmd+Shift+N` | Start a fresh conversation |
+| **SDD: Send Message** | `Cmd+Shift+G` `Cmd+Shift+P` | Send a message to the agent |
+| **SDD: Abort** | `Cmd+Shift+G` `Cmd+Shift+A` | Interrupt the current operation |
+| **SDD: Steer Agent** | `Cmd+Shift+G` `Cmd+Shift+I` | Steering message mid-operation |
+| **SDD: Switch Model** | | Pick a model from QuickPick |
+| **SDD: Cycle Model** | `Cmd+Shift+G` `Cmd+Shift+M` | Rotate to the next model |
+| **SDD: Set Thinking Level** | | Choose off / low / medium / high |
+| **SDD: Cycle Thinking** | `Cmd+Shift+G` `Cmd+Shift+T` | Rotate through thinking levels |
+| **SDD: Compact Context** | | Trigger context compaction |
+| **SDD: Export HTML** | | Save session as HTML |
+| **SDD: Session Stats** | | Display token usage and cost |
+| **SDD: Run Bash** | | Execute a shell command |
+| **SDD: List Commands** | | Browse slash commands |
+| **SDD: Set Session Name** | | Rename current session |
+| **SDD: Copy Last Response** | | Copy to clipboard |
+| **SDD: Switch Session** | | Load a different session |
+| **SDD: Show History** | | Open conversation viewer |
+| **SDD: Fork Session** | | Fork from a previous message |
+| **SDD: Fix Problems in File** | | Send file diagnostics to agent |
+| **SDD: Fix All Problems** | | Send workspace errors to agent |
+| **SDD: Commit Agent Changes** | | Git commit modified files |
+| **SDD: Create Branch** | | Create branch for agent work |
+| **SDD: Show Agent Diff** | | View git diff |
+| **SDD: Accept All Changes** | | Accept all SCM changes |
+| **SDD: Discard All Changes** | | Revert all agent modifications |
+| **SDD: Select Approval Mode** | | Choose auto-approve/ask/plan-only |
+| **SDD: Cycle Approval Mode** | | Rotate through approval modes |
+| **SDD: Code Lens** actions | | Ask, Refactor, Find Bugs, Tests |
 
 > On Windows/Linux, replace `Cmd` with `Ctrl`.
 
@@ -175,19 +175,19 @@ When the agent needs input (questions, confirmations, selections), VS Code dialo
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `gsd.binaryPath` | `"gsd"` | Path to the GSD binary |
-| `gsd.autoStart` | `false` | Start agent on extension activation |
-| `gsd.autoCompaction` | `true` | Automatic context compaction |
-| `gsd.codeLens` | `true` | Code lens above functions/classes |
-| `gsd.showProgressNotifications` | `false` | Progress notification (off — Chat shows progress) |
-| `gsd.activityFeedMaxItems` | `100` | Max items in Activity feed |
-| `gsd.showContextWarning` | `true` | Warn when context exceeds threshold |
-| `gsd.contextWarningThreshold` | `80` | Context % that triggers warning |
-| `gsd.approvalMode` | `"auto-approve"` | Agent permission mode |
+| `sdd.binaryPath` | `"sdd"` | Path to the SDD binary |
+| `sdd.autoStart` | `false` | Start agent on extension activation |
+| `sdd.autoCompaction` | `true` | Automatic context compaction |
+| `sdd.codeLens` | `true` | Code lens above functions/classes |
+| `sdd.showProgressNotifications` | `false` | Progress notification (off — Chat shows progress) |
+| `sdd.activityFeedMaxItems` | `100` | Max items in Activity feed |
+| `sdd.showContextWarning` | `true` | Warn when context exceeds threshold |
+| `sdd.contextWarningThreshold` | `80` | Context % that triggers warning |
+| `sdd.approvalMode` | `"auto-approve"` | Agent permission mode |
 
 ## How It Works
 
-The extension spawns `gsd --mode rpc` and communicates over JSON-RPC via stdin/stdout. Agent events stream in real-time. The change tracker captures file state before modifications for SCM diffs and rollback. UI requests from the agent (questions, confirmations) are handled via VS Code dialogs.
+The extension spawns `sdd --mode rpc` and communicates over JSON-RPC via stdin/stdout. Agent events stream in real-time. The change tracker captures file state before modifications for SCM diffs and rollback. UI requests from the agent (questions, confirmations) are handled via VS Code dialogs.
 
 ## Links
 

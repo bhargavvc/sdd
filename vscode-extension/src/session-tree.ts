@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { GsdClient } from "./gsd-client.js";
+import type { GsdClient } from "./sdd-client.js";
 
 export interface SessionItem {
 	label: string;
@@ -12,11 +12,11 @@ export interface SessionItem {
 }
 
 /**
- * Tree view provider that lists GSD session files from the same directory
+ * Tree view provider that lists SDD session files from the same directory
  * as the currently active session.
  */
 export class GsdSessionTreeProvider implements vscode.TreeDataProvider<SessionItem>, vscode.Disposable {
-	public static readonly viewId = "gsd-sessions";
+	public static readonly viewId = "sdd-sessions";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -107,7 +107,7 @@ export class GsdSessionTreeProvider implements vscode.TreeDataProvider<SessionIt
 		);
 		if (!element.isCurrent) {
 			item.command = {
-				command: "gsd.switchSession",
+				command: "sdd.switchSession",
 				title: "Switch to Session",
 				arguments: [element.sessionFile],
 			};

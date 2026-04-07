@@ -7,8 +7,8 @@ import type { ExtensionContext } from "@sdd/pi-coding-agent";
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";
 import { readForensicsMarker } from "../forensics.js";
-import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveGSDPreferences } from "../preferences.js";
-import { resolveGsdRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
+import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveSDDPreferences } from "../preferences.js";
+import { resolveSddRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
 import { hasSkillSnapshot, detectNewSkills, formatSkillsXml } from "../skill-discovery.js";
 import { getActiveAutoWorktreeContext } from "../auto-worktree.js";
 import { getActiveWorktreeName, getWorktreeOriginalCwd } from "../worktree-command.js";
@@ -17,11 +17,11 @@ import { formatOverridesSection, loadActiveOverrides, loadFile, parseContinue, p
 import { toPosixPath } from "../../shared/mod.js";
 import { markCmuxPromptShown, shouldPromptToEnableCmux } from "../../cmux/index.js";
 
-const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 function warnDeprecatedAgentInstructions(): void {
   const paths = [
-    join(gsdHome, "agent-instructions.md"),
+    join(sddHome, "agent-instructions.md"),
     join(process.cwd(), ".sdd", "agent-instructions.md"),
   ];
   for (const path of paths) {
@@ -29,7 +29,7 @@ function warnDeprecatedAgentInstructions(): void {
       console.warn(
         `[SDD] DEPRECATED: ${path} is no longer loaded. ` +
         `Migrate your instructions to AGENTS.md (or CLAUDE.md) in the same directory. ` +
-        `See https://github.com/gsd-build/SDD-2/issues/1492`,
+        `See https://github.com/bhargavvc/SDD-2/issues/1492`,
       );
     }
   }
@@ -65,7 +65,7 @@ export async function buildBeforeAgentStartResult(
     }
   }
 
-  const { block: knowledgeBlock, globalSizeKb } = loadKnowledgeBlock(gsdHome, process.cwd());
+  const { block: knowledgeBlock, globalSizeKb } = loadKnowledgeBlock(sddHome, process.cwd());
   if (globalSizeKb > 4) {
     ctx.ui.notify(
       `SDD: ~/.sdd/agent/KNOWLEDGE.md is ${globalSizeKb.toFixed(1)}KB — consider trimming to keep system prompt lean.`,
@@ -96,20 +96,20 @@ export async function buildBeforeAgentStartResult(
   }
 
   let codebaseBlock = "";
-  const codebasePath = resolveGsdRootFile(process.cwd(), "CODEBASE");
+  const codebasePath = resolveSddRootFile(process.cwd(), "CODEBASE");
   if (existsSync(codebasePath)) {
     try {
       const rawContent = readFileSync(codebasePath, "utf-8").trim();
       if (rawContent) {
         // Cap injection size to ~2 000 tokens to avoid bloating every request.
-        // Full map is always available at .gsd/CODEBASE.md.
+        // Full map is always available at .sdd/CODEBASE.md.
         const MAX_CODEBASE_CHARS = 8_000;
         const generatedMatch = rawContent.match(/Generated: (\S+)/);
         const generatedAt = generatedMatch?.[1] ?? "unknown";
         const content = rawContent.length > MAX_CODEBASE_CHARS
-          ? rawContent.slice(0, MAX_CODEBASE_CHARS) + "\n\n*(truncated — see .gsd/CODEBASE.md for full map)*"
+          ? rawContent.slice(0, MAX_CODEBASE_CHARS) + "\n\n*(truncated — see .sdd/CODEBASE.md for full map)*"
           : rawContent;
-        codebaseBlock = `\n\n[PROJECT CODEBASE — File structure and descriptions (generated ${generatedAt}, may be stale — run /gsd codebase update to refresh)]\n\n${content}`;
+        codebaseBlock = `\n\n[PROJECT CODEBASE — File structure and descriptions (generated ${generatedAt}, may be stale — run /sdd codebase update to refresh)]\n\n${content}`;
       }
     } catch {
       // skip
@@ -124,7 +124,7 @@ export async function buildBeforeAgentStartResult(
   const forensicsInjection = !injection ? buildForensicsContextInjection(process.cwd()) : null;
 
   const worktreeBlock = buildWorktreeContextBlock();
-  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — GSD]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${codebaseBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
+  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — SDD]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${codebaseBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
 
   stopContextTimer({
     systemPromptSize: fullSystem.length,
@@ -135,9 +135,9 @@ export async function buildBeforeAgentStartResult(
 
   // Determine which context message to inject (guided execute takes priority)
   const contextMessage = injection
-    ? { customType: "gsd-guided-context", content: injection, display: false as const }
+    ? { customType: "sdd-guided-context", content: injection, display: false as const }
     : forensicsInjection
-      ? { customType: "gsd-forensics", content: forensicsInjection, display: false as const }
+      ? { customType: "sdd-forensics", content: forensicsInjection, display: false as const }
       : null;
 
   return {
@@ -146,11 +146,11 @@ export async function buildBeforeAgentStartResult(
   };
 }
 
-export function loadKnowledgeBlock(gsdHomeDir: string, cwd: string): { block: string; globalSizeKb: number } {
+export function loadKnowledgeBlock(sddHomeDir: string, cwd: string): { block: string; globalSizeKb: number } {
   // 1. Global knowledge (~/.sdd/agent/KNOWLEDGE.md) — cross-project, user-maintained
   let globalKnowledge = "";
   let globalSizeKb = 0;
-  const globalKnowledgePath = join(gsdHomeDir, "agent", "KNOWLEDGE.md");
+  const globalKnowledgePath = join(sddHomeDir, "agent", "KNOWLEDGE.md");
   if (existsSync(globalKnowledgePath)) {
     try {
       const content = readFileSync(globalKnowledgePath, "utf-8").trim();
@@ -425,7 +425,7 @@ function buildForensicsContextInjection(basePath: string): string | null {
  * is complete or the session expires.
  */
 export function clearForensicsMarker(basePath: string): void {
-  const markerPath = join(basePath, ".gsd", "runtime", "active-forensics.json");
+  const markerPath = join(basePath, ".sdd", "runtime", "active-forensics.json");
   if (existsSync(markerPath)) {
     try {
       unlinkSync(markerPath);

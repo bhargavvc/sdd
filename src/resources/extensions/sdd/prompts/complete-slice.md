@@ -27,11 +27,11 @@ Then:
 6. If this slice produced evidence that a requirement changed status (Active → Validated, Active → Deferred, etc.), call `sdd_save_decision` with scope="requirement", decision="{requirement-id}", choice="{new-status}", rationale="{evidence}". Do NOT write `.sdd/REQUIREMENTS.md` directly — the engine renders it from the database.
 7. Write `{{sliceSummaryPath}}` (compress all task summaries).
 8. Write `{{sliceUatPath}}` — a concrete UAT script with real test cases derived from the slice plan and task summaries. Include preconditions, numbered steps with expected outcomes, and edge cases. This must NOT be a placeholder or generic template — tailor every test case to what this slice actually built.
-9. Review task summaries for `key_decisions`. Append any significant decisions to `.gsd/DECISIONS.md` if missing.
-10. Review task summaries for patterns, gotchas, or non-obvious lessons learned. If any would save future agents from repeating investigation or hitting the same issues, append them to `.gsd/KNOWLEDGE.md`. Only add entries that are genuinely useful — don't pad with obvious observations.
-11. Call `gsd_complete_slice` with milestoneId, sliceId, the slice summary, and the UAT result. Do NOT manually mark the roadmap checkbox — the tool writes to the DB and renders the ROADMAP.md projection automatically.
+9. Review task summaries for `key_decisions`. Append any significant decisions to `.sdd/DECISIONS.md` if missing.
+10. Review task summaries for patterns, gotchas, or non-obvious lessons learned. If any would save future agents from repeating investigation or hitting the same issues, append them to `.sdd/KNOWLEDGE.md`. Only add entries that are genuinely useful — don't pad with obvious observations.
+11. Call `sdd_complete_slice` with milestoneId, sliceId, the slice summary, and the UAT result. Do NOT manually mark the roadmap checkbox — the tool writes to the DB and renders the ROADMAP.md projection automatically.
 12. Do not run git commands — the system commits your changes and handles any merge after this unit succeeds.
-13. Update `.gsd/PROJECT.md` if it exists — refresh current state if needed: use the `write` tool with `path: ".gsd/PROJECT.md"` and `content` containing the full updated document reflecting current project state. Do NOT use the `edit` tool for this — PROJECT.md is a full-document refresh.
+13. Update `.sdd/PROJECT.md` if it exists — refresh current state if needed: use the `write` tool with `path: ".sdd/PROJECT.md"` and `content` containing the full updated document reflecting current project state. Do NOT use the `edit` tool for this — PROJECT.md is a full-document refresh.
 
 **Autonomous execution:** Do not call `ask_user_questions` or `secure_env_collect`. You are running in auto-mode — there is no human available to answer questions. Make reasonable assumptions and document them in the slice summary. If a decision genuinely requires human input, note it in the summary and proceed with the best available option.
 

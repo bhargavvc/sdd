@@ -374,7 +374,7 @@ test('--bare combined with --output-format json', () => {
 
 test('command before flags: new-milestone --context-text --auto --verbose', () => {
   const opts = parseHeadlessArgs([
-    'node', 'gsd', 'headless',
+    'node', 'sdd', 'headless',
     'new-milestone',
     '--context-text', 'build something cool',
     '--auto',
@@ -388,7 +388,7 @@ test('command before flags: new-milestone --context-text --auto --verbose', () =
 
 test('command before flags: next --json --timeout', () => {
   const opts = parseHeadlessArgs([
-    'node', 'gsd', 'headless',
+    'node', 'sdd', 'headless',
     'next',
     '--json',
     '--timeout', '60000',
@@ -400,7 +400,7 @@ test('command before flags: next --json --timeout', () => {
 
 test('command between flags: --auto new-milestone --verbose', () => {
   const opts = parseHeadlessArgs([
-    'node', 'gsd', 'headless',
+    'node', 'sdd', 'headless',
     '--auto',
     'new-milestone',
     '--verbose',

@@ -1020,16 +1020,16 @@ test("assembled slash-command behavior keeps built-ins safe while preserving SDD
   assert.equal(builtInReject.status, null);
 
   // /sdd status is now a browser surface (S02), verify that
-  const gsdSurface = await submitBrowserInput("/sdd status");
-  assert.equal(gsdSurface.outcome.kind, "surface");
-  assert.equal(gsdSurface.outcome.surface, "sdd-status");
-  assert.equal(gsdSurface.status, null);
+  const sddSurface = await submitBrowserInput("/sdd status");
+  assert.equal(sddSurface.outcome.kind, "surface");
+  assert.equal(sddSurface.outcome.surface, "sdd-status");
+  assert.equal(sddSurface.status, null);
 
   // /sdd auto is a passthrough subcommand — reaches the bridge as a prompt
-  const gsdPrompt = await submitBrowserInput("/sdd auto");
-  assert.equal(gsdPrompt.outcome.kind, "prompt");
-  assert.equal(gsdPrompt.status, 200);
-  assert.equal(gsdPrompt.body.command, "prompt");
+  const sddPrompt = await submitBrowserInput("/sdd auto");
+  assert.equal(sddPrompt.outcome.kind, "prompt");
+  assert.equal(sddPrompt.status, 200);
+  assert.equal(sddPrompt.body.command, "prompt");
 
   const sentTypes = bridgeCommands.map((command) => command.type);
   assert.deepEqual(

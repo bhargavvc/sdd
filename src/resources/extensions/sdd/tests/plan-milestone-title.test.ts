@@ -1,9 +1,9 @@
 /**
- * Regression test for #2879: gsd_plan_milestone silently drops milestone title
+ * Regression test for #2879: sdd_plan_milestone silently drops milestone title
  * when the DB row pre-exists from state reconciliation.
  *
  * Scenario: state reconciliation inserts a milestone row with an empty title
- * (INSERT OR IGNORE). When gsd_plan_milestone is called later with a title,
+ * (INSERT OR IGNORE). When sdd_plan_milestone is called later with a title,
  * the title must be persisted — not silently dropped.
  */
 
@@ -16,7 +16,7 @@ import {
   insertMilestone,
   getMilestone,
   upsertMilestonePlanning,
-} from "../gsd-db.ts";
+} from "../sdd-db.ts";
 
 test("upsertMilestonePlanning updates title when DB row pre-exists with empty title (#2879)", () => {
   try {
@@ -28,7 +28,7 @@ test("upsertMilestonePlanning updates title when DB row pre-exists with empty ti
     assert.ok(before, "milestone row should exist after insertMilestone");
     assert.equal(before.title, "", "title should be empty after reconciliation insert");
 
-    // Step 2: Simulate gsd_plan_milestone — insertMilestone is called again
+    // Step 2: Simulate sdd_plan_milestone — insertMilestone is called again
     // with a title, but INSERT OR IGNORE skips it since the row exists.
     insertMilestone({ id: "M099", title: "My Important Milestone", status: "active" });
     const afterInsert = getMilestone("M099");

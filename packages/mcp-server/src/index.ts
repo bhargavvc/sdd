@@ -1,5 +1,5 @@
 /**
- * @gsd-build/mcp-server — MCP server for SDD orchestration.
+ * @bhargavvc/mcp-server — MCP server for SDD orchestration.
  */
 
 export { SessionManager } from './session-manager.js';

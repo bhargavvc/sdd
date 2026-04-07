@@ -11,7 +11,7 @@ import {
   insertVerificationEvidence,
   upsertDecision,
   openDatabase,
-} from "./gsd-db.js";
+} from "./sdd-db.js";
 import { isClosedStatus } from "./status-guards.js";
 import { writeManifest } from "./workflow-manifest.js";
 import { atomicWriteSync } from "./atomic-write.js";
@@ -39,7 +39,7 @@ export function replaySliceComplete(milestoneId: string, sliceId: string, ts: st
     const incompleteTasks = tasks.filter(t => !isClosedStatus(t.status));
     if (incompleteTasks.length > 0) {
       process.stderr.write(
-        `[gsd] reconcile: skipping complete_slice replay for ${sliceId} — ` +
+        `[sdd] reconcile: skipping complete_slice replay for ${sliceId} — ` +
         `${incompleteTasks.length} task(s) still pending\n`,
       );
       return;
@@ -348,7 +348,7 @@ function _reconcileWorktreeLogsInner(
   if (conflicts.length > 0) {
     // D-04: atomic all-or-nothing — block entire merge
     writeConflictsFile(mainBasePath, conflicts, worktreeBasePath);
-    logError("reconcile", `${conflicts.length} conflict(s) detected`, { count: String(conflicts.length), path: join(mainBasePath, ".gsd", "CONFLICTS.md") });
+    logError("reconcile", `${conflicts.length} conflict(s) detected`, { count: String(conflicts.length), path: join(mainBasePath, ".sdd", "CONFLICTS.md") });
     return { autoMerged: 0, conflicts };
   }
 

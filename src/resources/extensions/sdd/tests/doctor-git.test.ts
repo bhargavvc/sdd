@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 
-import { runGSDDoctor } from "../../doctor.ts";
+import { runSDDDoctor } from "../../doctor.ts";
 function run(cmd: string, cwd: string): string {
   return execSync(cmd, { cwd, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" }).trim();
 }
@@ -526,10 +526,10 @@ describe('doctor-git', async () => {
 
       // Move .sdd to an external location and replace with a symlink.
       // This simulates the ~/.sdd/projects/<hash> layout where .sdd is a symlink.
-      const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "sdd-data");
-      cleanups.push(externalGsd);
-      renameSync(join(dir, ".sdd"), externalGsd);
-      symlinkSync(externalGsd, join(dir, ".sdd"));
+      const externalSdd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "sdd-data");
+      cleanups.push(externalSdd);
+      renameSync(join(dir, ".sdd"), externalSdd);
+      symlinkSync(externalSdd, join(dir, ".sdd"));
 
       // Create a real registered worktree under the (now symlinked) .sdd/worktrees/
       mkdirSync(join(dir, ".sdd", "worktrees"), { recursive: true });
@@ -665,22 +665,22 @@ describe('doctor-git', async () => {
       // which only stages tracked files — new untracked files are not staged)
       writeFileSync(join(dir, "README.md"), "# test\nmodified content\n");
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const staleIssues = detect.issues.filter(i => i.code === "stale_uncommitted_changes");
       assert.ok(staleIssues.length > 0, "detects stale uncommitted changes");
       assert.ok(staleIssues[0]?.message.includes("minute"), "message mentions minutes");
       assert.ok(staleIssues[0]?.fixable === true, "stale uncommitted changes is fixable");
 
-      // Fix should create a gsd snapshot commit
-      const fixed = await runGSDDoctor(dir, { fix: true });
+      // Fix should create a sdd snapshot commit
+      const fixed = await runSDDDoctor(dir, { fix: true });
       assert.ok(
-        fixed.fixesApplied.some(f => f.includes("gsd snapshot")),
-        "fix creates a gsd snapshot commit",
+        fixed.fixesApplied.some(f => f.includes("sdd snapshot")),
+        "fix creates a sdd snapshot commit",
       );
 
-      // Verify the snapshot commit was created with the gsd snapshot tag
+      // Verify the snapshot commit was created with the sdd snapshot tag
       const log = run("git log -1 --oneline", dir);
-      assert.ok(log.includes("gsd snapshot"), "commit is tagged with gsd snapshot");
+      assert.ok(log.includes("sdd snapshot"), "commit is tagged with sdd snapshot");
     });
 
     // ─── Test: stale_uncommitted_changes NOT flagged when recent commit ──
@@ -691,7 +691,7 @@ describe('doctor-git', async () => {
       // Create uncommitted changes (but last commit is fresh — just created)
       writeFileSync(join(dir, "fresh-dirty.txt"), "recent changes\n");
 
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const staleIssues = detect.issues.filter(i => i.code === "stale_uncommitted_changes");
       assert.deepStrictEqual(staleIssues.length, 0, "recent commit with dirty tree NOT flagged as stale");
     });
@@ -712,7 +712,7 @@ describe('doctor-git', async () => {
       });
 
       // No uncommitted changes — tree is clean
-      const detect = await runGSDDoctor(dir);
+      const detect = await runSDDDoctor(dir);
       const staleIssues = detect.issues.filter(i => i.code === "stale_uncommitted_changes");
       assert.deepStrictEqual(staleIssues.length, 0, "old commit with clean tree NOT flagged as stale");
     });

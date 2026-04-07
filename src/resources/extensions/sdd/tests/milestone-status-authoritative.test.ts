@@ -1,6 +1,6 @@
 /**
  * Bug #2807: Web roadmap derives milestone status from slice heuristics
- * instead of authoritative GSD milestone state.
+ * instead of authoritative SDD milestone state.
  *
  * getMilestoneStatus() should prefer the authoritative `status` field on
  * WorkspaceMilestoneTarget (populated from the engine registry) rather

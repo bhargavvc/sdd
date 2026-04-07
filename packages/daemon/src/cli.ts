@@ -7,10 +7,10 @@ import { Logger } from './logger.js';
 import { Daemon } from './daemon.js';
 import { install, uninstall, status } from './launchd.js';
 
-const USAGE = `Usage: gsd-daemon [options]
+const USAGE = `Usage: sdd-daemon [options]
 
 Options:
-  --config <path>  Path to YAML config file (default: ~/.gsd/daemon.yaml)
+  --config <path>  Path to YAML config file (default: ~/.sdd/daemon.yaml)
   --verbose        Print log entries to stderr in addition to the log file
   --install        Install the launchd LaunchAgent (auto-starts on login)
   --uninstall      Uninstall the launchd LaunchAgent
@@ -48,27 +48,27 @@ async function main(): Promise<void> {
       scriptPath,
       configPath,
     });
-    process.stdout.write('gsd-daemon: launchd agent installed and loaded.\n');
+    process.stdout.write('sdd-daemon: launchd agent installed and loaded.\n');
     process.exit(0);
   }
 
   if (values.uninstall) {
     uninstall();
-    process.stdout.write('gsd-daemon: launchd agent uninstalled.\n');
+    process.stdout.write('sdd-daemon: launchd agent uninstalled.\n');
     process.exit(0);
   }
 
   if (values.status) {
     const result = status();
     if (!result.registered) {
-      process.stdout.write('gsd-daemon: not registered with launchd.\n');
+      process.stdout.write('sdd-daemon: not registered with launchd.\n');
     } else if (result.pid != null) {
       process.stdout.write(
-        `gsd-daemon: running (PID ${result.pid}, last exit status: ${result.lastExitStatus ?? 'n/a'})\n`,
+        `sdd-daemon: running (PID ${result.pid}, last exit status: ${result.lastExitStatus ?? 'n/a'})\n`,
       );
     } else {
       process.stdout.write(
-        `gsd-daemon: registered but not running (last exit status: ${result.lastExitStatus ?? 'n/a'})\n`,
+        `sdd-daemon: registered but not running (last exit status: ${result.lastExitStatus ?? 'n/a'})\n`,
       );
     }
     process.exit(0);
@@ -91,6 +91,6 @@ async function main(): Promise<void> {
 
 main().catch((err: unknown) => {
   const msg = err instanceof Error ? err.message : String(err);
-  process.stderr.write(`gsd-daemon: fatal: ${msg}\n`);
+  process.stderr.write(`sdd-daemon: fatal: ${msg}\n`);
   process.exit(1);
 });

@@ -15,7 +15,7 @@ Read the reference file for the specific capability being added:
 
 Locate the existing extension file. Check:
 - `~/.pi/agent/extensions/` (global community extensions)
-- `.gsd/extensions/` (project-local)
+- `.sdd/extensions/` (project-local)
 
 Read the current extension code to understand its structure.
 

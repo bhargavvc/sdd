@@ -24,8 +24,8 @@ try {
     env: { ...process.env, SDD_NON_INTERACTIVE: "1" },
   });
 
-  const gsdDir = join(tmpDir, ".sdd");
-  if (!existsSync(gsdDir)) {
+  const sddDir = join(tmpDir, ".sdd");
+  if (!existsSync(sddDir)) {
     console.error(`.sdd directory not created in ${tmpDir}`);
     process.exit(1);
   }

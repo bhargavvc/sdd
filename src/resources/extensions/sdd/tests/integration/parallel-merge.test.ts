@@ -43,7 +43,7 @@ import {
   closeDatabase,
   insertMilestone,
   updateMilestoneStatus,
-} from "../../gsd-db.ts";
+} from "../../sdd-db.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -478,9 +478,9 @@ test("mergeAllCompleted — by-completion order respects startedAt", async () =>
 
 /** Set up a worktree DB with a milestone marked complete */
 function setupWorktreeDb(basePath: string, mid: string): void {
-  const wtGsdDir = join(basePath, ".gsd", "worktrees", mid, ".gsd");
-  mkdirSync(wtGsdDir, { recursive: true });
-  const dbPath = join(wtGsdDir, "gsd.db");
+  const wtSddDir = join(basePath, ".sdd", "worktrees", mid, ".sdd");
+  mkdirSync(wtSddDir, { recursive: true });
+  const dbPath = join(wtSddDir, "sdd.db");
   openDatabase(dbPath);
   insertMilestone({ id: mid, title: `Milestone ${mid}`, status: "complete" });
   updateMilestoneStatus(mid, "complete", new Date().toISOString());

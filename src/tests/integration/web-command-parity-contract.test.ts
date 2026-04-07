@@ -15,7 +15,7 @@ const {
   setCommandSurfacePending,
   surfaceOutcomeToOpenRequest,
 } = await import("../../../web/lib/command-surface-contract.ts")
-const gsdExtension = await import("../../resources/extensions/gsd/index.ts")
+const sddExtension = await import("../../resources/extensions/sdd/index.ts")
 
 const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">([
   ["settings", "surface"],
@@ -49,7 +49,7 @@ const DEFERRED_BROWSER_REJECTS = ["share", "copy", "changelog", "hotkeys", "tree
 async function collectRegisteredSddCommandRoots(): Promise<string[]> {
   const commands = new Map<string, unknown>()
 
-  await gsdExtension.default({
+  await sddExtension.default({
     registerCommand(name: string, options: unknown) {
       commands.set(name, options)
     },
@@ -328,11 +328,11 @@ test("SDD dispatch edge cases", async (t) => {
 })
 
 test("every SDD surface dispatches through the contract wiring end-to-end", async (t) => {
-  const gsdSurfaces = [...EXPECTED_SDD_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
+  const sddSurfaces = [...EXPECTED_SDD_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
 
-  assert.equal(gsdSurfaces.length, 19, "should have exactly 19 SDD surface subcommands")
+  assert.equal(sddSurfaces.length, 19, "should have exactly 19 SDD surface subcommands")
 
-  for (const [subcommand] of gsdSurfaces) {
+  for (const [subcommand] of sddSurfaces) {
     await t.test(`/sdd ${subcommand} -> dispatch -> open request -> surface state`, () => {
       const outcome = dispatchBrowserSlashCommand(`/sdd ${subcommand}`)
       assert.equal(outcome.kind, "surface")
@@ -680,7 +680,7 @@ test("surface action state keeps compaction summaries inspectable", () => {
 })
 
 test("command-surface session affordances use the shared store action path", () => {
-  const commandSurfacePath = resolve(import.meta.dirname, "../../../web/components/gsd/command-surface.tsx")
+  const commandSurfacePath = resolve(import.meta.dirname, "../../../web/components/sdd/command-surface.tsx")
   const commandSurfaceSource = readFileSync(commandSurfacePath, "utf-8")
 
   assert.match(

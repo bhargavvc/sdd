@@ -38,8 +38,8 @@ function resolveExtensionDir(): string {
   if (existsSync(join(moduleDir, "prompts"))) return moduleDir;
 
   // Fallback: user-local agent directory
-  const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
-  const agentSddDir = join(gsdHome, "agent", "extensions", "sdd");
+  const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+  const agentSddDir = join(sddHome, "agent", "extensions", "sdd");
   if (existsSync(join(agentSddDir, "prompts"))) return agentSddDir;
 
   // Last resort: return the module dir (warmCache will silently handle the miss)
@@ -136,7 +136,7 @@ export function loadPrompt(name: string, vars: Record<string, string> = {}): str
   for (const [key, value] of Object.entries(effectiveVars)) {
     // Use split/join instead of replaceAll to avoid JavaScript's special
     // replacement patterns ($', $`, $&) being interpreted in the value.
-    // See: https://github.com/gsd-build/gsd-2/issues/2968
+    // See: https://github.com/bhargavvc/sdd/issues/2968
     content = content.split(`{{${key}}}`).join(value);
   }
 

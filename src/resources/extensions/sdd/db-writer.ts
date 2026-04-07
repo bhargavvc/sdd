@@ -236,7 +236,7 @@ export async function nextDecisionId(): Promise<string> {
  */
 export async function nextRequirementId(): Promise<string> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
     const adapter = db._getAdapter();
     if (!adapter) return 'R001';
 
@@ -279,7 +279,7 @@ export async function saveRequirementToDb(
   basePath: string,
 ): Promise<{ id: string }> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./sdd-db.js');
 
     const id = await nextRequirementId();
 
@@ -323,7 +323,7 @@ export async function saveRequirementToDb(
 
     const nonSuperseded = allRequirements.filter(r => r.superseded_by == null);
     const md = generateRequirementsMd(nonSuperseded);
-    const filePath = resolveGsdRootFile(basePath, 'REQUIREMENTS');
+    const filePath = resolveSddRootFile(basePath, 'REQUIREMENTS');
     try {
       await saveFile(filePath, md);
     } catch (diskErr) {

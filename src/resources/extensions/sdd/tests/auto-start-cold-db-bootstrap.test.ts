@@ -19,7 +19,7 @@ assertTrue(
   "pre-derive DB helper resolves the project-root DB path (#2841)",
 );
 assertTrue(
-  helperRegion.includes("openDatabase(gsdDbPath)"),
+  helperRegion.includes("openDatabase(sddDbPath)"),
   "pre-derive DB helper opens the resolved DB path (#2841)",
 );
 

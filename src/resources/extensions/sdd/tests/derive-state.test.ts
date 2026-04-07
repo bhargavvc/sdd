@@ -936,11 +936,11 @@ slice: S01
     try {
       // Create a milestone directory with only an empty slices subdir — no content files.
       // This would normally be a ghost, but it has a worktree directory.
-      const milestoneDir = join(base, '.gsd', 'milestones', 'M002');
+      const milestoneDir = join(base, '.sdd', 'milestones', 'M002');
       mkdirSync(join(milestoneDir, 'slices'), { recursive: true });
 
       // Create a worktree directory for M002, simulating an active worktree
-      const worktreeDir = join(base, '.gsd', 'worktrees', 'M002');
+      const worktreeDir = join(base, '.sdd', 'worktrees', 'M002');
       mkdirSync(worktreeDir, { recursive: true });
 
       // isGhostMilestone should return false because the worktree exists

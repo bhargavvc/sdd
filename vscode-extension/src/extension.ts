@@ -137,14 +137,14 @@ export function activate(context: vscode.ExtensionContext): void {
 	let currentProgress: { resolve: () => void } | undefined;
 
 	client.onEvent((evt) => {
-		const showProgress = vscode.workspace.getConfiguration("gsd").get<boolean>("showProgressNotifications", true);
+		const showProgress = vscode.workspace.getConfiguration("sdd").get<boolean>("showProgressNotifications", true);
 		if (!showProgress) return;
 
 		if (evt.type === "agent_start" && !currentProgress) {
 			vscode.window.withProgress(
 				{
 					location: vscode.ProgressLocation.Notification,
-					title: "GSD Agent",
+					title: "SDD Agent",
 					cancellable: true,
 				},
 				(progress, token) => {
@@ -184,7 +184,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	let lastContextWarning = 0;
 	client.onEvent(async (evt) => {
 		if (evt.type !== "message_end") return;
-		const showWarning = vscode.workspace.getConfiguration("gsd").get<boolean>("showContextWarning", true);
+		const showWarning = vscode.workspace.getConfiguration("sdd").get<boolean>("showContextWarning", true);
 		if (!showWarning) return;
 
 		// Throttle: at most once per 60 seconds
@@ -199,7 +199,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			const totalTokens = (stats?.inputTokens ?? 0) + (stats?.outputTokens ?? 0);
 			if (contextWindow <= 0) return;
 
-			const threshold = vscode.workspace.getConfiguration("gsd").get<number>("contextWarningThreshold", 80);
+			const threshold = vscode.workspace.getConfiguration("sdd").get<number>("contextWarningThreshold", 80);
 			const pct = Math.round((totalTokens / contextWindow) * 100);
 			if (pct >= threshold) {
 				lastContextWarning = Date.now();
@@ -208,7 +208,7 @@ export function activate(context: vscode.ExtensionContext): void {
 					"Compact Now",
 				);
 				if (action === "Compact Now") {
-					await vscode.commands.executeCommand("gsd.compact");
+					await vscode.commands.executeCommand("sdd.compact");
 				}
 			}
 		} catch {
@@ -549,14 +549,14 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- SCM commands -------------------------------------------------------
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.acceptAllChanges", () => {
+		vscode.commands.registerCommand("sdd.acceptAllChanges", () => {
 			changeTracker?.acceptAll();
 			vscode.window.showInformationMessage("All agent changes accepted.");
 		}),
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.discardAllChanges", async () => {
+		vscode.commands.registerCommand("sdd.discardAllChanges", async () => {
 			if (!changeTracker?.hasChanges) {
 				vscode.window.showInformationMessage("No agent changes to discard.");
 				return;
@@ -574,7 +574,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.discardFileChanges", async (resourceState: vscode.SourceControlResourceState) => {
+		vscode.commands.registerCommand("sdd.discardFileChanges", async (resourceState: vscode.SourceControlResourceState) => {
 			if (!changeTracker || !resourceState?.resourceUri) return;
 			const filePath = resourceState.resourceUri.fsPath;
 			const success = await changeTracker.discardFile(filePath);
@@ -585,7 +585,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.acceptFileChanges", (resourceState: vscode.SourceControlResourceState) => {
+		vscode.commands.registerCommand("sdd.acceptFileChanges", (resourceState: vscode.SourceControlResourceState) => {
 			if (!changeTracker || !resourceState?.resourceUri) return;
 			changeTracker.acceptFile(resourceState.resourceUri.fsPath);
 		}),
@@ -594,7 +594,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Checkpoint commands ------------------------------------------------
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.restoreCheckpoint", async (checkpointId: number) => {
+		vscode.commands.registerCommand("sdd.restoreCheckpoint", async (checkpointId: number) => {
 			if (!changeTracker) return;
 			const checkpoint = changeTracker.checkpoints.find((c) => c.id === checkpointId);
 			if (!checkpoint) return;
@@ -614,7 +614,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Diagnostic commands ------------------------------------------------
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.fixProblemsInFile", async () => {
+		vscode.commands.registerCommand("sdd.fixProblemsInFile", async () => {
 			if (!requireConnected()) return;
 			try {
 				await diagnosticBridge!.fixProblemsInFile();
@@ -625,7 +625,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.fixAllProblems", async () => {
+		vscode.commands.registerCommand("sdd.fixAllProblems", async () => {
 			if (!requireConnected()) return;
 			try {
 				await diagnosticBridge!.fixAllProblems();
@@ -636,7 +636,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.clearDiagnostics", () => {
+		vscode.commands.registerCommand("sdd.clearDiagnostics", () => {
 			diagnosticBridge?.clearFindings();
 		}),
 	);
@@ -644,13 +644,13 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Permission commands ------------------------------------------------
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.cycleApprovalMode", () => {
+		vscode.commands.registerCommand("sdd.cycleApprovalMode", () => {
 			permissionManager?.cycleMode();
 		}),
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.selectApprovalMode", () => {
+		vscode.commands.registerCommand("sdd.selectApprovalMode", () => {
 			permissionManager?.selectMode();
 		}),
 	);
@@ -658,19 +658,19 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Git commands -------------------------------------------------------
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.commitAgentChanges", () => {
+		vscode.commands.registerCommand("sdd.commitAgentChanges", () => {
 			gitIntegration?.commitAgentChanges();
 		}),
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.createAgentBranch", () => {
+		vscode.commands.registerCommand("sdd.createAgentBranch", () => {
 			gitIntegration?.createAgentBranch();
 		}),
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.showAgentDiff", () => {
+		vscode.commands.registerCommand("sdd.showAgentDiff", () => {
 			gitIntegration?.showAgentDiff();
 		}),
 	);

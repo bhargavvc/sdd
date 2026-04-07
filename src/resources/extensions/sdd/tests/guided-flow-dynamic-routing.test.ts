@@ -15,10 +15,10 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const sddDir = join(__dirname, "..");
 
 function readSrc(file: string): string {
-  return readFileSync(join(gsdDir, file), "utf-8");
+  return readFileSync(join(sddDir, file), "utf-8");
 }
 
 const guidedFlowSrc = readSrc("guided-flow.ts");

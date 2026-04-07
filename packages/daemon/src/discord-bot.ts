@@ -256,7 +256,7 @@ export class DiscordBot {
   }
 
   /**
-   * Set the EventBridge reference so the bot can dispatch /gsd-verbose commands.
+   * Set the EventBridge reference so the bot can dispatch /sdd-verbose commands.
    * Called by Daemon after creating the EventBridge.
    */
   setEventBridge(bridge: EventBridge): void {
@@ -286,34 +286,34 @@ export class DiscordBot {
     this.logger.info('command handled', { commandName, userId: interaction.user.id });
 
     switch (commandName) {
-      case 'gsd-status': {
+      case 'sdd-status': {
         const sessions = this.sessionManager.getAllSessions();
         const content = formatSessionStatus(sessions);
         interaction.reply({ content, ephemeral: true }).catch((err) => {
-          this.logger.warn('gsd-status reply failed', {
+          this.logger.warn('sdd-status reply failed', {
             error: err instanceof Error ? err.message : String(err),
           });
         });
         break;
       }
-      case 'gsd-start':
+      case 'sdd-start':
         this.handleGsdStart(interaction).catch((err) => {
-          this.logger.warn('gsd-start handler error', {
+          this.logger.warn('sdd-start handler error', {
             error: err instanceof Error ? err.message : String(err),
           });
         });
         break;
-      case 'gsd-stop':
+      case 'sdd-stop':
         this.handleGsdStop(interaction).catch((err) => {
-          this.logger.warn('gsd-stop handler error', {
+          this.logger.warn('sdd-stop handler error', {
             error: err instanceof Error ? err.message : String(err),
           });
         });
         break;
-      case 'gsd-verbose': {
+      case 'sdd-verbose': {
         if (!this.eventBridge) {
           interaction.reply({ content: 'Event bridge not available.', ephemeral: true }).catch((err) => {
-            this.logger.warn('gsd-verbose reply failed', {
+            this.logger.warn('sdd-verbose reply failed', {
               error: err instanceof Error ? err.message : String(err),
             });
           });
@@ -323,7 +323,7 @@ export class DiscordBot {
         const channelId = interaction.channelId;
         this.eventBridge.getVerbosityManager().setLevel(channelId, level);
         interaction.reply({ content: `Verbosity set to **${level}** for this channel.`, ephemeral: true }).catch((err) => {
-          this.logger.warn('gsd-verbose reply failed', {
+          this.logger.warn('sdd-verbose reply failed', {
             error: err instanceof Error ? err.message : String(err),
           });
         });
@@ -340,12 +340,12 @@ export class DiscordBot {
   }
 
   // ---------------------------------------------------------------------------
-  // Private: /gsd-start handler
+  // Private: /sdd-start handler
   // ---------------------------------------------------------------------------
 
   private async handleGsdStart(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
-    this.logger.info('gsd-start: scanning projects');
+    this.logger.info('sdd-start: scanning projects');
 
     if (!this.scanProjects) {
       await interaction.editReply({ content: 'Project scanning not available.' });
@@ -356,7 +356,7 @@ export class DiscordBot {
     try {
       projects = await this.scanProjects();
     } catch (err) {
-      this.logger.error('gsd-start: scan failed', {
+      this.logger.error('sdd-start: scan failed', {
         error: err instanceof Error ? err.message : String(err),
       });
       await interaction.editReply({ content: 'Failed to scan for projects.' });
@@ -371,7 +371,7 @@ export class DiscordBot {
     // Discord select menus support max 25 options
     const truncated = projects.slice(0, 25);
     const select = new StringSelectMenuBuilder()
-      .setCustomId('gsd-start-select')
+      .setCustomId('sdd-start-select')
       .setPlaceholder('Select a project to start')
       .addOptions(
         truncated.map((p) => ({
@@ -395,9 +395,9 @@ export class DiscordBot {
       }) as StringSelectMenuInteraction;
 
       const projectPath = collected.values[0];
-      this.logger.info('gsd-start: project selected', { projectPath });
+      this.logger.info('sdd-start: project selected', { projectPath });
 
-      // Defer the update immediately — startSession can take 10-30s to spawn the GSD process,
+      // Defer the update immediately — startSession can take 10-30s to spawn the SDD process,
       // and Discord's component interaction token expires in 3 seconds without deferral.
       await collected.deferUpdate();
 
@@ -409,7 +409,7 @@ export class DiscordBot {
         });
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
-        this.logger.error('gsd-start: startSession failed', { error: errMsg, projectPath });
+        this.logger.error('sdd-start: startSession failed', { error: errMsg, projectPath });
         await interaction.editReply({
           content: `❌ Failed to start session: ${errMsg}`,
           components: [],
@@ -417,18 +417,18 @@ export class DiscordBot {
       }
     } catch {
       // Timeout or other collector error
-      this.logger.info('gsd-start: selection timed out');
+      this.logger.info('sdd-start: selection timed out');
       await interaction.editReply({ content: 'Selection timed out.', components: [] });
     }
   }
 
   // ---------------------------------------------------------------------------
-  // Private: /gsd-stop handler
+  // Private: /sdd-stop handler
   // ---------------------------------------------------------------------------
 
   private async handleGsdStop(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
-    this.logger.info('gsd-stop: listing sessions');
+    this.logger.info('sdd-stop: listing sessions');
 
     const allSessions = this.sessionManager.getAllSessions();
     const activeSessions = allSessions.filter(
@@ -443,7 +443,7 @@ export class DiscordBot {
     // Discord select menus support max 25 options
     const truncated = activeSessions.slice(0, 25);
     const select = new StringSelectMenuBuilder()
-      .setCustomId('gsd-stop-select')
+      .setCustomId('sdd-stop-select')
       .setPlaceholder('Select a session to stop')
       .addOptions(
         truncated.map((s) => ({
@@ -466,7 +466,7 @@ export class DiscordBot {
       }) as StringSelectMenuInteraction;
 
       const sessionId = collected.values[0];
-      this.logger.info('gsd-stop: session selected', { sessionId });
+      this.logger.info('sdd-stop: session selected', { sessionId });
 
       try {
         await this.sessionManager.cancelSession(sessionId);
@@ -476,7 +476,7 @@ export class DiscordBot {
         });
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
-        this.logger.error('gsd-stop: cancelSession failed', { error: errMsg, sessionId });
+        this.logger.error('sdd-stop: cancelSession failed', { error: errMsg, sessionId });
         await collected.update({
           content: `❌ Failed to stop session: ${errMsg}`,
           components: [],
@@ -484,7 +484,7 @@ export class DiscordBot {
       }
     } catch {
       // Timeout or other collector error
-      this.logger.info('gsd-stop: selection timed out');
+      this.logger.info('sdd-stop: selection timed out');
       await interaction.editReply({ content: 'Selection timed out.', components: [] });
     }
   }

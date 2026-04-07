@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient, AgentEvent } from "./gsd-client.js";
+import type { GsdClient, AgentEvent } from "./sdd-client.js";
 
 type ApprovalMode = "ask" | "auto-approve" | "plan-only";
 
@@ -16,13 +16,13 @@ export class GsdPermissionManager implements vscode.Disposable {
 
 	constructor(private readonly client: GsdClient) {
 		// Load saved mode from configuration
-		this._mode = vscode.workspace.getConfiguration("gsd").get<ApprovalMode>("approvalMode", "auto-approve");
+		this._mode = vscode.workspace.getConfiguration("sdd").get<ApprovalMode>("approvalMode", "auto-approve");
 
 		this.disposables.push(
 			this._onModeChange,
 			vscode.workspace.onDidChangeConfiguration((e) => {
-				if (e.affectsConfiguration("gsd.approvalMode")) {
-					this._mode = vscode.workspace.getConfiguration("gsd").get<ApprovalMode>("approvalMode", "auto-approve");
+				if (e.affectsConfiguration("sdd.approvalMode")) {
+					this._mode = vscode.workspace.getConfiguration("sdd").get<ApprovalMode>("approvalMode", "auto-approve");
 					this._onModeChange.fire(this._mode);
 				}
 			}),
@@ -48,7 +48,7 @@ export class GsdPermissionManager implements vscode.Disposable {
 		const currentIdx = modes.indexOf(this._mode);
 		this._mode = modes[(currentIdx + 1) % modes.length];
 
-		await vscode.workspace.getConfiguration("gsd").update("approvalMode", this._mode, vscode.ConfigurationTarget.Workspace);
+		await vscode.workspace.getConfiguration("sdd").update("approvalMode", this._mode, vscode.ConfigurationTarget.Workspace);
 		this._onModeChange.fire(this._mode);
 
 		const labels: Record<ApprovalMode, string> = {
@@ -90,7 +90,7 @@ export class GsdPermissionManager implements vscode.Disposable {
 
 		if (selected) {
 			this._mode = selected.mode;
-			await vscode.workspace.getConfiguration("gsd").update("approvalMode", this._mode, vscode.ConfigurationTarget.Workspace);
+			await vscode.workspace.getConfiguration("sdd").update("approvalMode", this._mode, vscode.ConfigurationTarget.Workspace);
 			this._onModeChange.fire(this._mode);
 		}
 	}

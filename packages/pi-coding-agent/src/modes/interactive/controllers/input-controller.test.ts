@@ -97,13 +97,13 @@ test("input-controller: built-in slash commands stay in TUI dispatch", async () 
 });
 
 test("input-controller: extension slash commands fall through to session.prompt", async () => {
-	const { host, prompted, errors, history } = createHost({ knownSlashCommands: ["gsd"] });
+	const { host, prompted, errors, history } = createHost({ knownSlashCommands: ["sdd"] });
 
-	await host.defaultEditor.onSubmit("/gsd help");
+	await host.defaultEditor.onSubmit("/sdd help");
 
-	assert.deepEqual(prompted, ["/gsd help"], "known extension slash commands should reach session.prompt");
+	assert.deepEqual(prompted, ["/sdd help"], "known extension slash commands should reach session.prompt");
 	assert.deepEqual(errors, [], "known extension slash commands should not show unknown-command errors");
-	assert.deepEqual(history, ["/gsd help"], "known extension slash commands should still be added to history");
+	assert.deepEqual(history, ["/sdd help"], "known extension slash commands should still be added to history");
 });
 
 test("input-controller: prompt template slash commands fall through to session.prompt", async () => {

@@ -79,7 +79,7 @@ export interface GitPreferences {
    *  Default: the main branch (from `main_branch` or auto-detected).
    */
   pr_target_branch?: string;
-  /** Whether to squash `gsd snapshot:` commits into the next real autoCommit.
+  /** Whether to squash `sdd snapshot:` commits into the next real autoCommit.
    *  Enabled by default. Set to false to keep snapshot commits in history
    *  for forensic inspection.
    */
@@ -497,19 +497,19 @@ export class GitServiceImpl {
     const allExclusions = [...RUNTIME_EXCLUSION_PATHS, ...extraExclusions];
 
     // ── Parallel worker milestone scope (#1991) ──
-    // When GSD_MILESTONE_LOCK is set, this process is a parallel worker that
+    // When SDD_MILESTONE_LOCK is set, this process is a parallel worker that
     // must only commit files belonging to its own milestone. Exclude all other
     // milestone directories from staging to prevent cross-milestone pollution
     // (e.g., an M033 worker fabricating M032 artifacts in the same commit).
-    const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+    const milestoneLock = process.env.SDD_MILESTONE_LOCK;
     if (milestoneLock) {
-      const msDir = join(gsdRoot(this.basePath), "milestones");
+      const msDir = join(sddRoot(this.basePath), "milestones");
       if (existsSync(msDir)) {
         try {
           const entries = readdirSync(msDir, { withFileTypes: true });
           for (const entry of entries) {
             if (entry.isDirectory() && entry.name !== milestoneLock) {
-              allExclusions.push(`.gsd/milestones/${entry.name}/`);
+              allExclusions.push(`.sdd/milestones/${entry.name}/`);
             }
           }
         } catch {
@@ -571,7 +571,7 @@ export class GitServiceImpl {
       : `chore: auto-commit after ${unitType}\n\nSDD-Unit: ${unitId}`;
     nativeCommit(this.basePath, message, { allowEmpty: false });
 
-    // Absorb any preceding gsd snapshot commits into this real commit.
+    // Absorb any preceding sdd snapshot commits into this real commit.
     // Walk backwards from HEAD~1 counting consecutive snapshot subjects,
     // then soft-reset to before them and re-commit with the same message.
     this.absorbSnapshotCommits(message);
@@ -580,7 +580,7 @@ export class GitServiceImpl {
   }
 
   /**
-   * Squash consecutive `gsd snapshot:` commits that sit immediately below
+   * Squash consecutive `sdd snapshot:` commits that sit immediately below
    * HEAD into the current HEAD commit. This keeps the git history clean
    * after automated snapshot commits are superseded by real work.
    *
@@ -597,13 +597,13 @@ export class GitServiceImpl {
       // Opt-in guard — users can disable to keep snapshot commits for forensics
       if (this.prefs.absorb_snapshot_commits === false) return;
 
-      const GSD_SNAPSHOT_PREFIX = "gsd snapshot:";
+      const SDD_SNAPSHOT_PREFIX = "sdd snapshot:";
       let count = 0;
 
       // Walk back from HEAD~1 counting consecutive snapshot commits (cap at 10)
       for (let i = 1; i <= 10; i++) {
         const subject = nativeCommitSubject(this.basePath, `HEAD~${i}`);
-        if (!subject.startsWith(GSD_SNAPSHOT_PREFIX)) break;
+        if (!subject.startsWith(SDD_SNAPSHOT_PREFIX)) break;
         count = i;
       }
 
@@ -643,8 +643,8 @@ export class GitServiceImpl {
 
       // Re-run smartStage so the same RUNTIME_EXCLUSION_PATHS apply.
       // Snapshot commits used nativeAddTracked (git add -u) which stages
-      // ALL tracked modifications including .gsd/ state files. Without
-      // re-staging, those .gsd/ changes leak into the absorbed commit.
+      // ALL tracked modifications including .sdd/ state files. Without
+      // re-staging, those .sdd/ changes leak into the absorbed commit.
       this.smartStage();
 
       try {

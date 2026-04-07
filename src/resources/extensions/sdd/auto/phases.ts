@@ -412,8 +412,8 @@ export async function runPreDispatch(
     } else if (state.phase === "blocked") {
       const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
       await deps.stopAuto(ctx, pi, blockerMsg);
-      ctx.ui.notify(`${blockerMsg}. Fix and run /gsd auto.`, "warning");
-      deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
+      ctx.ui.notify(`${blockerMsg}. Fix and run /sdd auto.`, "warning");
+      deps.sendDesktopNotification("SDD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
       deps.logCmuxEvent(prefs, blockerMsg, "error");
     } else {
       const ids = incomplete.map((m: { id: string }) => m.id).join(", ");
@@ -511,8 +511,8 @@ export async function runPreDispatch(
   if (state.phase === "blocked") {
     const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
     await closeoutAndStop(ctx, pi, s, deps, blockerMsg);
-    ctx.ui.notify(`${blockerMsg}. Fix and run /gsd auto.`, "warning");
-    deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
+    ctx.ui.notify(`${blockerMsg}. Fix and run /sdd auto.`, "warning");
+    deps.sendDesktopNotification("SDD", blockerMsg, "error", "attention", basename(s.originalBasePath || s.basePath));
     deps.logCmuxEvent(prefs, blockerMsg, "error");
     debugLog("autoLoop", { phase: "exit", reason: "blocked" });
     deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "terminal", data: { reason: "blocked", blockers: state.blockers } });
@@ -553,7 +553,7 @@ export async function runDispatch(
     // gate) — pause instead of hard-stopping so the session is resumable with
     // `/sdd auto`. Error/info-level stops remain hard stops for infrastructure
     // failures and terminal conditions respectively.
-    // See: https://github.com/gsd-build/gsd-2/issues/2474
+    // See: https://github.com/bhargavvc/sdd/issues/2474
     if (dispatchResult.level === "warning") {
       ctx.ui.notify(dispatchResult.reason, "warning");
       await deps.pauseAuto(ctx, pi);
@@ -733,7 +733,7 @@ export async function runGuards(
 
       ctx.ui.notify(label, "warning");
       deps.sendDesktopNotification(
-        "GSD", label, "warning", "stop-directive",
+        "SDD", label, "warning", "stop-directive",
         basename(s.originalBasePath || s.basePath),
       );
 
@@ -767,7 +767,7 @@ export async function runGuards(
     // In parallel worker mode, only count cost from the current auto-mode session
     // to avoid hitting the ceiling due to historical project-wide spend (#2184).
     let costUnits = currentLedger?.units;
-    if (process.env.GSD_PARALLEL_WORKER && s.autoStartTime && Array.isArray(costUnits)) {
+    if (process.env.SDD_PARALLEL_WORKER && s.autoStartTime && Array.isArray(costUnits)) {
       const sessionStartISO = new Date(s.autoStartTime).toISOString();
       costUnits = costUnits.filter(
         (u: { startedAt?: string }) => u.startedAt != null && u.startedAt >= sessionStartISO,
@@ -800,7 +800,7 @@ export async function runGuards(
         // 100% — special enforcement logic (halt/pause/warn)
         const msg = `Budget ceiling ${deps.formatCost(budgetCeiling)} reached (spent ${deps.formatCost(totalCost)}).`;
         if (budgetEnforcementAction === "halt") {
-          deps.sendDesktopNotification("GSD", msg, "error", "budget", basename(s.originalBasePath || s.basePath));
+          deps.sendDesktopNotification("SDD", msg, "error", "budget", basename(s.originalBasePath || s.basePath));
           await deps.stopAuto(ctx, pi, "Budget ceiling reached");
           debugLog("autoLoop", { phase: "exit", reason: "budget-halt" });
           return { action: "break", reason: "budget-halt" };
@@ -810,14 +810,14 @@ export async function runGuards(
             `${msg} Pausing auto-mode — /sdd auto to override and continue.`,
             "warning",
           );
-          deps.sendDesktopNotification("GSD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
+          deps.sendDesktopNotification("SDD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
           deps.logCmuxEvent(prefs, msg, "warning");
           await deps.pauseAuto(ctx, pi);
           debugLog("autoLoop", { phase: "exit", reason: "budget-pause" });
           return { action: "break", reason: "budget-pause" };
         }
         ctx.ui.notify(`${msg} Continuing (enforcement: warn).`, "warning");
-        deps.sendDesktopNotification("GSD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
+        deps.sendDesktopNotification("SDD", msg, "warning", "budget", basename(s.originalBasePath || s.basePath));
         deps.logCmuxEvent(prefs, msg, "warning");
       } else if (threshold.pct < 100) {
         // Sub-100% — simple notification

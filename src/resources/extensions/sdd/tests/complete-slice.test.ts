@@ -420,7 +420,7 @@ console.log('\n=== complete-slice: step 13 specifies write tool for PROJECT.md (
 
   // Step 13 must explicitly name the `write` tool so the LLM doesn't
   // confuse it with `edit` (which requires path + oldText + newText).
-  // See: https://github.com/gsd-build/gsd-2/issues/2946
+  // See: https://github.com/bhargavvc/sdd/issues/2946
   const mentionsWriteTool =
     /PROJECT\.md.*\bwrite\b/i.test(prompt) ||
     /\bwrite\b.*PROJECT\.md/i.test(prompt);

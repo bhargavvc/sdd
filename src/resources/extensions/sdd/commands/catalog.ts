@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { loadRegistry } from "../workflow-templates.js";
 import { resolveProjectRoot } from "../worktree.js";
 
-const gsdHome = process.env.SDD_HOME || join(homedir(), ".sdd");
+const sddHome = process.env.SDD_HOME || join(homedir(), ".sdd");
 
 export interface SddCommandDefinition {
   cmd: string;
@@ -14,8 +14,8 @@ export interface SddCommandDefinition {
 
 type CompletionMap = Record<string, readonly SddCommandDefinition[]>;
 
-export const GSD_COMMAND_DESCRIPTION =
-  "GSD — Get Shit Done: /gsd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink|codebase";
+export const SDD_COMMAND_DESCRIPTION =
+  "SDD — Spec-Driven Development: /sdd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink|codebase";
 
 export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
@@ -71,7 +71,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly SddCommandDefinition[] = [
   { cmd: "mcp", desc: "MCP server status and connectivity check (status, check <server>)" },
   { cmd: "rethink", desc: "Conversational project reorganization — reorder, park, discard, add milestones" },
   { cmd: "workflow", desc: "Custom workflow lifecycle (new, run, list, validate, pause, resume)" },
-  { cmd: "codebase", desc: "Generate and manage codebase map (.gsd/CODEBASE.md)" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.sdd/CODEBASE.md)" },
 ];
 
 const NESTED_COMPLETIONS: CompletionMap = {
@@ -253,7 +253,7 @@ function filterOptions(
 
 function getExtensionCompletions(prefix: string, action: string) {
   try {
-    const extDir = join(gsdHome, "agent", "extensions");
+    const extDir = join(sddHome, "agent", "extensions");
     const ids: Array<{ id: string; name: string }> = [];
     for (const entry of readdirSync(extDir, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;

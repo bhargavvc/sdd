@@ -27,7 +27,7 @@ export interface LockData {
 }
 
 function lockPath(basePath: string): string {
-  return join(gsdRoot(basePath), effectiveLockFile());
+  return join(sddRoot(basePath), effectiveLockFile());
 }
 
 /** Write or update the lock file with current auto-mode state. */

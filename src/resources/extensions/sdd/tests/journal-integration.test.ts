@@ -284,7 +284,7 @@ test("runDispatch checks prior-slice completion against the project root in work
   const ic = makeIC(deps, {
     s: {
       ...makeSession(),
-      basePath: "/tmp/project/.gsd/worktrees/M029-xoklo9",
+      basePath: "/tmp/project/.sdd/worktrees/M029-xoklo9",
       originalBasePath: "/tmp/project",
     } as any,
   });

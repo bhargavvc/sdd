@@ -4,8 +4,8 @@
  * Regression test for the db_unavailable loop in worktree/symlink layouts.
  *
  * The path resolver must handle BOTH worktree path families:
- *   - /.gsd/worktrees/<MID>/...           (direct layout)
- *   - /.gsd/projects/<hash>/worktrees/<MID>/...  (symlink-resolved layout)
+ *   - /.sdd/worktrees/<MID>/...           (direct layout)
+ *   - /.sdd/projects/<hash>/worktrees/<MID>/...  (symlink-resolved layout)
  *
  * When the second layout is not recognised, ensureDbOpen derives a wrong DB
  * path, the open fails silently, and every completion tool call returns
@@ -30,49 +30,49 @@ console.log("\n=== #2517 Part 1: resolveProjectRootDbPath symlink layout ===");
 const { resolveProjectRootDbPath } = await import("../bootstrap/dynamic-tools.js");
 
 // Standard worktree layout (already works)
-const standardPath = `/home/user/myproject/.gsd/worktrees/M001/work`;
+const standardPath = `/home/user/myproject/.sdd/worktrees/M001/work`;
 const standardResult = resolveProjectRootDbPath(standardPath);
 assertEq(
   standardResult,
-  join("/home/user/myproject", ".gsd", "gsd.db"),
+  join("/home/user/myproject", ".sdd", "sdd.db"),
   "Standard worktree layout resolves to project root DB path",
 );
 
-// Symlink-resolved layout (the regression — /.gsd/projects/<hash>/worktrees/...)
-const symlinkPath = `/home/user/myproject/.gsd/projects/abc123def/worktrees/M001/work`;
+// Symlink-resolved layout (the regression — /.sdd/projects/<hash>/worktrees/...)
+const symlinkPath = `/home/user/myproject/.sdd/projects/abc123def/worktrees/M001/work`;
 const symlinkResult = resolveProjectRootDbPath(symlinkPath);
 assertEq(
   symlinkResult,
-  join("/home/user/myproject", ".gsd", "gsd.db"),
-  "Symlink-resolved layout (/.gsd/projects/<hash>/worktrees/) resolves to project root DB path (#2517)",
+  join("/home/user/myproject", ".sdd", "sdd.db"),
+  "Symlink-resolved layout (/.sdd/projects/<hash>/worktrees/) resolves to project root DB path (#2517)",
 );
 
 // Windows-style separators for symlink layout
 if (sep === "\\") {
-  const winSymlinkPath = `C:\\Users\\dev\\project\\.gsd\\projects\\abc123def\\worktrees\\M001\\work`;
+  const winSymlinkPath = `C:\\Users\\dev\\project\\.sdd\\projects\\abc123def\\worktrees\\M001\\work`;
   const winResult = resolveProjectRootDbPath(winSymlinkPath);
   assertEq(
     winResult,
-    join("C:\\Users\\dev\\project", ".gsd", "gsd.db"),
+    join("C:\\Users\\dev\\project", ".sdd", "sdd.db"),
     "Windows symlink layout resolves correctly",
   );
 } else {
   // On non-Windows, test forward-slash variant explicitly
-  const fwdSymlinkPath = `/home/user/myproject/.gsd/projects/abc123def/worktrees/M001/work`;
+  const fwdSymlinkPath = `/home/user/myproject/.sdd/projects/abc123def/worktrees/M001/work`;
   const fwdResult = resolveProjectRootDbPath(fwdSymlinkPath);
   assertEq(
     fwdResult,
-    join("/home/user/myproject", ".gsd", "gsd.db"),
+    join("/home/user/myproject", ".sdd", "sdd.db"),
     "Forward-slash symlink layout resolves correctly on POSIX",
   );
 }
 
 // Edge: deeper nesting under projects/<hash>/worktrees
-const deepSymlinkPath = `/home/user/myproject/.gsd/projects/deadbeef42/worktrees/M003/sub/dir`;
+const deepSymlinkPath = `/home/user/myproject/.sdd/projects/deadbeef42/worktrees/M003/sub/dir`;
 const deepResult = resolveProjectRootDbPath(deepSymlinkPath);
 assertEq(
   deepResult,
-  join("/home/user/myproject", ".gsd", "gsd.db"),
+  join("/home/user/myproject", ".sdd", "sdd.db"),
   "Deep symlink worktree path still resolves to project root DB",
 );
 
@@ -81,7 +81,7 @@ const normalPath = `/home/user/myproject`;
 const normalResult = resolveProjectRootDbPath(normalPath);
 assertEq(
   normalResult,
-  join("/home/user/myproject", ".gsd", "gsd.db"),
+  join("/home/user/myproject", ".sdd", "sdd.db"),
   "Non-worktree path is unchanged",
 );
 

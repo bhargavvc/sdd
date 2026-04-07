@@ -22,7 +22,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { ensureGitignore, hasGitTrackedGsdFiles } from "../../gitignore.ts";
+import { ensureGitignore, hasGitTrackedSddFiles } from "../../gitignore.ts";
 import { migrateToExternalState } from "../../migrate-external.ts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────

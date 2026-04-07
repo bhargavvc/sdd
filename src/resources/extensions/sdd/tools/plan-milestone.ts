@@ -197,7 +197,7 @@ export async function handlePlanMilestone(
       const existingSlices = getMilestoneSlices(params.milestoneId);
       const completedSlices = existingSlices.filter(s => isClosedStatus(s.status));
       if (completedSlices.length > 0) {
-        guardError = `cannot re-plan milestone ${params.milestoneId}: ${completedSlices.length} slice(s) already completed (${completedSlices.map(s => s.id).join(", ")}). Use gsd_reassess_roadmap to modify the roadmap.`;
+        guardError = `cannot re-plan milestone ${params.milestoneId}: ${completedSlices.length} slice(s) already completed (${completedSlices.map(s => s.id).join(", ")}). Use sdd_reassess_roadmap to modify the roadmap.`;
         return;
       }
 

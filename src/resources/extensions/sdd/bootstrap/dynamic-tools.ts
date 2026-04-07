@@ -32,9 +32,9 @@ export function resolveProjectRootDbPath(basePath: string): string {
     return join(projectRoot, ".sdd", "sdd.db");
   }
 
-  // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/M001/...
-  // The project root is everything before /.gsd/projects/ (#2517)
-  const symlinkMarker = `${sep}.gsd${sep}projects${sep}`;
+  // Symlink-resolved layout: /.sdd/projects/<hash>/worktrees/M001/...
+  // The project root is everything before /.sdd/projects/ (#2517)
+  const symlinkMarker = `${sep}.sdd${sep}projects${sep}`;
   const symlinkIdx = basePath.indexOf(symlinkMarker);
   if (symlinkIdx !== -1) {
     const afterProjects = basePath.slice(symlinkIdx + symlinkMarker.length);
@@ -42,22 +42,22 @@ export function resolveProjectRootDbPath(basePath: string): string {
     const worktreeSeg = `${sep}worktrees${sep}`;
     if (afterProjects.includes(worktreeSeg)) {
       const projectRoot = basePath.slice(0, symlinkIdx);
-      return join(projectRoot, ".gsd", "gsd.db");
+      return join(projectRoot, ".sdd", "sdd.db");
     }
   }
 
   // Forward-slash variant for symlink-resolved layout
-  const fwdSymlinkMarker = "/.gsd/projects/";
+  const fwdSymlinkMarker = "/.sdd/projects/";
   const fwdSymlinkIdx = basePath.indexOf(fwdSymlinkMarker);
   if (fwdSymlinkIdx !== -1) {
     const afterProjects = basePath.slice(fwdSymlinkIdx + fwdSymlinkMarker.length);
     if (afterProjects.includes("/worktrees/")) {
       const projectRoot = basePath.slice(0, fwdSymlinkIdx);
-      return join(projectRoot, ".gsd", "gsd.db");
+      return join(projectRoot, ".sdd", "sdd.db");
     }
   }
 
-  return join(basePath, ".gsd", "gsd.db");
+  return join(basePath, ".sdd", "sdd.db");
 }
 
 export async function ensureDbOpen(): Promise<boolean> {
@@ -107,7 +107,7 @@ export async function ensureDbOpen(): Promise<boolean> {
     }
 
     process.stderr.write(
-      `gsd-db: ensureDbOpen failed — no .gsd directory found (resolvedPath=${resolveProjectRootDbPath(basePath)}, cwd=${basePath})\n`,
+      `sdd-db: ensureDbOpen failed — no .sdd directory found (resolvedPath=${resolveProjectRootDbPath(basePath)}, cwd=${basePath})\n`,
     );
     return false;
   } catch (err) {
@@ -118,7 +118,7 @@ export async function ensureDbOpen(): Promise<boolean> {
       error: (err as Error).message ?? String(err),
     };
     process.stderr.write(
-      `gsd-db: ensureDbOpen failed — ${JSON.stringify(diagnostic)}\n`,
+      `sdd-db: ensureDbOpen failed — ${JSON.stringify(diagnostic)}\n`,
     );
     return false;
   }

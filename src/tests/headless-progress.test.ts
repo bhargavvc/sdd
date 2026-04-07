@@ -232,18 +232,18 @@ describe('summarizeToolArgs', () => {
     assert.equal(summarizeToolArgs('ls', { path: 'src/utils' }), 'src/utils')
   })
 
-  it('summarizes gsd tool with milestone/slice/task IDs', () => {
-    assert.equal(summarizeToolArgs('gsd_task_complete', {
+  it('summarizes sdd tool with milestone/slice/task IDs', () => {
+    assert.equal(summarizeToolArgs('sdd_task_complete', {
       milestoneId: 'M001', sliceId: 'S01', taskId: 'T01', oneLiner: 'Built the thing',
     }), 'M001/S01/T01 Built the thing')
   })
 
-  it('summarizes gsd_plan_milestone with milestone ID', () => {
-    assert.equal(summarizeToolArgs('gsd_plan_milestone', { milestoneId: 'M002' }), 'M002')
+  it('summarizes sdd_plan_milestone with milestone ID', () => {
+    assert.equal(summarizeToolArgs('sdd_plan_milestone', { milestoneId: 'M002' }), 'M002')
   })
 
-  it('summarizes gsd_decision_save with decision text', () => {
-    const result = summarizeToolArgs('gsd_decision_save', { decision: 'Use SQLite for persistence' })
+  it('summarizes sdd_decision_save with decision text', () => {
+    const result = summarizeToolArgs('sdd_decision_save', { decision: 'Use SQLite for persistence' })
     assert.equal(result, 'Use SQLite for persistence')
   })
 

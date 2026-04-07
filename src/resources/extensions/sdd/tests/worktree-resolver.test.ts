@@ -922,7 +922,7 @@ test("mergeAndExit still merges when mode is 'none' but session is in a worktree
   // where default is "none". They have an active worktree with committed work.
   // mergeAndExit must detect the active worktree and merge regardless of config.
   const s = makeSession({
-    basePath: "/project/.gsd/worktrees/M001",
+    basePath: "/project/.sdd/worktrees/M001",
     originalBasePath: "/project",
   });
   const deps = makeDeps({

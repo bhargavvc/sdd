@@ -1,4 +1,4 @@
-// GSD2 — Ollama API response types
+// SDD2 — Ollama API response types
 
 /**
  * Type definitions for the Ollama REST API.

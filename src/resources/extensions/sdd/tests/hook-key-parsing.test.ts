@@ -5,7 +5,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const sddDir = join(__dirname, "..");
 
 /**
  * Regression tests for #2826: hook/* completed-unit keys were parsed
@@ -19,7 +19,7 @@ const gsdDir = join(__dirname, "..");
 
 describe("splitCompletedKey (#2826)", () => {
   it("is exported from forensics.ts", () => {
-    const source = readFileSync(join(gsdDir, "forensics.ts"), "utf-8");
+    const source = readFileSync(join(sddDir, "forensics.ts"), "utf-8");
     assert.ok(
       source.includes("export function splitCompletedKey"),
       "forensics.ts must export splitCompletedKey helper",
@@ -67,7 +67,7 @@ describe("splitCompletedKey (#2826)", () => {
 
 describe("forensics detectMissingArtifacts uses splitCompletedKey (#2826)", () => {
   it("does not use indexOf for key splitting", () => {
-    const source = readFileSync(join(gsdDir, "forensics.ts"), "utf-8");
+    const source = readFileSync(join(sddDir, "forensics.ts"), "utf-8");
     // Extract only the detectMissingArtifacts function body
     const fnStart = source.indexOf("function detectMissingArtifacts");
     assert.ok(fnStart !== -1, "detectMissingArtifacts must exist");
@@ -87,7 +87,7 @@ describe("forensics detectMissingArtifacts uses splitCompletedKey (#2826)", () =
 describe("doctor-runtime-checks uses splitCompletedKey (#2826)", () => {
   it("does not use indexOf for key splitting in orphaned-key check", () => {
     const source = readFileSync(
-      join(gsdDir, "doctor-runtime-checks.ts"),
+      join(sddDir, "doctor-runtime-checks.ts"),
       "utf-8",
     );
     // Find the orphaned completed-units section

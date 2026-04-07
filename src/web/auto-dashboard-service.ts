@@ -59,8 +59,8 @@ function isPidAlive(pid: number): boolean {
  *
  * The subprocess always starts with fresh module state (s.active === false),
  * so it can never report active/paused correctly. We check:
- *   1. .gsd/auto.lock — if present and its PID is alive, auto IS running.
- *   2. .gsd/runtime/paused-session.json — if present, auto IS paused.
+ *   1. .sdd/auto.lock — if present and its PID is alive, auto IS running.
+ *   2. .sdd/runtime/paused-session.json — if present, auto IS paused.
  *
  * See #2705.
  */
@@ -73,7 +73,7 @@ function reconcileWithDiskState(
   if (data.active || data.paused) return data;
 
   // Check for paused-session.json first (paused takes precedence).
-  const pausedPath = join(projectCwd, ".gsd", "runtime", "paused-session.json");
+  const pausedPath = join(projectCwd, ".sdd", "runtime", "paused-session.json");
   if (checkExists(pausedPath)) {
     try {
       // Validate the file is readable JSON (not corrupt).
@@ -85,7 +85,7 @@ function reconcileWithDiskState(
   }
 
   // Check for session lock with a live PID.
-  const lockPath = join(projectCwd, ".gsd", "auto.lock");
+  const lockPath = join(projectCwd, ".sdd", "auto.lock");
   if (checkExists(lockPath)) {
     try {
       const lockData = JSON.parse(readFileSync(lockPath, "utf-8")) as { pid?: number };
@@ -163,7 +163,7 @@ export async function collectAuthoritativeAutoDashboardData(
 
         try {
           const parsed = JSON.parse(stdout) as AutoDashboardData;
-          const projectCwd = env.GSD_WEB_PROJECT_CWD || "";
+          const projectCwd = env.SDD_WEB_PROJECT_CWD || "";
           const reconciled = projectCwd
             ? reconcileWithDiskState(parsed, projectCwd, checkExists)
             : parsed;

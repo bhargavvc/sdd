@@ -16,7 +16,7 @@ import {
   insertAssessment,
   deleteAssessmentByScope,
   getMilestoneSlices,
-} from "../gsd-db.js";
+} from "../sdd-db.js";
 import { resolveMilestonePath, clearPathCache } from "../paths.js";
 import { saveFile, clearParseCache } from "../files.js";
 import { invalidateStateCache } from "../state.js";

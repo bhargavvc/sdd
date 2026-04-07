@@ -1,7 +1,7 @@
 /**
  * SDD Changelog — Fetch and display categorized release notes from GitHub
  *
- * Fetches releases from the gsd-build/gsd-2 GitHub repository,
+ * Fetches releases from the bhargavvc/sdd GitHub repository,
  * prompts the user for a version filter, and sends raw release notes
  * into the conversation for the LLM to summarize.
  *
@@ -103,7 +103,7 @@ function formatRelease(release: GitHubRelease): string {
 
 // ─── Entry Point ──────────────────────────────────────────────────────────────
 
-const RELEASES_URL = "https://api.github.com/repos/gsd-build/gsd-2/releases?per_page=100";
+const RELEASES_URL = "https://api.github.com/repos/bhargavvc/sdd/releases?per_page=100";
 
 export async function handleChangelog(
   args: string,
