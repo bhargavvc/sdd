@@ -87,6 +87,7 @@ export class SddClient implements vscode.Disposable {
 	private buffer = "";
 	private restartCount = 0;
 	private restartTimestamps: number[] = [];
+	private _autoRetryEnabled = false;
 
 	private readonly _onEvent = new vscode.EventEmitter<AgentEvent>();
 	readonly onEvent = this._onEvent.event;
@@ -110,6 +111,10 @@ export class SddClient implements vscode.Disposable {
 		return this.process !== null && this.process.exitCode === null;
 	}
 
+	get autoRetryEnabled(): boolean {
+		return this._autoRetryEnabled;
+	}
+
 	/**
 	 * Spawn the SDD agent in RPC mode.
 	 */
@@ -127,59 +132,82 @@ export class SddClient implements vscode.Disposable {
 
 		this.buffer = "";
 
-		this.process.on("error", (err) => {
-			this.process = null;
-			const msg = err.message.includes("ENOENT")
-				? `SDD binary "${this.binaryPath}" not found. Install: npm install -g sdd-pi`
-				: err.message.includes("EACCES")
-					? `Permission denied running "${this.binaryPath}". Check file permissions.`
-					: err.message.includes("EINVAL")
-						? `Cannot start SDD — invalid spawn arguments on Windows. Try setting "sdd.binaryPath" to the full path (e.g., "C:\\nvm4w\\nodejs\\sdd.cmd").`
-						: `SDD process error: ${err.message}`;
-			this._onError.fire(msg);
-			this._onConnectionChange.fire(false);
-		});
-
-		this.process.stdout?.on("data", (chunk: Buffer) => {
+		proc.stdout?.on("data", (chunk: Buffer) => {
 			this.buffer += chunk.toString("utf8");
 			this.drainBuffer();
 		});
 
-		this.process.stderr?.on("data", (chunk: Buffer) => {
+		proc.stderr?.on("data", (chunk: Buffer) => {
 			const text = chunk.toString("utf8").trim();
 			if (text) {
 				this._onError.fire(text);
 			}
 		});
 
-		this.process.on("exit", (code, signal) => {
-			this.process = null;
+		let startupSettled = false;
+		const startupResult = new Promise<void>((resolve, reject) => {
+			const cleanup = () => {
+				proc.off("spawn", handleSpawn);
+				proc.off("error", handleStartupError);
+			};
+			const handleSpawn = () => {
+				if (startupSettled) return;
+				startupSettled = true;
+				cleanup();
+				this._onConnectionChange.fire(true);
+				this.restartCount = 0;
+				resolve();
+			};
+			const handleStartupError = (err: NodeJS.ErrnoException) => {
+				if (startupSettled) return;
+				startupSettled = true;
+				cleanup();
+				if (this.process === proc) {
+					this.process = null;
+				}
+				const hint = err.code === "ENOENT"
+					? ` Make sure SDD is installed ("npm install -g sdd-pi") and set "sdd.binaryPath" to the absolute path if it is not on PATH.`
+					: "";
+				const message = `Failed to start SDD process: ${err.message}.${hint}`;
+				this._onError.fire(message);
+				reject(new Error(message));
+			};
+
+			proc.once("spawn", handleSpawn);
+			proc.once("error", handleStartupError);
+		});
+
+		proc.on("error", (err: NodeJS.ErrnoException) => {
+			if (!startupSettled) {
+				return;
+			}
+			if (this.process === proc) {
+				this.process = null;
+			}
+			this._onConnectionChange.fire(false);
+			const hint = err.code === "ENOENT"
+				? ` Make sure SDD is installed ("npm install -g sdd-pi") and set "sdd.binaryPath" to the absolute path if it is not on PATH.`
+				: "";
+			this._onError.fire(`SDD process error: ${err.message}.${hint}`);
+		});
+
+		proc.on("exit", (code, signal) => {
+			if (this.process === proc) {
+				this.process = null;
+			}
 			this.rejectAllPending(`SDD process exited (code=${code}, signal=${signal})`);
 			this._onConnectionChange.fire(false);
 
 			if (code !== 0 && signal !== "SIGTERM") {
 				const now = Date.now();
 				this.restartTimestamps.push(now);
+				// Keep only timestamps within the last 60 seconds
 				this.restartTimestamps = this.restartTimestamps.filter(t => now - t < 60_000);
 
-				// Provide specific error messages based on exit code
-				if (code === 1) {
-					this._onError.fire(
-						`SDD agent exited with error (code=1). Check:\n` +
-						`  1. Authentication: Run "sdd" in terminal to re-authenticate\n` +
-						`  2. Node.js version: sdd requires Node 22+ (run "node --version")\n` +
-						`  3. Output panel: View → Output → "SDD Agent" for details`,
-					);
-				}
-
 				if (this.restartTimestamps.length > 3) {
+					// Too many crashes within 60s — stop retrying
 					this._onError.fire(
-						`SDD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting.\n\n` +
-						`Troubleshooting:\n` +
-						`  1. Open terminal and run: sdd --version\n` +
-						`  2. If that fails: npm install -g sdd-pi\n` +
-						`  3. Check auth: Run "sdd" in terminal and complete setup\n` +
-						`  4. Retry: Run command "SDD: Start Agent"`,
+						`SDD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "SDD: Start Agent" to retry manually.`,
 					);
 				} else if (this.restartCount < 3) {
 					this.restartCount++;
@@ -188,27 +216,7 @@ export class SddClient implements vscode.Disposable {
 			}
 		});
 
-		this._onConnectionChange.fire(true);
-		this.restartCount = 0;
-	}
-
-	/**
-	 * Check if the binary exists before attempting to spawn.
-	 */
-	private async resolveBinary(): Promise<string | null> {
-		const { execSync } = require("node:child_process");
-		try {
-			const cmd = process.platform === "win32" ? `where "${this.binaryPath}"` : `which "${this.binaryPath}"`;
-			const result = execSync(cmd, { encoding: "utf8", timeout: 5000 }).trim();
-			return result.split(/\r?\n/)[0] || null;
-		} catch {
-			// If binaryPath is an absolute path, check if file exists
-			if (this.binaryPath.includes("/") || this.binaryPath.includes("\\")) {
-				const fs = require("node:fs");
-				return fs.existsSync(this.binaryPath) ? this.binaryPath : null;
-			}
-			return null;
-		}
+		await startupResult;
 	}
 
 	/**
@@ -220,25 +228,12 @@ export class SddClient implements vscode.Disposable {
 		}
 
 		const proc = this.process;
-		const pid = proc.pid;
 		this.process = null;
-
-		// On Windows with shell:true, SIGTERM only kills cmd.exe, not the child node process.
-		// Use taskkill /T to kill the entire process tree.
-		if (process.platform === "win32" && pid) {
-			try {
-				const { execSync } = require("node:child_process");
-				execSync(`taskkill /pid ${pid} /T /F`, { stdio: "ignore" });
-			} catch {
-				proc.kill("SIGKILL");
-			}
-		} else {
-			proc.kill("SIGTERM");
-		}
+		proc.kill("SIGTERM");
 
 		await new Promise<void>((resolve) => {
 			const timeout = setTimeout(() => {
-				try { proc.kill("SIGKILL"); } catch { /* already dead */ }
+				proc.kill("SIGKILL");
 				resolve();
 			}, 2000);
 			proc.on("exit", () => {
@@ -387,6 +382,7 @@ export class SddClient implements vscode.Disposable {
 	async setAutoRetry(enabled: boolean): Promise<void> {
 		const response = await this.send({ type: "set_auto_retry", enabled });
 		this.assertSuccess(response);
+		this._autoRetryEnabled = enabled;
 	}
 
 	/**
@@ -428,6 +424,7 @@ export class SddClient implements vscode.Disposable {
 	async newSession(): Promise<void> {
 		const response = await this.send({ type: "new_session" });
 		this.assertSuccess(response);
+		this._autoRetryEnabled = false;
 	}
 
 	/**
@@ -493,6 +490,48 @@ export class SddClient implements vscode.Disposable {
 		const response = await this.send({ type: "get_commands" });
 		this.assertSuccess(response);
 		return (response.data as { commands: SlashCommand[] }).commands;
+	}
+
+	// =========================================================================
+	// Fork
+	// =========================================================================
+
+	/**
+	 * Get messages that can be used as fork points.
+	 */
+	async getForkMessages(): Promise<{ entryId: string; text: string }[]> {
+		const response = await this.send({ type: "get_fork_messages" });
+		this.assertSuccess(response);
+		return (response.data as { messages: { entryId: string; text: string }[] }).messages;
+	}
+
+	/**
+	 * Fork the session at the given entry point.
+	 */
+	async forkSession(entryId: string): Promise<{ text: string; cancelled: boolean }> {
+		const response = await this.send({ type: "fork", entryId });
+		this.assertSuccess(response);
+		return response.data as { text: string; cancelled: boolean };
+	}
+
+	// =========================================================================
+	// Queue Modes
+	// =========================================================================
+
+	/**
+	 * Set steering queue mode.
+	 */
+	async setSteeringMode(mode: "all" | "one-at-a-time"): Promise<void> {
+		const response = await this.send({ type: "set_steering_mode", mode });
+		this.assertSuccess(response);
+	}
+
+	/**
+	 * Set follow-up queue mode.
+	 */
+	async setFollowUpMode(mode: "all" | "one-at-a-time"): Promise<void> {
+		const response = await this.send({ type: "set_follow_up_mode", mode });
+		this.assertSuccess(response);
 	}
 
 	dispose(): void {
@@ -646,15 +685,11 @@ export class SddClient implements vscode.Disposable {
 		const id = `req_${++this.requestId}`;
 		const fullCommand = { ...command, id };
 
-		// Prompts can take minutes; state/model commands should be fast
-		const isPrompt = command.type === "prompt" || command.type === "steer" || command.type === "follow_up";
-		const timeoutMs = isPrompt ? 300_000 : 30_000; // 5min for prompts, 30s for others
-
 		return new Promise<RpcResponse>((resolve, reject) => {
 			const timer = setTimeout(() => {
 				this.pendingRequests.delete(id);
 				reject(new Error(`Timeout waiting for response to ${command.type}`));
-			}, timeoutMs);
+			}, 30_000);
 
 			this.pendingRequests.set(id, { resolve, reject, timer });
 			this.process!.stdin!.write(JSON.stringify(fullCommand) + "\n");

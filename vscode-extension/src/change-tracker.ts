@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "node:fs";
-import type { GsdClient, AgentEvent } from "./sdd-client.js";
+import type { SddClient, AgentEvent } from "./sdd-client.js";
 
 export interface FileSnapshot {
 	uri: vscode.Uri;
@@ -21,7 +21,7 @@ export interface Checkpoint {
  * before the agent modifies it, enabling diff views, SCM integration,
  * and checkpoint/rollback functionality.
  */
-export class GsdChangeTracker implements vscode.Disposable {
+export class SddChangeTracker implements vscode.Disposable {
 	/** file path → original content (before first agent modification this session) */
 	private originals = new Map<string, string>();
 	/** Set of file paths modified in the current agent turn */
@@ -43,7 +43,7 @@ export class GsdChangeTracker implements vscode.Disposable {
 
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: SddClient) {
 		this.disposables.push(this._onDidChange, this._onCheckpointChange);
 
 		this.disposables.push(

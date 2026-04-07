@@ -1,32 +1,32 @@
 import * as vscode from "vscode";
 import { SddClient, ThinkingLevel } from "./sdd-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
-import { GsdSidebarProvider } from "./sidebar.js";
-import { GsdFileDecorationProvider } from "./file-decorations.js";
-import { GsdBashTerminal } from "./bash-terminal.js";
-import { GsdSessionTreeProvider } from "./session-tree.js";
-import { GsdConversationHistoryPanel } from "./conversation-history.js";
-import { GsdSlashCompletionProvider } from "./slash-completion.js";
-import { GsdCodeLensProvider } from "./code-lens.js";
-import { GsdActivityFeedProvider } from "./activity-feed.js";
-import { GsdChangeTracker } from "./change-tracker.js";
-import { GsdScmProvider } from "./scm-provider.js";
-import { GsdDiagnosticBridge } from "./diagnostics.js";
-import { GsdLineDecorationManager } from "./line-decorations.js";
-import { GsdGitIntegration } from "./git-integration.js";
-import { GsdPermissionManager } from "./permissions.js";
+import { SddSidebarProvider } from "./sidebar.js";
+import { SddFileDecorationProvider } from "./file-decorations.js";
+import { SddBashTerminal } from "./bash-terminal.js";
+import { SddSessionTreeProvider } from "./session-tree.js";
+import { SddConversationHistoryPanel } from "./conversation-history.js";
+import { SddSlashCompletionProvider } from "./slash-completion.js";
+import { SddCodeLensProvider } from "./code-lens.js";
+import { SddActivityFeedProvider } from "./activity-feed.js";
+import { SddChangeTracker } from "./change-tracker.js";
+import { SddScmProvider } from "./scm-provider.js";
+import { SddDiagnosticBridge } from "./diagnostics.js";
+import { SddLineDecorationManager } from "./line-decorations.js";
+import { SddGitIntegration } from "./git-integration.js";
+import { SddPermissionManager } from "./permissions.js";
 
-let client: GsdClient | undefined;
-let sidebarProvider: GsdSidebarProvider | undefined;
-let fileDecorations: GsdFileDecorationProvider | undefined;
-let sessionTreeProvider: GsdSessionTreeProvider | undefined;
-let activityFeedProvider: GsdActivityFeedProvider | undefined;
-let changeTracker: GsdChangeTracker | undefined;
-let scmProvider: GsdScmProvider | undefined;
-let diagnosticBridge: GsdDiagnosticBridge | undefined;
-let lineDecorations: GsdLineDecorationManager | undefined;
-let gitIntegration: GsdGitIntegration | undefined;
-let permissionManager: GsdPermissionManager | undefined;
+let client: SddClient | undefined;
+let sidebarProvider: SddSidebarProvider | undefined;
+let fileDecorations: SddFileDecorationProvider | undefined;
+let sessionTreeProvider: SddSessionTreeProvider | undefined;
+let activityFeedProvider: SddActivityFeedProvider | undefined;
+let changeTracker: SddChangeTracker | undefined;
+let scmProvider: SddScmProvider | undefined;
+let diagnosticBridge: SddDiagnosticBridge | undefined;
+let lineDecorations: SddLineDecorationManager | undefined;
+let gitIntegration: SddGitIntegration | undefined;
+let permissionManager: SddPermissionManager | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
@@ -50,14 +50,50 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(client);
 
 	// Log stderr to an output channel
-	const outputChannel = vscode.window.createOutputChannel("SDD Agent");
+	const outputChannel = vscode.window.createOutputChannel("SDD-2 Agent");
 	context.subscriptions.push(outputChannel);
 
 	client.onError((msg) => {
 		outputChannel.appendLine(`[stderr] ${msg}`);
 	});
 
-	client.onConnectionChange((connected) => {
+	// -- Persistent status bar item ----------------------------------------
+
+	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+	statusBarItem.command = "workbench.view.extension.sdd";
+	statusBarItem.text = "$(hubot) SDD";
+	statusBarItem.tooltip = "SDD Agent — click to open";
+	statusBarItem.show();
+	context.subscriptions.push(statusBarItem);
+
+	async function refreshStatusBar(): Promise<void> {
+		if (!client?.isConnected) {
+			statusBarItem.text = "$(hubot) SDD";
+			statusBarItem.tooltip = "SDD: Disconnected";
+			return;
+		}
+		try {
+			const [state, stats] = await Promise.all([
+				client.getState().catch(() => null),
+				client.getSessionStats().catch(() => null),
+			]);
+			const modelId = state?.model?.id ?? "";
+			const costPart = stats?.totalCost !== undefined ? ` | $${stats.totalCost.toFixed(4)}` : "";
+			const streamPart = state?.isStreaming ? " $(sync~spin)" : "";
+			statusBarItem.text = `$(hubot) SDD${modelId ? ` | ${modelId}` : ""}${costPart}${streamPart}`;
+			statusBarItem.tooltip = state?.model
+				? `SDD: Connected — ${state.model.provider}/${state.model.id}`
+				: "SDD: Connected";
+		} catch {
+			// ignore fetch errors
+		}
+	}
+
+	const statusBarTimer = setInterval(() => refreshStatusBar(), 10_000);
+	context.subscriptions.push({ dispose: () => clearInterval(statusBarTimer) });
+
+	client.onConnectionChange(async (connected) => {
+		await refreshStatusBar();
 		if (connected) {
 			vscode.window.setStatusBarMessage("$(hubot) SDD connected", 3000);
 		} else {
@@ -67,7 +103,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Sidebar -----------------------------------------------------------
 
-	sidebarProvider = new SddSidebarProvider(context.extensionUri, client, context.globalState);
+	sidebarProvider = new SddSidebarProvider(context.extensionUri, client);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
 			SddSidebarProvider.viewId,
@@ -77,7 +113,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- File decorations --------------------------------------------------
 
-	fileDecorations = new GsdFileDecorationProvider(client);
+	fileDecorations = new SddFileDecorationProvider(client);
 	context.subscriptions.push(
 		fileDecorations,
 		vscode.window.registerFileDecorationProvider(fileDecorations),
@@ -85,51 +121,51 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Bash terminal -----------------------------------------------------
 
-	const bashTerminal = new GsdBashTerminal(client);
+	const bashTerminal = new SddBashTerminal(client);
 	context.subscriptions.push(bashTerminal);
 
 	// -- Session tree view -------------------------------------------------
 
-	sessionTreeProvider = new GsdSessionTreeProvider(client);
+	sessionTreeProvider = new SddSessionTreeProvider(client);
 	context.subscriptions.push(
 		sessionTreeProvider,
-		vscode.window.registerTreeDataProvider(GsdSessionTreeProvider.viewId, sessionTreeProvider),
+		vscode.window.registerTreeDataProvider(SddSessionTreeProvider.viewId, sessionTreeProvider),
 	);
 
 	// -- Activity feed -----------------------------------------------------
 
-	activityFeedProvider = new GsdActivityFeedProvider(client);
+	activityFeedProvider = new SddActivityFeedProvider(client);
 	context.subscriptions.push(
 		activityFeedProvider,
-		vscode.window.registerTreeDataProvider(GsdActivityFeedProvider.viewId, activityFeedProvider),
+		vscode.window.registerTreeDataProvider(SddActivityFeedProvider.viewId, activityFeedProvider),
 	);
 
 	// -- Change tracker & SCM provider -------------------------------------
 
-	changeTracker = new GsdChangeTracker(client);
+	changeTracker = new SddChangeTracker(client);
 	context.subscriptions.push(changeTracker);
 
-	scmProvider = new GsdScmProvider(changeTracker, cwd);
+	scmProvider = new SddScmProvider(changeTracker, cwd);
 	context.subscriptions.push(scmProvider);
 
 	// -- Diagnostics -------------------------------------------------------
 
-	diagnosticBridge = new GsdDiagnosticBridge(client);
+	diagnosticBridge = new SddDiagnosticBridge(client);
 	context.subscriptions.push(diagnosticBridge);
 
 	// -- Line-level decorations --------------------------------------------
 
-	lineDecorations = new GsdLineDecorationManager(changeTracker!);
+	lineDecorations = new SddLineDecorationManager(changeTracker!);
 	context.subscriptions.push(lineDecorations);
 
 	// -- Git integration ---------------------------------------------------
 
-	gitIntegration = new GsdGitIntegration(changeTracker!, cwd);
+	gitIntegration = new SddGitIntegration(changeTracker!, cwd);
 	context.subscriptions.push(gitIntegration);
 
 	// -- Permissions -------------------------------------------------------
 
-	permissionManager = new GsdPermissionManager(client);
+	permissionManager = new SddPermissionManager(client);
 	context.subscriptions.push(permissionManager);
 
 	// -- Progress notifications --------------------------------------------
@@ -220,6 +256,48 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	context.subscriptions.push(registerChatParticipant(context, client));
 
+	// -- Conversation history panel ----------------------------------------
+
+	// (panel is created on demand via sdd.showHistory command)
+
+	// -- Slash command completion ------------------------------------------
+
+	const slashCompletion = new SddSlashCompletionProvider(client);
+	context.subscriptions.push(
+		slashCompletion,
+		vscode.languages.registerCompletionItemProvider(
+			[
+				{ language: "markdown" },
+				{ language: "plaintext" },
+				{ language: "typescript" },
+				{ language: "typescriptreact" },
+				{ language: "javascript" },
+				{ language: "javascriptreact" },
+			],
+			slashCompletion,
+			"/",
+		),
+	);
+
+	// -- Code lens "Ask SDD" -----------------------------------------------
+
+	const codeLensProvider = new SddCodeLensProvider(client);
+	context.subscriptions.push(
+		codeLensProvider,
+		vscode.languages.registerCodeLensProvider(
+			[
+				{ language: "typescript" },
+				{ language: "typescriptreact" },
+				{ language: "javascript" },
+				{ language: "javascriptreact" },
+				{ language: "python" },
+				{ language: "go" },
+				{ language: "rust" },
+			],
+			codeLensProvider,
+		),
+	);
+
 	// -- Commands -----------------------------------------------------------
 
 	// Start
@@ -231,7 +309,8 @@ export function activate(context: vscode.ExtensionContext): void {
 				const autoCompaction = vscode.workspace.getConfiguration("sdd").get<boolean>("autoCompaction", true);
 				await client!.setAutoCompaction(autoCompaction).catch(() => {});
 				sidebarProvider?.refresh();
-				vscode.window.setStatusBarMessage("$(hubot) SDD agent started", 3000);
+				refreshStatusBar();
+				vscode.window.showInformationMessage("SDD agent started.");
 			} catch (err) {
 				handleError(err, "Failed to start SDD");
 			}
@@ -243,7 +322,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand("sdd.stop", async () => {
 			await client!.stop();
 			sidebarProvider?.refresh();
-			vscode.window.setStatusBarMessage("$(hubot) SDD agent stopped", 3000);
+			vscode.window.showInformationMessage("SDD agent stopped.");
 		}),
 	);
 
@@ -254,7 +333,9 @@ export function activate(context: vscode.ExtensionContext): void {
 			try {
 				await client!.newSession();
 				sidebarProvider?.refresh();
-				vscode.window.setStatusBarMessage("$(hubot) New SDD session", 3000);
+				sessionTreeProvider?.refresh();
+				fileDecorations?.clear();
+				vscode.window.showInformationMessage("New SDD session started.");
 			} catch (err) {
 				handleError(err, "Failed to start new session");
 			}
@@ -284,7 +365,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				await client!.abort();
-				vscode.window.setStatusBarMessage("$(hubot) Operation aborted", 3000);
+				vscode.window.showInformationMessage("Operation aborted.");
 			} catch (err) {
 				handleError(err, "Failed to abort");
 			}
@@ -383,7 +464,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				await client!.compact();
-				vscode.window.setStatusBarMessage("$(hubot) Context compacted", 3000);
+				vscode.window.showInformationMessage("Context compacted.");
 				sidebarProvider?.refresh();
 			} catch (err) {
 				handleError(err, "Failed to compact context");
@@ -507,44 +588,246 @@ export function activate(context: vscode.ExtensionContext): void {
 		}),
 	);
 
-	// -- Editor Context Menu Actions ----------------------------------------
+	// Switch Session
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.switchSession", async (sessionFile?: string) => {
+			if (!requireConnected()) return;
+			const file = sessionFile ?? await (async () => {
+				const input = await vscode.window.showInputBox({
+					prompt: "Enter session file path",
+					placeHolder: "/path/to/session.jsonl",
+				});
+				return input;
+			})();
+			if (!file) return;
+			try {
+				await client!.switchSession(file);
+				sidebarProvider?.refresh();
+				sessionTreeProvider?.refresh();
+				vscode.window.showInformationMessage("Switched session.");
+			} catch (err) {
+				handleError(err, "Failed to switch session");
+			}
+		}),
+	);
 
-	const editorActions = [
-		{ command: "sdd.explain", label: "Explain", prompt: "Explain this code clearly. What does it do, why, and any edge cases?" },
-		{ command: "sdd.fix", label: "Fix", prompt: "Find and fix any bugs in this code. Show what you changed and why." },
-		{ command: "sdd.addTests", label: "Add Tests", prompt: "Write comprehensive tests for this code covering happy path, edge cases, and error conditions." },
-		{ command: "sdd.refactor", label: "Refactor", prompt: "Refactor this code for better readability, performance, and maintainability." },
-		{ command: "sdd.optimize", label: "Optimize", prompt: "Optimize this code for performance. Identify bottlenecks and improve them." },
-	];
+	// Refresh Sessions
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.refreshSessions", () => {
+			sessionTreeProvider?.refresh();
+		}),
+	);
 
-	for (const action of editorActions) {
-		context.subscriptions.push(
-			vscode.commands.registerCommand(action.command, async () => {
-				const editor = vscode.window.activeTextEditor;
-				if (!editor) return;
-				const selection = editor.selection;
-				const selectedText = editor.document.getText(selection);
-				if (!selectedText) {
-					vscode.window.showWarningMessage("Select some code first.");
+	// Show Conversation History
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.showHistory", () => {
+			if (!requireConnected()) return;
+			SddConversationHistoryPanel.createOrShow(context.extensionUri, client!);
+		}),
+	);
+
+	// Ask About Symbol (triggered by code lens)
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"sdd.askAboutSymbol",
+			async (symbolName: string, fileName: string, lineNumber: number) => {
+				if (!requireConnected()) return;
+				try {
+					const prompt = `Explain the \`${symbolName}\` function/class in ${fileName} (line ${lineNumber}). Be concise.`;
+					await client!.sendPrompt(prompt);
+				} catch (err) {
+					handleError(err, "Failed to send Ask SDD request");
+				}
+			},
+		),
+	);
+
+	// Clear File Decorations
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.clearFileDecorations", () => {
+			fileDecorations?.clear();
+		}),
+	);
+
+	// Clear Activity Feed
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.clearActivity", () => {
+			activityFeedProvider?.clear();
+		}),
+	);
+
+	// Fork Session
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.forkSession", async () => {
+			if (!requireConnected()) return;
+			try {
+				const messages = await client!.getForkMessages();
+				if (messages.length === 0) {
+					vscode.window.showInformationMessage("No fork points available.");
 					return;
 				}
-				const filePath = editor.document.uri.fsPath;
-				const relativePath = vscode.workspace.asRelativePath(filePath);
-				const startLine = selection.start.line + 1;
-				const message = `${action.prompt}\n\nFile: ${relativePath} (line ${startLine})\n\`\`\`\n${selectedText}\n\`\`\``;
-
-				if (!client?.isConnected) {
-					try { await client!.start(); } catch { return; }
-				}
-				try {
+				const items = messages.map((m) => ({
+					label: m.text.slice(0, 80) + (m.text.length > 80 ? "..." : ""),
+					description: m.entryId,
+					entryId: m.entryId,
+				}));
+				const selected = await vscode.window.showQuickPick(items, {
+					placeHolder: "Select a message to fork from",
+				});
+				if (!selected) return;
+				const result = await client!.forkSession(selected.entryId);
+				if (!result.cancelled) {
+					vscode.window.showInformationMessage("Session forked successfully.");
 					sidebarProvider?.refresh();
-					await client!.sendPrompt(message);
-				} catch (err) {
-					handleError(err, `Failed to ${action.label.toLowerCase()}`);
+					sessionTreeProvider?.refresh();
 				}
-			}),
-		);
-	}
+			} catch (err) {
+				handleError(err, "Failed to fork session");
+			}
+		}),
+	);
+
+	// Toggle Steering Mode
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.toggleSteeringMode", async () => {
+			if (!requireConnected()) return;
+			try {
+				const state = await client!.getState();
+				const next = state.steeringMode === "all" ? "one-at-a-time" : "all";
+				await client!.setSteeringMode(next);
+				vscode.window.showInformationMessage(`Steering mode: ${next}`);
+				sidebarProvider?.refresh();
+			} catch (err) {
+				handleError(err, "Failed to toggle steering mode");
+			}
+		}),
+	);
+
+	// Toggle Follow-Up Mode
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.toggleFollowUpMode", async () => {
+			if (!requireConnected()) return;
+			try {
+				const state = await client!.getState();
+				const next = state.followUpMode === "all" ? "one-at-a-time" : "all";
+				await client!.setFollowUpMode(next);
+				vscode.window.showInformationMessage(`Follow-up mode: ${next}`);
+				sidebarProvider?.refresh();
+			} catch (err) {
+				handleError(err, "Failed to toggle follow-up mode");
+			}
+		}),
+	);
+
+	// Refactor Symbol (code lens)
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"sdd.refactorSymbol",
+			async (symbolName: string, fileName: string, lineNumber: number) => {
+				if (!requireConnected()) return;
+				try {
+					await client!.sendPrompt(`Refactor the \`${symbolName}\` function/class in ${fileName} (line ${lineNumber}). Improve clarity, performance, or structure while preserving behavior.`);
+				} catch (err) {
+					handleError(err, "Failed to send refactor request");
+				}
+			},
+		),
+	);
+
+	// Find Bugs in Symbol (code lens)
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"sdd.findBugsSymbol",
+			async (symbolName: string, fileName: string, lineNumber: number) => {
+				if (!requireConnected()) return;
+				try {
+					await client!.sendPrompt(`Review the \`${symbolName}\` function/class in ${fileName} (line ${lineNumber}) for potential bugs, edge cases, and issues.`);
+				} catch (err) {
+					handleError(err, "Failed to send bug review request");
+				}
+			},
+		),
+	);
+
+	// Generate Tests for Symbol (code lens)
+	context.subscriptions.push(
+		vscode.commands.registerCommand(
+			"sdd.generateTestsSymbol",
+			async (symbolName: string, fileName: string, lineNumber: number) => {
+				if (!requireConnected()) return;
+				try {
+					await client!.sendPrompt(`Generate comprehensive tests for the \`${symbolName}\` function/class in ${fileName} (line ${lineNumber}). Cover success paths, edge cases, and error scenarios.`);
+				} catch (err) {
+					handleError(err, "Failed to send test generation request");
+				}
+			},
+		),
+	);
+
+	// Toggle Auto-Retry
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.toggleAutoRetry", async () => {
+			if (!requireConnected()) return;
+			try {
+				const next = !client!.autoRetryEnabled;
+				await client!.setAutoRetry(next);
+				vscode.window.showInformationMessage(`Auto-retry ${next ? "enabled" : "disabled"}.`);
+				sidebarProvider?.refresh();
+			} catch (err) {
+				handleError(err, "Failed to toggle auto-retry");
+			}
+		}),
+	);
+
+	// Abort Retry
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.abortRetry", async () => {
+			if (!requireConnected()) return;
+			try {
+				await client!.abortRetry();
+				vscode.window.showInformationMessage("Retry aborted.");
+			} catch (err) {
+				handleError(err, "Failed to abort retry");
+			}
+		}),
+	);
+
+	// Set Session Name
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.setSessionName", async () => {
+			if (!requireConnected()) return;
+			const name = await vscode.window.showInputBox({
+				prompt: "Enter a name for this session",
+				placeHolder: "e.g. auth-refactor",
+			});
+			if (!name) return;
+			try {
+				await client!.setSessionName(name);
+				sidebarProvider?.refresh();
+				vscode.window.showInformationMessage(`Session named "${name}".`);
+			} catch (err) {
+				handleError(err, "Failed to set session name");
+			}
+		}),
+	);
+
+	// Copy Last Response
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.copyLastResponse", async () => {
+			if (!requireConnected()) return;
+			try {
+				const text = await client!.getLastAssistantText();
+				if (!text) {
+					vscode.window.showInformationMessage("No response to copy.");
+					return;
+				}
+				await vscode.env.clipboard.writeText(text);
+				vscode.window.showInformationMessage("Last response copied to clipboard.");
+			} catch (err) {
+				handleError(err, "Failed to copy last response");
+			}
+		}),
+	);
 
 	// -- SCM commands -------------------------------------------------------
 

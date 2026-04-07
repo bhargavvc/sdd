@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient, AgentEvent } from "./sdd-client.js";
+import type { SddClient, AgentEvent } from "./sdd-client.js";
 
 type ApprovalMode = "ask" | "auto-approve" | "plan-only";
 
@@ -7,14 +7,14 @@ type ApprovalMode = "ask" | "auto-approve" | "plan-only";
  * Permission/approval system for agent actions.
  * Can be configured to prompt before file writes, command execution, etc.
  */
-export class GsdPermissionManager implements vscode.Disposable {
+export class SddPermissionManager implements vscode.Disposable {
 	private _mode: ApprovalMode = "auto-approve";
 	private disposables: vscode.Disposable[] = [];
 
 	private readonly _onModeChange = new vscode.EventEmitter<ApprovalMode>();
 	readonly onModeChange = this._onModeChange.event;
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: SddClient) {
 		// Load saved mode from configuration
 		this._mode = vscode.workspace.getConfiguration("sdd").get<ApprovalMode>("approvalMode", "auto-approve");
 

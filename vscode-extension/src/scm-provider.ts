@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
-import type { GsdChangeTracker } from "./change-tracker.js";
+import type { SddChangeTracker } from "./change-tracker.js";
 
 const SDD_ORIGINAL_SCHEME = "sdd-original";
 
@@ -9,18 +9,18 @@ const SDD_ORIGINAL_SCHEME = "sdd-original";
  * in a dedicated "SDD Agent" section of the Source Control panel.
  * Supports QuickDiff to show before/after diffs, and accept/discard per-file.
  */
-export class GsdScmProvider implements vscode.Disposable {
+export class SddScmProvider implements vscode.Disposable {
 	private readonly scm: vscode.SourceControl;
 	private readonly changesGroup: vscode.SourceControlResourceGroup;
-	private readonly contentProvider: GsdOriginalContentProvider;
+	private readonly contentProvider: SddOriginalContentProvider;
 	private disposables: vscode.Disposable[] = [];
 
 	constructor(
-		private readonly tracker: GsdChangeTracker,
+		private readonly tracker: SddChangeTracker,
 		private readonly workspaceRoot: string,
 	) {
 		// Register content provider for original file contents
-		this.contentProvider = new GsdOriginalContentProvider(tracker);
+		this.contentProvider = new SddOriginalContentProvider(tracker);
 		this.disposables.push(
 			vscode.workspace.registerTextDocumentContentProvider(
 				SDD_ORIGINAL_SCHEME,
@@ -105,11 +105,11 @@ export class GsdScmProvider implements vscode.Disposable {
  * TextDocumentContentProvider that serves the original (pre-agent) content
  * of files via the `sdd-original:` URI scheme.
  */
-class GsdOriginalContentProvider implements vscode.TextDocumentContentProvider {
+class SddOriginalContentProvider implements vscode.TextDocumentContentProvider {
 	private readonly _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 	readonly onDidChange = this._onDidChange.event;
 
-	constructor(private readonly tracker: GsdChangeTracker) {
+	constructor(private readonly tracker: SddChangeTracker) {
 		tracker.onDidChange((paths) => {
 			for (const p of paths) {
 				this._onDidChange.fire(vscode.Uri.file(p).with({ scheme: SDD_ORIGINAL_SCHEME }));

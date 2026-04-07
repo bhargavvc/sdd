@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import type { GsdChangeTracker, Checkpoint } from "./change-tracker.js";
+import type { SddChangeTracker, Checkpoint } from "./change-tracker.js";
 
 /**
  * TreeDataProvider that shows agent checkpoints (one per agent turn).
  * Each checkpoint can be restored to revert all file changes since that point.
  */
-export class GsdCheckpointProvider implements vscode.TreeDataProvider<Checkpoint>, vscode.Disposable {
+export class SddCheckpointProvider implements vscode.TreeDataProvider<Checkpoint>, vscode.Disposable {
 	public static readonly viewId = "sdd-checkpoints";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
@@ -13,7 +13,7 @@ export class GsdCheckpointProvider implements vscode.TreeDataProvider<Checkpoint
 
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly tracker: GsdChangeTracker) {
+	constructor(private readonly tracker: SddChangeTracker) {
 		this.disposables.push(
 			this._onDidChangeTreeData,
 			tracker.onCheckpointChange(() => this._onDidChangeTreeData.fire()),

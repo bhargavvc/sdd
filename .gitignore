@@ -1,3 +1,5 @@
+# ── SDD state dir (never check in) ──
+.sdd/
 
 # ── Compiled test output ──
 dist-test/

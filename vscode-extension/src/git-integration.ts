@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { exec } from "node:child_process";
-import type { GsdChangeTracker } from "./change-tracker.js";
+import type { SddChangeTracker } from "./change-tracker.js";
 
 /**
  * Provides git integration for agent changes — commit, branch, and diff.
  */
-export class GsdGitIntegration implements vscode.Disposable {
+export class SddGitIntegration implements vscode.Disposable {
 	private disposables: vscode.Disposable[] = [];
 
 	constructor(
-		private readonly tracker: GsdChangeTracker,
+		private readonly tracker: SddChangeTracker,
 		private readonly cwd: string,
 	) {}
 

@@ -1,16 +1,16 @@
 import * as vscode from "vscode";
-import type { GsdClient } from "./sdd-client.js";
+import type { SddClient } from "./sdd-client.js";
 
 /**
  * Integrates with VS Code's diagnostic system:
  * - Reads diagnostics (errors/warnings) from the Problems panel and sends them to the agent
  * - Provides a DiagnosticCollection for the agent to surface its own findings
  */
-export class GsdDiagnosticBridge implements vscode.Disposable {
+export class SddDiagnosticBridge implements vscode.Disposable {
 	private readonly collection: vscode.DiagnosticCollection;
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: SddClient) {
 		this.collection = vscode.languages.createDiagnosticCollection("sdd");
 		this.disposables.push(this.collection);
 	}

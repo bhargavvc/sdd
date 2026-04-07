@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
-import * as path from "node:path";
-import * as fs from "node:fs";
-import type { SddClient, AgentEvent } from "./sdd-client.js";
+import type { SddClient, SessionStats, ThinkingLevel } from "./sdd-client.js";
 
 /**
  * Send a message through VS Code's Chat panel so the user sees the response.
@@ -16,28 +14,33 @@ async function sendViaChat(message: string): Promise<void> {
  * Designed for information density without clutter — collapsible sections,
  * hidden empty data, and consolidated action buttons.
  */
-export class GsdSidebarProvider implements vscode.WebviewViewProvider {
+export class SddSidebarProvider implements vscode.WebviewViewProvider {
 	public static readonly viewId = "sdd-sidebar";
 
 	private view?: vscode.WebviewView;
 	private disposables: vscode.Disposable[] = [];
-	private chatMessages: ChatMessage[] = [];
-	private outputChannel: vscode.OutputChannel;
-	private globalState: vscode.Memento;
+	private refreshTimer: ReturnType<typeof setInterval> | undefined;
 
 	constructor(
-		_extensionUri: vscode.Uri,
+		private readonly extensionUri: vscode.Uri,
 		private readonly client: SddClient,
-		globalState?: vscode.Memento,
 	) {
-		this.globalState = globalState ?? { get: () => undefined, update: async () => {}, keys: () => [] } as unknown as vscode.Memento;
-		this.outputChannel = vscode.window.createOutputChannel("SDD Events");
 		this.disposables.push(
-			this.outputChannel,
-			client.onConnectionChange(() => {
-				this.sendToWebview({ type: "statusUpdate", connected: this.client.isConnected });
+			client.onConnectionChange(() => this.refresh()),
+			client.onEvent((evt) => {
+				switch (evt.type) {
+					case "agent_start":
+					case "agent_end":
+					case "model_switched":
+					case "compaction_start":
+					case "compaction_end":
+					case "retry_start":
+					case "retry_end":
+					case "retry_error":
+						this.refresh();
+						break;
+				}
 			}),
-			client.onEvent((evt) => this.handleAgentEvent(evt)),
 		);
 	}
 
@@ -47,21 +50,13 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 		_token: vscode.CancellationToken,
 	): void {
 		this.view = webviewView;
-		webviewView.webview.options = { enableScripts: true };
 
-		webviewView.webview.onDidReceiveMessage(async (msg: { command: string; text?: string; label?: string; path?: string }) => {
+		webviewView.webview.options = {
+			enableScripts: true,
+		};
+
+		webviewView.webview.onDidReceiveMessage(async (msg: { command: string; value?: string }) => {
 			switch (msg.command) {
-				case "sendMessage":
-					if (msg.text) await this.handleUserMessage(msg.text, msg.label);
-					break;
-				case "openFile":
-					if (msg.path) {
-						try {
-							const uri = vscode.Uri.file(msg.path);
-							await vscode.window.showTextDocument(uri);
-						} catch { /* file not found, ignore */ }
-					}
-					break;
 				case "start":
 					await vscode.commands.executeCommand("sdd.start");
 					break;
@@ -69,40 +64,41 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 					await vscode.commands.executeCommand("sdd.stop");
 					break;
 				case "newSession":
-					this.saveCurrentSession();
-					this.chatMessages = [];
-					this.currentSessionId = "";
 					await vscode.commands.executeCommand("sdd.newSession");
-					this.sendToWebview({ type: "clearChat" });
 					break;
-				case "home":
-					this.saveCurrentSession();
-					this.chatMessages = [];
-					this.currentSessionId = "";
-					this.sendToWebview({ type: "clearChat" });
-					setTimeout(() => this.pushFullState(), 100);
+				case "cycleModel":
+					await vscode.commands.executeCommand("sdd.cycleModel");
 					break;
-				case "getHistory":
-					this.sendToWebview({ type: "historyData", sessions: this.getSessionHistory() });
+				case "cycleThinking":
+					await vscode.commands.executeCommand("sdd.cycleThinking");
 					break;
 				case "switchModel":
 					await vscode.commands.executeCommand("sdd.switchModel");
 					break;
-				case "cycleThinking":
-					await vscode.commands.executeCommand("sdd.cycleThinking");
+				case "setThinking":
+					await vscode.commands.executeCommand("sdd.setThinking");
 					break;
 				case "compact":
 					await vscode.commands.executeCommand("sdd.compact");
 					break;
 				case "abort":
 					await vscode.commands.executeCommand("sdd.abort");
-					this.sendToWebview({ type: "agentEnd" });
+					break;
+				case "exportHtml":
+					await vscode.commands.executeCommand("sdd.exportHtml");
+					break;
+				case "sessionStats":
+					await vscode.commands.executeCommand("sdd.sessionStats");
+					break;
+				case "listCommands":
+					await vscode.commands.executeCommand("sdd.listCommands");
 					break;
 				case "toggleAutoCompaction":
 					if (this.client.isConnected) {
 						const state = await this.client.getState().catch(() => null);
 						if (state) {
 							await this.client.setAutoCompaction(!state.autoCompactionEnabled).catch(() => {});
+							this.refresh();
 						}
 					}
 					break;
@@ -162,237 +158,14 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 			}
 		});
 
-		webviewView.webview.html = this.getHtml();
-		setTimeout(() => this.pushFullState(), 150);
-	}
-
-	private scanProjectState(): ProjectState {
-		const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-		if (!cwd) return { hasProject: false, milestones: [], activeMilestone: null };
-
-		const sddDir = path.join(cwd, ".sdd", "milestones");
-		if (!fs.existsSync(sddDir)) return { hasProject: false, milestones: [], activeMilestone: null };
-
-		const milestones: MilestoneInfo[] = [];
-		try {
-			const entries = fs.readdirSync(sddDir, { withFileTypes: true });
-			for (const entry of entries) {
-				if (!entry.isDirectory() || !/^M\d{3}/.test(entry.name)) continue;
-
-				const mDir = path.join(sddDir, entry.name);
-				const mId = entry.name.match(/^(M\d{3})/)?.[1] ?? entry.name;
-
-				// Determine status
-				const hasSummary = fs.existsSync(path.join(mDir, `${mId}-SUMMARY.md`));
-				const hasParked = fs.existsSync(path.join(mDir, `${mId}-PARKED.md`));
-				const hasRoadmap = fs.existsSync(path.join(mDir, `${mId}-ROADMAP.md`));
-
-				let title = mId;
-				let slicesDone = 0;
-				let slicesTotal = 0;
-
-				// Parse ROADMAP.md for title and slice progress
-				if (hasRoadmap) {
-					try {
-						const content = fs.readFileSync(path.join(mDir, `${mId}-ROADMAP.md`), "utf-8");
-						// Title from first H1
-						const titleMatch = content.match(/^#\s+(?:M\d{3}:\s*)?(.+)$/m);
-						if (titleMatch) title = titleMatch[1].trim();
-						// Count slices
-						const sliceLines = content.matchAll(/^-\s+\[([ xX])\]\s+\*\*S\d+:/gm);
-						for (const m of sliceLines) {
-							slicesTotal++;
-							if (m[1] === "x" || m[1] === "X") slicesDone++;
-						}
-					} catch { /* ignore read errors */ }
-				}
-
-				// Also check for CONTEXT.md title as fallback
-				if (title === mId) {
-					const ctxPath = path.join(mDir, `${mId}-CONTEXT.md`);
-					if (fs.existsSync(ctxPath)) {
-						try {
-							const ctx = fs.readFileSync(ctxPath, "utf-8");
-							const ctxTitle = ctx.match(/^#\s+(?:M\d{3}:\s*)?(.+)$/m);
-							if (ctxTitle) title = ctxTitle[1].trim();
-						} catch { /* ignore */ }
-					}
-				}
-
-				const status: MilestoneInfo["status"] = hasSummary ? "complete"
-					: hasParked ? "parked"
-					: hasRoadmap ? "active"
-					: "pending";
-
-				milestones.push({ id: mId, title, status, slicesDone, slicesTotal });
+		// Periodic refresh while connected (for token stats)
+		this.refreshTimer = setInterval(() => {
+			if (this.client.isConnected) {
+				this.refresh();
 			}
-		} catch { /* ignore dir read errors */ }
+		}, 10_000);
 
-		milestones.sort((a, b) => a.id.localeCompare(b.id));
-
-		const activeMilestone = milestones.find(m => m.status === "active") ?? null;
-
-		return { hasProject: milestones.length > 0, milestones, activeMilestone };
-	}
-
-	private async pushFullState(): Promise<void> {
-		let modelName = "Not connected";
-		const connected = this.client.isConnected;
-
-		if (connected) {
-			try {
-				const state = await this.client.getState();
-				modelName = state.model ? `${state.model.provider}/${state.model.id}` : "Connected";
-			} catch { /* ignore */ }
-		}
-
-		const projectState = this.scanProjectState();
-
-		this.sendToWebview({
-			type: "init",
-			connected,
-			modelName,
-			messages: this.chatMessages,
-			project: projectState,
-		});
-	}
-
-	private async handleUserMessage(text: string, displayLabel?: string): Promise<void> {
-		if (!this.client.isConnected) {
-			try {
-				await this.client.start();
-			} catch (err) {
-				const msg = err instanceof Error ? err.message : String(err);
-				this.sendToWebview({ type: "error", text: `Failed to start agent: ${msg}` });
-				return;
-			}
-		}
-
-		this.sendToWebview({ type: "userMessage", text: displayLabel ?? text });
-		this.bubbleCreated = false;
-
-		try {
-			// sendPrompt resolves immediately (acknowledges receipt).
-			// Streaming events arrive AFTER via handleAgentEvent.
-			await this.client.sendPrompt(text);
-		} catch (err) {
-			const msg = err instanceof Error ? err.message : String(err);
-			this.sendToWebview({ type: "error", text: msg });
-		}
-	}
-
-	private handleAgentEvent(evt: AgentEvent): void {
-		if (!this.view) return;
-
-		this.outputChannel.appendLine(`[event] ${evt.type}: ${JSON.stringify(evt).slice(0, 300)}`);
-		try { fs.appendFileSync(path.join(process.env.USERPROFILE ?? "", "sdd-events.log"), `${evt.type}: ${JSON.stringify(evt).slice(0, 500)}\n`); } catch {}
-
-		switch (evt.type) {
-			case "agent_start":
-				this.sendToWebview({ type: "agentWorking" });
-				break;
-
-			case "tool_execution_start": {
-				const toolName = evt.toolName as string | undefined;
-				const toolInput = evt.toolInput as Record<string, unknown> | undefined;
-				const detail = this.describeToolCall(toolName ?? "", toolInput);
-				this.sendToWebview({ type: "toolProgress", text: detail });
-				break;
-			}
-
-			case "message_update": {
-				const ae = evt.assistantMessageEvent as Record<string, unknown> | undefined;
-				if (!ae) break;
-				if (ae.type === "text_delta" && ae.delta) {
-					this.ensureAssistantBubble();
-					this.appendDelta(ae.delta as string);
-				}
-				break;
-			}
-
-			case "agent_end":
-				this.bubbleCreated = false;
-				this.autoSaveSession();
-				this.sendToWebview({ type: "agentEnd" });
-				break;
-
-			// Ignore: message_start, message_end, turn_start, turn_end,
-			// extensions_ready, extension_ui_request, tool_execution_end
-		}
-	}
-
-	private bubbleCreated = false;
-
-	private ensureAssistantBubble(): void {
-		if (!this.bubbleCreated) {
-			this.bubbleCreated = true;
-			this.chatMessages.push({ role: "assistant", content: "" });
-			this.sendToWebview({ type: "assistantStart" });
-		}
-	}
-
-	private appendDelta(text: string): void {
-		const last = this.chatMessages[this.chatMessages.length - 1];
-		if (last?.role === "assistant") last.content += text;
-		this.sendToWebview({ type: "delta", text });
-	}
-
-	private describeToolCall(toolName: string, input?: Record<string, unknown>): string {
-		if (!input) return `Running ${toolName}...`;
-		switch (toolName) {
-			case "Read": return `Reading ${this.shortenPath(String(input.file_path ?? ""))}`;
-			case "Write": return `Writing ${this.shortenPath(String(input.file_path ?? ""))}`;
-			case "Edit": return `Editing ${this.shortenPath(String(input.file_path ?? ""))}`;
-			case "Bash": return `$ ${String(input.command ?? "").slice(0, 60)}`;
-			case "Glob": return `Searching ${input.pattern ?? ""}`;
-			case "Grep": return `Grep: ${input.pattern ?? ""}`;
-			default: return `${toolName}...`;
-		}
-	}
-
-	private shortenPath(fp: string): string {
-		return fp.replace(/\\/g, "/").split("/").slice(-2).join("/");
-	}
-
-	private sendToWebview(msg: Record<string, unknown>): void {
-		this.view?.webview.postMessage(msg);
-	}
-
-	private saveCurrentSession(): void {
-		if (this.chatMessages.length === 0) return;
-		const firstUserMsg = this.chatMessages.find(m => m.role === "user");
-		if (!firstUserMsg) return;
-		const history = this.getSessionHistory();
-		history.unshift({ text: firstUserMsg.content, time: new Date().toISOString() });
-		if (history.length > 20) history.pop();
-		this.globalState.update("sdd.sessionHistory", history);
-	}
-
-	private getSessionHistory(): { text: string; time: string }[] {
-		return this.globalState.get<{ text: string; time: string }[]>("sdd.sessionHistory", []);
-	}
-
-	private currentSessionId = "";
-
-	private autoSaveSession(): void {
-		const firstUserMsg = this.chatMessages.find(m => m.role === "user");
-		if (!firstUserMsg) return;
-		const msgCount = this.chatMessages.length;
-		const sessionKey = firstUserMsg.content.slice(0, 50);
-
-		// If same session (same first message), update in place
-		if (this.currentSessionId === sessionKey) return;
-		this.currentSessionId = sessionKey;
-
-		const history = this.getSessionHistory();
-		// Don't duplicate if already exists with same text
-		if (history.length > 0 && history[0].text === firstUserMsg.content) return;
-		history.unshift({
-			text: firstUserMsg.content,
-			time: new Date().toISOString(),
-		});
-		if (history.length > 30) history.pop();
-		this.globalState.update("sdd.sessionHistory", history);
+		this.refresh();
 	}
 
 	async refresh(): Promise<void> {
@@ -469,7 +242,12 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 	}
 
 	dispose(): void {
-		for (const d of this.disposables) d.dispose();
+		if (this.refreshTimer) {
+			clearInterval(this.refreshTimer);
+		}
+		for (const d of this.disposables) {
+			d.dispose();
+		}
 	}
 
 	private getHtml(info: {
@@ -868,300 +646,8 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 			if (btn) {
 				vscode.postMessage({ command: btn.dataset.command });
 			}
-		}
-
-		// Contextual workflow actions
-		html += '<div class="section-label">WORKFLOW</div>';
-		html += '<div class="wf-grid">';
-
-		if (active) {
-			html += wfBtn('Progress on ' + active.id + ': slices done, next, blocked?', '&#128200;', 'Check Progress', true, false);
-			html += wfBtn('Resume ' + active.id + '. Check CONTINUE-HERE and active slice.', '&#9654;', 'Resume Work', true, false);
-			html += wfBtn('Plan next slice in ' + active.id + '.', '&#128203;', 'Plan Slice', false, false);
-			html += wfBtn('Execute current slice in ' + active.id + '.', '&#9889;', 'Execute Slice', false, false);
-			html += wfBtn('Verify ' + active.id + ' against success criteria. Run tests.', '&#9989;', 'Verify Work', false, false);
-			html += wfBtn('Check pending todos and CONTINUE-HERE files.', '&#128221;', 'Check Todos', false, false);
-		}
-
-		html += wfBtn('Define a new milestone with slices.', '&#10010;', 'New Milestone', false, false);
-		html += wfBtn('Review open issues. Close resolved, flag urgent.', '&#128172;', 'Review Issues', false, false);
-		html += '</div>';
-
-	} else {
-		// No project initialized
-		html += '<div class="no-project">No SDD project found in workspace.<br>Initialize one to get started.</div>';
-		html += '<div class="section-label">GET STARTED</div>';
-		html += '<div class="wf-grid">';
-		html += wfBtn('Initialize SDD project here.', '&#128640;', 'New Project', true, true);
-		html += wfBtn('What is SDD? Explain workflow and concepts.', '&#10067;', 'SDD Help', false, true);
-		html += wfBtn('Create roadmap with milestones for this codebase.', '&#128506;', 'Create Roadmap', false, false);
-		html += wfBtn('Map codebase: architecture, key files, entry points.', '&#128270;', 'Map Codebase', false, false);
-		html += '</div>';
-	}
-
-	html += '</div>';
-	return html;
-}
-
-function renderMilestoneCard(m) {
-	const pct = m.slicesTotal > 0 ? Math.round((m.slicesDone / m.slicesTotal) * 100) : 0;
-	const barColor = m.status === 'complete' ? 'green' : pct > 0 ? 'coral' : 'green';
-	let html = '<div class="ms-card ' + m.status + '">';
-	html += '<div class="ms-card-top">';
-	html += '<span class="ms-id">' + esc(m.id) + '</span>';
-	html += '<span class="ms-status ms-status-' + m.status + '">' + m.status + '</span>';
-	html += '</div>';
-	html += '<div class="ms-title">' + esc(m.title) + '</div>';
-	if (m.slicesTotal > 0) {
-		html += '<div class="ms-progress">';
-		html += '<div class="ms-bar-bg"><div class="ms-bar-fill ' + barColor + '" style="width:' + pct + '%"></div></div>';
-		html += '<div class="ms-bar-label"><span>' + m.slicesDone + '/' + m.slicesTotal + ' slices</span><span>' + pct + '%</span></div>';
-		html += '</div>';
-	}
-	html += '</div>';
-	return html;
-}
-
-function wfBtn(prompt, icon, label, primary, wide) {
-	let cls = 'wf-btn';
-	if (primary) cls += ' primary';
-	if (wide) cls += ' wide';
-	return '<button class="' + cls + '" data-prompt="' + esc(prompt) + '" data-label="' + esc(label) + '">'
-		+ '<span class="wf-icon">' + icon + '</span>'
-		+ '<span class="wf-label">' + esc(label) + '</span>'
-		+ '</button>';
-}
-
-function esc(s) {
-	return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Simple markdown to HTML — all regexes use new RegExp() because
-// template literals eat backslashes (e.g. \* becomes * inside backtick strings)
-var BS = String.fromCharCode(92);  // backslash
-var BT = String.fromCharCode(96);  // backtick
-var codeBlockRe = new RegExp(BT+BT+BT+'('+BS+'w*)'+BS+'n(['+BS+'s'+BS+'S]*?)'+BT+BT+BT, 'g');
-var inlineCodeRe = new RegExp(BT+'([^'+BT+']+)'+BT, 'g');
-var boldRe = new RegExp(BS+'*'+BS+'*(.+?)'+BS+'*'+BS+'*', 'g');
-var italicRe = new RegExp(BS+'*(.+?)'+BS+'*', 'g');
-var tableSepRe = new RegExp('^'+BS+'|[-|: ]+'+BS+'|$', 'gm');
-var tableRowRe = new RegExp('^'+BS+'|(.+)'+BS+'|$', 'gm');
-// Match file paths inside inline-code: e.g. <code class="inline-code">src/foo.ts</code>
-var fileInCodeRe = new RegExp('<code class="inline-code">([^<]*?'+BS+'.(ts|tsx|js|jsx|json|md|css|html|py|rs|yaml|yml|toml|sh|sql)[^<]*?)</code>', 'g');
-// Thinking block markers: lines starting with common thinking phrases
-var thinkingPhrases = ['let me ', 'checking ', 'looking at ', 'reading ', 'i need to ', 'i should ', 'let me check', 'confirmed', 'verifying ', 'planning '];
-var thinkingId = 0;
-
-function md(raw) {
-	var s = esc(raw);
-	s = s.replace(codeBlockRe, '<pre><code>$2</code></pre>');
-	s = s.replace(inlineCodeRe, '<code class="inline-code">$1</code>');
-	s = s.replace(/^### (.+)$/gm, '<div class="md-h3">$1</div>');
-	s = s.replace(/^## (.+)$/gm, '<div class="md-h2">$1</div>');
-	s = s.replace(/^# (.+)$/gm, '<div class="md-h1">$1</div>');
-	s = s.replace(boldRe, '<strong>$1</strong>');
-	s = s.replace(italicRe, '<em>$1</em>');
-	s = s.replace(/^---$/gm, '<hr class="md-hr">');
-	s = s.replace(/^- (.+)$/gm, '<div class="md-li">&#8226; $1</div>');
-	s = s.replace(tableSepRe, '');
-	s = s.replace(tableRowRe, function(_, row) {
-		if (!row) return '';
-		var cells = row.split('|').map(function(c){ return c.trim(); }).filter(Boolean);
-		return '<div class="md-table-row">' + cells.map(function(c){ return '<span class="md-cell">' + c + '</span>'; }).join('') + '</div>';
-	});
-	// Make file paths in inline code clickable
-	s = s.replace(fileInCodeRe, function(_, fp) {
-		return '<span class="file-link" data-file="' + fp + '">' + fp + '</span>';
-	});
-	s = s.replace(new RegExp(BS+'n','g'), '<br>');
-	s = s.replace(new RegExp('(<br>){3,}','g'), '<br><br>');
-	s = s.replace(new RegExp('<br>(<div|<pre|<hr)','g'), '$1');
-	s = s.replace(new RegExp('(<'+BS+'/div>|<'+BS+'/pre>)<br>','g'), '$1');
-	return s;
-}
-
-let rawContent = '';
-let progressEl = null;
-
-window.addEventListener('message', ({ data: msg }) => {
-	switch (msg.type) {
-		case 'init':
-			setConnected(msg.connected, msg.modelName);
-			messagesEl.innerHTML = '';
-			if (msg.messages && msg.messages.length > 0) {
-				hasMessages = true;
-				for (const m of msg.messages) {
-					if (m.role === 'user') { appendUser(m.content); lastUserMessage = m.content; }
-					else if (m.content) { const b = appendAssistantBubble(); b.innerHTML = md(m.content); }
-				}
-			} else {
-				hasMessages = false;
-				emptyEl.innerHTML = renderDashboard(msg.project);
-				messagesEl.appendChild(emptyEl);
-			}
-			updateNavButtons();
-			break;
-
-		case 'statusUpdate':
-			setConnected(msg.connected, null);
-			break;
-
-		case 'historyData':
-			renderHistoryPanel(msg.sessions);
-			break;
-
-		case 'userMessage':
-			emptyEl.remove();
-			removeProgress();
-			appendUser(msg.text);
-			lastUserMessage = msg.text;
-			hasMessages = true;
-			updateNavButtons();
-			break;
-
-		case 'agentWorking':
-			showProgress('SDD is thinking...');
-			break;
-
-		case 'toolProgress':
-			showProgress(msg.text);
-			break;
-
-		case 'assistantStart':
-			removeProgress();
-			rawContent = '';
-			currentBubble = appendAssistantBubble();
-			currentBubble.classList.add('streaming');
-			setStreaming(true);
-			break;
-
-		case 'delta':
-			if (!currentBubble) {
-				rawContent = '';
-				currentBubble = appendAssistantBubble();
-				currentBubble.classList.add('streaming');
-				setStreaming(true);
-			}
-			rawContent += msg.text;
-			appendDelta(msg.text);
-			break;
-
-		case 'agentEnd':
-			removeProgress();
-			finalRender();
-			if (currentBubble) {
-				currentBubble.classList.remove('streaming');
-				currentBubble = null;
-			}
-			rawContent = '';
-			setStreaming(false);
-			if (lastUserMessage) renderNextActions(lastUserMessage);
-			break;
-
-		case 'clearChat':
-			messagesEl.innerHTML = '';
-			messagesEl.appendChild(emptyEl);
-			currentBubble = null;
-			rawContent = '';
-			lastUserMessage = '';
-			hasMessages = false;
-			updateNavButtons();
-			removeProgress();
-			setStreaming(false);
-			break;
-
-		case 'error': {
-			removeProgress();
-			const err = document.createElement('div');
-			err.className = 'err-msg';
-			err.textContent = '\\u26A0 ' + msg.text;
-			messagesEl.appendChild(err);
-			setStreaming(false);
-			scrollBottom();
-			break;
-		}
-	}
-});
-
-// Fast streaming: append raw text during stream, full markdown parse only on completion
-function appendDelta(text) {
-	if (currentBubble) {
-		// During streaming: just append text node (instant, no parsing)
-		currentBubble.appendChild(document.createTextNode(text));
-		scrollBottom();
-	}
-}
-function finalRender() {
-	if (currentBubble && rawContent) {
-		try { currentBubble.innerHTML = md(rawContent); }
-		catch(e) { currentBubble.textContent = rawContent; }
-		scrollBottom();
-	}
-}
-
-function showProgress(text) {
-	if (!progressEl) {
-		progressEl = document.createElement('div');
-		progressEl.className = 'tool-progress';
-		messagesEl.appendChild(progressEl);
-	}
-	progressEl.innerHTML = '<span class="progress-spinner"></span> ' + esc(text);
-	scrollBottom();
-}
-
-function removeProgress() {
-	if (progressEl) { progressEl.remove(); progressEl = null; }
-}
-
-function setConnected(val, model) {
-	connected = val;
-	dot.className = 'dot ' + (val ? 'dot-on' : 'dot-off');
-	if (model !== null) modelLabel.textContent = model || (val ? 'Connected' : 'Not connected');
-	toggleBtn.textContent = val ? 'Stop' : 'Start';
-	inputEl.disabled = !val || streaming;
-	sendBtn.disabled = !val || streaming;
-}
-
-function setStreaming(val) {
-	streaming = val;
-	inputEl.disabled = !connected || val;
-	sendBtn.disabled = !connected || val;
-}
-
-function appendUser(text) {
-	const w = document.createElement('div');
-	w.className = 'msg-wrapper';
-	const r = document.createElement('div');
-	r.className = 'msg-role msg-role-you';
-	r.textContent = 'You';
-	const b = document.createElement('div');
-	b.className = 'bubble-user';
-	b.textContent = text;
-	w.append(r, b);
-	messagesEl.appendChild(w);
-	scrollBottom();
-	return b;
-}
-
-function appendAssistantBubble(initialHtml) {
-	const w = document.createElement('div');
-	w.className = 'msg-wrapper';
-	const r = document.createElement('div');
-	r.className = 'msg-role';
-	r.textContent = 'SDD';
-	const b = document.createElement('div');
-	b.className = 'bubble-assistant';
-	if (initialHtml) b.innerHTML = initialHtml;
-	w.append(r, b);
-	messagesEl.appendChild(w);
-	scrollBottom();
-	return b;
-}
-
-function scrollBottom() {
-	messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-</script>
+		});
+	</script>
 </body>
 </html>`;
 	}
@@ -1322,6 +808,8 @@ function formatNum(n: number): string {
 function getNonce(): string {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	let nonce = "";
-	for (let i = 0; i < 32; i++) nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+	for (let i = 0; i < 32; i++) {
+		nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
 	return nonce;
 }

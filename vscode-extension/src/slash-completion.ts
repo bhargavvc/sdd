@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient, SlashCommand } from "./sdd-client.js";
+import type { SddClient, SlashCommand } from "./sdd-client.js";
 
 /**
  * CompletionItemProvider that surfaces SDD slash commands when the user
@@ -9,13 +9,13 @@ import type { GsdClient, SlashCommand } from "./sdd-client.js";
  * Commands are fetched from the running agent via get_commands RPC and
  * cached so the list remains available between keystrokes.
  */
-export class GsdSlashCompletionProvider
+export class SddSlashCompletionProvider
 	implements vscode.CompletionItemProvider, vscode.Disposable
 {
 	private cachedCommands: SlashCommand[] = [];
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: SddClient) {
 		// Refresh cache whenever the connection (re)establishes.
 		this.disposables.push(
 			client.onConnectionChange(async (connected) => {

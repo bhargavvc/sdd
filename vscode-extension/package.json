@@ -1,8 +1,8 @@
 {
-  "name": "sdd-2",
-  "displayName": "SDD-2",
-  "description": "VS Code integration for the SDD-2 coding agent — sidebar dashboard, @sdd chat participant, activity feed, conversation history, code lens, session forking, slash command completion, workflow controls, and 33 commands",
-  "publisher": "FluxLabs",
+  "name": "sdd",
+  "displayName": "SDD",
+  "description": "VS Code integration for the SDD coding agent — sidebar dashboard, @sdd chat participant, activity feed, conversation history, code lens, session forking, slash command completion, workflow controls, and 33 commands",
+  "publisher": "bhargavvc",
   "version": "0.3.0",
   "icon": "logo.jpg",
   "license": "MIT",

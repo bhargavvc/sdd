@@ -1,17 +1,17 @@
 import * as vscode from "vscode";
-import type { GsdChangeTracker } from "./change-tracker.js";
+import type { SddChangeTracker } from "./change-tracker.js";
 
 /**
  * Provides line-level editor decorations for files modified by the SDD agent.
  * Shows subtle background highlights on changed lines and gutter icons.
  */
-export class GsdLineDecorationManager implements vscode.Disposable {
+export class SddLineDecorationManager implements vscode.Disposable {
 	private readonly addedDecoration: vscode.TextEditorDecorationType;
 	private readonly modifiedDecoration: vscode.TextEditorDecorationType;
 	private readonly gutterDecoration: vscode.TextEditorDecorationType;
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly tracker: GsdChangeTracker) {
+	constructor(private readonly tracker: SddChangeTracker) {
 		this.addedDecoration = vscode.window.createTextEditorDecorationType({
 			isWholeLine: true,
 			backgroundColor: "rgba(78, 201, 176, 0.07)",

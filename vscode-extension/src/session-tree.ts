@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { GsdClient } from "./sdd-client.js";
+import type { SddClient } from "./sdd-client.js";
 
 export interface SessionItem {
 	label: string;
@@ -15,7 +15,7 @@ export interface SessionItem {
  * Tree view provider that lists SDD session files from the same directory
  * as the currently active session.
  */
-export class GsdSessionTreeProvider implements vscode.TreeDataProvider<SessionItem>, vscode.Disposable {
+export class SddSessionTreeProvider implements vscode.TreeDataProvider<SessionItem>, vscode.Disposable {
 	public static readonly viewId = "sdd-sessions";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
@@ -25,7 +25,7 @@ export class GsdSessionTreeProvider implements vscode.TreeDataProvider<SessionIt
 	private currentSessionFile: string | undefined;
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: SddClient) {
 		this.disposables.push(
 			this._onDidChangeTreeData,
 			client.onConnectionChange(() => this.refresh()),
