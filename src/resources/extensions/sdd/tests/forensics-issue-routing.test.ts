@@ -26,8 +26,8 @@ test("forensics prompt requires gh CLI with --repo bhargavvc/sdd for issue creat
   // Must contain the exact gh CLI command with the correct repo flag
   assert.match(
     prompt,
-    /gh issue create --repo bhargavvc\/sdd-2/,
-    "Prompt must specify gh issue create --repo bhargavvc/sdd",
+    /gh issue create --repo sdd-build\/sdd-2/,
+    "Prompt must specify gh issue create --repo sdd-build/sdd-2",
   );
 });
 
