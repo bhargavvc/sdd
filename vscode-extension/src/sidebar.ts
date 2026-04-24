@@ -155,6 +155,14 @@ export class SddSidebarProvider implements vscode.WebviewViewProvider {
 				case "showHistory":
 					await vscode.commands.executeCommand("sdd.showHistory");
 					break;
+				case "fixProblemsInFile":
+					await vscode.commands.executeCommand("sdd.fixProblemsInFile");
+					break;
+				case "selectApprovalMode":
+					await vscode.commands.executeCommand("sdd.selectApprovalMode");
+					break;
+				default:
+					console.warn(`Unknown SDD sidebar command: ${msg.command}`);
 			}
 		});
 
