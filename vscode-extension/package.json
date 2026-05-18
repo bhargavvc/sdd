@@ -3,7 +3,7 @@
   "displayName": "SDD",
   "description": "VS Code integration for the SDD coding agent — sidebar dashboard, @sdd chat participant, activity feed, conversation history, code lens, session forking, slash command completion, workflow controls, and 33 commands",
   "publisher": "bhargavvc",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "icon": "logo.jpg",
   "license": "MIT",
   "repository": {
@@ -124,6 +124,18 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "sdd.refreshSessions",
+          "when": "view == sdd-sessions",
+          "group": "navigation"
+        },
+        {
+          "command": "sdd.clearActivity",
+          "when": "view == sdd-activity",
+          "group": "navigation"
+        }
+      ],
       "editor/context": [
         {
           "submenu": "sdd.contextMenu",
@@ -132,11 +144,21 @@
         }
       ],
       "sdd.contextMenu": [
-        { "command": "sdd.explain" },
-        { "command": "sdd.fix" },
-        { "command": "sdd.addTests" },
-        { "command": "sdd.refactor" },
-        { "command": "sdd.optimize" }
+        {
+          "command": "sdd.explain"
+        },
+        {
+          "command": "sdd.fix"
+        },
+        {
+          "command": "sdd.addTests"
+        },
+        {
+          "command": "sdd.refactor"
+        },
+        {
+          "command": "sdd.optimize"
+        }
       ]
     },
     "submenus": [
@@ -280,6 +302,22 @@
           "type": "webview",
           "id": "sdd-sidebar",
           "name": "SDD Agent"
+        },
+        {
+          "id": "sdd-sessions",
+          "name": "Sessions"
+        },
+        {
+          "id": "sdd-activity",
+          "name": "Activity"
+        },
+        {
+          "id": "sdd-plan",
+          "name": "Plan"
+        },
+        {
+          "id": "sdd-checkpoints",
+          "name": "Checkpoints"
         }
       ],
       "scm/title": [
@@ -366,7 +404,11 @@
         "sdd.approvalMode": {
           "type": "string",
           "default": "auto-approve",
-          "enum": ["auto-approve", "ask", "plan-only"],
+          "enum": [
+            "auto-approve",
+            "ask",
+            "plan-only"
+          ],
           "enumDescriptions": [
             "Agent runs freely without prompts",
             "Prompt before file changes and commands",
@@ -380,10 +422,12 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
+    "test": "node --experimental-strip-types --test \"test/*.test.ts\"",
     "package": "vsce package",
     "publish": "vsce publish"
   },
   "devDependencies": {
+    "@types/node": "^22.19.19",
     "@types/vscode": "^1.95.0",
     "@vscode/vsce": "^3.7.1",
     "sharp": "^0.34.5",

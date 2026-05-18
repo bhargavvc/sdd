@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.1]
+
+### Changed
+
+- **Upstream sync** — 18 commits from `gsd-build/gsd-2` applied to `vscode-extension/src/` and `vscode-extension/test/` (commits `0b5362529`..`b556b116a`)
+- **Session token reporting** — input, output, cache-read, and cache-write tokens reported separately from overall context usage (fix `cf6760b0d`)
+- **RPC display helpers** — new `rpc-display.ts` with `formatSessionStatsLines`, `getContextUsageDisplay`, and bash-result helpers; imported by sidebar and extension (refactor `43b8e24e1`)
+- **RPC state types** — `RpcSessionState`, `RpcSlashCommand`, and related shared types vendored inline in `sdd-client.ts`; no external workspace dependency (refactor `5d2156d67`, Option A)
+- **Agent diff scope** — change tracker diff now scoped to tracked files only (`e73e96bb2`)
+- **Checkpoint tree view** — checkpoint view registered and checkpoint file existence hardened (`f1f2ed247`, `0fc654ca6`)
+- **RPC file mutation tracking** — mutation events tracked for RPC file changes (`e3c86b3d5`)
+- **Security hardening** — project-controlled surfaces hardened against injection (`65ca5aa2e`)
+- **Windows portability** — command execution and path handling hardened for Windows (`f1a6e8266`)
+- **Platform stability** — onboarding sync and command execution stabilized (`0b5362529`)
+- **Test suite** — three contract/behavior test files added to `vscode-extension/test/` (not compiled by tsc; not shipped in VSIX)
+- **`@types/node`** added to devDependencies (required for standalone build outside monorepo workspace)
+
 ## [0.3.0]
 
 ### Added

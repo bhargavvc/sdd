@@ -1,28 +1,18 @@
+// Project/App: SDD-2
+// File Purpose: VS Code extension RPC client for communicating with the SDD agent.
+
 import { ChildProcess, spawn } from "node:child_process";
 import * as vscode from "vscode";
+import { buildSddClientSpawnPlan } from "./sdd-client-spawn.js";
 
-/**
- * Mirrors the RPC command/response protocol from the SDD agent.
- * These types are intentionally kept minimal and self-contained so the
- * extension has no dependency on the agent packages at runtime.
- */
+// ---------------------------------------------------------------------------
+// Vendored types from @gsd-build/contracts (workspace-local package, not
+// published to npm — types are inlined here to keep the extension buildable
+// standalone without a monorepo workspace link).
+// Source: packages/contracts/src/rpc.ts @ upstream/main
+// ---------------------------------------------------------------------------
 
-export type ThinkingLevel = "off" | "low" | "medium" | "high";
-
-export interface RpcSessionState {
-	model?: { provider: string; id: string; contextWindow?: number };
-	thinkingLevel: ThinkingLevel;
-	isStreaming: boolean;
-	isCompacting: boolean;
-	steeringMode: "all" | "one-at-a-time";
-	followUpMode: "all" | "one-at-a-time";
-	sessionFile?: string;
-	sessionId: string;
-	sessionName?: string;
-	autoCompactionEnabled: boolean;
-	messageCount: number;
-	pendingMessageCount: number;
-}
+export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
 export interface ModelInfo {
 	provider: string;
@@ -32,29 +22,65 @@ export interface ModelInfo {
 }
 
 export interface SessionStats {
-	inputTokens?: number;
-	outputTokens?: number;
-	cacheReadTokens?: number;
-	cacheWriteTokens?: number;
-	totalCost?: number;
-	messageCount?: number;
-	turnCount?: number;
-	duration?: number;
+	sessionFile: string | undefined;
+	sessionId: string;
+	userMessages: number;
+	assistantMessages: number;
+	toolCalls: number;
+	toolResults: number;
+	totalMessages: number;
+	tokens: {
+		input: number;
+		output: number;
+		cacheRead: number;
+		cacheWrite: number;
+		total: number;
+	};
+	cost: number;
 }
 
 export interface BashResult {
-	stdout: string;
-	stderr: string;
-	exitCode: number | null;
+	output: string;
+	exitCode: number | undefined;
+	cancelled: boolean;
+	truncated: boolean;
+	fullOutputPath?: string;
 }
 
-export interface SlashCommand {
+export interface RpcSlashCommand {
 	name: string;
 	description?: string;
 	source: "extension" | "prompt" | "skill";
 	location?: "user" | "project" | "path";
 	path?: string;
 }
+
+export interface RpcSessionState {
+	model?: ModelInfo;
+	thinkingLevel: ThinkingLevel;
+	isStreaming: boolean;
+	isCompacting: boolean;
+	steeringMode: "all" | "one-at-a-time";
+	followUpMode: "all" | "one-at-a-time";
+	sessionFile?: string;
+	sessionId: string;
+	sessionName?: string;
+	autoCompactionEnabled: boolean;
+	autoRetryEnabled: boolean;
+	retryInProgress: boolean;
+	retryAttempt: number;
+	messageCount: number;
+	pendingMessageCount: number;
+	extensionsReady: boolean;
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Mirrors the RPC command/response protocol from the SDD agent.
+ * Shared contract types are vendored inline above (see source comment).
+ */
+export type SlashCommand = RpcSlashCommand;
 
 export interface RpcResponse {
 	id?: string;
@@ -123,11 +149,8 @@ export class SddClient implements vscode.Disposable {
 			return;
 		}
 
-		const proc = spawn(this.binaryPath, ["--mode", "rpc"], {
-			cwd: this.cwd,
-			stdio: ["pipe", "pipe", "pipe"],
-			env: { ...process.env },
-		});
+		const spawnPlan = buildSddClientSpawnPlan(this.binaryPath, this.cwd);
+		const proc = spawn(spawnPlan.command, spawnPlan.args, spawnPlan.options);
 		this.process = proc;
 
 		this.buffer = "";

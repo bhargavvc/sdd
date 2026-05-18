@@ -1,4 +1,8 @@
+// Project/App: SDD-2
+// File Purpose: VS Code extension activation and command registration for SDD.
+
 import * as vscode from "vscode";
+import { pickTrustedConfigurationValue } from "./trusted-config.js";
 import { SddClient, ThinkingLevel } from "./sdd-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
 import { SddSidebarProvider } from "./sidebar.js";
@@ -15,18 +19,41 @@ import { SddDiagnosticBridge } from "./diagnostics.js";
 import { SddLineDecorationManager } from "./line-decorations.js";
 import { SddGitIntegration } from "./git-integration.js";
 import { SddPermissionManager } from "./permissions.js";
+import { SddPlanViewerProvider } from "./plan-viewer.js";
+import { SddCheckpointProvider } from "./checkpoints.js";
+import {
+	formatSessionStatsLines,
+	getBashExitCode,
+	getBashOutput,
+	getSessionCost,
+	getSessionTotalTokens,
+} from "./rpc-display.js";
 
 let client: SddClient | undefined;
 let sidebarProvider: SddSidebarProvider | undefined;
 let fileDecorations: SddFileDecorationProvider | undefined;
 let sessionTreeProvider: SddSessionTreeProvider | undefined;
 let activityFeedProvider: SddActivityFeedProvider | undefined;
+let planViewerProvider: SddPlanViewerProvider | undefined;
+let checkpointProvider: SddCheckpointProvider | undefined;
 let changeTracker: SddChangeTracker | undefined;
 let scmProvider: SddScmProvider | undefined;
 let diagnosticBridge: SddDiagnosticBridge | undefined;
 let lineDecorations: SddLineDecorationManager | undefined;
 let gitIntegration: SddGitIntegration | undefined;
 let permissionManager: SddPermissionManager | undefined;
+
+function getTrustedConfigurationValue<T>(section: string, key: string, fallback: T): T {
+	const config = vscode.workspace.getConfiguration(section);
+	return pickTrustedConfigurationValue(config.inspect<T>(key), fallback);
+}
+
+export function resolveTrustedSddStartupConfig(): { binaryPath: string; autoStart: boolean } {
+	return {
+		binaryPath: getTrustedConfigurationValue("sdd", "binaryPath", "sdd"),
+		autoStart: getTrustedConfigurationValue("sdd", "autoStart", false),
+	};
+}
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
@@ -42,8 +69,9 @@ function handleError(err: unknown, context: string): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+	const startupConfig = resolveTrustedSddStartupConfig();
 	const config = vscode.workspace.getConfiguration("sdd");
-	const binaryPath = config.get<string>("binaryPath", "sdd");
+	const binaryPath = startupConfig.binaryPath;
 	const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
 	client = new SddClient(binaryPath, cwd);
@@ -78,7 +106,8 @@ export function activate(context: vscode.ExtensionContext): void {
 				client.getSessionStats().catch(() => null),
 			]);
 			const modelId = state?.model?.id ?? "";
-			const costPart = stats?.totalCost !== undefined ? ` | $${stats.totalCost.toFixed(4)}` : "";
+			const cost = getSessionCost(stats);
+			const costPart = cost > 0 ? ` | $${cost.toFixed(4)}` : "";
 			const streamPart = state?.isStreaming ? " $(sync~spin)" : "";
 			statusBarItem.text = `$(hubot) SDD${modelId ? ` | ${modelId}` : ""}${costPart}${streamPart}`;
 			statusBarItem.tooltip = state?.model
@@ -140,10 +169,24 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.window.registerTreeDataProvider(SddActivityFeedProvider.viewId, activityFeedProvider),
 	);
 
+	// -- Plan view ----------------------------------------------------------
+
+	planViewerProvider = new SddPlanViewerProvider(client);
+	context.subscriptions.push(
+		planViewerProvider,
+		vscode.window.registerTreeDataProvider(SddPlanViewerProvider.viewId, planViewerProvider),
+	);
+
 	// -- Change tracker & SCM provider -------------------------------------
 
-	changeTracker = new SddChangeTracker(client);
+	changeTracker = new SddChangeTracker(client, cwd);
 	context.subscriptions.push(changeTracker);
+
+	checkpointProvider = new SddCheckpointProvider(changeTracker);
+	context.subscriptions.push(
+		checkpointProvider,
+		vscode.window.registerTreeDataProvider(SddCheckpointProvider.viewId, checkpointProvider),
+	);
 
 	scmProvider = new SddScmProvider(changeTracker, cwd);
 	context.subscriptions.push(scmProvider);
@@ -232,7 +275,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				client!.getSessionStats().catch(() => null),
 			]);
 			const contextWindow = state?.model?.contextWindow ?? 0;
-			const totalTokens = (stats?.inputTokens ?? 0) + (stats?.outputTokens ?? 0);
+			const totalTokens = getSessionTotalTokens(stats);
 			if (contextWindow <= 0) return;
 
 			const threshold = vscode.workspace.getConfiguration("sdd").get<number>("contextWarningThreshold", 80);
@@ -496,15 +539,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (!requireConnected()) return;
 			try {
 				const stats = await client!.getSessionStats();
-				const lines: string[] = [];
-				if (stats.inputTokens !== undefined) lines.push(`Input tokens: ${stats.inputTokens.toLocaleString()}`);
-				if (stats.outputTokens !== undefined) lines.push(`Output tokens: ${stats.outputTokens.toLocaleString()}`);
-				if (stats.cacheReadTokens !== undefined) lines.push(`Cache read: ${stats.cacheReadTokens.toLocaleString()}`);
-				if (stats.cacheWriteTokens !== undefined) lines.push(`Cache write: ${stats.cacheWriteTokens.toLocaleString()}`);
-				if (stats.totalCost !== undefined) lines.push(`Cost: $${stats.totalCost.toFixed(4)}`);
-				if (stats.turnCount !== undefined) lines.push(`Turns: ${stats.turnCount}`);
-				if (stats.messageCount !== undefined) lines.push(`Messages: ${stats.messageCount}`);
-				if (stats.duration !== undefined) lines.push(`Duration: ${Math.round(stats.duration / 1000)}s`);
+				const lines = formatSessionStatsLines(stats);
 
 				vscode.window.showInformationMessage(
 					lines.length > 0 ? lines.join(" | ") : "No stats available.",
@@ -527,15 +562,15 @@ export function activate(context: vscode.ExtensionContext): void {
 			try {
 				const result = await client!.runBash(command);
 				outputChannel.appendLine(`[bash] $ ${command}`);
-				if (result.stdout) outputChannel.appendLine(result.stdout);
-				if (result.stderr) outputChannel.appendLine(`[stderr] ${result.stderr}`);
-				outputChannel.appendLine(`[exit code: ${result.exitCode}]`);
+				const output = getBashOutput(result);
+				if (output) outputChannel.appendLine(output);
+				outputChannel.appendLine(`[exit code: ${getBashExitCode(result) ?? "unknown"}]`);
 				outputChannel.show(true);
 
-				if (result.exitCode === 0) {
+				if (getBashExitCode(result) === 0) {
 					vscode.window.showInformationMessage("Bash command completed successfully.");
 				} else {
-					vscode.window.showWarningMessage(`Bash command exited with code ${result.exitCode}`);
+					vscode.window.showWarningMessage(`Bash command exited with code ${getBashExitCode(result) ?? "unknown"}`);
 				}
 			} catch (err) {
 				handleError(err, "Failed to run bash command");
@@ -924,6 +959,12 @@ export function activate(context: vscode.ExtensionContext): void {
 		}),
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sdd.clearPlan", () => {
+			planViewerProvider?.clear();
+		}),
+	);
+
 	// -- Permission commands ------------------------------------------------
 
 	context.subscriptions.push(
@@ -960,7 +1001,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Auto-start ---------------------------------------------------------
 
-	if (config.get<boolean>("autoStart", false)) {
+	if (startupConfig.autoStart) {
 		vscode.commands.executeCommand("sdd.start");
 	}
 }
@@ -971,6 +1012,7 @@ export function deactivate(): void {
 	fileDecorations?.dispose();
 	sessionTreeProvider?.dispose();
 	activityFeedProvider?.dispose();
+	checkpointProvider?.dispose();
 	changeTracker?.dispose();
 	scmProvider?.dispose();
 	diagnosticBridge?.dispose();
@@ -982,6 +1024,7 @@ export function deactivate(): void {
 	fileDecorations = undefined;
 	sessionTreeProvider = undefined;
 	activityFeedProvider = undefined;
+	checkpointProvider = undefined;
 	changeTracker = undefined;
 	scmProvider = undefined;
 	diagnosticBridge = undefined;
